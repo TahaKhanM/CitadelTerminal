@@ -1,0 +1,6 @@
+00:01
+Once we have our zip file, we can navigate to the My Algos page on the terminal site and select Upload an Algo.
+
+00:07
+After choosing our zip, it'll take a moment to compile. Once it does, it'll automatically start playing ranked matches against other algos uploaded to the terminal site, which will appear in the My Global Replay section, and it becomes available for use on the Playground.
+
