@@ -1,0 +1,15 @@
+00:02
+This video discusses the basic gameplay of Terminal.
+
+00:06
+Terminal takes place in two distinct phases, the deploy phase, where you choose where to deploy your units, and the action phase, where these units path automatically and attempt to reach your opponent's edge. When they do, your opponent's health will be reduced by one.
+
+00:23
+The objective of terminal is to reduce your opponent's health to zero before they can do the same to you. In order to achieve this objective, we have mobile and stationary units.
+
+00:35
+Mobile units cost bits to deploy. They can be deployed on our edge and they can be stacked on top of one another.
+
+00:44
+Stationary units cost cores to deploy. They can be deployed anywhere on our side of the arena, and they persist across multiple turns.
+
