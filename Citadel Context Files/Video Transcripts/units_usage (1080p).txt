@@ -1,0 +1,15 @@
+00:01
+In this video, we're going to look at the abilities of each of the units in Terminal. The Ping is a fast and cheap unit which is useful for scoring quickly. The Destructor will attack mobile enemy units that enter its range.
+
+00:16
+The Filter is a simple wall. It doesn't attack, but can be used to manipulate pathing.
+
+00:22
+The Scrambler is a high-health, high-attack offensive unit. It's extremely effective at destroying enemy attackers, but does not attack enemy defenses.
+
+00:32
+The Encrypter grants bonus health to friendly units that enter its range.
+
+00:37
+The EMP is an expensive and fragile attacker. Its high range and damage make it extremely effective at destroying enemy defenses, if it can be kept safe. For more detailed information, check out the rules and docs.
+
