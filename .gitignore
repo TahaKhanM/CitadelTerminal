@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Replays - keep the directory tracked, but not the large binary replays
+replays/*
+!replays/.gitkeep
+
+# Tournament outputs (large)
+replays/tournament_*/
+
+# Built algo zips
+algos/*.zip
+
+# Local Claude Code state
+.claude/settings.local.json
+.claude/projects/

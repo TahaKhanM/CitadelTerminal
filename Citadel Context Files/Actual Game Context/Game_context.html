@@ -1,0 +1,1032 @@
+<div
+  data-v-53de5f1e=""
+  id="game-reference-container"
+  class="s3 s3-resource-board"
+>
+  <div data-v-53de5f1e="" id="rules-section" class="reference-content s3">
+    <div id="rules-text" class="rules-text">
+      <div id="ConfigDescription" style="text-align: left">
+        <h2 id="rule-changes-for-special-competition">
+          Rule Changes for Special Competition
+        </h2>
+        <p>
+          Congratulations, you are part of a special competition that features
+          unique gameplay that is reserved for this competition and overrides
+          the base game rules. The 'My Algos' and 'Playground' pages will only
+          display algos you uploaded for this competition. Your algos will only
+          play ranked matches against other algos that are also using this
+          special ruleset.
+        </p>
+        <p>
+          The following describes the gameplay differences between the
+          competition you are in and the base game:
+        </p>
+        <div style="text-align: left">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Before</th>
+                <th>After</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Wall</td>
+                <td>Start Health: 60 <br />Upgrade Cost: 0 <br />Cost: 1</td>
+                <td>Start Health: 60 <br />Upgrade Cost: 2 <br />Cost: 1</td>
+              </tr>
+              <tr>
+                <td>Support</td>
+                <td>
+                  Shield Range: 3.5 <br />Cost: 4 <br />Health: 30
+                  <br />Upgraded Shield Per Unit: 4 <br />Upgraded Shield Range:
+                  7
+                </td>
+                <td>
+                  Shield Range: 3.5 <br />Cost: 4 <br />Health: 1 <br />Upgraded
+                  Shield Per Unit: 1 <br />Upgraded Shield Range: 7
+                </td>
+              </tr>
+              <tr>
+                <td>Turret</td>
+                <td>
+                  Cost: 2 <br />Start Health: 75 <br />Damage: 5 <br />Upgrade
+                  Damage: 16 <br />Upgrade Range: 3.5 <br />Upgrade Cost: 4
+                  <br />
+                  Upgrade Start Health: 75
+                </td>
+                <td>
+                  Cost: 2 <br />Start Health: 60 <br />Damage: 6 <br />Upgrade
+                  Damage: 20 <br />Upgrade Range: 3.5 <br />Upgrade Cost: 4
+                  <br />
+                  Upgrade Start Health: 100
+                </td>
+              </tr>
+              <tr>
+                <td>Scout</td>
+                <td>
+                  <p>Attack Range: 3.5 <br />Health: 15</p>
+                </td>
+                <td>
+                  <p>Attack Range: 3.5 <br />Health: 15</p>
+                </td>
+              </tr>
+              <tr>
+                <td>Demolisher</td>
+                <td>Player breach damage: 1 <br />Speed: 0.5 <br />Cost: 3</td>
+                <td>Player breach damage: 1 <br />Speed: 0.5 <br />Cost: 3</td>
+              </tr>
+              <tr>
+                <td>Interceptor</td>
+                <td>
+                  Health: 40 <br />Cost: 1 <br />Attack Range: 4.5 <br />Self
+                  Destruct Damage To Units: 40 <br />Self Destruct Damage To
+                  Buildings: 40 <br />Speed: 0.25
+                </td>
+                <td>
+                  Health: 40 <br />Cost: 1 <br />Attack Range: 4.5 <br />Self
+                  Destruct Damage To Units: 40 <br />Self Destruct Damage To
+                  Buildings: 40 <br />Speed: 0.25
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="GameplayOverview" style="text-align: left">
+        <h2 id="gameplay-overview">Gameplay Overview</h2>
+        <p>
+          Correlation One’s Terminal is a member of the Tower Defense game
+          genre. It is a two-player, simultaneous-turns game that takes place on
+          a diamond-shaped arena. One player occupies the bottom half of the
+          arena, while the other player occupies the top half. The objective is
+          to reduce your opponents health to zero. You can do this by advancing
+          <b><a href="#Glossary">Mobile units</a></b> to your opponent's edge
+          and building <b><a href="#Glossary">Structures</a></b> to protect your
+          own edges.
+        </p>
+        <p>
+          <img
+            src="https://ai-games.s3-us-west-2.amazonaws.com/assets/terminal-example-gameplay.gif"
+            alt="alt text"
+            title="Terminal Example Round"
+          />
+        </p>
+        <p>
+          All units have <b><a href="#Glossary">Health</a></b> and when their
+          health reaches zero, they are destroyed. Some units will
+          <b><a href="#Glossary">Attack</a></b> and attempt to destroy enemy
+          units that enter their <b><a href="#Glossary">Range</a></b> of
+          operation. Throughout the game, both players are provided two
+          resources - <b><a href="#Glossary">Mobile points</a></b> and
+          <b><a href="#Glossary">Structure points</a></b> - which are used to
+          create Mobile units and Structures, respectively.
+        </p>
+        <p>
+          The key differences between Mobile units and Structures are shown in
+          the table below:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Mobile unit</th>
+              <th>Structure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Where is it Deployed?</td>
+              <td>From either of your two arena edges</td>
+              <td>On any square in your half of the arena</td>
+            </tr>
+            <tr>
+              <td>How does it Move?</td>
+              <td>
+                Moves to opposite arena edge, using patching algorithm described
+                <b><a href="#AdvancedInfo">below</a></b>
+              </td>
+              <td>Stationary (does not move)</td>
+            </tr>
+            <tr>
+              <td>What does it Target?</td>
+              <td>Targets all enemy units</td>
+              <td>Only attacks enemy Mobile units</td>
+            </tr>
+            <tr>
+              <td>Can there be multiple 'stacked' in one location?</td>
+              <td>Yes</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Do they block movement?</td>
+              <td>No</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>What resources are used to Deploy it?</td>
+              <td>Mobile points</td>
+              <td>Structure points</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Units differ in their cost, health, damage, and range of operation.
+          Click on the drop-downs below to learn more about Units.
+        </p>
+        <details open="">
+          <summary>Mobile units - Attackers:</summary>
+          <p>
+            Mobile units are deployed from either of the two edges on the
+            player’s side of the arena, and aim to reach the opposite edge in
+            enemy territory. They attack enemy Mobile units and Structures while
+            moving. Some Structures attack incoming enemy Mobile unit units,
+            acting as a defense.
+          </p>
+          <p>
+            If Mobile units successfully reach the opposite edge, they decrease
+            the opponent’s Health by 1 point and award 1 Structure points to the
+            deploying player; they then disappear from the arena.
+          </p>
+          <p>
+            There are three types of Mobile units. The
+            <b><a href="#Glossary">Scout</a></b> is a fast-moving unit which
+            deals light damage and is useful for scoring. The
+            <b><a href="#Glossary">Demolisher</a></b> is expensive and easily
+            destroyed, but it's high damage and far range and can wreak havoc on
+            enemy defenses. The <b><a href="#Glossary">Interceptor</a></b> is a
+            high-health unit that deals high damage to enemy Mobile units, but
+            cannot attack enemy Structures. The three types of Mobile units and
+            their characteristics are detailed below:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Unit Image</th>
+                <th>Cost</th>
+                <th>Health</th>
+                <th>Range*</th>
+                <th>Damage</th>
+                <th>Speed*</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Scout</td>
+                <td>
+                  <img
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAAEhyb7BAAAAAXNSR0IArs4c6QAAAR1JREFUOBGdk+EVwjAIhI2/3ED3cIa6hW6hY6or6AJuYP2Ohko0aX3yXgq5OwKl6WKB9X2/k1fQsWQXB4bAdjySON+UPjLLSEGs476MYU+eWj8d9uGKMRegKBIJiQ8jEAMIKyZFNh29GjVsDs58+Bv7siTAKotu4wm1ANEw4BopDIGVbfGG51Jypy8hoHqxQUmR7S0EuDja8J36WLLuDUE5VESbIHx89eQAIg1P9p60k+4hVbq8bpDJBTWvJPAzS7dym1J61nSTmNpixZdWu+1Wa6eRoGF8zh/IsE0txzAEem99fh8S4axJq5zhRhLsWFfWv6bc8pICaC76YWqvBWwmTprf5pXFlhkex+Z8pggOiH/rfko7y3GYZtjNCV8IUxz8JN2SMAAAAABJRU5ErkJggg=="
+                    alt="scout"
+                  />
+                </td>
+                <td>1 Mobile points</td>
+                <td>15</td>
+                <td>3.5</td>
+                <td>2</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Demolisher</td>
+                <td>
+                  <img
+                    src="data:image/png;base64,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"
+                    alt="demolisher"
+                  />
+                </td>
+                <td>3 Mobile points</td>
+                <td>5</td>
+                <td>4.5</td>
+                <td>8</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Interceptor</td>
+                <td>
+                  <img
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAAHfOtk4AAAAAXNSR0IArs4c6QAABMRJREFUWAm1l2uoFkUYx99Xj+CFzKDjBUO0IE6YIEVFyVHrW2YEImYgXvCTHRMiEL9oIQmW9UUSEQrpAmH2Ua1AoguEFzRRLEHipImmiOUXNfW4/f7z7szO7s7umfOecx74v/PM//k/z8zOO7uz20iSpKvRlpHZNyKQmXEo7oEkIGo04Kfq51owWiJR7gyRjxI4DfaB8eAZJ6JzDVy3BP5OIFNSqxqOE1ihbYmdlm8uqNls3m8DgbbXcWSFLxgFofESjsCZSrtLnQp7rK5QPkdKbFmrSVYpij827R+k3STikXxaviexYWin5UNZj9g8KwpeJYKxEmSbIEv2vSWuQ8ZG12nHocAdLehVJdPOA7K3zW+S7E6LnldQZiYYGonYMcMbWevnO5radfMLoV0KrrZSs/X8FmJZQTgNTpvWN90tm0CzoBWfzVoZviDWJ20+MHva5UCsAvscEemQE55EZaCiMHrdluU9AKkd3FeRV0mTU56ZSCy3sJUVvAA5u8F6R9F5DRx0hOfAjwG6nJUenXOJZbNTB9sI+oyXJL/Rzs9leB1i68GdVPsH7XvgmHb2bE/XtkudbhX7C8hugXWx1dA+AD4H1mbpOdADDoGHwLM2Qvs1mAznjP5CcA5ojS6D4zx3zZ9Gc8oI06BLkgO3BtxQzLPD+E/6Qvqd4KbjUvFIRxQc4nWxr4jr6lpG5wOw1fYH0pKXbQsl0h9VIiMrBvOCZD8FyekBe0oyyKNgQSlQQ6C/CTpLEsinwJ+lQA2BPrde/nnzNHmHa3LjQwyiKU+MzzB/XHhpilOOKUqOlqY3p4WYBS7myMgOebl10z77GSyKzM/JyLsNJjiSTr66i5h1eYnwXjDJo50L/xb41BA4OtJdMdwOoIedNd3crwN701/GX+yq4Uhoi23B3w8OiUxtG22Hn2B9+Jngh1SnZrt+bDH558HLNiG2JUdXtRnoRF+tKc4GsgtgF3gFjIstOFgdY2lCeii/C34Fsg2mLo4mJDsOfgH2kBInOwM+BC+AUe1MhrzHwQbwE7gLfDtL50BKnHP1IcYBnU2a0IMugEN/JOgGW8Ep4JuW/Sh4B+jGmgF6gAbRne7bJTqfgEXgPn8M+XDagLKFuRjEG4ZOki9zgZoO+tHgRfAR6AX/Ap0uK0D04yfV0yQHgsMR+F1RrDsoGAaSsXTr6oJk04NDEHjehPnLgoJhIBlvWzrm+7XlEe1NhWtqhUMQZJzp6VhaseDzyQ2DYBLQptZTcIwLDINDfXsnLo8qT4LuMtmOqIQ2RNTWC6NML5hxhvhhk9LalJXvd3HVwirq6+6VZe+HYWnGIh7YEmep0R5j+FtmdL+JJAx8ifutGhYwVvyWQWw+FGifCJcbOpYxmuBvIJtZWZmgzjLZx5WiIQ4w1mIzYpL8GCxNUN9lOlz/A6WzLJg0RCTjfQ9kr5ZKQn5hQknyZilYINDpwag3Pr3IFQ9rKPMcPEKrPaTD3Xw3Fsq4LvEuILsCsu8HOs+Jxc5aNX4nWA72gH+Ab7WHNUId7gvADtALfNMLtFZI775d3njmjRNus+UadE6AomklvgFrwQwnHqRDrQlgCfgMaIWKdg9iiu6KuYw1B+znE/3kIMcdVLomRAF9lHb8DzIgELrw3VWyAAAAAElFTkSuQmCC"
+                    alt="interceptor"
+                  />
+                </td>
+                <td>1 Mobile points</td>
+                <td>40</td>
+                <td>4.5</td>
+                <td>20</td>
+                <td>4</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <sup>
+              *Range: Maximum Euclidean distance of a targetable coordinate </sup
+            ><br /><sup> *Speed: Frames required to move one space</sup>
+          </p>
+        </details>
+        <details open="">
+          <summary>Structure Units - Defenders:</summary>
+          <p>
+            Structures are stationary units that do not move. They block the
+            paths of both friendly and enemy Mobile units, and no two Structures
+            can occupy the same location. They persist across multiple turns.
+          </p>
+          <p>
+            There are three types of Structures. The
+            <b><a href="#Glossary">Wall</a></b> is a cheap, simple Structure
+            used to influence the paths units take and to protect more valuable
+            Structures. <b><a href="#Glossary"> The Supports</a></b> grants
+            bonus health as shields to all friendly Mobile unitss that enter its
+            range. Each Support can shield a given friendly unit once.
+            <b><a href="#Glossary">Turrets</a></b> attack enemy Mobile units.
+          </p>
+          <p>
+            A Structure unit can also be upgraded to gain stats. Missing health
+            persists when a tower's health is increased by an upgrade. The
+            upgrade cost is the same as the units base cost unless otherwise
+            stated. The three types of Structures and their characteristics are:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Unit Image</th>
+                <th>Cost</th>
+                <th>Health</th>
+                <th>Role</th>
+                <th>Upgrade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Wall</td>
+                <td>
+                  <img
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAEFCu8CAAAAAXNSR0IArs4c6QAAAohJREFUSA2llj1uGzEQhSUjpXKBpDIMpNcBgs0FDKRwGuccPoAAH8ZwYeQEalK4MeBWOoDdxJXdGTA23+NyNsNZrlaOBhhxft7MkFwOqdksU9u2a5P7EWN7NOqR10O3SfHWIyw/DfIB4cF7ZyivMkBf4PMktW0jx1ZGC7VRgCT3gnkYCxvKCn6Blw7ToTBewws41d+V8gbQpszt8uFstchRSk5AFx6hKPQfySYl0JMHG+g2gKJ6XAThtYC3wuEUMBeWxapo00TXDjcqdlDWgqCdFi1G0c7RQbvAZVZenb8qgjvpA4VAOTYD402MwtYHIA93NSfZuCRePIsJCx2kpr6Gn2Gd11UBiAoAP13UAd3GGK2xcTAdV7XJR1gto2NsVG6gWRmLs+cr4HvLuK4yim3GYDd9oOQc+K8fZYigmg7Mpr0qs9TQzkag1izavjdQGyZ63tmtrpiJp1m46yuS5cS8YyOYdLMwLhV4BicaC5AdQNmP2fiUYzUMKmPTFWU0uAV8sIHi2FRnBaqfdojYVAPGjDmRnayQq6oKu7v9YjECGvgPfChpy+pboqI41ca1fdWHGHygykR1K/mPhppIOQcfsPYNRjs6Fos6Bfoj1tVMv91WI9plbD4d4skVxSJRVw7YGsJyp8bQ9enpPAb/r05SXZSe1vp29k6ZY6/3ap9JkHBhSfP4osvmMQR/Cvohasz1qIJXIeNl0A9RY66uFsuNzT35fEzNgpyxRcpbB4D9w8nbnR6zd7cGwWoJewgt1/Ap1ozxNnA8ygqSTe+aTp2eKR0Gsf2zlW8s7tvUbtitE1dMzr1JseXtkqvOJ6sDIFh/pL/DX+HPsJ0+nfAH+Df8az6f3zPupL+TafBOo0GExAAAAABJRU5ErkJggg=="
+                    alt="wall"
+                  />
+                </td>
+                <td>1 Structure points</td>
+                <td>60</td>
+                <td>A simple wall</td>
+                <td>
+                  Cost: 2 <br />
+                  Health: 200
+                </td>
+              </tr>
+              <tr>
+                <td>Support</td>
+                <td>
+                  <img
+                    src="data:image/png;base64,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"
+                    alt="support"
+                  />
+                </td>
+                <td>4 Structure points</td>
+                <td>1</td>
+                <td>
+                  Grants 3 shielding to friendly units that pass within 3.5
+                  units
+                </td>
+                <td>
+                  Range increased to 7 units. Base shielding increased to 4.
+                  Grants (0.3 * Y position) additional shielding.
+                </td>
+              </tr>
+              <tr>
+                <td>Turret</td>
+                <td>
+                  <img
+                    src="data:image/png;base64,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"
+                    alt="turret"
+                  />
+                </td>
+                <td>2 Structure points</td>
+                <td>60</td>
+                <td>
+                  Deals 6 damage to an enemy Mobile unit within 2.5 tiles each
+                  frame*
+                </td>
+                <td>
+                  Cost: 4 <br />
+                  Damage: 20 <br />
+                  Range: 3.5 <br />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <sup>
+              *Range is maximum Euclidean distance to a targetable coordinate
+            </sup>
+          </p>
+        </details>
+        <br /><br />
+      </div>
+      <div id="Map" style="text-align: left">
+        <h4 id="map">Map</h4>
+        <p>
+          Units in terminal are placed and move along a diamond-shaped grid. The
+          coordinates on the grid range from 0,0 to 27,27. Note that half of
+          these coordinates fall outside the diamond shaped gameplay area.
+        </p>
+        <p>
+          <img
+            src="https://ai-games.s3-us-west-2.amazonaws.com/assets/map.png"
+            alt="alt text"
+            title="Map"
+          />
+        </p>
+      </div>
+      <div id="GameStart" style="text-align: left">
+        <h4 id="game-start">Game Start</h4>
+        <p>
+          Each player begins the game with 8 Structure points, 1 Mobile points,
+          and 40 Health.
+        </p>
+        <p>
+          <img
+            src="https://ai-games.s3-us-west-2.amazonaws.com/assets/terminal-resources-ui.png"
+            alt="alt text"
+            title="Terminal Resource and Health"
+          />
+        </p>
+        <p>
+          You can see each players' available resources at current point of game
+          playback in the upper corners of the game board. The gauge represents
+          your owned proportion of the total resources available between the
+          players.
+        </p>
+      </div>
+      <div id="TurnStructure" style="text-align: left">
+        <h4 id="turn-structure">Turn Structure</h4>
+        <p>
+          Each turn is split up into three phases: Restore, Deploy, and Action.
+          In the restore phase, players are granted resources. In the deploy
+          phase, players choose where they want to deploy their units. In the
+          action phase, deployed units act automatically according to the game
+          rules.
+        </p>
+      </div>
+      <div id="RestorePhase" style="text-align: left">
+        <p>
+          <strong>1. “Restore” Phase</strong> Players lose a fraction of their
+          stored Mobile points from the previous turn and then are given
+          additional Mobile points and Structure points. Players are also shown
+          the current game state. The below resource schedule explains how
+          resources are allocated during the game.
+        </p>
+        <details open="">
+          <summary>More</summary>
+          <p>
+            At the start of each turn (except the first one), a “decay” mechanic
+            is applied whereby each player automatically loses 25% of all Mobile
+            points stored from the previous turn. Following this players are
+            given 4 Structure points and 1 Mobile points, plus an additional 1
+            Mobile points for every 5 turns that have passed. For example, at
+            the start of turns 0 through 4 you receive 1 Mobile points, at the
+            start of turns 5 - 9 you receive 2, and so on.
+          </p>
+          <p>
+            In addition to the resources gained at the start of each turn,
+            players gain 1 Structure points for each point of damage they dealt
+            to their opponent’s health in the previous turn. Structures that
+            generate resources will do so at this time.
+          </p>
+          <p>
+            <small
+              >Note: Mobile points decay amount rounds to the nearest
+              tenth.</small
+            >
+          </p>
+        </details>
+        <p><br /></p>
+      </div>
+      <div id="DeployPhase" style="text-align: left">
+        <p>
+          <strong>2. “Deploy” Phase</strong> Players select locations to deploy
+          Mobile units and Structures using their accumulated Mobile points and
+          Structure points. Players can also choose to remove existing
+          Structures for some refund. Once both players have made their
+          selections, the Deploy phase is over, and the Action phase begins.
+        </p>
+        <details open="">
+          <summary>More</summary>
+          <p>
+            Players send commands that list where and how many Structure and
+            Mobile units they wish to deploy. During this phase, the player can
+            see enemy Structures which survived the previous action phase, but
+            not the new Units their opponent is deploying. Players will have 15
+            seconds to submit their commands each turn, after which they will
+            begin taking 1 damage per second.
+          </p>
+          <p>
+            Players are also allowed to remove previously built Structures from
+            the arena in this phase and receive a refund. This refund is equal
+            to 90% of the initial cost of the Structure, times the percentage of
+            the Structure’s original health remaining at the time of removal.
+          </p>
+          <p style="text-align: center; font-size: 1.35em">
+            <i>Refund</i> = 90 * <i>InitialCost</i> * ( <i>RemainingHealth</i> /
+            <i>OriginalHealth</i>)
+          </p>
+          <p>
+            Structures that are selected to be removed will be marked visually
+            and will be removed at the end of the action phase.
+          </p>
+          <p>
+            <small
+              >Note: Structure refund amount rounds to the nearest tenth.</small
+            >
+          </p>
+        </details>
+        <br />
+      </div>
+      <div class="rules-section" id="ActionPhase" style="text-align: left">
+        <p>
+          <strong>3. “Action” Phase</strong> The game engine deploys Mobile
+          units and Structures according to player choices made in the Deploy
+          phase. The Action phase progresses in discrete Frames and continues
+          until all Mobile units are destroyed or reach the opponent’s edge.
+        </p>
+        <details open="">
+          <summary>More</summary>
+          <p>
+            After both players have chosen which units they wish to deploy, the
+            game engine deploys Mobile units and Structures according to the
+            commands sent in the Deploy Phase. Then, based on the movement and
+            targeting logic (detailed later), the game automatically controls
+            each player’s units for the duration of the Action Phase. The Action
+            Phase has many discrete Frames and continues until all Mobile units
+            are destroyed or reach the opponent’s edge.
+          </p>
+          <p>
+            Each Frame during the Action Phase is sent to both players. Players
+            cannot send commands during the Action Phase, but can observe,
+            collect information, and plan for the next turn. After the Action
+            Phase, the next turn begins and the cycle repeats.
+          </p>
+          <p>During each frame, actions will occur in this order:</p>
+          <ol>
+            <li>
+              <p>
+                Each Support grants a Shield to any new friendly Mobile units
+                that have entered its range.
+              </p>
+            </li>
+            <li>
+              <p>
+                Each unit attempts to move. Units which have nowhere to move
+                deal self destruct damage, and their health becomes 0. See
+                ‘Patching‘ in advanced info
+              </p>
+            </li>
+            <li><p>All units attack. See ‘Targeting’ in advanced info</p></li>
+            <li>
+              <p>
+                Units that were reduced below 0 health by self destructing or
+                taking damage are removed.
+              </p>
+            </li>
+          </ol>
+        </details>
+        <br />
+      </div>
+      <div id="GameplayEnd" style="text-align: left">
+        <h4 id="gameplay-end">Gameplay End</h4>
+        <p>
+          If a player reduces their opponents health to zero, they will win. If
+          the 100th round is completed, the player with the highest health will
+          win. If both algos have the same health at the end of the 100th round
+          or lose all their health in the same frame, the algo with the lowest
+          computation time will be declared the winner.
+        </p>
+      </div>
+      <div id="AdvancedInfo" style="text-align: left">
+        <h2 id="units-advanced">Advanced info</h2>
+        <p>
+          This section refers to specific details about the implementation of
+          niche mechanics that is only needed by advanced users. For more basic
+          unit information, see the
+          <b><a href="#GameplayOverview">Gameplay Overview</a></b>
+        </p>
+        <details open="">
+          <summary>Movement and Patching:</summary>
+          <p>
+            Movement and Patching are automated by the game’s engine. Details of
+            the information movement logic, as well as edge cases when movement
+            is blocked, are described below.
+          </p>
+          <p><strong>Patching Logic</strong></p>
+          <p>
+            In general, the Mobile units will always take the shortest path to
+            their destination, and will prefer to zig-zag rather than moving in
+            a straight line for extended periods of time.
+          </p>
+          <p>
+            Each Mobile unit moves at its speed detailed above, taking one step
+            after the required number of frames have passed. Mobile units can
+            only move left, right, up, or down (not diagonally). Each time a
+            Mobile unit takes a step, it will choose the most ideal tile to step
+            onto using the following logic:
+          </p>
+          <ol>
+            <li>
+              <p>
+                Choose the tile which is the shortest number of steps from the
+                Unit’s destination, described below.
+              </p>
+            </li>
+            <li>
+              <p>
+                If multiple tiles are equally close to the units destination,
+                move in the opposite direction of the previous movement. For
+                example, if the Unit made a vertical move on its previous step,
+                it will prefer a horizontal move.
+              </p>
+            </li>
+            <li>
+              <p>
+                In the case where a Unit has just been deployed and has yet to
+                move, it will prefer a vertical movement.
+              </p>
+            </li>
+            <li>
+              <p>
+                If there are two tiles with equal distances and are equally
+                preferred based on direction, the unit will choose one that is
+                in the direction of it’s target edge. For example, if a unit
+                wants to reach the top-right edge, and must choose between
+                moving left and right, if both paths have the same minimum
+                number of steps it will move right.
+              </p>
+            </li>
+          </ol>
+          <p><strong>Choosing a destination</strong></p>
+          <p>
+            A Units destination is usually the opposite edge of the edge it was
+            created on. If the opposite edge is unreachable due to structure
+            placements, the Unit will instead attempt to reach the deepest
+            possible location in the enemy territory, and then self destruct as
+            described below. The deepest location is the location with the
+            furthest Y coordinate from your territory. If multiple such
+            locations are reachable, the Unit will choose the one closest to its
+            target edge. For example, A unit attempting to reach the top-right
+            corner who can reach [13, 26], [14, 26] and [15, 25] will choose
+            [14, 26]. First, it will narrow its search to [13, 26] and [14, 26],
+            as they have the deepest Y coordinate into enemy territory. Then, it
+            will choose [14, 26] because it wants to reach the top-right edge,
+            and [14, 26] is further to the right than [13, 26]. A Unit whose
+            target edge is the top-left it will choose [13, 26] if the same
+            options are available.
+          </p>
+          <p>
+            Note that if a Structure is destroyed at any point during the Action
+            Phase, a path can become available to a better self-destruct
+            location or the target edge, causing a unit’s path to change
+            dramatically, sometimes even causing it to double back.
+          </p>
+          <p>
+            <strong>Self-Destruct</strong> If the Mobile unit’s path is
+            completely blocked, it will go to an open space closest to the
+            opposing edge as described above and self-destruct. The
+            self-destruct only damages enemy units and has a range of 1.5. The
+            damage dealt to each affected enemy is equal to the starting health
+            of the self-destructing unit. However, self-destruct damage will
+            only occur if the unit has moved at least 5 spaces before
+            self-destructing. Units will still attack on the frame that they
+            self-destruct.
+          </p>
+        </details>
+        <details open="">
+          <summary>Targeting:</summary>
+          <p>
+            Targeting is also handled automatically by the game; players cannot
+            directly control which enemy units their deployed Mobile units or
+            Structures target. Mobile unit and Structure units both follow the
+            same targeting rules. They begin with a list of all eligible enemy
+            targets within range, and remove targets from the list in the
+            following order until a unique target is identified:
+          </p>
+          <ol>
+            <li><p>Prioritize Mobile units over Structures</p></li>
+            <li>
+              <p>
+                Choose the nearest target(s). Note that the potential targets
+                could include multiple locations if they are the same distance
+                away.
+              </p>
+            </li>
+            <li>
+              <p>Choose the target(s) with the lowest remaining health</p>
+            </li>
+            <li>
+              <p>
+                Choose the target(s) which are the furthest into/towards your
+                side of the arena
+              </p>
+            </li>
+            <li><p>Choose the target closest to an edge</p></li>
+          </ol>
+          <p>
+            This will almost always uniquely identify at most one enemy unit to
+            target. Each unit can deal damage at most once per Frame.
+          </p>
+          <p><strong>Additional Clarifications</strong></p>
+          <l
+            ><li>Units attack in the order that they were created.</li>
+            <li>
+              In the rare case that the above logic does not identify a unique
+              unit, the most recently created unit will be chosen.
+            </li>
+            <li>
+              The order deployment commands are sent to the game engine matters
+              for these rare situations where creation time is taken into
+              account.
+            </li>
+            <li>
+              Units that have 0 health remaining will not be chosen as a target
+              by a unit that has yet to attack.
+            </li>
+            <li>
+              'Overkill' damage from a single attack will not affect another
+              unit. For example, if a unit has 5 health left and takes 8 damage
+              from an attack, the 3 "extra" damage will not affect another unit.
+            </li></l
+          >
+        </details>
+        <details open="">
+          <summary>Shielding:</summary>
+          <l
+            ><li>
+              There is no limit to the amount of Shielding a given unit can
+              receive
+            </li>
+            <li>
+              There is no limit to the number of unique Mobile units a given
+              Support can grant Shielding.
+            </li>
+            <li>
+              Each Support can only grant Shielding to a given Mobile units one
+              time.
+            </li></l
+          >
+        </details>
+      </div>
+      <div id="GameRequirements" style="text-align: left">
+        <h2 id="game-requirements">Game Requirements</h2>
+        <p>
+          Terminal requires the
+          <a href="https://www.google.com/chrome/" target="_blank"
+            >Google Chrome</a
+          >
+          browser to upload, debug and test your algorithms on our website or to
+          play by hand. Please download/update to the latest version for an
+          optimal experience.
+        </p>
+        <p>
+          However, in order to run the game locally for more convenient testing,
+          you will need to install Python:
+        </p>
+        <h5
+          id="-a-href-https-www-python-org-downloads-release-python-360-target-_blank-python-3-6-or-latest-a-"
+        >
+          <a
+            href="https://www.python.org/downloads/release/python-360/"
+            target="_blank"
+            >Python 3.6 or latest</a
+          >
+        </h5>
+        <p>Additionally Windows users will need to use:</p>
+        <h5 id="windows-powershell-v5-or-latest-included-in-windows-10-">
+          Windows PowerShell v5 or latest (included in Windows 10)
+        </h5>
+        <p>
+          Older versions of Windows, such as Windows 7, can
+          <a
+            href="https://learn.microsoft.com/en-us/powershell/scripting/install/microsoft-update-faq?view=powershell-7.4"
+            target="_blank"
+            >update their PowerShell for free</a
+          >
+        </p>
+        <p>
+          If you have trouble playing the game on our website or locally please
+          check the
+          <a
+            href="https://github.com/correlation-one/C1GamesStarterKit/"
+            target="_blank"
+            >readme in the starterkit repo</a
+          >, or our <b><a href="#Troubleshooting">troubleshooting section</a></b
+          >.
+        </p>
+      </div>
+      <div id="Download" class="alt-table" style="text-align: left">
+        <h2 id="download-starter-kit">Development Guide</h2>
+        <p>
+          Before you jump right into coding, we recommend viewing the
+          <a href="/quickstart">quick start guide</a> and following the startup
+          steps there
+        </p>
+        <h4 id="select-your-language">Getting started</h4>
+        <p>
+          Download the starter kit to start programming your bot. The kit
+          includes a starter bot for you to have a starting point.
+        </p>
+        <p>
+          View the README.md file in the starterkit for guidance on how to
+          access the programming documentation.
+        </p>
+        <p>
+          Note: When creating your algorithm, you can assume you occupy the
+          bottom half of the arena and write code from this orientation. The
+          game will handle the symmetry when running your algo from the top
+          half.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Language</th>
+              <th>Github Repository</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Python</td>
+              <td>
+                <a
+                  href="https://github.com/correlation-one/AIGamesStarterKit/tree/master/python-algo"
+                  ><i class="icon mdi mdi-github"></i> GitHub
+                </a>
+              </td>
+              <td>
+                <a
+                  href="https://github.com/correlation-one/C1GamesStarterKit/archive/master.zip"
+                  ><i class="icon mdi mdi-download"></i> Download
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="Troubleshooting" style="text-align: left">
+        <h2 id="troubleshooting">Troubleshooting</h2>
+        <h4 id="algo-failed-to-compile-">Algo Failed to Compile:</h4>
+        <p>
+          Firstly, try clicking the algo on the My Algo page, it won't refresh
+          its compiling status unless you click on it.
+        </p>
+        <p>
+          Make sure all file and folder names in your project, even inside the
+          folder that you submit, are free of spaces and special characters.
+        </p>
+        <p>
+          Your algo may not appear in the dropdown list on the
+          <a href="/playgroundlive" target="_blank">Playground</a> if it is
+          still being prepared for automated play. Try waiting a minute, or
+          re-uploading an algo with extraneous files removed.
+        </p>
+        <h4 id="website-issues-">Website Issues:</h4>
+        <p>
+          Make sure you are using chrome and it is updated to the latest
+          version. Unfortunately, only chrome is supported for this build.
+        </p>
+        <p>
+          If the game board has visual issues, enable hardware acceleration for
+          chrome. It can be enabled in chrome settings by opening
+          <span id="rules-highlight">chrome://settings/system</span> in address
+          bar. Then simply click the toggle for
+          <span id="rules-highlight"
+            >"Use hardware acceleration when available"</span
+          >. Additionally users have reported
+          <span id="rules-highlight"
+            >disabling hardware acceleration and reenabling</span
+          >
+          it while restarting the browser also helps.
+        </p>
+        <p>
+          Lastly for the above and any other kind of strange behavior found on
+          the website, try refreshing the page. If that doesn't work try
+          <span id="rules-highlight">empty cache and hard reload</span>; right
+          click anywhere on the website and click
+          <span id="rules-highlight">inspect</span>, ignore the new developer
+          section that opens up. Instead, right click the refresh page icon on
+          the normal url bar next to the back and forward arrow icons and hit
+          <span id="rules-highlight">empty cache and hard reload</span>.
+        </p>
+        <h4 id="game-issues-">Game Issues:</h4>
+        <p>
+          First make sure to read the
+          <a
+            href="https://github.com/correlation-one/C1GamesStarterKit"
+            target="_blank"
+            >README.md</a
+          >
+          included in the starterkit viewable on the github page by scrolling
+          down. Additionally make sure to get the latest version of starterkit
+          as your issue may have been solved by a recent update. We also may
+          have updated it with improved documentation and new features.
+        </p>
+        <p>Below we will list some common errors and how to address them:</p>
+        <p>
+          <span id="rules-highlight"
+            >Error: Unable to access jarfile engine.jar</span
+          >
+          or <span id="rules-highlight">No such file or directory</span>: You
+          are likely running the run_match script while in the scripts
+          directory. First, try running our new run_match.py script which is
+          directory independent and more flexible in how you call it. If you do
+          want to use an older run_match script your console has to be run in
+          the parent folder that the engine.jar is contained in. Details for how
+          to run the commands correctly are in the
+          <a
+            href="https://github.com/correlation-one/C1GamesStarterKit"
+            target="_blank"
+            >README.md</a
+          >.
+        </p>
+        <h4 id="windows-os-issues-">Windows OS Issues:</h4>
+        <p>Firstly, make sure you are using powershell not cmd or git bash.</p>
+        <p>
+          You likely will also have to run
+          <span id="rules-highlight">Set-ExecutionPolicy</span> as detailed in
+          the
+          <a
+            href="https://github.com/correlation-one/C1GamesStarterKit"
+            target="_blank"
+            >README.md</a
+          >.
+        </p>
+        <p>
+          <span id="rules-highlight"
+            >Split-Path : Cannot bind argument to parameter ‘Path’ because it is
+            null</span
+          >
+          : Your powershell may be out of date which is likely if you are using
+          a windows version before windows 10. See the
+          <b
+            ><a href="#GameplayOverview">requirements section for details</a></b
+          >
+          on how to update your powershell.
+        </p>
+        <p>
+          <span id="rules-highlight"
+            >The term ‘py’ is not recognized as the name of a cmdlet, function,
+            script file, or operable program.</span
+          >
+          : Make sure you have python 3.10 installed and not python 2 or an
+          older version. Also make sure during installation that you set the
+          option to add it to the PATH variable and install for all users.
+          Lastly, after installing restart your powershell.
+        </p>
+        <h4 id="permission-issues-">Permission Issues:</h4>
+        <p>
+          If you are having issues relating to permissions, your machine may be
+          automatically disabling execute permissions on the scripts in the
+          scripts folder. On a Unix machine, you can use ls -la to check the
+          <a href="https://en.wikipedia.org/wiki/File_system_permissions"
+            >permissions</a
+          >
+          on your files, and
+          <a href="https://en.wikipedia.org/wiki/Chmod">chmod</a> to add execute
+          permissions. Similar commands exist in windows powershell. The README
+          in the starterkit provides more information and tips related to our
+          scripts.
+        </p>
+      </div>
+      <div id="Glossary" style="text-align: left">
+        <h2 id="glossary">Glossary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Attack</td>
+              <td>
+                An attack will reduce the health of a Unit equal to the
+                attacker's damage
+              </td>
+            </tr>
+            <tr>
+              <td>Demolisher</td>
+              <td>
+                An expensive and easily destroyed Mobile unit. Has high damage
+                and far range. Can wreak havoc on enemy defenses if properly
+                used.
+              </td>
+            </tr>
+            <tr>
+              <td>Mobile points</td>
+              <td>Currency for placing Mobile units on the board</td>
+            </tr>
+            <tr>
+              <td>Health (Player)</td>
+              <td>
+                For every Mobile unit that reaches the opponent’s edge, the
+                health of the opponent is decreased by one.
+              </td>
+            </tr>
+            <tr>
+              <td>Health (Unit)</td>
+              <td>
+                Health of a Unit. If it is reduced to zero, the unit is
+                destroyed and removed from the arena.
+              </td>
+            </tr>
+            <tr>
+              <td>Interceptor</td>
+              <td>
+                A high-health unit that deals high damage to enemy Mobile units,
+                but cannot attack enemy Structures
+              </td>
+            </tr>
+            <tr>
+              <td>Structure points</td>
+              <td>Currency for placing Structures on the board</td>
+            </tr>
+            <tr>
+              <td>Mobile units</td>
+              <td>
+                Units which move across the board to the opponent’s edge.
+                Multiple Mobile units can occupy the same location.
+              </td>
+            </tr>
+            <tr>
+              <td>Scout</td>
+              <td>A fast-moving unit which deals light damage.</td>
+            </tr>
+            <tr>
+              <td>Structure</td>
+              <td>
+                Stationary units that do not move. They block the paths of both
+                friendly and enemy Mobile units. No two Structures can occupy
+                the same location.
+              </td>
+            </tr>
+            <tr>
+              <td>Support</td>
+              <td>
+                Structure which provides additional health to friendly Mobile
+                units
+              </td>
+            </tr>
+            <tr>
+              <td>Turret</td>
+              <td>Structure which attacks enemy Mobile units</td>
+            </tr>
+            <tr>
+              <td>Wall</td>
+              <td>
+                A cheap, simple Structure used to influence a Unit’s path and
+                protect more valuable Structures
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

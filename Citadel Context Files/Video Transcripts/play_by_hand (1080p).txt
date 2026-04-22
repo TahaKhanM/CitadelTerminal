@@ -1,0 +1,12 @@
+00:02
+You can use the playground to play practice games in Terminal. To start a game, we'll have to select an option for Player 1 and Player 2.
+
+00:10
+We can play by hand, allowing us to control the player directly, choose an algo that we've previously uploaded, or select a premade boss.
+
+00:19
+Defeating bosses by hand is a great way to start learning the basics of Terminal. Running playground matches against your own algos may help reveal their weaknesses, and you can even play bosses against one another to get ideas about how to defeat them. Once you select two players, you can click the initiate button to start the match.
+
+00:38
+The console in the bottom left corner provides a lot of functionality. You can pause, rewind, and fast forward your games, similarly to a video player. You can also use the debug panel to see error and other outputs from your algos.
+
