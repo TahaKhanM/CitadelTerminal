@@ -127,7 +127,8 @@ def _ensure_pathfinders(state: SimState) -> None:
 def apply_deploy_actions(state: SimState, config: SimConfig,
                          p1_spawns: List[list], p1_upgrades: List[list],
                          p2_spawns: List[list], p2_upgrades: List[list],
-                         ordered_events: Optional[List] = None) -> None:
+                         ordered_events: Optional[List] = None,
+                         events: Optional[List[dict]] = None) -> None:
     """Mutate state to post-deploy: spawn structures, apply upgrades, spawn
     mobile units.
 
@@ -136,6 +137,17 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
       p{1,2}_spawns:   [x, y, type_idx, uid]
       p{1,2}_upgrades: [x, y, new_uid]
       ordered_events:  (player, [x, y, type_idx, uid])
+
+    If `events` is provided, a spawn event dict is appended for every
+    successful placement / upgrade / mobile spawn in the same order
+    engine.jar emits GlobalSpawn (SpawnUnitsSystem.java:158 for
+    placements/mobiles, :160 for upgrades). This mirrors the engine's
+    actionFrame=0 emission order: events emitted by processInputBuild +
+    processInputDeploy accumulate before the first frame's visibles +
+    events are serialized (GameMain.runLoop). Event shape:
+        {"type":"spawn", "xy":(x,y), "type_idx":tidx, "uid":uid,
+         "player":player}
+    — translated to engine wire format by _translate_events_to_buckets.
 
     Engine command-order semantics (reproduced here):
       Parser.processInputForPlayer processes each command in the order the
@@ -184,6 +196,13 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 if state.pathfinders is not None:
                     for pf in state.pathfinders.values():
                         pf.put(x, y)
+                if events is not None:
+                    # Engine: SpawnUnitsSystem.java:158 emits GlobalSpawn
+                    # for structure/mobile placements (tidx 0..5).
+                    events.append({
+                        "type": "spawn", "xy": xy, "type_idx": tidx,
+                        "uid": uid, "player": player,
+                    })
             elif tidx == 7:  # UPGRADE
                 s = state.structures.get(xy)
                 if s is None or s.player != player or s.upgraded:
@@ -213,6 +232,13 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 # autoAdd=true from SpawnUnitsSystem.java:147).
                 del state.structures[xy]
                 state.structures[xy] = s
+                if events is not None:
+                    # Engine: SpawnUnitsSystem.java:160 emits GlobalSpawn
+                    # with type_id=7 for upgrades, carrying the new uid.
+                    events.append({
+                        "type": "spawn", "xy": xy, "type_idx": 7,
+                        "uid": uid, "player": player,
+                    })
             elif tidx in MOBILE_TYPES:
                 spec = config.mobile_spec(tidx)
                 # Deduct MP cost. Engine: the same playerUseResources call
@@ -225,6 +251,27 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                     uid=uid, player=player,
                     spawn_xy=xy, target_edge=target_edge,
                 ))
+                if events is not None:
+                    # Engine: SpawnUnitsSystem.java:158 emits GlobalSpawn
+                    # for mobile placements (same code path as structures).
+                    events.append({
+                        "type": "spawn", "xy": xy, "type_idx": tidx,
+                        "uid": uid, "player": player,
+                    })
+            elif tidx == 6:  # REMOVE
+                # Engine: SpawnUnitsSystem.java:52-60 emits GlobalSpawn with
+                # the target's existing uid when a removal command is
+                # accepted. The STATE mutation (refund.turnStartRemoval =
+                # gameMain.turn, subsequent pseudo-unit emission, and
+                # RemoveOwnUnitSystem refund when turnsRequired elapses) is
+                # Cluster F — SimCore currently leaves state.structures
+                # unchanged on a removal command. Only the spawn event is
+                # emitted here so event_spawn zeros out cleanly.
+                if events is not None:
+                    events.append({
+                        "type": "spawn", "xy": xy, "type_idx": 6,
+                        "uid": uid, "player": player,
+                    })
         return
 
     # Fallback: no ordered_events. Structure, upgrade, mobile — each in its
@@ -932,7 +979,21 @@ def _translate_events_to_buckets(
                 str(t_uid),
                 _pid_persp(s_ply, perspective),
             ])
-        # `spawn` and `melee` are not emitted by SimCore. Known Step 2 gaps.
+        elif t == "spawn":
+            # Emitted by apply_deploy_actions for structure / upgrade /
+            # mobile placements (mirrors SpawnUnitsSystem.java:158/160).
+            # Engine wire format: [[x,y], typeID, uid, srcPID_in_persp]
+            xy = e.get("xy") or (0, 0)
+            tidx = int(e.get("type_idx") or 0)
+            uid = str(e.get("uid"))
+            ply = int(e.get("player") or 0)
+            buckets["spawn"].append([
+                [int(xy[0]), int(xy[1])],
+                tidx,
+                uid,
+                _pid_persp(ply, perspective),
+            ])
+        # `melee` is not emitted by SimCore (Citadel has no melee units).
     return buckets
 
 
@@ -1023,6 +1084,7 @@ def simulate_action_phase_iter(
     max_frames: int = 200,
     perspective: int = 1,
     total_frame_start: int = 0,
+    seed_events: Optional[List[dict]] = None,
 ):
     """Per-frame observation generator. Yields one engine-equivalent action-
     phase frame dict per engine actionFrame.
@@ -1030,6 +1092,13 @@ def simulate_action_phase_iter(
     Frame-loop structure is IDENTICAL to simulate_action_phase (same systems,
     same order, same mutations). The only addition is an observation dict
     built after each frame's systems run.
+
+    seed_events, if provided, is a list of event dicts that are prepended
+    to frame 0's flat_events. Used by validators to seed the deploy-phase
+    spawn events (engine emits these during processInputBuild /
+    processInputDeploy, and they appear in the first action frame's event
+    bucket alongside any move/attack events from the initial gameEngineLoop
+    run during BUILDPHASE/DEPLOYPHASE).
 
     Yields:
         dict with keys turnInfo, p1Stats, p2Stats, p1Units, p2Units, events
@@ -1046,6 +1115,7 @@ def simulate_action_phase_iter(
 
     f = 0
     total_frame = total_frame_start
+    pending_seed = list(seed_events) if seed_events else []
     while f < max_frames:
         # Harvest deaths-from-prior-frame before we clear them so we can keep
         # type/player info for translation.
@@ -1066,6 +1136,13 @@ def simulate_action_phase_iter(
         system_breach(state, config, flat_events)
         system_self_destruct(state, config, flat_events)
         system_attack(state, config, flat_events)
+
+        # Prepend deploy-phase spawn events on frame 0 only — engine
+        # accumulates them in the same event buckets before the first
+        # frame's clearEvents runs.
+        if pending_seed:
+            flat_events = pending_seed + flat_events
+            pending_seed = []
 
         obs = build_frame_observation(
             state, flat_events, frame_idx=f, turn=turn,
