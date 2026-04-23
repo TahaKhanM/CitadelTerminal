@@ -1,10 +1,21 @@
 """SimCore config loader — typed accessors over citadel_config_snapshot.json.
 
-The live server config is authoritative; the snapshot file is a verified copy.
-All numerics flow through this module; nothing downstream hardcodes values.
+Canonical source: `_raw_unit_information` (an exact copy of what engine.jar
+serves at game start, per unitInformation in replays). All StructureSpec /
+MobileSpec values are DERIVED by re-implementing engine.jar's
+Config.processUnitInfoInPlace / Config.java:184-190 copy-then-patch
+semantics. We do not maintain a hand-curated `_derived_lookup_for_sim_core`
+block — that was historically a source of silent drift (notably EF.upgrade
+mispriced at 2 SP instead of 4 because its live config has no cost1 key
+and the upgrade inherits base.cost1=4).
 
-The snapshot uses pre-rename shorthands (FF/EF/DF/PI/EI/SI), matching what the
-live server delivers. See memory/citadel_runtime_shorthands.md.
+The snapshot uses pre-rename shorthands (FF/EF/DF/PI/EI/SI), matching what
+the live server delivers. See memory/citadel_runtime_shorthands.md.
+
+Drift guard: run `python3 -m algos.athena.sim.drift_check
+<path/to/ranked.replay>` (or via the regression harness) to verify every
+gameplay-relevant field in `_raw_unit_information` matches the replay's
+live `unitInformation`.
 """
 
 from __future__ import annotations
@@ -41,17 +52,85 @@ ARENA = 28
 HALF = 14
 
 
+# ---------------------------------------------------------------- engine mirror
+
+# Gameplay-relevant fields in engine.jar's SpawnUnitsSystem.UnitConfig that
+# Config.processUnitInfoInPlace (Config.java:99-176) populates from JSON.
+# Map: JSON key (camelCase from server) → (Python attr, default).
+#
+# Fields NOT listed are UI-only (icons, scales, display names) and are
+# ignored; drift on those is cosmetic, not gameplay-relevant.
+_ENGINE_FIELDS: Dict[str, Any] = {
+    # JSON key              Python attr          default (engine's UnitConfig)
+    "cost1":                 ("metal_cost",              0.0),
+    "cost2":                 ("food_cost",               0.0),
+    "startHealth":           ("start_health",            0.0),  # also sets maxHealth
+    "getHitRadius":          ("get_hit_radius",          0.0),
+    "attackRange":           ("attack_range",            0.0),
+    "attackDamageTower":     ("attack_damage_tower",     0.0),
+    "attackDamageWalker":    ("attack_damage_walker",    0.0),
+    "shieldRange":           ("shield_range",            0.0),
+    "shieldPerUnit":         ("shield_per_unit",         0.0),
+    "shieldDecay":           ("shield_decay",            0.0),
+    "shieldBonusPerY":       ("shield_bonus_per_y",      0.0),
+    "speed":                 ("speed",                   0.0),
+    "playerBreachDamage":    ("player_breach_damage",    0.0),
+    "metalForBreach":        ("metal_for_breach",        0.0),
+    "selfDestructDamageWalker": ("self_destruct_damage_walker", 0.0),
+    "selfDestructDamageTower":  ("self_destruct_damage_tower",  0.0),
+    "selfDestructRange":     ("self_destruct_range",     0.0),
+    "selfDestructStepsRequired": ("self_destruct_steps_required", 0),
+    "refundPercentage":      ("refund_percentage",       0.0),
+    "turnsRequiredToRemove": ("turns_required_to_remove", 0),
+    "generatesResource1":    ("generates_resource1",     0.0),
+    "generatesResource2":    ("generates_resource2",     0.0),
+}
+
+# Fields considered cosmetic (UI) — tracked for audit but not part of spec.
+_UI_FIELDS = frozenset([
+    "iconxScale", "iconyScale", "icon", "display", "shorthand", "unitCategory",
+])
+
+
+def _fill_unit_config(unit_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Mirror Config.processUnitInfoInPlace (Config.java:99-176): populate a
+    fresh UnitConfig with defaults, then overwrite each field that is present
+    in `unit_dict`. Fields absent from `unit_dict` retain the default."""
+    out: Dict[str, Any] = {}
+    for _json_key, (attr, default) in _ENGINE_FIELDS.items():
+        out[attr] = default
+    for json_key, (attr, _default) in _ENGINE_FIELDS.items():
+        if json_key in unit_dict and unit_dict[json_key] is not None:
+            v = unit_dict[json_key]
+            # Engine stores startHealth → both startHealth and maxHealth.
+            out[attr] = v
+    return out
+
+
+def _patch_upgrade(base_cfg: Dict[str, Any],
+                   upgrade_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Mirror Config.java:184-190: upgrade variant is a COPY of the base with
+    fields from the upgrade sub-dict overriding only where present. Critical
+    for fields like EF.upgrade.cost1 (missing in live config → inherits base
+    metalCost=4, not "defaults to 0")."""
+    cfg = dict(base_cfg)  # shallow copy; values are scalars
+    for json_key, (attr, _default) in _ENGINE_FIELDS.items():
+        if json_key in upgrade_dict and upgrade_dict[json_key] is not None:
+            cfg[attr] = upgrade_dict[json_key]
+    return cfg
+
+
+# ---------------------------------------------------------------- specs
+
 @dataclass(frozen=True)
 class StructureSpec:
     hp: float
     cost_sp: float
     refund_pct: float
     turns_required_to_remove: int
-    # Turret-only
     attack_range: float = 0.0
     attack_damage_walker: float = 0.0
     attack_damage_tower: float = 0.0
-    # Support-only
     shield_range: float = 0.0
     shield_per_unit: float = 0.0
     shield_bonus_per_y: float = 0.0
@@ -87,92 +166,86 @@ class Resources:
     bit_ramp_cap_growth: float
     round_start_bit_ramp: int
     bit_growth_rate: float         # additional MP added per round as ramp applies
-    cores_for_player_damage: float  # +SP per HP of damage dealt
+    cores_for_player_damage: float  # legacy pre-season-5 field; unused post-5
 
+
+def _struct_spec_from(cfg: Dict[str, Any]) -> StructureSpec:
+    return StructureSpec(
+        hp=float(cfg["start_health"]),
+        cost_sp=float(cfg["metal_cost"]),
+        refund_pct=float(cfg["refund_percentage"]),
+        turns_required_to_remove=int(cfg["turns_required_to_remove"]),
+        attack_range=float(cfg["attack_range"]),
+        attack_damage_walker=float(cfg["attack_damage_walker"]),
+        attack_damage_tower=float(cfg["attack_damage_tower"]),
+        shield_range=float(cfg["shield_range"]),
+        shield_per_unit=float(cfg["shield_per_unit"]),
+        shield_bonus_per_y=float(cfg["shield_bonus_per_y"]),
+        shield_decay=float(cfg["shield_decay"]),
+    )
+
+
+def _mobile_spec_from(cfg: Dict[str, Any]) -> MobileSpec:
+    return MobileSpec(
+        hp=float(cfg["start_health"]),
+        cost_mp=float(cfg["food_cost"]),
+        attack_range=float(cfg["attack_range"]),
+        attack_damage_walker=float(cfg["attack_damage_walker"]),
+        attack_damage_tower=float(cfg["attack_damage_tower"]),
+        speed=float(cfg["speed"]),
+        self_destruct_range=float(cfg["self_destruct_range"]),
+        self_destruct_damage_walker=float(cfg["self_destruct_damage_walker"]),
+        self_destruct_damage_tower=float(cfg["self_destruct_damage_tower"]),
+        self_destruct_steps_required=int(cfg["self_destruct_steps_required"]),
+        breach_damage=float(cfg["player_breach_damage"]),
+        metal_for_breach=float(cfg["metal_for_breach"]),
+    )
+
+
+# ---------------------------------------------------------------- SimConfig
 
 class SimConfig:
-    """Frozen view over citadel_config_snapshot.json with typed accessors."""
+    """Frozen view over citadel_config_snapshot.json with typed accessors.
+
+    Loaded from `_raw_unit_information` + `_resources_block_verbatim` only.
+    Derived specs are computed here — never read from any hand-maintained
+    derived lookup block, to prevent silent drift."""
 
     def __init__(self, raw: Dict[str, Any]):
         self._raw = raw
-        derived = raw.get("_derived_lookup_for_sim_core", {})
-        resources = raw.get("_resources_block_verbatim", {})
-
-        # ---- structures
-        ff = derived["FF"]
-        self.wall_base = StructureSpec(
-            hp=ff["base"]["hp"],
-            cost_sp=ff["base"]["cost_sp"],
-            refund_pct=ff["base"]["refund_pct"],
-            turns_required_to_remove=ff["base"]["turns_required_to_remove"],
-        )
-        self.wall_upg = StructureSpec(
-            hp=ff["upgrade"]["hp"],
-            cost_sp=ff["upgrade"]["cost_sp"],
-            refund_pct=ff["upgrade"]["refund_pct"],
-            turns_required_to_remove=ff["upgrade"]["turns_required_to_remove"],
-        )
-
-        ef = derived["EF"]
-        self.support_base = StructureSpec(
-            hp=ef["base"]["hp"],
-            cost_sp=ef["base"]["cost_sp"],
-            refund_pct=ef["base"]["refund_pct"],
-            turns_required_to_remove=ef["base"]["turns_required_to_remove"],
-            shield_range=ef["base"]["shield_range"],
-            shield_per_unit=ef["base"]["shield_per_unit"],
-            shield_bonus_per_y=ef["base"]["shield_bonus_per_y"],
-        )
-        self.support_upg = StructureSpec(
-            hp=ef["upgrade"]["hp"],
-            cost_sp=ef["upgrade"]["cost_sp"],
-            refund_pct=ef["upgrade"]["refund_pct"],
-            turns_required_to_remove=ef["upgrade"]["turns_required_to_remove"],
-            shield_range=ef["upgrade"]["shield_range"],
-            shield_per_unit=ef["upgrade"]["shield_per_unit"],
-            shield_bonus_per_y=ef["upgrade"]["shield_bonus_per_y"],
-        )
-
-        df = derived["DF"]
-        self.turret_base = StructureSpec(
-            hp=df["base"]["hp"],
-            cost_sp=df["base"]["cost_sp"],
-            refund_pct=df["base"]["refund_pct"],
-            turns_required_to_remove=df["base"]["turns_required_to_remove"],
-            attack_range=df["base"]["attack_range"],
-            attack_damage_walker=df["base"]["attack_damage_walker"],
-            attack_damage_tower=df["base"]["attack_damage_tower"],
-        )
-        self.turret_upg = StructureSpec(
-            hp=df["upgrade"]["hp"],
-            cost_sp=df["upgrade"]["cost_sp"],
-            refund_pct=df["upgrade"]["refund_pct"],
-            turns_required_to_remove=df["upgrade"]["turns_required_to_remove"],
-            attack_range=df["upgrade"]["attack_range"],
-            attack_damage_walker=df["upgrade"]["attack_damage_walker"],
-            attack_damage_tower=df["upgrade"]["attack_damage_tower"],
-        )
-
-        # ---- mobile units (not upgradeable)
-        def mob(d: Dict[str, Any]) -> MobileSpec:
-            return MobileSpec(
-                hp=d["hp"], cost_mp=d["cost_mp"],
-                attack_range=d["attack_range"],
-                attack_damage_walker=d["attack_damage_walker"],
-                attack_damage_tower=d["attack_damage_tower"],
-                speed=d["speed"],
-                self_destruct_range=d["self_destruct_range"],
-                self_destruct_damage_walker=d["self_destruct_damage_walker"],
-                self_destruct_damage_tower=d["self_destruct_damage_tower"],
-                self_destruct_steps_required=d["self_destruct_steps_required"],
-                breach_damage=d["breach_damage"],
-                metal_for_breach=d["metal_for_breach"],
+        raw_units = raw.get("_raw_unit_information")
+        if not raw_units:
+            raise ValueError(
+                "citadel_config_snapshot.json is missing _raw_unit_information; "
+                "regenerate via /inspect-config."
             )
-        self.scout = mob(derived["PI"])
-        self.demolisher = mob(derived["EI"])
-        self.interceptor = mob(derived["SI"])
+        # Build fully-patched base + upgrade configs for every shorthand.
+        by_sh: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        for u in raw_units:
+            sh = u.get("shorthand")
+            if not sh:
+                continue
+            base_cfg = _fill_unit_config(u)
+            upg_cfg: Optional[Dict[str, Any]] = None
+            if "upgrade" in u and isinstance(u["upgrade"], dict):
+                upg_cfg = _patch_upgrade(base_cfg, u["upgrade"])
+            by_sh[sh] = {"base": base_cfg, "upgrade": upg_cfg or {}}
 
-        # ---- resources
+        # Structures
+        self.wall_base = _struct_spec_from(by_sh["FF"]["base"])
+        self.wall_upg = _struct_spec_from(by_sh["FF"]["upgrade"])
+        self.support_base = _struct_spec_from(by_sh["EF"]["base"])
+        self.support_upg = _struct_spec_from(by_sh["EF"]["upgrade"])
+        self.turret_base = _struct_spec_from(by_sh["DF"]["base"])
+        self.turret_upg = _struct_spec_from(by_sh["DF"]["upgrade"])
+
+        # Mobile units
+        self.scout = _mobile_spec_from(by_sh["PI"]["base"])
+        self.demolisher = _mobile_spec_from(by_sh["EI"]["base"])
+        self.interceptor = _mobile_spec_from(by_sh["SI"]["base"])
+
+        # Resources block — verbatim from engine
+        resources = raw.get("_resources_block_verbatim", {})
         self.resources = Resources(
             starting_hp=float(resources["startingHP"]),
             starting_sp=float(resources["startingCores"]),
