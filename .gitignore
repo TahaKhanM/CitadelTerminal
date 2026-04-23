@@ -34,3 +34,6 @@ tools/evolve_*.pkl
 # Local Claude Code state
 .claude/settings.local.json
 .claude/projects/
+
+# Extracted action JSONs (reproduce via tools/replay_to_actions.py)
+replays/ranked/*.actions.json
