@@ -86,6 +86,20 @@ Walls have the best HP/SP ratio of any unit in the game (60 HP / SP base; 66.7 H
 | Shield bonus per Y | 0 | **0.7 × Y** |
 | Effective shield formula | `3` | `1 + 0.7 × Y_position` |
 
+> 🛑 **Local-vs-competition gotcha (verified 2026-04-23 via `/inspect-config`):**
+> The starter-kit `C1GamesStarterKit-master/game-configs.json` has the *old*
+> Encryptor config for EF — `cost1: 7`, `startHealth: 30`, **`shieldRange: 0`**,
+> upgrade `generatesResource2: 2`. Under the local engine, **Supports do not
+> shield at all** (range 0); upgraded Supports instead generate +2 MP/turn.
+> Any Support-caravan strategy is therefore *untestable* via `/run-match`,
+> `/bestof`, or `/tournament` — it will tie or regress locally even when it
+> would work on the competition server. Confirmed by inspecting a full
+> v14-vs-v13 local replay: **0 shield events across 5927 action frames**,
+> and both sides tied 39-39 like the v13-mirror baseline. To test a caravan
+> pre-upload, either patch `game-configs.json` to competition Support
+> values for the run, or rely on the forward simulator (Phase 0 of
+> `ADVANCED_STRATEGIES_PROMPT.md`).
+
 ⚠️ **Base Support HP is 1** — a single attack from anything kills it. An unupgraded Support is a one-shot shield dispenser.
 
 ⚠️ **Upgrading a Support raises its HP from 1 to 40**, making it durable enough to last multiple turns. This is a big deal strategically — *upgraded* Supports can anchor your back row across an entire game; *base* Supports are effectively single-use unless walled.
