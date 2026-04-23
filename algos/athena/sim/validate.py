@@ -503,7 +503,12 @@ def validate_replay_full(path: Path, config: SimConfig) -> Tuple[List[FrameDiff]
         p1_sp, p1_up, p2_sp, p2_up = _extract_deploy_actions(af_first)
         ordered = _extract_deploy_events_in_order(af_first)
         state = _build_state_from_deploy_frame(deploys[t], config, upgraded_pre.get(t, set()))
-        apply_deploy_actions(state, config, p1_sp, p1_up, p2_sp, p2_up, ordered_events=ordered)
+        # Collect deploy-phase spawn events to seed into frame 0 (engine
+        # emits GlobalSpawn from processInputBuild + processInputDeploy and
+        # those appear in the first action frame's event bucket).
+        deploy_events: List[dict] = []
+        apply_deploy_actions(state, config, p1_sp, p1_up, p2_sp, p2_up,
+                             ordered_events=ordered, events=deploy_events)
 
         # Seed total_frame_number from the replay's first action frame so
         # the turnInfo column matches (if sim produces the right frame count).
@@ -511,6 +516,7 @@ def validate_replay_full(path: Path, config: SimConfig) -> Tuple[List[FrameDiff]
 
         sim_iter = simulate_action_phase_iter(
             state, config, perspective=1, total_frame_start=total_frame_start,
+            seed_events=deploy_events,
         )
         rep_i = 0
         for sim_obs in sim_iter:
