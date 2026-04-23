@@ -549,6 +549,12 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
             r = spec.self_destruct_range
             dmg_walker = spec.self_destruct_damage_walker
             dmg_tower = spec.self_destruct_damage_tower
+            # Track victim locations per category for the GlobalSelfDestruct
+            # payload. Engine's SelfDestructSystem.java:36-40 appends to
+            # attackedLocationsWalkers / attackedLocationsTowers during the
+            # hit loop.
+            walker_locs: List[Tuple[int, int]] = []
+            tower_locs: List[Tuple[int, int]] = []
             for other in state.mobiles:
                 if other is m or other.hp <= 0 or other.player == m.player:
                     continue
@@ -556,6 +562,7 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
                     continue
                 new_hp, new_sh, died = _apply_damage(other.hp, other.shield, dmg_walker)
                 other.hp, other.shield = new_hp, new_sh
+                walker_locs.append(other.xy)
                 events.append({"type": "damage", "xy": other.xy, "dmg": dmg_walker,
                                "victim_uid": other.uid, "source_uid": m.uid})
                 if died:
@@ -569,14 +576,40 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
                     continue
                 new_hp, _sh, died = _apply_damage(s.hp, 0.0, dmg_tower)
                 s.hp = new_hp
+                tower_locs.append(s.xy)
                 events.append({"type": "damage", "xy": s.xy, "dmg": dmg_tower,
                                "victim_uid": s.uid, "source_uid": m.uid})
                 if died:
                     events.append({"type": "death", "xy": s.xy, "uid": s.uid,
                                    "type_idx": s.type_idx, "player": s.player,
                                    "removed": False})
-            events.append({"type": "selfDestruct", "xy": m.xy, "uid": m.uid,
-                           "player": m.player})
+            # Engine's SelfDestructSystem.java:47-56 emits ONE GlobalSelfDestruct
+            # with merged walker+tower locations and damage=attackWalker when
+            # attackWalker == attackTower; else TWO events (walker then tower,
+            # in that emission order). For Citadel, every mobile type has
+            # equal walker/tower SD damage, so the two-event branch is
+            # unreachable on ranked replays but we implement it anyway for
+            # fuzz / future-config parity.
+            if dmg_walker == dmg_tower:
+                events.append({
+                    "type": "selfDestruct", "xy": m.xy, "uid": m.uid,
+                    "player": m.player, "type_idx": m.type_idx,
+                    "target_locations": list(walker_locs) + list(tower_locs),
+                    "damage": dmg_walker,
+                })
+            else:
+                events.append({
+                    "type": "selfDestruct", "xy": m.xy, "uid": m.uid,
+                    "player": m.player, "type_idx": m.type_idx,
+                    "target_locations": list(walker_locs),
+                    "damage": dmg_walker,
+                })
+                events.append({
+                    "type": "selfDestruct", "xy": m.xy, "uid": m.uid,
+                    "player": m.player, "type_idx": m.type_idx,
+                    "target_locations": list(tower_locs),
+                    "damage": dmg_tower,
+                })
         # SDer is always destroyed, even if steps_taken < minimumSteps
         # (engine: SelfDestructSystem.java:58-60).
         events.append({"type": "death", "xy": m.xy, "uid": m.uid,
@@ -1036,20 +1069,21 @@ def _translate_events_to_buckets(
                 _pid_persp(int(e.get("attacker_player") or 0), perspective),
             ])
         elif t == "selfDestruct":
+            # Engine's GlobalSelfDestruct wire format (inPerspective):
+            # [[src_xy], [target_xys], damage, typeID, srcID, srcPID_in_persp]
+            # Fields are now carried on the flat event directly (populated
+            # by system_self_destruct per SelfDestructSystem.java:47-56).
             xy = e.get("xy") or (0, 0)
-            uid = e.get("uid")
-            # damage + type: lookup from state (SD-er is already hp=0 but
-            # still iterable until next clear_destroyed)
-            tid = _unit_type_by_uid(state, uid)
-            if tid < 0 and dead_lookup is not None:
-                tid = dead_lookup.get(uid, (-1, 0))[0]
+            uid = str(e.get("uid"))
+            tid = int(e.get("type_idx", -1))
+            locs = e.get("target_locations") or []
             buckets["selfDestruct"].append([
                 [int(xy[0]), int(xy[1])],
-                [],  # target-locations: not tracked by SimCore; known gap
-                0.0,  # damage: not tracked on event; could reconstitute
-                int(tid),
-                str(uid),
-                _pid_persp(int(e.get("player") or 0), perspective),
+                [[int(l[0]), int(l[1])] for l in locs],
+                float(e.get("damage", 0.0)),
+                tid,
+                uid,
+                _pid_persp(int(e.get("player", 0)), perspective),
             ])
         elif t == "shield":
             # SimCore shield events carry support_uid, target_uid, amount.
