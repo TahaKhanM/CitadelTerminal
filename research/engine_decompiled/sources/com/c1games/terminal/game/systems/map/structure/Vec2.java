@@ -46,3 +46,4 @@ public class Vec2 {
         return "(" + this.x + ", " + this.y + ")";
     }
 }
+

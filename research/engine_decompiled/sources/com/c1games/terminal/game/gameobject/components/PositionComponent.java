@@ -56,3 +56,4 @@ extends Component {
         this.game.map.removeObject(this, this.position.x, this.position.y);
     }
 }
+

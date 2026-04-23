@@ -69,3 +69,4 @@ public class MapBounds {
         return coords.x >= 0 && coords.y >= 0 && coords.x < this.boardSize && coords.y < this.boardSize && this.arena[coords.x][coords.y];
     }
 }
+

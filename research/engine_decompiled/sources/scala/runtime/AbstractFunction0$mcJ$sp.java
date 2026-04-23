@@ -1,0 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package scala.runtime;
+
+import scala.Function0$mcJ$sp;
+import scala.Function0$mcJ$sp$class;
+import scala.runtime.AbstractFunction0;
+
+public abstract class AbstractFunction0$mcJ$sp
+extends AbstractFunction0<Object>
+implements Function0$mcJ$sp {
+    public AbstractFunction0$mcJ$sp() {
+        Function0$mcJ$sp$class.$init$(this);
+    }
+}
+

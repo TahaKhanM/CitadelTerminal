@@ -56,3 +56,4 @@ public class Coords {
         return "(" + this.x + ", " + this.y + ")";
     }
 }
+

@@ -1,0 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package scala.reflect.runtime;
+
+import scala.reflect.ScalaSignature;
+
+@ScalaSignature(bytes="\u0006\u0001i1\u0001\"\u0001\u0002\u0011\u0002\u0007\u0005\u0011B\u0006\u0002\u0012\u0015\u00064\u0018-\u00168jm\u0016\u00148/\u001a$pe\u000e,'BA\u0002\u0005\u0003\u001d\u0011XO\u001c;j[\u0016T!!\u0002\u0004\u0002\u000fI,g\r\\3di*\tq!A\u0003tG\u0006d\u0017m\u0001\u0001\u0014\u0005\u0001Q\u0001CA\u0006\r\u001b\u00051\u0011BA\u0007\u0007\u0005\u0019\te.\u001f*fM\")q\u0002\u0001C\u0001!\u00051A%\u001b8ji\u0012\"\u0012!\u0005\t\u0003\u0017II!a\u0005\u0004\u0003\tUs\u0017\u000e\u001e\u0005\u0006+\u0001!\t\u0001E\u0001\u0006M>\u00148-\u001a\t\u0003/ai\u0011AA\u0005\u00033\t\u0011ABS1wCVs\u0017N^3sg\u0016\u0004")
+public interface JavaUniverseForce {
+    public void force();
+}
+

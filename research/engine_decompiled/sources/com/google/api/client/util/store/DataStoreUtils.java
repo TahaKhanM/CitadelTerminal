@@ -1,0 +1,36 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package com.google.api.client.util.store;
+
+import com.google.api.client.util.store.DataStore;
+import java.io.IOException;
+
+/*
+ * This class specifies class file version 49.0 but uses Java 6 signatures.  Assumed Java 6.
+ */
+public final class DataStoreUtils {
+    public static String toString(DataStore<?> dataStore) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append('{');
+            boolean first = true;
+            for (String key : dataStore.keySet()) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(key).append('=').append(dataStore.get(key));
+            }
+            return sb.append('}').toString();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private DataStoreUtils() {
+    }
+}
+

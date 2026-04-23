@@ -36,3 +36,4 @@ extends Component {
         this.initFinalizeCallEnable(true);
     }
 }
+

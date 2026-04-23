@@ -1,0 +1,92 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package io.grpc.netty.shaded.io.netty.resolver;
+
+import io.grpc.netty.shaded.io.netty.resolver.AddressResolver;
+import io.grpc.netty.shaded.io.netty.util.concurrent.EventExecutor;
+import io.grpc.netty.shaded.io.netty.util.concurrent.Future;
+import io.grpc.netty.shaded.io.netty.util.concurrent.FutureListener;
+import io.grpc.netty.shaded.io.netty.util.internal.logging.InternalLogger;
+import io.grpc.netty.shaded.io.netty.util.internal.logging.InternalLoggerFactory;
+import java.io.Closeable;
+import java.net.SocketAddress;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+public abstract class AddressResolverGroup<T extends SocketAddress>
+implements Closeable {
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AddressResolverGroup.class);
+    private final Map<EventExecutor, AddressResolver<T>> resolvers = new IdentityHashMap<EventExecutor, AddressResolver<T>>();
+
+    protected AddressResolverGroup() {
+    }
+
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    public AddressResolver<T> getResolver(final EventExecutor executor) {
+        AddressResolver<T> r;
+        if (executor == null) {
+            throw new NullPointerException("executor");
+        }
+        if (executor.isShuttingDown()) {
+            throw new IllegalStateException("executor not accepting a task");
+        }
+        Map<EventExecutor, AddressResolver<T>> map2 = this.resolvers;
+        synchronized (map2) {
+            r = this.resolvers.get(executor);
+            if (r == null) {
+                AddressResolver<T> newResolver;
+                try {
+                    newResolver = this.newResolver(executor);
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException("failed to create a new resolver", e);
+                }
+                this.resolvers.put(executor, newResolver);
+                executor.terminationFuture().addListener(new FutureListener<Object>(){
+
+                    /*
+                     * WARNING - Removed try catching itself - possible behaviour change.
+                     */
+                    @Override
+                    public void operationComplete(Future<Object> future) throws Exception {
+                        Map map2 = AddressResolverGroup.this.resolvers;
+                        synchronized (map2) {
+                            AddressResolverGroup.this.resolvers.remove(executor);
+                        }
+                        newResolver.close();
+                    }
+                });
+                r = newResolver;
+            }
+        }
+        return r;
+    }
+
+    protected abstract AddressResolver<T> newResolver(EventExecutor var1) throws Exception;
+
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    @Override
+    public void close() {
+        AddressResolver[] addressResolverArray = this.resolvers;
+        synchronized (this.resolvers) {
+            AddressResolver[] rArray = this.resolvers.values().toArray(new AddressResolver[this.resolvers.size()]);
+            this.resolvers.clear();
+            // ** MonitorExit[var2_1] (shouldn't be in output)
+            for (AddressResolver r : rArray) {
+                try {
+                    r.close();
+                }
+                catch (Throwable t) {
+                    logger.warn("Failed to close a resolver:", t);
+                }
+            }
+            return;
+        }
+    }
+}
+

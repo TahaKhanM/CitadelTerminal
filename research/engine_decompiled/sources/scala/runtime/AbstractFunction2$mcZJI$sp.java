@@ -1,0 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package scala.runtime;
+
+import scala.Function2$mcZJI$sp;
+import scala.Function2$mcZJI$sp$class;
+import scala.runtime.AbstractFunction2;
+
+public abstract class AbstractFunction2$mcZJI$sp
+extends AbstractFunction2<Object, Object, Object>
+implements Function2$mcZJI$sp {
+    public AbstractFunction2$mcZJI$sp() {
+        Function2$mcZJI$sp$class.$init$(this);
+    }
+}
+
