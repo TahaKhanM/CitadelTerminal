@@ -226,6 +226,17 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 s.upgraded = True
                 s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
                 s.uid = uid  # new uid assigned by engine on upgrade
+                # Engine destroys the old Gameobject and creates a fresh
+                # one (SpawnUnitsSystem.java:93 + 147-160). The fresh
+                # Gameobject has a brand-new RefundComponent with
+                # turnStartRemoval=-1 (unset). Any prior pending-removal
+                # status on the pre-upgrade structure is discarded. A
+                # subsequent type-6 command this turn will set a fresh
+                # turn_start_removal on the upgraded structure — so we
+                # MUST reset it here, otherwise the pre-upgrade flag
+                # leaks through and type-6's `turn_start_removal is
+                # None` gate skips the new removal.
+                s.turn_start_removal = None
                 # Re-insert at end of dict to match gameObjects order
                 # (engine destroys old Gameobject, appends new one to
                 # game.gameObjects — see Gameobject.java:57-60 with
@@ -259,14 +270,30 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                         "uid": uid, "player": player,
                     })
             elif tidx == 6:  # REMOVE
-                # Engine: SpawnUnitsSystem.java:52-60 emits GlobalSpawn with
-                # the target's existing uid when a removal command is
-                # accepted. The STATE mutation (refund.turnStartRemoval =
-                # gameMain.turn, subsequent pseudo-unit emission, and
-                # RemoveOwnUnitSystem refund when turnsRequired elapses) is
-                # Cluster F — SimCore currently leaves state.structures
-                # unchanged on a removal command. Only the spawn event is
-                # emitted here so event_spawn zeros out cleanly.
+                # Engine: SpawnUnitsSystem.java:52-60.
+                #   if target has RefundComponent && turnStartRemoval < 0:
+                #       refund.turnStartRemoval = gameMain.turn;
+                #       addSpawnEvent(type=6, target.uid, player);
+                # SimCore mirrors the same ordering: first mutate state
+                # (turn_start_removal set to state.turn), then emit spawn
+                # event. Only sets turn_start_removal on structures that
+                # exist, belong to the issuing player, and aren't already
+                # pending removal. Mid-action-phase consumption: the
+                # run_remove_own_unit_system call at end-of-action-frame
+                # checks `turn_start_removal + turns_required_to_remove
+                # <= current_turn` and fires the refund + GlobalDeath
+                # (removed=true). For Citadel's turns_required_to_remove
+                # >= 2 this never fires within the same turn's action
+                # phase; the actual refund fires at the NEXT turn's
+                # BUILDPHASE call site (not run inside this per-turn
+                # validator — the validator rebuilds state from the next
+                # turn's deploy frame, which already reflects the
+                # refund).
+                s = state.structures.get(xy)
+                if (s is not None
+                        and s.player == player
+                        and s.turn_start_removal is None):
+                    s.turn_start_removal = state.turn
                 if events is not None:
                     events.append({
                         "type": "spawn", "xy": xy, "type_idx": 6,
@@ -816,6 +843,63 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
               spec.attack_damage_tower, spec.attack_range)
 
 
+def system_remove_own_unit(state: SimState, config: SimConfig,
+                             events: List[dict], current_turn: int) -> None:
+    """Port of RemoveOwnUnitSystem.removeOwnUnitProcess
+    (RemoveOwnUnitSystem.java:20-34).
+
+    For each structure with turn_start_removal set, if
+      turn_start_removal + turns_required_to_remove <= current_turn
+    the structure is refunded and destroyed this system-call:
+      * refund_metal = costMetal * (hp / max_hp) * refund_pct
+        (engine: line 24. costMetal is the structure's *total* cost —
+         base + upgrade bump for upgraded structures, via spawnComponent
+         accumulation in attemptSpawn line 154.)
+      * refund credited to the refunder's SP via _round01(sp + refund)
+        to mirror PlayerStats.addToMetal's post-op rounding.
+      * GlobalDeath emitted with removed=True.
+      * structure popped from state.structures (engine: currentHP=-1 +
+        gameObjectDestroy.accept, popped at next clearDestroyed — SimCore
+        pops directly for simplicity, same visible effect).
+
+    Citadel note: every structure's turns_required_to_remove >= 2, so
+    within a single turn's action phase this gate is always `>`
+    (pending structure survives this turn). The function is a no-op on
+    ranked replays. Ported for fuzz/future-config parity anyway."""
+    to_refund = []
+    for xy in list(state.structures.keys()):
+        s = state.structures.get(xy)
+        if s is None or s.turn_start_removal is None or s.hp <= 0.0:
+            continue
+        spec = config.structure_spec(s.type_idx, upgraded=s.upgraded)
+        if s.turn_start_removal + spec.turns_required_to_remove > current_turn:
+            continue
+        to_refund.append((xy, s, spec))
+    for xy, s, spec in to_refund:
+        base_spec = config.structure_spec(s.type_idx, upgraded=False)
+        # spawnComponent.costMetal = base + upgrade bump (see
+        # SpawnUnitsSystem.java:154). For a base structure, total = base.
+        # For an upgraded structure, total = base.cost + upgrade.cost.
+        total_cost = base_spec.cost_sp + (spec.cost_sp if s.upgraded else 0.0)
+        hp_pct = s.hp / spec.hp if spec.hp > 0 else 0.0
+        refund_metal = total_cost * hp_pct * spec.refund_pct
+        placer = state.p1 if s.player == 1 else state.p2
+        placer.sp = _round01(placer.sp + refund_metal)
+        events.append({
+            "type": "death", "xy": xy, "uid": s.uid,
+            "type_idx": s.type_idx, "player": s.player,
+            "removed": True,
+        })
+        # Pop from state + pathfinders (engine: set hp=-1 + queue destroy;
+        # SimCore collapses to direct pop — same observable effect since
+        # engine's next clearDestroyed at start-of-gameEngineLoop would
+        # have done this anyway).
+        state.structures.pop(xy, None)
+        if state.pathfinders is not None:
+            for pf in state.pathfinders.values():
+                pf.remove(xy[0], xy[1])
+
+
 def clear_destroyed(state: SimState, events: Optional[List[dict]] = None) -> None:
     """Pop dead units from state and keep pathfinders in sync. Does NOT emit
     death events — those fire inline at each kill site (system_attack /
@@ -1126,8 +1210,8 @@ def _translate_events_to_buckets(
     return buckets
 
 
-def _snapshot_units(state: SimState, perspective: int = 1,
-                     current_turn: int = 0) -> Tuple[list, list]:
+def _snapshot_units(state: SimState, config: Optional[SimConfig] = None,
+                     perspective: int = 1) -> Tuple[list, list]:
     """Snapshot p1Units / p2Units in engine wire format (8-bucket list of
     lists). Perspective-mirroring of coordinates is NOT applied — we assume
     the replay under compare is stored with perspective=1 (p1 view),
@@ -1136,14 +1220,21 @@ def _snapshot_units(state: SimState, perspective: int = 1,
     Each real-unit entry is [x, y, hp+shield, uid]. Pseudo-units (removal
     index 6, upgrade index 7) are joined by (x,y).
 
-    Performance-sensitive — called once per frame. Avoids redundant float()
-    / str() coercions (state already stores properly typed fields) and
-    skips per-iteration check for pseudo-units when the structure has
-    neither flag set."""
+    Pseudo-unit index 6 (removal) HP slot matches engine's
+    DisplayUnitsSystem.java:32:
+        float(turns_required_to_remove - (current_turn - turn_start_removal))
+    — countdown from turns_required down to 0 across the life of a pending
+    removal. Requires `config` to look up the structure's
+    turns_required_to_remove; if None is passed (legacy callers), falls
+    back to 0.0 which preserves old behavior of emitting the pseudo-unit
+    without correct countdown.
+
+    Performance-sensitive — called once per frame."""
     p1w, p1s, p1t, p1sc, p1d, p1i, p1rm, p1up = [], [], [], [], [], [], [], []
     p2w, p2s, p2t, p2sc, p2d, p2i, p2rm, p2up = [], [], [], [], [], [], [], []
     p1_by_type = (p1w, p1s, p1t, p1sc, p1d, p1i, p1rm, p1up)
     p2_by_type = (p2w, p2s, p2t, p2sc, p2d, p2i, p2rm, p2up)
+    turn = state.turn
     for s in state.structures.values():
         if s.hp <= 0.0:
             continue
@@ -1151,8 +1242,13 @@ def _snapshot_units(state: SimState, perspective: int = 1,
         uid = s.uid
         bucket = p1_by_type if s.player == 1 else p2_by_type
         bucket[s.type_idx].append([x, y, s.hp, uid])
-        if s.pending_removal:
-            bucket[6].append([x, y, 0.0, uid])
+        if s.turn_start_removal is not None:
+            if config is not None:
+                spec = config.structure_spec(s.type_idx, upgraded=s.upgraded)
+                hp_slot = float(spec.turns_required_to_remove - (turn - s.turn_start_removal))
+            else:
+                hp_slot = 0.0
+            bucket[6].append([x, y, hp_slot, uid])
         if s.upgraded:
             bucket[7].append([x, y, 0.0, uid])
     for m in state.mobiles:
@@ -1175,9 +1271,14 @@ def build_frame_observation(
     total_frame_number: int,
     perspective: int = 1,
     dead_lookup: Optional[Dict[str, Tuple[int, int]]] = None,
+    config: Optional[SimConfig] = None,
 ) -> dict:
     """Assemble a single engine-equivalent action-phase frame dict from
     current SimState + the events emitted during this frame.
+
+    `config` is required for the removal pseudo-unit HP countdown to
+    match engine's DisplayUnitsSystem.java:32 formula. Legacy callers
+    that pass None will emit pseudo-units with hp=0 (old behavior).
 
     Output schema matches Parser.parseVisiblesListToJson:
       turnInfo:  [1, turn, frame_idx, total_frame_number]
@@ -1189,7 +1290,7 @@ def build_frame_observation(
                  Empty dict when the frame had no events — consumers should
                  treat missing buckets as [].
     """
-    p1u, p2u = _snapshot_units(state, perspective=perspective, current_turn=turn)
+    p1u, p2u = _snapshot_units(state, config=config, perspective=perspective)
     if flat_events:
         ev = _translate_events_to_buckets(
             flat_events, state, perspective=perspective, dead_lookup=dead_lookup
@@ -1279,10 +1380,26 @@ def simulate_action_phase_iter(
         # emitted p{1,2}Units reflect the survivor set.
         clear_destroyed(state)
 
+        # RemoveOwnUnitSystem runs AFTER gameEngineLoop in engine's
+        # ACTION-phase iteration (GameMain.runLoop:316). Its refund-death
+        # events accumulate into this frame's bucket and its structure
+        # pops propagate into this frame's p{1,2}Units snapshot. For
+        # Citadel configs this is always a no-op (turns_required >= 2
+        # and this turn's removal was set this turn); ported for fuzz /
+        # future-config parity.
+        system_remove_own_unit(state, config, flat_events, turn)
+        for e in flat_events:
+            if isinstance(e, dict) and e.get("type") == "death":
+                uid = str(e.get("uid"))
+                if uid not in dead_lookup:
+                    dead_lookup[uid] = (int(e.get("type_idx", -1)),
+                                        int(e.get("player", 0)))
+
         obs = build_frame_observation(
             state, flat_events, frame_idx=f, turn=turn,
             total_frame_number=total_frame,
             perspective=perspective, dead_lookup=dead_lookup,
+            config=config,
         )
         yield obs
         f += 1

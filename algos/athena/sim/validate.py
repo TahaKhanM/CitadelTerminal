@@ -164,6 +164,28 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
     all_structures.sort(key=lambda s: int(s.uid))
     for s in all_structures:
         state.structures[s.xy] = s
+
+    # Reconstruct turn_start_removal from the deploy frame's p{1,2}Units[6]
+    # pseudo-unit entries. Engine's DisplayUnitsSystem.java:32 emits:
+    #   hp_slot = turns_required_to_remove - (current_turn - turn_start_removal)
+    # Back-compute:
+    #   turn_start_removal = current_turn - (turns_required_to_remove - hp_slot)
+    # The pseudo-unit's (x,y) is the target structure's position; join by tile.
+    current_turn = state.turn
+    for player, key in ((1, "p1Units"), (2, "p2Units")):
+        units = df.get(key) or []
+        if len(units) <= 6:
+            continue
+        for u in units[6] or []:
+            if not isinstance(u, (list, tuple)) or len(u) < 4:
+                continue
+            x, y = int(u[0]), int(u[1])
+            hp_slot = int(float(u[2]))
+            s = state.structures.get((x, y))
+            if s is None or s.player != player:
+                continue
+            spec = config.structure_spec(s.type_idx, upgraded=s.upgraded)
+            s.turn_start_removal = current_turn - (spec.turns_required_to_remove - hp_slot)
     return state
 
 

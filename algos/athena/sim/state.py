@@ -39,7 +39,15 @@ class Structure:
     hp: float
     uid: str               # unit_id from the replay (never re-used)
     player: int            # 1 or 2
-    pending_removal: bool = False
+    # Engine's RefundComponent.turnStartRemoval (see RefundComponent.java).
+    # None = not pending removal; otherwise the integer turn number on which
+    # the type-6 removal command was issued. The removal fires at the START
+    # of turn (turn_start_removal + turns_required_to_remove), via
+    # RemoveOwnUnitSystem. While pending, the replay surfaces a type-6
+    # pseudo-unit in p{1,2}Units[6] with hp_slot =
+    # turns_required_to_remove - (current_turn - turn_start_removal) —
+    # _snapshot_units emits that from this field.
+    turn_start_removal: Optional[int] = None
     # Mutated per frame
     shielded_already: Set[str] = field(default_factory=set)  # uids shielded by THIS unit (only for Supports)
 
