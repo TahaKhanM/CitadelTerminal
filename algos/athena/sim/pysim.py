@@ -131,15 +131,21 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 xy=(x, y), type_idx=tidx, upgraded=False,
                 hp=spec.hp, uid=state.alloc_id(), player=player,
             )
-        # Upgrades
+            state.structures_version += 1
+        # Upgrades — engine's SpawnUnitsSystem (off 287–855):
+        #   currentHP += (upgradeMaxHP − baseMaxHP), clamped to upgradeMaxHP.
+        # So a damaged wall at 30/60 HP upgraded becomes 30 + (200-60) = 170/200,
+        # NOT 200. We previously set hp = upgradeMaxHP which over-counted by up
+        # to 40 HP per damaged-upgraded structure.
         for loc in ups:
             x, y = int(loc[0]), int(loc[1])
             s = state.structures.get((x, y))
             if s is None or s.player != player or s.upgraded:
                 continue
-            spec = config.structure_spec(s.type_idx, upgraded=True)
+            base_spec = config.structure_spec(s.type_idx, upgraded=False)
+            upg_spec = config.structure_spec(s.type_idx, upgraded=True)
             s.upgraded = True
-            s.hp = spec.hp
+            s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
         # Mobile units
         for loc in spawns:
             x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
@@ -159,6 +165,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
 
 def _recompute_path(m: Mobile, state: SimState) -> None:
     m.path = navigate(m.xy, m.target_edge, _blocked_set(state))
+    m.path_version = state.structures_version
 
 
 def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
@@ -183,9 +190,10 @@ def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
             continue
         m.move_buildup -= 1.0
 
-        # Recompute if path is empty or stale (cheap; caller ensures we
-        # aren't running this every frame for every unit when idle).
-        if not m.path or m.path[0] != m.xy:
+        # Re-path if structures changed since last compute (matches engine's
+        # getStep semantics) OR path head doesn't align with current tile.
+        if (m.path_version != state.structures_version
+                or not m.path or m.path[0] != m.xy):
             _recompute_path(m, state)
 
         next_tile = None
@@ -212,16 +220,15 @@ def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
         m.path = m.path[1:]
         m.steps_taken += 1
         events.append({"type": "move", "uid": m.uid, "from": prev, "to": next_tile})
-        # After the move, evaluate whether we've reached the edge.
+        # Engine's rule: finishedNavigating is set ONLY when getStep returns
+        # the same tile as current (delta=0). Successfully moving to a new
+        # tile NEVER sets it, even if the new tile is the current path end.
+        # The next frame's move will call getStep again and set
+        # finishedNavigating if still stuck; meanwhile the attack phase
+        # this frame can still destroy the blocker.
         if m.xy in target_tiles_cache[m.player]:
             m.finished_navigating = True
             m.reached_target = True
-        elif len(m.path) < 2:
-            # Path exhausted without reaching the edge = self-destruct next.
-            _recompute_path(m, state)
-            if len(m.path) < 2 or m.path[0] != m.xy:
-                m.finished_navigating = True
-                m.reached_target = m.xy in target_tiles_cache[m.player]
 
 
 def system_collision(state: SimState) -> None:
@@ -466,6 +473,7 @@ def clear_destroyed(state: SimState, events: List[dict]) -> None:
     to_kill = [xy for xy, s in state.structures.items() if s.hp <= 0]
     for xy in to_kill:
         s = state.structures.pop(xy)
+        state.structures_version += 1
         events.append({"type": "death", "xy": xy, "uid": s.uid,
                        "type_idx": s.type_idx, "player": s.player, "self_destruct": False})
     survivors = []

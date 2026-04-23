@@ -176,15 +176,18 @@ class TurnValidation:
 
 
 def _collect_upgraded_uids(frames: List[dict]) -> Dict[int, set]:
-    """Walk every action-frame spawn event; collect the set of uids that had
-    been upgraded BEFORE turn T. Returns {turn_T: set_of_uids_upgraded_before_T}.
+    """Walk every action-frame UPGRADE event and collect the set of POST-
+    upgrade uids that the engine assigns to upgraded structures. Returns
+    {turn_T: set_of_upgraded_uids_observable_at_T's_deploy_frame}.
 
-    A spawn event for type=7 (UPGRADE) has the upgrade's OWN uid, not the
-    upgraded structure's uid — so we map x,y → uid of the structure at that
-    location in the preceding deploy frame.
+    Engine behavior (verified empirically, replay-spec):
+      An UPGRADE spawn event has shape [[x,y], 7, NEW_UID, player]. The
+      structure at (x,y) gets NEW_UID as its uid post-upgrade; NEW_UID then
+      appears in subsequent deploy frames. A structure's current uid is
+      "upgraded" iff it has been the new_uid in some upgrade event.
     """
     deploys = _index_deploy_frames(frames)
-    upgrades_at_turn: Dict[int, list] = {}
+    upgraded_uids_at_turn: Dict[int, list] = {}
     for f in frames:
         ti = f.get("turnInfo") or []
         if len(ti) < 3 or ti[0] != 1 or ti[2] != 0:
@@ -193,31 +196,21 @@ def _collect_upgraded_uids(frames: List[dict]) -> Dict[int, set]:
         for ev in f.get("events", {}).get("spawn", []):
             if not isinstance(ev, (list, tuple)) or len(ev) < 4:
                 continue
-            xy = ev[0]
-            if not isinstance(xy, (list, tuple)) or len(xy) < 2:
-                continue
             if int(ev[1]) != 7:  # not UPGRADE
                 continue
-            upgrades_at_turn.setdefault(turn, []).append((int(xy[0]), int(xy[1])))
-    # Resolve (x,y) to uid using the deploy frame at the same turn
+            new_uid = str(ev[2])
+            upgraded_uids_at_turn.setdefault(turn, []).append(new_uid)
+
     result: Dict[int, set] = {}
     upgraded_so_far: set = set()
     for t in sorted(deploys.keys()):
+        # At turn T deploy frame, structures upgraded in turns 0..T-1 AND
+        # in turn T's deploy phase both show their upgraded uid, because
+        # the deploy frame is emitted AFTER the deploy phase. So include
+        # turn T's upgrades too.
+        for uid in upgraded_uids_at_turn.get(t, []):
+            upgraded_so_far.add(uid)
         result[t] = set(upgraded_so_far)
-        df = deploys[t]
-        # Map xy → uid at this deploy frame
-        xy_to_uid: Dict[Tuple[int, int], str] = {}
-        for side in ("p1Units", "p2Units"):
-            for ti in (IDX_WALL, IDX_SUPPORT, IDX_TURRET):
-                if ti >= len(df.get(side, [])):
-                    continue
-                for u in df[side][ti]:
-                    if len(u) >= 4:
-                        xy_to_uid[(int(u[0]), int(u[1]))] = str(u[3])
-        for xy in upgrades_at_turn.get(t, []):
-            uid = xy_to_uid.get(xy)
-            if uid:
-                upgraded_so_far.add(uid)
     return result
 
 
