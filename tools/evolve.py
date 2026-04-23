@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
-"""CMA-ES over v19_evolved's 16-knob CONFIG.
+"""ARCHIVED — CMA-ES runner over a v13-family 16-knob config.
 
-Fitness per individual = sum of win rates across 5 opponents:
-    v14_support_caravan, v13_second_ring,
-    opp_scout_rush, opp_demo_line, opp_turret_castle
-Each opponent is evaluated via `python3 tools/bestof.py v19_evolved <opp> N`,
-with the candidate knobs injected via the env var CITADEL_CFG_JSON.
+DO NOT RUN as-is. This script targets `algos/v19_evolved/` which was removed
+during the Tier 2 cleanup (empirically a dead end). The CMA-ES attempt it
+drove produced flat fitness (`top10_var=0.000` at gen 0) because every
+v13-family variant mirror-ties v13 at exactly 40-40 — no gradient to climb.
+See `memory/v13_mirror_ceiling.md` for the full diagnosis.
 
-Individuals are evaluated SERIALLY (one at a time), but each bestof call
-farms its games across a process pool. This keeps the CITADEL_CFG_JSON
-env var unambiguous per game and avoids races over the shared
-`algos/v19_evolved/` folder.
+Kept as infrastructure for a future, Tier-5-archetype-based evolution run:
+once a genuinely different offensive archetype (Demolisher+Support train,
+Interceptor+Scout mix, scripted self-destruct, own-wall path engineering, or
+remove-and-relocate — see `docs/ADVANCED_STRATEGIES_PROMPT.md` §5.2–§5.6)
+produces a non-tie baseline, this file can be re-pointed at its knob file
+and re-run. Until then, do not re-launch — it will immediately fail on the
+missing `algos/v19_evolved/knobs.py` import, and even if that were fixed,
+the fitness landscape is flat against v13.
 
-Usage:
+Original usage (DO NOT INVOKE until pre-conditions above are met):
     python3 tools/evolve.py [--gens=15] [--pop=25] [--n=2] [--sigma=0.3]
-
-Checkpoints every generation to tools/evolve_state.pkl. Prints one status
-line per generation: "gen N | best=X.XX | mean=Y.YY | worst=Z.ZZ".
-Final best is written to tools/evolve_best.json.
 """
 import argparse
 import json

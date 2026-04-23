@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
-# Run the full baseline-evaluation suite on an algo.
+# Pre-upload validation suite for a Citadel Terminal algo.
 #
-# This is the "does it ship" check — runs all the success-criteria tests that
-# a baseline algo must pass, in order, and exits non-zero on failure.
+# Runs the full battery of local checks an algo should clear before being zipped
+# for the competition site. Designed for any archetype (center-Scout rush, Demolisher
+# train, Interceptor+Scout mix, self-destruct wave, own-wall path engineering, etc.) —
+# it validates runtime correctness and surfaces win-rate signal, not any particular
+# tactical pattern.
 #
 # Usage:
 #   ./tools/eval.sh <algo_name> [opponent=<starter>] [n=5]
 #
 # Examples:
-#   ./tools/eval.sh v1_baseline
-#   ./tools/eval.sh v2_upgraded v1_baseline 10
+#   ./tools/eval.sh v20_demolisher_train
+#   ./tools/eval.sh v21_interceptor_mix opp_defensive 10
+#   ./tools/eval.sh v22_self_destruct v13_second_ring 10
 #
 # Runs:
 #   1. Syntax / runtime check against bundled test replay (test_algo)
 #   2. Single match vs opponent (quick sanity)
 #   3. Best-of-2N vs opponent (Wilson 95% CI)
-#   4. Mirror self-match (side-asymmetry detection)
+#   4. Mirror self-match (side-asymmetry detection; also catches the v13-family
+#      40-40 mirror-tie signature — see memory/v13_mirror_ceiling.md)
 #   5. Turn-time profile against the latest match replay
 #
 # Exits:
