@@ -7,6 +7,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STARTER_KIT="$REPO_ROOT/C1GamesStarterKit-master"
 
+"$REPO_ROOT/tools/apply_competition_config.sh"
+
 ALGO="${1:-$STARTER_KIT/python-algo}"
 REPLAY="${2:-}"
 

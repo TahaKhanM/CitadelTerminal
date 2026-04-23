@@ -9,6 +9,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STARTER_KIT="$REPO_ROOT/C1GamesStarterKit-master"
 REPLAY_OUT="$REPO_ROOT/replays"
 
+"$REPO_ROOT/tools/apply_competition_config.sh"
+
 ALGO1="${1:-$STARTER_KIT/python-algo}"
 ALGO2="${2:-$STARTER_KIT/python-algo}"
 
