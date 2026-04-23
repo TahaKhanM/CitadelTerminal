@@ -86,7 +86,17 @@ class PlayerStats:
 
 @dataclass
 class SimState:
-    """Full mutable state across an action-phase simulation."""
+    """Full mutable state across an action-phase simulation.
+
+    UIDS come exclusively from the replay's spawn events. SimCore never
+    allocates uids; doing so would diverge from engine.jar's monotonic
+    Game.idCount counter and cause every event-join column in the Phase
+    1.B validator to show uid-mismatch noise. apply_deploy_actions (in
+    pysim.py) takes the engine-assigned uid directly from each spawn
+    event's third field (`ev[2]`) and propagates it to the created
+    Structure/Mobile. See engine.jar's Game.getNewID
+    (research/engine_decompiled/sources/.../Game.java:132) for the
+    reference counter."""
     turn: int
     # Structures indexed by (x, y). Engine allows only one structure per tile.
     structures: Dict[Tuple[int, int], Structure]
@@ -95,8 +105,6 @@ class SimState:
     mobiles: List[Mobile]
     p1: PlayerStats
     p2: PlayerStats
-    # Monotonic unit-id counter for new mobile/structure ids
-    _next_id: int = 1_000_000
     # The 4 per-edge PathFinder instances (see sim.pathfinder). Populated by
     # `init_pathfinders()` after the initial structures are in place and
     # kept in sync thereafter via put()/remove() calls from
@@ -104,14 +112,6 @@ class SimState:
     pathfinders: Optional[dict] = None
 
     # --- helpers ---
-
-    def alloc_id(self) -> str:
-        # IMPORTANT: uids must be NUMERIC strings so tie-break-by-larger-gid
-        # (engine's TargetAndAttackSystem.pickUnit 5th tiebreak) can parse
-        # them as integers. Engine assigns monotonic integer gids.
-        i = self._next_id
-        self._next_id += 1
-        return str(i)
 
     def struct_at(self, xy: Tuple[int, int]) -> Optional[Structure]:
         return self.structures.get(xy)

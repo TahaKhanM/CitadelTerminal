@@ -120,65 +120,135 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                          p2_spawns: List[list], p2_upgrades: List[list],
                          ordered_events: Optional[List] = None) -> None:
     """Mutate state to post-deploy: spawn structures, apply upgrades, spawn
-    mobile units. Structure ownership is enforced by half-board.
+    mobile units.
 
-    If `ordered_events` is provided (list of (player, [x,y,type]) tuples
-    in the exact engine-issued order), use it for spawn-order fidelity
-    on both structures and mobiles. Upgrades are still processed per-
-    player after all structures on that side are placed.
+    Entry shapes (uid is engine-assigned from the replay spawn event's
+    3rd slot; see _extract_deploy_actions / _extract_deploy_events_in_order):
+      p{1,2}_spawns:   [x, y, type_idx, uid]
+      p{1,2}_upgrades: [x, y, new_uid]
+      ordered_events:  (player, [x, y, type_idx, uid])
 
-    Without `ordered_events`, falls back to (p1_spawns, p2_spawns) order.
-    """
-    if ordered_events is None:
-        ordered_events = [(1, s) for s in p1_spawns] + [(2, s) for s in p2_spawns]
+    Engine command-order semantics (reproduced here):
+      Parser.processInputForPlayer processes each command in the order the
+      algo issued it, and SpawnUnitsSystem.attemptSpawn / the type-7 branch
+      creates a new Gameobject immediately. gameObjects is appended in
+      that interleaved order — so a turn that places wall → upgrades
+      other wall → places turret produces gameObjects ending in
+      [wall, upgraded_wall', turret]. Processing all structures first
+      then all upgrades then all mobiles loses this interleaving and
+      corrupts the per-type bucket order that the validator gates on.
 
-    # Structures in engine-issued order
-    for player, loc in ordered_events:
-        x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
-        if not on_diamond(x, y):
-            continue
-        if tidx not in STRUCTURE_TYPES:
-            continue
-        owner = 1 if y < HALF else 2
-        if owner != player:
-            continue
-        if (x, y) in state.structures:
-            continue
-        spec = config.structure_spec(tidx, upgraded=False)
-        state.structures[(x, y)] = Structure(
-            xy=(x, y), type_idx=tidx, upgraded=False,
-            hp=spec.hp, uid=state.alloc_id(), player=player,
-        )
-        if state.pathfinders is not None:
-            for pf in state.pathfinders.values():
-                pf.put(x, y)
+    Single-pass implementation: iterate ordered_events exactly once and
+    dispatch per-type. Upgrades replace the target structure's uid and
+    move it to the end of state.structures (dict del + re-insert) to
+    match gameObjects's post-clearDestroyed state.
 
-    # Upgrades — engine's SpawnUnitsSystem (off 287–855):
-    #   currentHP += (upgradeMaxHP − baseMaxHP), clamped to upgradeMaxHP.
+    The non-ordered_events fallback (old p{1,2}_spawns + p{1,2}_upgrades
+    path) is preserved for callers that don't have per-event ordering —
+    in that case structures are placed first, then upgrades, then mobiles.
+    Validators should always pass ordered_events."""
+    if ordered_events is not None:
+        # Single-pass: handle every event in its engine-issued position.
+        for player, loc in ordered_events:
+            x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
+            uid = str(loc[3])
+            xy = (x, y)
+            if tidx in STRUCTURE_TYPES:
+                if not on_diamond(x, y):
+                    continue
+                owner = 1 if y < HALF else 2
+                if owner != player:
+                    continue
+                if xy in state.structures:
+                    continue
+                spec = config.structure_spec(tidx, upgraded=False)
+                state.structures[xy] = Structure(
+                    xy=xy, type_idx=tidx, upgraded=False,
+                    hp=spec.hp, uid=uid, player=player,
+                )
+                if state.pathfinders is not None:
+                    for pf in state.pathfinders.values():
+                        pf.put(x, y)
+            elif tidx == 7:  # UPGRADE
+                s = state.structures.get(xy)
+                if s is None or s.player != player or s.upgraded:
+                    continue
+                base_spec = config.structure_spec(s.type_idx, upgraded=False)
+                upg_spec = config.structure_spec(s.type_idx, upgraded=True)
+                s.upgraded = True
+                s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
+                s.uid = uid  # new uid assigned by engine on upgrade
+                # Re-insert at end of dict to match gameObjects order
+                # (engine destroys old Gameobject, appends new one to
+                # game.gameObjects — see Gameobject.java:57-60 with
+                # autoAdd=true from SpawnUnitsSystem.java:147).
+                del state.structures[xy]
+                state.structures[xy] = s
+            elif tidx in MOBILE_TYPES:
+                spec = config.mobile_spec(tidx)
+                target_edge = spawn_tile_target_edge(xy)
+                state.mobiles.append(Mobile(
+                    xy=xy, type_idx=tidx,
+                    hp=spec.hp, shield=0.0,
+                    uid=uid, player=player,
+                    spawn_xy=xy, target_edge=target_edge,
+                ))
+        return
+
+    # Fallback: no ordered_events. Structure, upgrade, mobile — each in its
+    # own pass. Used only by callers that lack per-event ordering.
+    for player, spawns in ((1, p1_spawns), (2, p2_spawns)):
+        for loc in spawns:
+            x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
+            if tidx not in STRUCTURE_TYPES:
+                continue
+            if not on_diamond(x, y):
+                continue
+            owner = 1 if y < HALF else 2
+            if owner != player:
+                continue
+            xy = (x, y)
+            if xy in state.structures:
+                continue
+            uid = str(loc[3])
+            spec = config.structure_spec(tidx, upgraded=False)
+            state.structures[xy] = Structure(
+                xy=xy, type_idx=tidx, upgraded=False,
+                hp=spec.hp, uid=uid, player=player,
+            )
+            if state.pathfinders is not None:
+                for pf in state.pathfinders.values():
+                    pf.put(x, y)
+
     for player, ups in ((1, p1_upgrades), (2, p2_upgrades)):
         for loc in ups:
             x, y = int(loc[0]), int(loc[1])
-            s = state.structures.get((x, y))
+            xy = (x, y)
+            s = state.structures.get(xy)
             if s is None or s.player != player or s.upgraded:
                 continue
             base_spec = config.structure_spec(s.type_idx, upgraded=False)
             upg_spec = config.structure_spec(s.type_idx, upgraded=True)
             s.upgraded = True
             s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
+            s.uid = str(loc[2])
+            del state.structures[xy]
+            state.structures[xy] = s
 
-    # Mobile units in engine-issued order
-    for player, loc in ordered_events:
-        x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
-        if tidx not in MOBILE_TYPES:
-            continue
-        spec = config.mobile_spec(tidx)
-        target_edge = spawn_tile_target_edge((x, y))
-        state.mobiles.append(Mobile(
-            xy=(x, y), type_idx=tidx,
-            hp=spec.hp, shield=0.0,
-            uid=state.alloc_id(), player=player,
-            spawn_xy=(x, y), target_edge=target_edge,
-        ))
+    for player, spawns in ((1, p1_spawns), (2, p2_spawns)):
+        for loc in spawns:
+            x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
+            if tidx not in MOBILE_TYPES:
+                continue
+            uid = str(loc[3])
+            spec = config.mobile_spec(tidx)
+            target_edge = spawn_tile_target_edge((x, y))
+            state.mobiles.append(Mobile(
+                xy=(x, y), type_idx=tidx,
+                hp=spec.hp, shield=0.0,
+                uid=uid, player=player,
+                spawn_xy=(x, y), target_edge=target_edge,
+            ))
 
 
 # -------------------------------------------------------- per-frame systems
@@ -419,8 +489,9 @@ def _pick_target(attacker_xy: Tuple[int, int], attacker_player: int,
             else:
                 game_object_id_larger = int(new_gid) > int(target_gid)
         except (TypeError, ValueError):
-            # Non-numeric uids shouldn't happen in our sim (state.alloc_id
-            # returns numeric strings), but fall back safely.
+            # Non-numeric uids shouldn't happen in our sim — every uid
+            # originates from engine.jar's monotonic getNewID() counter,
+            # plumbed through apply_deploy_actions. Fall back safely.
             game_object_id_larger = str(new_gid) > str(target_gid)
         # Update condition matches decompiled bytecode:
         #   (closer
@@ -600,3 +671,367 @@ def simulate_action_phase(
         frame_events=frame_events,
         frame_count=f,
     )
+
+
+# ============================================================================
+# FRAME-LEVEL OBSERVATION (Phase 1.B instrumentation)
+# ============================================================================
+#
+# simulate_action_phase_iter yields one observation per engine action-frame.
+# Each observation is a dict shaped like a replay action-phase frame (see
+# Parser.parseVisiblesListToJson), produced by translating SimCore's internal
+# flat-event list into the engine's 9-bucket events dict and snapshotting the
+# current p1/p2 units per-type.
+#
+# PURE INSTRUMENTATION: this path runs the same systems in the same order as
+# simulate_action_phase, emits the same flat events, and applies no additional
+# mutations. The only thing it does differently is yield after each frame
+# and materialize a per-frame observation dict.
+#
+# Known already-surfaced divergences from the engine's wire format (to be
+# fixed in Step 2 individual commits; Step 1 just surfaces them):
+#   * Deaths from this-frame's attack/SD/breach are emitted by SimCore's
+#     clear_destroyed() at the START of the NEXT frame. The engine emits
+#     them in THIS frame. So sim death events are 1 frame late.
+#   * `selfDestruct` event target-locations list is empty in SimCore.
+#   * `damage`/`attack`/`shield`/`move` events in SimCore don't carry the
+#     engine's typeID/PID trailing fields (we fill them from state at
+#     translate time, so this isn't a gap — but note if state has drifted,
+#     these fields become unreliable).
+#   * `spawn` events are not emitted by apply_deploy_actions (deploy-phase
+#     spawns are engine-emitted by Parser.processInputDeploy; SimCore just
+#     mutates state silently).
+#   * p{1,2}Units[6] (removal pseudo-unit) HP slot: we emit 0.0 because we
+#     don't track turnStartRemoval — only the pending_removal boolean.
+
+# Bucket names, fixed engine order (don't reorder — we gate on equality).
+_EVENT_BUCKETS = ("attack", "breach", "damage", "death", "melee",
+                  "move", "selfDestruct", "shield", "spawn")
+
+
+def _empty_buckets() -> Dict[str, list]:
+    return {k: [] for k in _EVENT_BUCKETS}
+
+
+def _pid_persp(player: int, perspective: int) -> int:
+    """Engine's samePlayerToPlayerID: returns 1 if actor pid matches viewer, else 2."""
+    return 1 if player == perspective else 2
+
+
+def _unit_type_by_uid(state: SimState, uid: str) -> int:
+    """Look up a unit's type_idx from state by uid. Returns -1 if not found.
+
+    Used when translating a flat sim event to engine wire format — the flat
+    event lacks typeID but the state still has the unit (for structures that
+    survive the frame, or mobiles that haven't been cleared yet)."""
+    for s in state.structures.values():
+        if s.uid == uid:
+            return s.type_idx
+    for m in state.mobiles:
+        if m.uid == uid:
+            return m.type_idx
+    return -1
+
+
+def _unit_player_by_uid(state: SimState, uid: str) -> int:
+    for s in state.structures.values():
+        if s.uid == uid:
+            return s.player
+    for m in state.mobiles:
+        if m.uid == uid:
+            return m.player
+    return 0
+
+
+def _translate_events_to_buckets(
+    flat_events: List[dict],
+    state: SimState,
+    perspective: int = 1,
+    dead_lookup: Optional[Dict[str, Tuple[int, int]]] = None,
+) -> Dict[str, list]:
+    """Convert SimCore's flat event list into the engine's 9-bucket wire
+    format, player-`perspective` view.
+
+    `dead_lookup` is an optional {uid: (type_idx, player)} dict for units that
+    were destroyed in a previous frame and are no longer present in state —
+    used to resolve typeID/PID for their trailing death events. Without it,
+    death events for already-removed units would have type=-1.
+    """
+    buckets = _empty_buckets()
+    for e in flat_events:
+        if not isinstance(e, dict):
+            continue
+        t = e.get("type")
+        if t == "move":
+            uid = e.get("uid")
+            # lookup type + player from surviving state
+            tid = _unit_type_by_uid(state, uid)
+            ply = _unit_player_by_uid(state, uid)
+            if tid < 0 and dead_lookup is not None:
+                tid, ply = dead_lookup.get(uid, (-1, 0))
+            old = e.get("from") or (0, 0)
+            new = e.get("to") or (0, 0)
+            buckets["move"].append([
+                [int(old[0]), int(old[1])],
+                [int(new[0]), int(new[1])],
+                [0, 0],
+                int(tid),
+                str(uid),
+                _pid_persp(ply, perspective),
+            ])
+        elif t == "attack":
+            src_uid = e.get("attacker_uid")
+            tgt_uid = e.get("victim_uid")
+            tid = _unit_type_by_uid(state, src_uid)
+            ply = _unit_player_by_uid(state, src_uid)
+            if tid < 0 and dead_lookup is not None:
+                tid, ply = dead_lookup.get(src_uid, (-1, 0))
+            src_xy = e.get("from_xy") or (0, 0)
+            tgt_xy = e.get("to_xy") or (0, 0)
+            buckets["attack"].append([
+                [int(src_xy[0]), int(src_xy[1])],
+                [int(tgt_xy[0]), int(tgt_xy[1])],
+                float(e.get("dmg") or 0.0),
+                int(tid),
+                str(src_uid),
+                str(tgt_uid),
+                _pid_persp(ply, perspective),
+            ])
+            # Engine also emits a `damage` for every attack. SimCore does NOT
+            # emit a separate damage event for attacks — it only emits damage
+            # for SD hits. For faithful wire-format output, synthesize the
+            # matching damage event here. The victim's typeID/PID are looked
+            # up the same way.
+            v_tid = _unit_type_by_uid(state, tgt_uid)
+            v_ply = _unit_player_by_uid(state, tgt_uid)
+            if v_tid < 0 and dead_lookup is not None:
+                v_tid, v_ply = dead_lookup.get(tgt_uid, (-1, 0))
+            buckets["damage"].append([
+                [int(tgt_xy[0]), int(tgt_xy[1])],
+                float(e.get("dmg") or 0.0),
+                int(v_tid),
+                str(tgt_uid),
+                _pid_persp(v_ply, perspective),
+            ])
+        elif t == "damage":
+            # SD hit on a victim
+            v_uid = e.get("victim_uid")
+            v_tid = _unit_type_by_uid(state, v_uid)
+            v_ply = _unit_player_by_uid(state, v_uid)
+            if v_tid < 0 and dead_lookup is not None:
+                v_tid, v_ply = dead_lookup.get(v_uid, (-1, 0))
+            xy = e.get("xy") or (0, 0)
+            buckets["damage"].append([
+                [int(xy[0]), int(xy[1])],
+                float(e.get("dmg") or 0.0),
+                int(v_tid),
+                str(v_uid),
+                _pid_persp(v_ply, perspective),
+            ])
+        elif t == "death":
+            # type_idx & player are stored on the event itself (clear_destroyed
+            # reads them off the dying Structure/Mobile before pop).
+            xy = e.get("xy") or (0, 0)
+            is_removed = bool(e.get("self_destruct") or False)
+            # engine's `removed` flag is True when death originated from
+            # RemoveOwnUnitSystem (refund). Our sim doesn't distinguish that
+            # yet — a SD-death reuses the flag but semantically is wrong.
+            # Known Step 2 fix.
+            buckets["death"].append([
+                [int(xy[0]), int(xy[1])],
+                int(e.get("type_idx") or -1),
+                str(e.get("uid")),
+                _pid_persp(int(e.get("player") or 0), perspective),
+                is_removed,
+            ])
+        elif t == "breach":
+            xy = e.get("xy") or (0, 0)
+            buckets["breach"].append([
+                [int(xy[0]), int(xy[1])],
+                float(e.get("dmg") or 0.0),
+                int(e.get("attacker_type") or -1),
+                str(e.get("attacker_uid")),
+                _pid_persp(int(e.get("attacker_player") or 0), perspective),
+            ])
+        elif t == "selfDestruct":
+            xy = e.get("xy") or (0, 0)
+            uid = e.get("uid")
+            # damage + type: lookup from state (SD-er is already hp=0 but
+            # still iterable until next clear_destroyed)
+            tid = _unit_type_by_uid(state, uid)
+            if tid < 0 and dead_lookup is not None:
+                tid = dead_lookup.get(uid, (-1, 0))[0]
+            buckets["selfDestruct"].append([
+                [int(xy[0]), int(xy[1])],
+                [],  # target-locations: not tracked by SimCore; known gap
+                0.0,  # damage: not tracked on event; could reconstitute
+                int(tid),
+                str(uid),
+                _pid_persp(int(e.get("player") or 0), perspective),
+            ])
+        elif t == "shield":
+            # SimCore shield events carry support_uid, target_uid, amount.
+            # Resolve xy/type/pid from state.
+            s_uid = e.get("support_uid")
+            t_uid = e.get("target_uid")
+            s_tid = _unit_type_by_uid(state, s_uid)
+            s_ply = _unit_player_by_uid(state, s_uid)
+            s_xy = (0, 0); t_xy = (0, 0)
+            for s in state.structures.values():
+                if s.uid == s_uid:
+                    s_xy = s.xy; break
+            for m in state.mobiles:
+                if m.uid == t_uid:
+                    t_xy = m.xy; break
+            buckets["shield"].append([
+                [int(s_xy[0]), int(s_xy[1])],
+                [int(t_xy[0]), int(t_xy[1])],
+                float(e.get("amount") or 0.0),
+                int(s_tid),
+                str(s_uid),
+                str(t_uid),
+                _pid_persp(s_ply, perspective),
+            ])
+        # `spawn` and `melee` are not emitted by SimCore. Known Step 2 gaps.
+    return buckets
+
+
+def _snapshot_units(state: SimState, perspective: int = 1,
+                     current_turn: int = 0) -> Tuple[list, list]:
+    """Snapshot p1Units / p2Units in engine wire format (8-bucket list of
+    lists). Perspective-mirroring of coordinates is NOT applied — we assume
+    the replay under compare is stored with perspective=1 (p1 view),
+    identity coordinates. Caller can convert if needed.
+
+    Each real-unit entry is [x, y, hp+shield, uid]. Pseudo-units (removal
+    index 6, upgrade index 7) are joined by (x,y).
+
+    Performance-sensitive — called once per frame. Avoids redundant float()
+    / str() coercions (state already stores properly typed fields) and
+    skips per-iteration check for pseudo-units when the structure has
+    neither flag set."""
+    p1w, p1s, p1t, p1sc, p1d, p1i, p1rm, p1up = [], [], [], [], [], [], [], []
+    p2w, p2s, p2t, p2sc, p2d, p2i, p2rm, p2up = [], [], [], [], [], [], [], []
+    p1_by_type = (p1w, p1s, p1t, p1sc, p1d, p1i, p1rm, p1up)
+    p2_by_type = (p2w, p2s, p2t, p2sc, p2d, p2i, p2rm, p2up)
+    for s in state.structures.values():
+        if s.hp <= 0.0:
+            continue
+        x, y = s.xy
+        uid = s.uid
+        bucket = p1_by_type if s.player == 1 else p2_by_type
+        bucket[s.type_idx].append([x, y, s.hp, uid])
+        if s.pending_removal:
+            bucket[6].append([x, y, 0.0, uid])
+        if s.upgraded:
+            bucket[7].append([x, y, 0.0, uid])
+    for m in state.mobiles:
+        if m.hp <= 0.0:
+            continue
+        x, y = m.xy
+        bucket = p1_by_type if m.player == 1 else p2_by_type
+        bucket[m.type_idx].append([x, y, m.hp + m.shield, m.uid])
+    return list(p1_by_type), list(p2_by_type)
+
+
+_EMPTY_EV: Dict[str, list] = {}
+
+
+def build_frame_observation(
+    state: SimState,
+    flat_events: List[dict],
+    frame_idx: int,
+    turn: int,
+    total_frame_number: int,
+    perspective: int = 1,
+    dead_lookup: Optional[Dict[str, Tuple[int, int]]] = None,
+) -> dict:
+    """Assemble a single engine-equivalent action-phase frame dict from
+    current SimState + the events emitted during this frame.
+
+    Output schema matches Parser.parseVisiblesListToJson:
+      turnInfo:  [1, turn, frame_idx, total_frame_number]
+      p1Stats:   [hp, sp, mp]            (no botTime — sim doesn't have one)
+      p2Stats:   [hp, sp, mp]
+      p1Units:   list of 8 lists, index=type_idx, entry=[x,y,hp+shield,uid]
+      p2Units:   ditto
+      events:    dict of 9 buckets in inPerspective format (see _translate…)
+                 Empty dict when the frame had no events — consumers should
+                 treat missing buckets as [].
+    """
+    p1u, p2u = _snapshot_units(state, perspective=perspective, current_turn=turn)
+    if flat_events:
+        ev = _translate_events_to_buckets(
+            flat_events, state, perspective=perspective, dead_lookup=dead_lookup
+        )
+    else:
+        ev = _EMPTY_EV
+    p1 = state.p1; p2 = state.p2
+    return {
+        "turnInfo": [1, turn, frame_idx, total_frame_number],
+        "p1Stats": [p1.hp, p1.sp, p1.mp],
+        "p2Stats": [p2.hp, p2.sp, p2.mp],
+        "p1Units": p1u,
+        "p2Units": p2u,
+        "events": ev,
+    }
+
+
+def simulate_action_phase_iter(
+    state: SimState,
+    config: SimConfig,
+    max_frames: int = 200,
+    perspective: int = 1,
+    total_frame_start: int = 0,
+):
+    """Per-frame observation generator. Yields one engine-equivalent action-
+    phase frame dict per engine actionFrame.
+
+    Frame-loop structure is IDENTICAL to simulate_action_phase (same systems,
+    same order, same mutations). The only addition is an observation dict
+    built after each frame's systems run.
+
+    Yields:
+        dict with keys turnInfo, p1Stats, p2Stats, p1Units, p2Units, events
+        (see build_frame_observation).
+
+    Does NOT run the post-loop final clear_destroyed; caller should run it
+    if terminal-state cleanup is desired (mirrors simulate_action_phase's
+    one-trailing-call behavior)."""
+    turn = state.turn
+    # Maintain a dead-unit lookup so events emitted AFTER a unit's death can
+    # still resolve typeID/PID from its former state. Populated from
+    # clear_destroyed's pre_events each frame.
+    dead_lookup: Dict[str, Tuple[int, int]] = {}
+
+    f = 0
+    total_frame = total_frame_start
+    while f < max_frames:
+        # Harvest deaths-from-prior-frame before we clear them so we can keep
+        # type/player info for translation.
+        flat_events: List[dict] = []
+        clear_destroyed(state, flat_events)
+        for e in flat_events:
+            if isinstance(e, dict) and e.get("type") == "death":
+                uid = str(e.get("uid"))
+                dead_lookup[uid] = (int(e.get("type_idx") or -1),
+                                    int(e.get("player") or 0))
+        if not state.mobiles:
+            return
+
+        system_move(state, config, flat_events)
+        system_collision(state)
+        system_shield_decay(state, config)
+        system_shield_give(state, config, flat_events)
+        system_breach(state, config, flat_events)
+        system_self_destruct(state, config, flat_events)
+        system_attack(state, config, flat_events)
+
+        obs = build_frame_observation(
+            state, flat_events, frame_idx=f, turn=turn,
+            total_frame_number=total_frame,
+            perspective=perspective, dead_lookup=dead_lookup,
+        )
+        yield obs
+        f += 1
+        total_frame += 1

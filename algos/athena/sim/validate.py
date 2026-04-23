@@ -1,22 +1,30 @@
-"""SimCore validation harness.
+"""SimCore Phase 1.B validator — per-frame, 23-column parity table.
 
-For each turn of each ranked replay:
-  1. Read the deploy-phase snapshot (structures + stats at turn start).
-  2. Apply the observed deploy actions via apply_deploy_actions.
-  3. Run simulate_action_phase.
-  4. Compare the resulting state to the replay's NEXT deploy snapshot
-     (which captures the post-action-phase, pre-deploy state of turn T+1).
+Extends the Phase 1.A HP-delta gate to a full-state bit-exact gate. For
+every action-phase frame of every ranked replay, SimCore's generated
+frame is compared field-by-field against the engine's replay frame.
 
-Metrics computed:
+Columns (23; see ATHENA_BUILD_PLAN and the orientation checkpoint):
+   stats: p1_hp, p2_hp, p1_sp, p2_sp, p1_mp, p2_mp          (6)
+   units: p{1,2}_structures, p{1,2}_mobiles,
+          p{1,2}_removal_pseudo, p{1,2}_upgrade_pseudo       (8)
+   events: attack, breach, damage, death, melee, move,
+           selfDestruct, shield, spawn                       (9)
+Plus 1 turn-level metric: frame_count.
 
-  per-turn HP-delta match: |sim.p{1,2}.hp_change − replay.p{1,2}.hp_change|
-  per-turn structure damage:
-     structures hit this turn, total damage delta from sim vs replay
-  per-turn mobile-breach count: how many of our/their mobiles breached
+Per-column metric per (replay, turn, frame):
+  None       = exact match
+  (s, r)     = (sim_value, replay_value) — mismatch summary
 
-Aggregate gate: (max / mean) absolute error in HP damage dealt per player per
-turn, as a fraction of starting HP (40). Plan's gate:
-    max ≤ 5%  (= 2.0 HP), mean ≤ 1% (= 0.4 HP).
+Aggregate (per replay, and overall):
+  max_err, mean_err, n_nonzero_frames
+
+Gate: all 23 columns report 0 non-zero frames across the entire ranked
+corpus.
+
+Back-compat: the __main__ entry still runs the Phase 1.A HP-delta summary
+(with the same output format) so existing regression-check scripts
+continue to work. Pass --full to get the 23-column Phase 1.B table.
 """
 
 from __future__ import annotations
@@ -24,8 +32,9 @@ from __future__ import annotations
 import json
 import sys
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -35,7 +44,11 @@ from sim.config import (  # noqa: E402
     IDX_WALL,
     SimConfig,
 )
-from sim.pysim import apply_deploy_actions, simulate_action_phase  # noqa: E402
+from sim.pysim import (  # noqa: E402
+    apply_deploy_actions,
+    simulate_action_phase,
+    simulate_action_phase_iter,
+)
 from sim.state import PlayerStats, SimState, Structure  # noqa: E402
 
 
@@ -71,6 +84,19 @@ def _index_deploy_frames(frames: List[dict]) -> Dict[int, dict]:
     return out
 
 
+def _index_action_frames(frames: List[dict]) -> Dict[int, List[dict]]:
+    """Return {turn_number: [action_frame_0, action_frame_1, ...]}."""
+    out: Dict[int, List[dict]] = {}
+    for f in frames:
+        ti = f.get("turnInfo") or []
+        if len(ti) >= 3 and ti[0] == 1:
+            out.setdefault(int(ti[1]), []).append(f)
+    # Sort each turn's frames by actionFrame
+    for t in out:
+        out[t].sort(key=lambda f: f["turnInfo"][2])
+    return out
+
+
 def _index_first_action_frames(frames: List[dict]) -> Dict[int, dict]:
     """Return {turn_number: first phase-1 frame_num=0 for that turn}."""
     out = {}
@@ -93,7 +119,18 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
     instantiated as upgraded regardless of current HP (upgraded structures
     can be damaged below base-max-HP). If None, we fall back to the HP
     heuristic (hp > base max ⇒ upgraded), which misclassifies damaged
-    upgraded structures."""
+    upgraded structures.
+
+    Structure insertion order matters: engine's DisplayUnitsSystem iterates
+    game.gameObjects (single list, no per-type split) in insertion order,
+    and Parser.parseVisiblesListToJson then buckets by type for wire
+    emission. gameObjects is monotonically populated — every `new Gameobject`
+    gets a fresh uid from Game.getNewID(), and gameObjects.remove(this) on
+    destroy means the remaining items stay ordered by uid. So the faithful
+    reconstruction of engine's gameObjects order for a mid-game snapshot
+    is: take all live structures across all types and sort ascending by
+    integer uid. This order drives state.structures dict insertion →
+    _snapshot_units iteration → per-type bucket emission order."""
     p1 = df.get("p1Stats") or [40, 8, 1, 0]
     p2 = df.get("p2Stats") or [40, 8, 1, 0]
     state = SimState(
@@ -102,6 +139,7 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
         p1=PlayerStats(hp=float(p1[0]), sp=float(p1[1]), mp=float(p1[2])),
         p2=PlayerStats(hp=float(p2[0]), sp=float(p2[1]), mp=float(p2[2])),
     )
+    all_structures: List[Structure] = []
     for player, key in ((1, "p1Units"), (2, "p2Units")):
         units = df.get(key) or []
         for type_idx in (IDX_WALL, IDX_SUPPORT, IDX_TURRET):
@@ -118,16 +156,31 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
                     upgraded = uid in upgraded_uids
                 else:
                     upgraded = hp > base_spec.hp
-                state.structures[(x, y)] = Structure(
+                all_structures.append(Structure(
                     xy=(x, y), type_idx=type_idx, upgraded=upgraded,
                     hp=hp, uid=uid, player=player,
-                )
+                ))
+    # Sort by integer uid to reproduce engine's gameObjects order.
+    all_structures.sort(key=lambda s: int(s.uid))
+    for s in all_structures:
+        state.structures[s.xy] = s
     return state
 
 
 def _extract_deploy_actions(action_frame: dict) -> Tuple[List[list], List[list], List[list], List[list]]:
     """Return (p1_spawns, p1_upgrades, p2_spawns, p2_upgrades) from the first
     action-frame's spawn events. Type 7 = upgrade; types 0..5 = spawns.
+
+    Each entry carries the engine-assigned uid (spawn event's 3rd slot) so
+    apply_deploy_actions can stamp new Structures/Mobiles with the same uid
+    the engine used — a prerequisite for uid-joined columns (events, units,
+    pseudo-units) to match.
+
+    Spawn entry shape:    [x, y, type_idx, uid]
+    Upgrade entry shape:  [x, y, new_uid]         (engine reassigns uid on
+                                                   upgrade — see Cluster A
+                                                   notes / SpawnUnitsSystem
+                                                   .attemptSpawn line 147)
 
     Preserves the event order within each player so that game-object
     insertion order for tie-breaking in targeting matches the engine's.
@@ -141,19 +194,20 @@ def _extract_deploy_actions(action_frame: dict) -> Tuple[List[list], List[list],
         if not isinstance(xy, (list, tuple)) or len(xy) < 2:
             continue
         x, y, utype, player = int(xy[0]), int(xy[1]), int(ev[1]), int(ev[3])
-        if utype == 7:  # UPGRADE
-            (p1_up if player == 1 else p2_up).append([x, y])
+        uid = str(ev[2])
+        if utype == 7:  # UPGRADE — uid is the NEW (post-upgrade) uid
+            (p1_up if player == 1 else p2_up).append([x, y, uid])
         elif utype in (0, 1, 2, 3, 4, 5):
-            (p1_sp if player == 1 else p2_sp).append([x, y, utype])
+            (p1_sp if player == 1 else p2_sp).append([x, y, utype, uid])
     return p1_sp, p1_up, p2_sp, p2_up
 
 
 def _extract_deploy_events_in_order(action_frame: dict) -> List[Tuple[int, List[list]]]:
     """Return ordered list of (player, event_payload) for every spawn event
-    in the first action frame. This preserves the exact engine-issued
-    order, so when we apply deploys the resulting insertion order into
-    state.structures / state.mobiles matches the engine's game-objects
-    list (relevant for tie-breaking targeting priority)."""
+    in the first action frame. Preserves engine-issued spawn order.
+
+    event_payload shape: [x, y, type_idx, uid] for every spawn (including
+    upgrades with type_idx=7; apply_deploy_actions filters by type)."""
     ordered: List[Tuple[int, List]] = []
     for ev in (action_frame or {}).get("events", {}).get("spawn", []):
         if not isinstance(ev, (list, tuple)) or len(ev) < 4:
@@ -162,52 +216,14 @@ def _extract_deploy_events_in_order(action_frame: dict) -> List[Tuple[int, List[
         if not isinstance(xy, (list, tuple)) or len(xy) < 2:
             continue
         x, y, utype, player = int(xy[0]), int(xy[1]), int(ev[1]), int(ev[3])
-        ordered.append((player, [x, y, utype]))
+        uid = str(ev[2])
+        ordered.append((player, [x, y, utype, uid]))
     return ordered
-
-
-# --------------------------------------------------------- per-turn validate
-
-from dataclasses import dataclass  # noqa: E402
-
-
-@dataclass
-class TurnValidation:
-    turn: int
-    # Replay truth
-    replay_p1_hp_delta: float
-    replay_p2_hp_delta: float
-    replay_p1_sp_delta: float
-    replay_p2_sp_delta: float
-    # SimCore output
-    sim_p1_hp_delta: float
-    sim_p2_hp_delta: float
-    sim_p1_sp_delta: float
-    sim_p2_sp_delta: float
-    # Structure damage (sum over all enemy structures this turn)
-    sim_struct_damage_p1: float  # damage p1 dealt to p2 structures
-    sim_struct_damage_p2: float
-
-    @property
-    def p1_hp_err(self) -> float:
-        return abs(self.sim_p1_hp_delta - self.replay_p1_hp_delta)
-
-    @property
-    def p2_hp_err(self) -> float:
-        return abs(self.sim_p2_hp_delta - self.replay_p2_hp_delta)
 
 
 def _collect_upgraded_uids(frames: List[dict]) -> Dict[int, set]:
     """Walk every action-frame UPGRADE event and collect the set of POST-
-    upgrade uids that the engine assigns to upgraded structures. Returns
-    {turn_T: set_of_upgraded_uids_observable_at_T's_deploy_frame}.
-
-    Engine behavior (verified empirically, replay-spec):
-      An UPGRADE spawn event has shape [[x,y], 7, NEW_UID, player]. The
-      structure at (x,y) gets NEW_UID as its uid post-upgrade; NEW_UID then
-      appears in subsequent deploy frames. A structure's current uid is
-      "upgraded" iff it has been the new_uid in some upgrade event.
-    """
+    upgrade uids that the engine assigns to upgraded structures."""
     deploys = _index_deploy_frames(frames)
     upgraded_uids_at_turn: Dict[int, list] = {}
     for f in frames:
@@ -226,19 +242,44 @@ def _collect_upgraded_uids(frames: List[dict]) -> Dict[int, set]:
     result: Dict[int, set] = {}
     upgraded_so_far: set = set()
     for t in sorted(deploys.keys()):
-        # At turn T deploy frame, structures upgraded in turns 0..T-1 AND
-        # in turn T's deploy phase both show their upgraded uid, because
-        # the deploy frame is emitted AFTER the deploy phase. So include
-        # turn T's upgrades too.
         for uid in upgraded_uids_at_turn.get(t, []):
             upgraded_so_far.add(uid)
         result[t] = set(upgraded_so_far)
     return result
 
 
+# --------------------------------------------------------- per-turn HP validate
+#
+# Back-compat Phase 1.A summary (used when validator is invoked without --full
+# or from existing diff tools). Exact code from the pre-Phase-1.B validator.
+
+@dataclass
+class TurnValidation:
+    turn: int
+    replay_p1_hp_delta: float
+    replay_p2_hp_delta: float
+    replay_p1_sp_delta: float
+    replay_p2_sp_delta: float
+    sim_p1_hp_delta: float
+    sim_p2_hp_delta: float
+    sim_p1_sp_delta: float
+    sim_p2_sp_delta: float
+    sim_struct_damage_p1: float
+    sim_struct_damage_p2: float
+
+    @property
+    def p1_hp_err(self) -> float:
+        return abs(self.sim_p1_hp_delta - self.replay_p1_hp_delta)
+
+    @property
+    def p2_hp_err(self) -> float:
+        return abs(self.sim_p2_hp_delta - self.replay_p2_hp_delta)
+
+
 def validate_replay(path: Path, config: SimConfig) -> List[TurnValidation]:
-    """Run SimCore once per turn and compare to the next deploy frame."""
-    frames, _cfg = _parse_replay(path)
+    """Phase 1.A: run SimCore once per turn and compare to the next deploy
+    frame. Used for fast regression checks."""
+    frames, _ = _parse_replay(path)
     deploys = _index_deploy_frames(frames)
     actions = _index_first_action_frames(frames)
     upgraded_pre = _collect_upgraded_uids(frames)
@@ -247,7 +288,7 @@ def validate_replay(path: Path, config: SimConfig) -> List[TurnValidation]:
     turns = sorted(deploys.keys())
     for t in turns:
         if t + 1 not in deploys:
-            break  # last turn has no "post" snapshot
+            break
         df_t = deploys[t]
         df_next = deploys[t + 1]
         af_t = actions.get(t)
@@ -255,50 +296,26 @@ def validate_replay(path: Path, config: SimConfig) -> List[TurnValidation]:
             continue
         p1_sp, p1_up, p2_sp, p2_up = _extract_deploy_actions(af_t)
         ordered = _extract_deploy_events_in_order(af_t)
-
-        # Build state from deploy snapshot with persistent upgrade tracking.
         state = _build_state_from_deploy_frame(df_t, config, upgraded_pre.get(t, set()))
-        # Capture deploy-time stats for deltas
         pre_p1_hp, pre_p2_hp = state.p1.hp, state.p2.hp
         pre_p1_sp, pre_p2_sp = state.p1.sp, state.p2.sp
-
-        # Apply deploy actions in exact engine-issued spawn order
         apply_deploy_actions(state, config, p1_sp, p1_up, p2_sp, p2_up, ordered_events=ordered)
-        # Run action phase
         simulate_action_phase(state, config)
-
         sim_p1_hp_d = pre_p1_hp - state.p1.hp
         sim_p2_hp_d = pre_p2_hp - state.p2.hp
-        sim_p1_sp_d = state.p1.sp - pre_p1_sp  # positive = gain
+        sim_p1_sp_d = state.p1.sp - pre_p1_sp
         sim_p2_sp_d = state.p2.sp - pre_p2_sp
-
-        # Replay truth: compare p1/p2 stats at turn T deploy vs turn T+1 deploy.
-        # Between deploys, the engine ALSO runs the investment phase (income +
-        # decay) which we do not simulate here — we only validate the
-        # action-phase HP damage. So compare HP delta (action-phase-only
-        # effect) vs full replay delta minus any between-turn HP change
-        # (which is zero normally — HP only changes from breaches).
         rp1_hp = pre_p1_hp - float(df_next["p1Stats"][0])
         rp2_hp = pre_p2_hp - float(df_next["p2Stats"][0])
-        # For SP, the replay includes action-phase breach refunds PLUS the
-        # inter-turn income (4 SP + breach bonus). We can't fully reconcile
-        # without reimplementing InvestmentSystem. Report delta but the gate
-        # is HP-only.
         rp1_sp = float(df_next["p1Stats"][1]) - pre_p1_sp
         rp2_sp = float(df_next["p2Stats"][1]) - pre_p2_sp
-
         rows.append(TurnValidation(
             turn=t,
-            replay_p1_hp_delta=rp1_hp,
-            replay_p2_hp_delta=rp2_hp,
-            replay_p1_sp_delta=rp1_sp,
-            replay_p2_sp_delta=rp2_sp,
-            sim_p1_hp_delta=sim_p1_hp_d,
-            sim_p2_hp_delta=sim_p2_hp_d,
-            sim_p1_sp_delta=sim_p1_sp_d,
-            sim_p2_sp_delta=sim_p2_sp_d,
-            sim_struct_damage_p1=0.0,
-            sim_struct_damage_p2=0.0,
+            replay_p1_hp_delta=rp1_hp, replay_p2_hp_delta=rp2_hp,
+            replay_p1_sp_delta=rp1_sp, replay_p2_sp_delta=rp2_sp,
+            sim_p1_hp_delta=sim_p1_hp_d, sim_p2_hp_delta=sim_p2_hp_d,
+            sim_p1_sp_delta=sim_p1_sp_d, sim_p2_sp_delta=sim_p2_sp_d,
+            sim_struct_damage_p1=0.0, sim_struct_damage_p2=0.0,
         ))
     return rows
 
@@ -321,8 +338,7 @@ def _aggregate(rows: List[TurnValidation]) -> Dict[str, float]:
 
 
 def validate_corpus(replays_dir: Path, config: SimConfig) -> Dict[str, dict]:
-    """Run validation across every replay in replays_dir. Returns per-replay
-    + aggregate summaries."""
+    """Phase 1.A corpus gate — HP-delta only."""
     paths = sorted(replays_dir.glob("*.replay"))
     report = {}
     t0 = time.perf_counter()
@@ -333,15 +349,334 @@ def validate_corpus(replays_dir: Path, config: SimConfig) -> Dict[str, dict]:
         report[p.name] = agg
         total_sims += len(rows)
     t1 = time.perf_counter()
+    return {
+        "per_replay": report,
+        "timing": {"wall_s": t1 - t0, "total_sims": total_sims,
+                   "sims_per_s": total_sims / max(1e-6, t1 - t0)},
+    }
 
-    # Cross-replay aggregate
-    all_p1 = []
-    all_p2 = []
-    for name, agg in report.items():
-        # each agg has turns; if zero, skip
-        pass
-    # Rebuild from all rows for a single gate
-    return {"per_replay": report, "timing": {"wall_s": t1 - t0, "total_sims": total_sims, "sims_per_s": total_sims / max(1e-6, t1 - t0)}}
+
+# ==========================================================================
+# PHASE 1.B — 23-column frame-level parity table
+# ==========================================================================
+
+# -------------------------------------- Column definitions & extractors ---
+
+# Each column extracts a comparable representation from either a sim frame
+# or a replay frame. Frames have the same schema (emitted by
+# pysim.build_frame_observation / engine's Parser.parseVisiblesListToJson),
+# so most extractors are identical on both sides.
+#
+# Unit buckets:
+#   structures  → p{1,2}Units[0..2]
+#   mobiles     → p{1,2}Units[3..5]
+#   removal_ps  → p{1,2}Units[6]
+#   upgrade_ps  → p{1,2}Units[7]
+#
+# Each unit entry is [x, y, hp+shield, uid]. Compared order-sensitive
+# (engine's per-type bucket order is game-object insertion order; SimCore
+# mirrors that deterministically).
+
+STAT_COLS = ("p1_hp", "p2_hp", "p1_sp", "p2_sp", "p1_mp", "p2_mp")
+UNIT_COLS = (
+    "p1_structures", "p1_mobiles", "p1_removal_pseudo", "p1_upgrade_pseudo",
+    "p2_structures", "p2_mobiles", "p2_removal_pseudo", "p2_upgrade_pseudo",
+)
+EVENT_COLS = ("event_attack", "event_breach", "event_damage", "event_death",
+              "event_melee", "event_move", "event_selfDestruct",
+              "event_shield", "event_spawn")
+ALL_COLS = STAT_COLS + UNIT_COLS + EVENT_COLS
+
+
+def _units_raw(frame: dict, player: int, type_idx: int) -> list:
+    """Raw unit list for (player, type_idx); returns the underlying list from
+    the frame dict. Both sim-emitted and replay-parsed frames use the same
+    shape — list of [x, y, hp+shield, uid] — so raw == raw comparison works
+    without normalization."""
+    units = frame.get(f"p{player}Units") or []
+    if type_idx >= len(units):
+        return []
+    return units[type_idx] or []
+
+
+def _structures_raw(frame: dict, player: int) -> list:
+    return (_units_raw(frame, player, 0)
+            + _units_raw(frame, player, 1)
+            + _units_raw(frame, player, 2))
+
+
+def _mobiles_raw(frame: dict, player: int) -> list:
+    return (_units_raw(frame, player, 3)
+            + _units_raw(frame, player, 4)
+            + _units_raw(frame, player, 5))
+
+
+# -------------------------------------- Per-frame diff ---------------------
+
+@dataclass
+class FrameDiff:
+    replay: str
+    turn: int
+    frame: int
+    # Mismatches: {col_name: (sim_value, replay_value)}; omit cols that match.
+    mismatches: Dict[str, Tuple[Any, Any]] = field(default_factory=dict)
+
+
+def _diff_frame(sim_frame: dict, rep_frame: dict) -> Dict[str, Tuple[Any, Any]]:
+    """Return {col: (sim_val, replay_val)} for every non-matching column.
+
+    Raw list equality — both sim and replay use the same list-of-list shapes
+    for units/events, so no normalization is needed. Float precision isn't a
+    concern for whole-number stats; noise in dmg/shield would be a genuine
+    divergence worth surfacing."""
+    out: Dict[str, Tuple[Any, Any]] = {}
+
+    # --- stats (6) ---
+    s1 = sim_frame["p1Stats"]; r1 = rep_frame["p1Stats"]
+    s2 = sim_frame["p2Stats"]; r2 = rep_frame["p2Stats"]
+    if s1[0] != r1[0]: out["p1_hp"] = (s1[0], r1[0])
+    if s2[0] != r2[0]: out["p2_hp"] = (s2[0], r2[0])
+    if s1[1] != r1[1]: out["p1_sp"] = (s1[1], r1[1])
+    if s2[1] != r2[1]: out["p2_sp"] = (s2[1], r2[1])
+    if s1[2] != r1[2]: out["p1_mp"] = (s1[2], r1[2])
+    if s2[2] != r2[2]: out["p2_mp"] = (s2[2], r2[2])
+
+    # --- unit buckets (8) ---
+    for ply in (1, 2):
+        sv = _structures_raw(sim_frame, ply)
+        rv = _structures_raw(rep_frame, ply)
+        if sv != rv:
+            out[f"p{ply}_structures"] = (sv, rv)
+        sv = _mobiles_raw(sim_frame, ply)
+        rv = _mobiles_raw(rep_frame, ply)
+        if sv != rv:
+            out[f"p{ply}_mobiles"] = (sv, rv)
+        sv = _units_raw(sim_frame, ply, 6)
+        rv = _units_raw(rep_frame, ply, 6)
+        if sv != rv:
+            out[f"p{ply}_removal_pseudo"] = (sv, rv)
+        sv = _units_raw(sim_frame, ply, 7)
+        rv = _units_raw(rep_frame, ply, 7)
+        if sv != rv:
+            out[f"p{ply}_upgrade_pseudo"] = (sv, rv)
+
+    # --- events (9) — ORDER-SENSITIVE, per user guidance ---
+    sim_ev = sim_frame.get("events") or {}
+    rep_ev = rep_frame.get("events") or {}
+    for bucket in ("attack", "breach", "damage", "death", "melee", "move",
+                   "selfDestruct", "shield", "spawn"):
+        sv = sim_ev.get(bucket) or []
+        rv = rep_ev.get(bucket) or []
+        if sv != rv:
+            out[f"event_{bucket}"] = (sv, rv)
+
+    return out
+
+
+def validate_replay_full(path: Path, config: SimConfig) -> Tuple[List[FrameDiff], Dict[str, int]]:
+    """Run SimCore turn-by-turn and diff every action-phase frame against
+    the replay. Returns (diffs, turn_stats).
+
+    turn_stats: {"total_turns": N, "total_frames": M,
+                 "sim_frame_count_mismatches": K}
+    """
+    frames, _ = _parse_replay(path)
+    deploys = _index_deploy_frames(frames)
+    actions_all = _index_action_frames(frames)
+    actions_first = _index_first_action_frames(frames)
+    upgraded_pre = _collect_upgraded_uids(frames)
+
+    all_diffs: List[FrameDiff] = []
+    total_turns = 0
+    total_frames = 0
+    frame_count_mismatches = 0
+
+    for t in sorted(deploys.keys()):
+        af_first = actions_first.get(t)
+        if af_first is None:
+            continue
+        replay_frames = actions_all.get(t, [])
+        if not replay_frames:
+            continue
+        total_turns += 1
+
+        p1_sp, p1_up, p2_sp, p2_up = _extract_deploy_actions(af_first)
+        ordered = _extract_deploy_events_in_order(af_first)
+        state = _build_state_from_deploy_frame(deploys[t], config, upgraded_pre.get(t, set()))
+        apply_deploy_actions(state, config, p1_sp, p1_up, p2_sp, p2_up, ordered_events=ordered)
+
+        # Seed total_frame_number from the replay's first action frame so
+        # the turnInfo column matches (if sim produces the right frame count).
+        total_frame_start = int(replay_frames[0]["turnInfo"][3])
+
+        sim_iter = simulate_action_phase_iter(
+            state, config, perspective=1, total_frame_start=total_frame_start,
+        )
+        rep_i = 0
+        for sim_obs in sim_iter:
+            if rep_i >= len(replay_frames):
+                # Sim produced more frames than replay
+                all_diffs.append(FrameDiff(
+                    replay=path.name, turn=t, frame=rep_i,
+                    mismatches={"frame_count": ("sim_excess", "")},
+                ))
+                frame_count_mismatches += 1
+                break
+            rep_frame = replay_frames[rep_i]
+            mism = _diff_frame(sim_obs, rep_frame)
+            if mism:
+                all_diffs.append(FrameDiff(
+                    replay=path.name, turn=t, frame=rep_i, mismatches=mism,
+                ))
+            total_frames += 1
+            rep_i += 1
+        # Drain iter if replay had fewer frames
+        extra = 0
+        for _ in sim_iter:
+            extra += 1
+        if extra:
+            all_diffs.append(FrameDiff(
+                replay=path.name, turn=t, frame=rep_i,
+                mismatches={"frame_count": (f"sim_excess_{extra}", "")},
+            ))
+            frame_count_mismatches += 1
+        if rep_i < len(replay_frames):
+            missing = len(replay_frames) - rep_i
+            all_diffs.append(FrameDiff(
+                replay=path.name, turn=t, frame=rep_i,
+                mismatches={"frame_count": ("sim_short", f"missing_{missing}")},
+            ))
+            frame_count_mismatches += 1
+
+    return all_diffs, {
+        "total_turns": total_turns,
+        "total_frames": total_frames,
+        "frame_count_mismatches": frame_count_mismatches,
+    }
+
+
+def validate_corpus_full(replays_dir: Path, config: SimConfig) -> dict:
+    paths = sorted(replays_dir.glob("*.replay"))
+    t0 = time.perf_counter()
+    all_diffs: List[FrameDiff] = []
+    per_replay_frame_counts: Dict[str, int] = {}
+    total_turns_all = 0
+    total_frames_all = 0
+    frame_count_mismatches_all = 0
+    for p in paths:
+        diffs, stats = validate_replay_full(p, config)
+        all_diffs.extend(diffs)
+        per_replay_frame_counts[p.name] = stats["total_frames"]
+        total_turns_all += stats["total_turns"]
+        total_frames_all += stats["total_frames"]
+        frame_count_mismatches_all += stats["frame_count_mismatches"]
+    t1 = time.perf_counter()
+    wall = t1 - t0
+
+    # Per-column aggregation.
+    col_nonzero_frames: Dict[str, int] = {c: 0 for c in ALL_COLS}
+    col_nonzero_replays: Dict[str, set] = {c: set() for c in ALL_COLS}
+    # First example: {col: (replay, turn, frame, sim_val, rep_val)}
+    col_first_example: Dict[str, tuple] = {}
+    frame_count_nonzero_replays: set = set()
+
+    for d in all_diffs:
+        for col, (sv, rv) in d.mismatches.items():
+            if col == "frame_count":
+                frame_count_nonzero_replays.add(d.replay)
+                continue
+            if col in col_nonzero_frames:
+                col_nonzero_frames[col] += 1
+                col_nonzero_replays[col].add(d.replay)
+                if col not in col_first_example:
+                    col_first_example[col] = (d.replay, d.turn, d.frame, sv, rv)
+
+    return {
+        "timing": {
+            "wall_s": wall,
+            "total_turns": total_turns_all,
+            "total_frames": total_frames_all,
+            "frames_per_s": total_frames_all / max(1e-6, wall),
+            "sims_per_s": total_turns_all / max(1e-6, wall),
+        },
+        "columns": {
+            c: {
+                "nonzero_frames": col_nonzero_frames[c],
+                "nonzero_replays": len(col_nonzero_replays[c]),
+                "first_example": col_first_example.get(c),
+            }
+            for c in ALL_COLS
+        },
+        "frame_count_nonzero_replays": sorted(frame_count_nonzero_replays),
+        "frame_count_mismatches_total": frame_count_mismatches_all,
+    }
+
+
+# ---------------------------------------------------------------- CLI ------
+
+def _print_phase1a_report(report: dict) -> None:
+    print(json.dumps(report["timing"], indent=2))
+    all_errs_max = []
+    all_errs_mean = []
+    for name, agg in sorted(report["per_replay"].items()):
+        if "max_hp_err" not in agg:
+            continue
+        print(f"  {name:65s} turns={agg['turns']:3d} max={agg['max_hp_err']:5.1f} mean={agg['mean_hp_err']:5.2f}")
+        all_errs_max.append(agg["max_hp_err"])
+        all_errs_mean.append(agg["mean_hp_err"])
+    if all_errs_max:
+        overall_max = max(all_errs_max)
+        overall_mean = sum(all_errs_mean) / len(all_errs_mean)
+        print()
+        print(f"OVERALL (across {len(all_errs_max)} replays):")
+        print(f"  max hp err = {overall_max:.2f}  (gate: ≤2.0 HP = 5% of 40)")
+        print(f"  mean hp err = {overall_mean:.2f} (gate: ≤0.4 HP = 1% of 40)")
+        gate = "PASS" if (overall_max <= 2.0 and overall_mean <= 0.4) else "FAIL"
+        print(f"  Phase 1 gate: {gate}")
+
+
+def _fmt_example(ex: tuple) -> str:
+    if ex is None:
+        return ""
+    replay, turn, frame, sv, rv = ex
+    rid = replay[:38] + "…" if len(replay) > 40 else replay
+    if isinstance(sv, list) and isinstance(rv, list):
+        return f"{rid} T{turn}F{frame}  |sim|={len(sv)} |rep|={len(rv)}"
+    return f"{rid} T{turn}F{frame}  sim={sv!r} rep={rv!r}"
+
+
+def _print_phase1b_report(report: dict) -> None:
+    tm = report["timing"]
+    print("=" * 78)
+    print(f"Phase 1.B — full-state parity | {tm['total_frames']} frames across "
+          f"{tm['total_turns']} turns | wall={tm['wall_s']:.2f}s")
+    print(f"  throughput: {tm['sims_per_s']:6.1f} sims/s  |  "
+          f"{tm['frames_per_s']:6.0f} frames/s")
+    print()
+    print(f"  {'column':<24} {'#frames_diff':>12} {'#replays':>9}  first_example")
+    print(f"  {'-' * 24} {'-' * 12} {'-' * 9}  {'-' * 40}")
+    any_fail = False
+    for c in ALL_COLS:
+        ci = report["columns"][c]
+        nz = ci["nonzero_frames"]
+        nzr = ci["nonzero_replays"]
+        ex = _fmt_example(ci["first_example"])
+        mark = "" if nz == 0 else "  FAIL"
+        if nz > 0:
+            any_fail = True
+        print(f"  {c:<24} {nz:>12} {nzr:>9}  {ex}{mark}")
+    # Frame count
+    fcnr = report["frame_count_nonzero_replays"]
+    if report["frame_count_mismatches_total"]:
+        print()
+        print(f"  frame_count mismatches: {report['frame_count_mismatches_total']} "
+              f"across {len(fcnr)} replays")
+        any_fail = True
+    print()
+    print(f"Phase 1.B GATE: {'FAIL' if any_fail else 'PASS'}")
+    thr = tm["sims_per_s"]
+    thr_gate = "PASS" if thr >= 50 else "FAIL"
+    print(f"Throughput GATE (≥50 sims/s): {thr_gate} ({thr:.1f})")
 
 
 if __name__ == "__main__":
@@ -349,8 +684,32 @@ if __name__ == "__main__":
     replays_dir = repo / "replays" / "ranked"
     config = SimConfig.load()
 
-    if len(sys.argv) > 1 and sys.argv[1] == "--one":
-        p = Path(sys.argv[2])
+    argv = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = [a for a in sys.argv[1:] if a.startswith("--")]
+
+    if "--full" in flags:
+        # Phase 1.B: 23-column frame-level gate.
+        if argv:
+            # Single replay or list of replays.
+            paths = [Path(a) for a in argv]
+            all_diffs: List[FrameDiff] = []
+            for p in paths:
+                diffs, _ = validate_replay_full(p, config)
+                all_diffs.extend(diffs)
+            # Mini summary
+            cols = {}
+            for d in all_diffs:
+                for c, (sv, rv) in d.mismatches.items():
+                    cols.setdefault(c, 0)
+                    cols[c] += 1
+            print(f"diffs={len(all_diffs)}  cols_touched={len(cols)}")
+            for c, n in sorted(cols.items(), key=lambda kv: -kv[1]):
+                print(f"  {c:<24} {n:>6}")
+        else:
+            report = validate_corpus_full(replays_dir, config)
+            _print_phase1b_report(report)
+    elif "--one" in flags:
+        p = Path(argv[0])
         rows = validate_replay(p, config)
         print(f"{p.name}: {len(rows)} turns validated")
         for r in rows[:10]:
@@ -359,23 +718,6 @@ if __name__ == "__main__":
         agg = _aggregate(rows)
         print(f"aggregate: {agg}")
     else:
+        # Default = Phase 1.A HP-delta summary (back-compat).
         report = validate_corpus(replays_dir, config)
-        print(json.dumps(report["timing"], indent=2))
-        # Aggregate across replays
-        all_errs_max = []
-        all_errs_mean = []
-        for name, agg in sorted(report["per_replay"].items()):
-            if "max_hp_err" not in agg:
-                continue
-            print(f"  {name:65s} turns={agg['turns']:3d} max={agg['max_hp_err']:5.1f} mean={agg['mean_hp_err']:5.2f}")
-            all_errs_max.append(agg["max_hp_err"])
-            all_errs_mean.append(agg["mean_hp_err"])
-        if all_errs_max:
-            overall_max = max(all_errs_max)
-            overall_mean = sum(all_errs_mean) / len(all_errs_mean)
-            print()
-            print(f"OVERALL (across {len(all_errs_max)} replays):")
-            print(f"  max hp err = {overall_max:.2f}  (gate: ≤2.0 HP = 5% of 40)")
-            print(f"  mean hp err = {overall_mean:.2f} (gate: ≤0.4 HP = 1% of 40)")
-            gate = "PASS" if (overall_max <= 2.0 and overall_mean <= 0.4) else "FAIL"
-            print(f"  Phase 1 gate: {gate}")
+        _print_phase1a_report(report)
