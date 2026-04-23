@@ -32,7 +32,7 @@ from __future__ import annotations
 import math
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple  # noqa: F401
 
 from .config import (
     IDX_DEMOLISHER,
@@ -110,33 +110,43 @@ def _blocked_set(state: SimState) -> Set[Tuple[int, int]]:
 
 def apply_deploy_actions(state: SimState, config: SimConfig,
                          p1_spawns: List[list], p1_upgrades: List[list],
-                         p2_spawns: List[list], p2_upgrades: List[list]) -> None:
+                         p2_spawns: List[list], p2_upgrades: List[list],
+                         ordered_events: Optional[List] = None) -> None:
     """Mutate state to post-deploy: spawn structures, apply upgrades, spawn
-    mobile units. Structure ownership is enforced by half-board."""
-    for player, spawns, ups in ((1, p1_spawns, p1_upgrades), (2, p2_spawns, p2_upgrades)):
-        # Structures first
-        for loc in spawns:
-            x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
-            if not on_diamond(x, y):
-                continue
-            if tidx not in STRUCTURE_TYPES:
-                continue
-            owner = 1 if y < HALF else 2
-            if owner != player:
-                continue
-            if (x, y) in state.structures:
-                continue
-            spec = config.structure_spec(tidx, upgraded=False)
-            state.structures[(x, y)] = Structure(
-                xy=(x, y), type_idx=tidx, upgraded=False,
-                hp=spec.hp, uid=state.alloc_id(), player=player,
-            )
-            state.structures_version += 1
-        # Upgrades — engine's SpawnUnitsSystem (off 287–855):
-        #   currentHP += (upgradeMaxHP − baseMaxHP), clamped to upgradeMaxHP.
-        # So a damaged wall at 30/60 HP upgraded becomes 30 + (200-60) = 170/200,
-        # NOT 200. We previously set hp = upgradeMaxHP which over-counted by up
-        # to 40 HP per damaged-upgraded structure.
+    mobile units. Structure ownership is enforced by half-board.
+
+    If `ordered_events` is provided (list of (player, [x,y,type]) tuples
+    in the exact engine-issued order), use it for spawn-order fidelity
+    on both structures and mobiles. Upgrades are still processed per-
+    player after all structures on that side are placed.
+
+    Without `ordered_events`, falls back to (p1_spawns, p2_spawns) order.
+    """
+    if ordered_events is None:
+        ordered_events = [(1, s) for s in p1_spawns] + [(2, s) for s in p2_spawns]
+
+    # Structures in engine-issued order
+    for player, loc in ordered_events:
+        x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
+        if not on_diamond(x, y):
+            continue
+        if tidx not in STRUCTURE_TYPES:
+            continue
+        owner = 1 if y < HALF else 2
+        if owner != player:
+            continue
+        if (x, y) in state.structures:
+            continue
+        spec = config.structure_spec(tidx, upgraded=False)
+        state.structures[(x, y)] = Structure(
+            xy=(x, y), type_idx=tidx, upgraded=False,
+            hp=spec.hp, uid=state.alloc_id(), player=player,
+        )
+        state.structures_version += 1
+
+    # Upgrades — engine's SpawnUnitsSystem (off 287–855):
+    #   currentHP += (upgradeMaxHP − baseMaxHP), clamped to upgradeMaxHP.
+    for player, ups in ((1, p1_upgrades), (2, p2_upgrades)):
         for loc in ups:
             x, y = int(loc[0]), int(loc[1])
             s = state.structures.get((x, y))
@@ -146,19 +156,20 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
             upg_spec = config.structure_spec(s.type_idx, upgraded=True)
             s.upgraded = True
             s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
-        # Mobile units
-        for loc in spawns:
-            x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
-            if tidx not in MOBILE_TYPES:
-                continue
-            spec = config.mobile_spec(tidx)
-            target_edge = spawn_tile_target_edge((x, y))
-            state.mobiles.append(Mobile(
-                xy=(x, y), type_idx=tidx,
-                hp=spec.hp, shield=0.0,
-                uid=state.alloc_id(), player=player,
-                spawn_xy=(x, y), target_edge=target_edge,
-            ))
+
+    # Mobile units in engine-issued order
+    for player, loc in ordered_events:
+        x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
+        if tidx not in MOBILE_TYPES:
+            continue
+        spec = config.mobile_spec(tidx)
+        target_edge = spawn_tile_target_edge((x, y))
+        state.mobiles.append(Mobile(
+            xy=(x, y), type_idx=tidx,
+            hp=spec.hp, shield=0.0,
+            uid=state.alloc_id(), player=player,
+            spawn_xy=(x, y), target_edge=target_edge,
+        ))
 
 
 # -------------------------------------------------------- per-frame systems
