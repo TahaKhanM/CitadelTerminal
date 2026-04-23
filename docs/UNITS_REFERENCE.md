@@ -1,6 +1,12 @@
 # Units Reference — Competition Values
 
-All values below reflect the **special-competition ruleset**. They are what the server config delivers at game start. The starter-kit `game-configs.json` is out-of-date and must NOT be treated as authoritative.
+All values below reflect the **special-competition ruleset**. They are what the server config delivers at game start, **verified against the live config extracted from an official downloaded replay (`replays/v11_official_replay_01.replay`)**. The starter-kit `game-configs.json` is out-of-date and must NOT be treated as authoritative.
+
+> **How these were verified**: the first line of every official `.replay` file is the full live server config JSON. Run
+> ```bash
+> python3 -c 'import json; print(json.dumps(json.loads(open("<replay>").readline())["unitInformation"], indent=2))'
+> ```
+> to dump it yourself. The numbers here match that source as of 2026-04-23.
 
 Shorthand constants in code:
 ```
@@ -74,29 +80,37 @@ Walls have the best HP/SP ratio of any unit in the game (60 HP / SP base; 66.7 H
 | | Base | Upgraded |
 |---|---|---|
 | Cost (SP) | **4** | **+4** (4 base + 4 upgrade = 8 total) |
-| Starting HP | **1** ⚠️ | 1 (no HP change) |
+| Starting HP | **1** ⚠️ | **40** ⚠️ (upgrade massively increases HP!) |
 | Shield range | 3.5 | **7** |
-| Shield per mobile unit | **3** (flat) | see below ⚠️ |
+| Shield per mobile unit (base component) | **3** (flat) | **1** (flat) |
+| Shield bonus per Y | 0 | **0.7 × Y** |
+| Effective shield formula | `3` | `1 + 0.7 × Y_position` |
 
-⚠️ **Support HP is 1** in this competition (base game: 30). A single attack from anything kills it. Either protect it with walls or accept it as a one-shot-shield dispenser.
+⚠️ **Base Support HP is 1** — a single attack from anything kills it. An unupgraded Support is a one-shot shield dispenser.
 
-⚠️ **Upgraded shield per unit — how to read the docs:**
+⚠️ **Upgrading a Support raises its HP from 1 to 40**, making it durable enough to last multiple turns. This is a big deal strategically — *upgraded* Supports can anchor your back row across an entire game; *base* Supports are effectively single-use unless walled.
 
-The competition docs describe the upgrade two places, which must be combined:
+### Upgraded Support shield math
 
-1. **Doc 4 (Structure Units table, upgrade cell)**: *"Range increased to 7 units. Base shielding increased to 4. (0.3 × Y position) additional shielding."* — i.e. base-game upgrade formula is `4 + 0.3 × Y`.
-2. **Doc 1 (Rule Changes for Special Competition, Support row)**: lists **`Upgraded Shield Per Unit: 1`** for the competition (base game value was 4).
+**Formula (authoritative, from live config):**
+```
+shield_per_unit = 1 + 0.7 × Y_position
+range = 7 (Euclidean)
+```
 
-Combining them, the competition upgraded Support most likely grants **`1 + 0.3 × Y_position`** shield per mobile unit: Doc 1 overrides the "4" base shield component to "1", and the `0.3 × Y` positional bonus is not mentioned as changed, so it is assumed unchanged.
+Per-Y-position table:
 
-Practical consequences assuming the combined formula:
-- At Y=0: `1 + 0` = **1 shield/unit** (WORSE than a base Support's flat 3).
-- At Y=7: `1 + 2.1` = **3.1 shield/unit** (roughly break-even with base).
-- At Y=13 (your back row): `1 + 3.9` = **4.9 shield/unit** (best).
+| Y | Shield/unit | Notes |
+|---|---|---|
+| 0 | 1.0 | worse than base Support's flat 3 |
+| 3 | 3.1 | break-even with base |
+| 7 | 5.9 | clearly better than base |
+| 10 | 8.0 | very strong |
+| 13 (back row) | **10.1** | maximum |
 
-**Implication**: don't upgrade Supports deployed near your front (Y<7) — you'd actively lose per-unit shielding. Only upgrade Supports that sit deep in your territory.
+**Implication**: stacking 3-4 upgraded Supports at Y=13 gives each passing Scout ~30-40 shield — more than doubling HP (Scout base 15 → shielded ~45-55). This is **much stronger than the "0.3 × Y" reading in older versions of these docs**. Support-caravan strategies are high-EV in this competition.
 
-⚠️ There is a non-trivial alternative reading where the competition's upgraded Support is a **flat 1 shield/unit** (i.e., the `shieldBonusPerY: 0.3` field was also zeroed out). Doc 1 doesn't explicitly say one way or the other. If you want certainty, read the server-delivered `self.config["unitInformation"][1]["upgrade"]` dict in `on_game_start` and check for `shieldBonusPerY`.
+⚠️ Placement rule: DON'T upgrade a Support at Y<3 — the per-unit shield would be *worse* than leaving it at base. Always place upgraded Supports at Y≥7; ideally Y=13.
 
 **Shielding rules:**
 - A Support shields each mobile unit **once** — when that unit first enters its range.
@@ -131,7 +145,20 @@ Turrets fire every frame at one target (targeting rules in `TARGETING_AND_PATHIN
 
 `"RM"` and `"UP"` are not deployable units — they're *modifiers* sent in build commands:
 
-- **Remove**: mark your own structure for removal. It will be destroyed at end of action phase. Refund = `0.9 × InitialCost × (CurrentHP / StartingHP)` rounded to 0.1, given as SP next Restore.
+- **Remove**: mark your own structure for removal. Removal completes after `turnsRequiredToRemove` turns (NOT at end of the current action phase as earlier doc versions claimed):
+  - Base structure: **2 turns** to complete removal.
+  - Upgraded structure: **3 turns** to complete removal.
+
+  Refund formula differs by upgrade state:
+  ```
+  base structure:     refund = 0.9 × InitialCost × (CurrentHP / StartingHP)
+  upgraded structure: refund = 0.8 × InitialCost × (CurrentHP / StartingHP)
+  ```
+
+  Implications:
+  - The 2-turn removal delay means you can't pivot defense on a single turn via remove-and-replace. Plan 2+ turns ahead.
+  - Upgraded structures refund 11 % less — upgrade-then-remove is lossy. Don't use upgrade as a temporary boost expecting full refund.
+
 - **Upgrade**: spend the upgrade cost on an existing structure to apply upgraded stats. Current missing-HP carries over (upgrading a Turret at 10/60 HP leaves it at 50/100 HP after upgrade).
 
 Both are used via `game_state.attempt_remove(locs)` and `game_state.attempt_upgrade(locs)`.

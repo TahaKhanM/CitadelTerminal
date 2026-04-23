@@ -43,13 +43,14 @@ During Deploy you can:
 - **Spawn structures** (Walls, Supports, Turrets) anywhere in your half of the arena on unoccupied tiles. Costs SP.
 - **Spawn mobile units** (Scouts, Demolishers, Interceptors) on your two edges (BOTTOM_LEFT or BOTTOM_RIGHT diagonal). Costs MP. Mobile units can stack arbitrarily deep on the same tile.
 - **Upgrade existing structures** (Wall → 200 HP tank, Turret → stronger/longer-ranged, Support → bigger shield / longer range). Costs additional SP (see `UNITS_REFERENCE.md`).
-- **Mark structures for removal.** Marked structures are removed at the END of the upcoming action phase and you receive a refund:
+- **Mark structures for removal.** Marked structures take **2 turns to complete removal for base structures, 3 turns for upgraded** (verified from official replay config's `turnsRequiredToRemove` field). You receive a refund when removal completes:
 
   ```
-  refund = 0.9 × InitialCost × (RemainingHealth / OriginalHealth)
+  base structure:     refund = 0.9 × InitialCost × (RemainingHealth / OriginalHealth)
+  upgraded structure: refund = 0.8 × InitialCost × (RemainingHealth / OriginalHealth)
   ```
 
-  (rounded to nearest 0.1). You don't get the structure back immediately — you get SP back next Restore phase.
+  (rounded to nearest 0.1). You don't get the structure back immediately — you get SP back when the removal completes, which is 2-3 turns later.
 
 **Visibility during Deploy**: you see the full board AND the opponent's surviving structures, but **not** the opponent's mobile or structural deployments for this turn. Both sides commit blind.
 

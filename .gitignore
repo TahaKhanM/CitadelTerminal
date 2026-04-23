@@ -15,12 +15,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# Replays - keep the directory tracked, but not the large binary replays
+# Replays - ignore local eval artifacts, but TRACK ranked downloads (ELO-tagged)
 replays/*
 !replays/.gitkeep
-
-# Tournament outputs (large)
-replays/tournament_*/
+!replays/*_elo_*.replay
 
 # Built algo zips
 algos/*.zip

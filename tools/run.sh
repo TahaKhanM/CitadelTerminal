@@ -20,6 +20,11 @@ if [ ! -d "$ALGO2" ] && [ -d "$REPO_ROOT/algos/$ALGO2" ]; then
   ALGO2="$REPO_ROOT/algos/$ALGO2"
 fi
 
+# run_match.py cd's into the starter-kit dir before invoking engine.jar,
+# so relative paths break. Always convert to absolute.
+ALGO1="$(cd "$ALGO1" && pwd)"
+ALGO2="$(cd "$ALGO2" && pwd)"
+
 mkdir -p "$REPLAY_OUT"
 
 echo "[run.sh] Algo 1: $ALGO1"

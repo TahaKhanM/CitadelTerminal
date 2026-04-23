@@ -60,7 +60,7 @@ Movement is orthogonal only (step cost = Manhattan for BFS), but target *eligibi
 
 | Location | Description |
 |---|---|
-| `[13, 13]`, `[14, 13]` | Center back row of your territory — highest Y on your side; optimal for upgraded Supports (shield bonus = 1 + 0.3·13 = 4.9 per unit) |
+| `[13, 13]`, `[14, 13]` | Center back row of your territory — highest Y on your side; optimal for upgraded Supports (shield bonus = 1 + 0.7·13 = **10.1 per unit** per Support) |
 | `[0, 13]`, `[27, 13]` | Your back corners — classic Turret positions to deny enemy scoring |
 | `[13, 0]`, `[14, 0]` | Your "closest to enemy" spawn tiles — shortest path to opposing edge |
 | `[13, 11]`, `[14, 11]` | Dead-center mid-row positions — popular Turret spots that threaten a wide swath of incoming paths |
