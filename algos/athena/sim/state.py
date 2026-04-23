@@ -106,9 +106,12 @@ class SimState:
     # --- helpers ---
 
     def alloc_id(self) -> str:
+        # IMPORTANT: uids must be NUMERIC strings so tie-break-by-larger-gid
+        # (engine's TargetAndAttackSystem.pickUnit 5th tiebreak) can parse
+        # them as integers. Engine assigns monotonic integer gids.
         i = self._next_id
         self._next_id += 1
-        return f"sim{i}"
+        return str(i)
 
     def struct_at(self, xy: Tuple[int, int]) -> Optional[Structure]:
         return self.structures.get(xy)

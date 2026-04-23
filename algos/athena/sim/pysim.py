@@ -97,12 +97,6 @@ def _target_edges_mobile(player: int) -> Tuple[int, int]:
     return (EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT)
 
 
-def _target_edge_tiles(player: int) -> frozenset:
-    if player == 1:
-        return _EDGE_SET_CACHE[EDGE_TOP_LEFT] | _EDGE_SET_CACHE[EDGE_TOP_RIGHT]
-    return _EDGE_SET_CACHE[EDGE_BOTTOM_LEFT] | _EDGE_SET_CACHE[EDGE_BOTTOM_RIGHT]
-
-
 def _blocked_set(state: SimState) -> Set[Tuple[int, int]]:
     return set(state.structures.keys())
 
@@ -205,7 +199,6 @@ def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
       7. else move body to nextTile, increment stepsTaken, emit GlobalMove.
     """
     _ensure_pathfinders(state)
-    target_tiles_cache: Dict[int, frozenset] = {1: _target_edge_tiles(1), 2: _target_edge_tiles(2)}
     pathfinders = state.pathfinders
     for m in state.mobiles:
         if m.hp <= 0 or m.finished_navigating:
@@ -223,8 +216,11 @@ def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
         dy = ny - m.xy[1]
         if dx == 0 and dy == 0:
             m.finished_navigating = True
-            # reached_target iff current position is a navigation target
-            m.reached_target = m.xy in target_tiles_cache[m.player]
+            # reached_target iff current position is in the SPECIFIC
+            # nav-targets list for this mobile's assigned edge (matches
+            # NavigateToEdgeSystem.java:50-54 — only the unit's own
+            # `navigationTargetLocations`, not the union of p's two edges).
+            m.reached_target = m.xy in _EDGE_SET_CACHE[m.target_edge]
             continue
         prev = m.xy
         m.xy = (nx, ny)
@@ -365,109 +361,174 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
         m.hp = 0
 
 
-def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> None:
-    """TargetAndAttackSystem.processTargeting.
+def _pick_target(attacker_xy: Tuple[int, int], attacker_player: int,
+                 candidates: list) -> Optional[object]:
+    """Exact port of TargetAndAttackSystem.pickUnit (decompiled Java).
 
-    Every live attacker (Turrets + damage-dealing mobiles) picks ONE target
-    this frame via the priority key:
+    Candidates is a list of target objects (Structure or Mobile); this
+    function returns the picked one or None.
 
-      (distance, hp+shield, |y - player_edge|, |x - 13.5|)
+    Priority (all floats; from pickUnit source):
+      1. closer  (strict <)
+      2. equalDistance AND lessHP
+      3. equalDistance AND equalHP AND closerToStart (smaller |y - start|)
+      4. equalDistance AND equalHP AND equalToStart AND fartherFromCenter
+         (LARGER |x - 13.5|)  ← counter-intuitive
+      5. equalDistance AND equalHP AND equalToStart AND equalFromCenter
+         AND gameObjectIDLarger (LARGER uid as int)
 
-    Mobile units target both enemy mobiles (walker damage) and enemy
-    structures (tower damage); Turrets only target mobiles.
-
-    CRITICAL: each attacker re-filters `hp > 0` during target selection
-    because prior attackers in this frame may have killed mobiles. Without
-    this, multiple turrets target the same already-dead unit and waste
-    their shots (observed: 19 scouts "survive" when replay shows 0).
+    Dead candidates (hp <= 0) are skipped.
     """
-    # Build the list of attackers up-front; target selection reads
-    # state.mobiles / state.structures live (so mutations apply).
-    attacker_structs = [s for s in state.structures.values() if s.hp > 0 and s.type_idx == IDX_TURRET]
+    if not candidates:
+        return None
+    start_pos = 0.0 if attacker_player == 1 else 28.0
+    closest_distance = 1.0e10
+    closest_health = 1.0e10
+    distance_to_player_start = 1.0e10
+    distance_to_center = 0.0
+    target_gid = ""
+    best = None
+    for cand in candidates:
+        hp = cand.hp
+        if hp <= 0.0:
+            continue
+        # distance
+        dx = cand.xy[0] - attacker_xy[0]
+        dy = cand.xy[1] - attacker_xy[1]
+        new_dist = (dx * dx + dy * dy) ** 0.5
+        closer = new_dist < closest_distance
+        equal_distance = new_dist == closest_distance
+        # hp+shield
+        new_hp = hp + getattr(cand, "shield", 0.0)
+        less_hp = new_hp < closest_health
+        equal_hp = new_hp == closest_health
+        # |y - start_pos|
+        new_dist_start = abs(cand.xy[1] - start_pos)
+        closer_to_start = new_dist_start < distance_to_player_start
+        equal_to_start = new_dist_start == distance_to_player_start
+        # |x - 13.5|
+        new_dist_center = abs(cand.xy[0] - 13.5)
+        farther_from_center = new_dist_center > distance_to_center
+        equal_from_center = new_dist_center == distance_to_center
+        # gid compare (as int)
+        new_gid = cand.uid
+        # Empty string means no winner yet → any gid wins
+        try:
+            if target_gid == "":
+                game_object_id_larger = True
+            else:
+                game_object_id_larger = int(new_gid) > int(target_gid)
+        except (TypeError, ValueError):
+            # Non-numeric uids shouldn't happen in our sim (state.alloc_id
+            # returns numeric strings), but fall back safely.
+            game_object_id_larger = str(new_gid) > str(target_gid)
+        # Update condition matches decompiled bytecode:
+        #   (closer
+        #    OR (equal_dist AND less_hp)
+        #    OR (equal_dist AND equal_hp AND closer_to_start)
+        #    OR (equal_dist AND equal_hp AND equal_to_start AND farther_from_center))
+        #   OR (equal_dist AND equal_hp AND equal_to_start AND equal_from_center
+        #       AND gid_larger)
+        first_cond = (closer
+                      or (equal_distance and less_hp)
+                      or (equal_distance and equal_hp and closer_to_start)
+                      or (equal_distance and equal_hp and equal_to_start and farther_from_center))
+        second_cond = (equal_distance and equal_hp and equal_to_start
+                       and equal_from_center and game_object_id_larger)
+        if not first_cond and not second_cond:
+            continue
+        # Update best
+        best = cand
+        closest_distance = new_dist
+        closest_health = new_hp
+        distance_to_player_start = new_dist_start
+        distance_to_center = new_dist_center
+        target_gid = new_gid
+    return best
+
+
+def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> None:
+    """Exact port of TargetAndAttackSystem.processTargeting (decompiled).
+
+    Engine behavior:
+      * Iterate attackers in game-object insertion order (structures first,
+        then mobiles, each in their own insertion order).
+      * ATTACKER SNAPSHOT: attackers that were alive at the START of the
+        attack phase all fire, even if killed by an earlier attacker in
+        the same phase. The engine uses `gameObjectDestroy.accept(...)`
+        which only queues for destruction — components stay enabled until
+        the next clear_destroyed. A scout that dies mid-phase still emits
+        its one attack event this frame.
+      * Each attacker picks HIGH priority (walkers/mobiles) first; if no
+        alive walker in range, falls back to LOW priority (towers/
+        structures). Skipped entirely if no target in either list.
+      * Damage applied IMMEDIATELY via dealDamageToHealthComponent.
+    """
+    # Snapshot attackers: anyone with hp > 0 at phase start fires.
+    attacker_structs = [s for s in state.structures.values()
+                        if s.hp > 0 and s.type_idx == IDX_TURRET]
     attacker_mobiles = [m for m in state.mobiles if m.hp > 0]
 
-    # Turrets first (matches engine: iteration order is game-objects insertion
-    # order; Turrets existed from earlier turns so they're earlier in the list
-    # than same-turn-spawned mobiles).
-    for s in attacker_structs:
-        if s.hp <= 0:
-            continue
-        spec = config.structure_spec(IDX_TURRET, upgraded=s.upgraded)
-        if spec.attack_damage_walker <= 0:
-            continue
-        r = spec.attack_range
-        y_edge = 0.0 if s.player == 1 else 28.0
-        best = None
-        best_key = None
-        for m in state.mobiles:
-            if m.hp <= 0 or m.player == s.player:
-                continue
-            d = _distance(s.xy, m.xy)
-            if d > r + 1e-9:
-                continue
-            key = (d, m.hp + m.shield, abs(m.xy[1] - y_edge), abs(m.xy[0] - 13.5))
-            if best_key is None or key < best_key:
-                best_key = key
-                best = m
-        if best is None:
-            continue
-        dmg = spec.attack_damage_walker
-        new_hp, new_sh = _apply_damage(best.hp, best.shield, dmg)
-        best.hp, best.shield = new_hp, new_sh
-        events.append({"type": "attack", "attacker_uid": s.uid,
-                       "victim_uid": best.uid, "dmg": dmg,
-                       "from_xy": s.xy, "to_xy": best.xy})
+    def _fire(att_xy, att_player, att_uid, dmg_walker, dmg_tower, att_range):
+        """Pick target (walkers first, then structures); apply damage."""
+        r = att_range
+        # Walker candidates in range
+        walker_candidates = []
+        if dmg_walker > 0:
+            for other in state.mobiles:
+                if other.hp <= 0 or other.player == att_player:
+                    continue
+                dx = other.xy[0] - att_xy[0]
+                dy = other.xy[1] - att_xy[1]
+                d_sq = dx * dx + dy * dy
+                if d_sq > r * r + 1e-9:
+                    continue
+                walker_candidates.append(other)
+        target = None
+        is_walker = False
+        if walker_candidates:
+            target = _pick_target(att_xy, att_player, walker_candidates)
+            is_walker = True
+        if target is None and dmg_tower > 0:
+            struct_candidates = []
+            for s in state.structures.values():
+                if s.hp <= 0 or s.player == att_player:
+                    continue
+                dx = s.xy[0] - att_xy[0]
+                dy = s.xy[1] - att_xy[1]
+                if dx * dx + dy * dy > r * r + 1e-9:
+                    continue
+                struct_candidates.append(s)
+            target = _pick_target(att_xy, att_player, struct_candidates)
+            is_walker = False
+        if target is None:
+            return
+        if is_walker:
+            dmg = dmg_walker
+            new_hp, new_sh = _apply_damage(target.hp, target.shield, dmg)
+            target.hp, target.shield = new_hp, new_sh
+        else:
+            dmg = dmg_tower
+            target.hp -= dmg
+        events.append({"type": "attack", "attacker_uid": att_uid,
+                       "victim_uid": target.uid, "dmg": dmg,
+                       "from_xy": att_xy, "to_xy": target.xy})
 
-    # Mobile attackers — live_mobiles may have changed; re-scan state.mobiles.
-    for m in attacker_mobiles:
-        if m.hp <= 0:
+    # Turrets first
+    for s in attacker_structs:
+        spec = config.structure_spec(IDX_TURRET, upgraded=s.upgraded)
+        if spec.attack_damage_walker <= 0 and spec.attack_damage_tower <= 0:
             continue
+        _fire(s.xy, s.player, s.uid, spec.attack_damage_walker,
+              spec.attack_damage_tower, spec.attack_range)
+
+    # Mobile attackers
+    for m in attacker_mobiles:
         spec = config.mobile_spec(m.type_idx)
         if spec.attack_damage_walker <= 0 and spec.attack_damage_tower <= 0:
             continue
-        r = spec.attack_range
-        y_edge = 0.0 if m.player == 1 else 28.0
-        best = None
-        best_key = None
-        best_kind = None
-        # Enemy mobiles (walker damage)
-        if spec.attack_damage_walker > 0:
-            for other in state.mobiles:
-                if other is m or other.hp <= 0 or other.player == m.player:
-                    continue
-                d = _distance(m.xy, other.xy)
-                if d > r + 1e-9:
-                    continue
-                key = (d, other.hp + other.shield, abs(other.xy[1] - y_edge), abs(other.xy[0] - 13.5))
-                if best_key is None or key < best_key:
-                    best_key = key
-                    best = other
-                    best_kind = "mobile"
-        # Enemy structures (tower damage)
-        if spec.attack_damage_tower > 0:
-            for s in state.structures.values():
-                if s.hp <= 0 or s.player == m.player:
-                    continue
-                d = _distance(m.xy, s.xy)
-                if d > r + 1e-9:
-                    continue
-                key = (d, s.hp, abs(s.xy[1] - y_edge), abs(s.xy[0] - 13.5))
-                if best_key is None or key < best_key:
-                    best_key = key
-                    best = s
-                    best_kind = "struct"
-        if best is None:
-            continue
-        if best_kind == "mobile":
-            dmg = spec.attack_damage_walker
-            new_hp, new_sh = _apply_damage(best.hp, best.shield, dmg)
-            best.hp, best.shield = new_hp, new_sh
-        else:
-            dmg = spec.attack_damage_tower
-            best.hp -= dmg
-        events.append({"type": "attack", "attacker_uid": m.uid,
-                       "victim_uid": best.uid, "dmg": dmg,
-                       "from_xy": m.xy, "to_xy": best.xy})
+        _fire(m.xy, m.player, m.uid, spec.attack_damage_walker,
+              spec.attack_damage_tower, spec.attack_range)
 
 
 def clear_destroyed(state: SimState, events: List[dict]) -> None:
