@@ -23,6 +23,11 @@ replays/*
 # Built algo zips
 algos/*.zip
 
+# Evolution run artifacts (evolve.py outputs; see tools/evolve.py)
+tools/evolve_*.json
+tools/evolve_*.txt
+tools/evolve_*.pkl
+
 # Local Claude Code state
 .claude/settings.local.json
 .claude/projects/

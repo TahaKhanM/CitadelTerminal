@@ -1,5 +1,0 @@
-/opt/miniconda3/lib/python3.13/site-packages/cma/s.py:16: UserWarning: Could not import matplotlib.pyplot, therefore ``cma.plot()`` etc. is not available
-  _warnings.warn('Could not import matplotlib.pyplot, therefore'
-[16:33:07] cma=4.4.4 gens=12 pop=20 n=2 sigma0=0.3
-[16:33:07] opponents: ['v14_support_caravan', 'v13_second_ring', 'opp_scout_rush', 'opp_demo_line', 'opp_turret_castle']
-[16:33:07] knobs (16): ['SCOUT_THRESHOLD_MULT', 'DEMO_THRESHOLD_MULT', 'DEMO_FRONT_THRESHOLD', 'PRESSURE_TRIGGER_MULT', 'BUILD_T_UPGRADE_CENTER', 'BUILD_T_UPGRADE_SIDELANE', 'BUILD_T_UPGRADE_OUTER_MID', 'BUILD_T_UPGRADE_OUTER_EDGE', 'BUILD_T_UPGRADE_INNER_CORNER', 'BUILD_T_OUTER_CORNERS', 'HOARD_T_START', 'HOARD_T_UPGRADE_SECOND_RING', 'HOARD_T_THIRD_RING', 'HOARD_T_WALL_UPGRADES', 'HOARD_T_OUTER_RING', 'UPGRADE_HP_PCT']
