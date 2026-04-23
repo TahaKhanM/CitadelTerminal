@@ -73,6 +73,13 @@ class Mobile:
     finished_navigating: bool = False
     # Set by system_move when finished_navigating AND xy is in nav targets.
     reached_target: bool = False
+    # Set by system_breach when the mobile breaches. Engine's BreachSystem
+    # calls disableGameObject (BreachSystem.java:28) → attack component
+    # isEnabled==false → TargetAndAttackSystem.java:30 skips it from the
+    # attacker snapshot. SDed / attack-killed mobiles are NOT disabled
+    # and still fire one last shot (engine's `attackWhenDestroyed` gate);
+    # only breachers must be explicitly excluded from the attacker list.
+    breached: bool = False
 
 
 # ------------------------------------------------------------ sim state

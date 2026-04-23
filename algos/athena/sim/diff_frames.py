@@ -72,14 +72,16 @@ def replay_event_counts_per_frame(replay_action_frames: list) -> list:
 
 
 def sim_frame_by_frame(state: SimState, config: SimConfig, max_frames: int = 300):
-    """Yield per-frame event lists for one action phase."""
+    """Yield per-frame event lists for one action phase.
+
+    Post-Cluster-D flow: deaths fire inline at each kill site, so there
+    is no pre-frame events-bucket for carried-over deaths. clear_destroyed
+    runs AFTER systems each frame to pop dead units before the next
+    iteration (matches simulate_action_phase_iter)."""
     f = 0
     while f < max_frames:
-        pre_events = []
-        clear_destroyed(state, pre_events)
         if not state.mobiles:
             return
-
         frame_events = []
         system_move(state, config, frame_events)
         system_collision(state)
@@ -88,7 +90,8 @@ def sim_frame_by_frame(state: SimState, config: SimConfig, max_frames: int = 300
         system_breach(state, config, frame_events)
         system_self_destruct(state, config, frame_events)
         system_attack(state, config, frame_events)
-        yield f, frame_events + pre_events
+        clear_destroyed(state)
+        yield f, frame_events
         f += 1
 
 

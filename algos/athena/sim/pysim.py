@@ -439,11 +439,15 @@ def system_shield_give(state: SimState, config: SimConfig, events: List[dict]) -
 
 
 def system_breach(state: SimState, config: SimConfig, events: List[dict]) -> None:
-    """BreachSystem.breachProcess.
+    """BreachSystem.breachProcess (BreachSystem.java:21-37).
 
     Gate: finished_navigating AND reached_target.
     Effects: apply breach_damage to the ENEMY player's HP, refund
     metal_for_breach SP to OUR player, destroy the unit.
+
+    Event order per breacher matches engine's BreachSystem.java:32-35:
+      1. GlobalDeath for the breacher (removed=false).
+      2. GlobalBreached event.
     """
     for m in state.mobiles:
         if m.hp <= 0:
@@ -457,25 +461,48 @@ def system_breach(state: SimState, config: SimConfig, events: List[dict]) -> Non
         # Engine: PlayerStats.addToMetal(metalForBreach) applies
         # roundDecimals after the add, so SP stays snapped to 0.1.
         own.sp = _round01(own.sp + spec.metal_for_breach)
+        events.append({"type": "death", "xy": m.xy, "uid": m.uid,
+                       "type_idx": m.type_idx, "player": m.player,
+                       "removed": False})
         events.append({"type": "breach", "xy": m.xy, "dmg": spec.breach_damage,
                        "attacker_type": m.type_idx, "attacker_uid": m.uid,
                        "attacker_player": m.player})
-        m.hp = 0  # destroyed on same frame
+        # Engine disables the breacher (BreachSystem.java:28) — this flag
+        # is what system_attack's snapshot filter uses to exclude
+        # breachers (they have hp=0 like SDers + attack-killed mobiles
+        # but should NOT fire, unlike the other two).
+        m.breached = True
+        m.hp = 0  # destroyed on same frame; clear_destroyed pops before yield
 
 
-def _apply_damage(target_hp: float, target_shield: float, dmg: float) -> Tuple[float, float]:
-    """Engine damage flow: if dmg <= shield_total → absorb onto shields; else
-    shields wiped AND remainder hits HP.
-    Returns (new_hp, new_shield)."""
+def _apply_damage(target_hp: float, target_shield: float,
+                   dmg: float) -> Tuple[float, float, bool]:
+    """Engine damage flow — port of HealthComponent.dealDamageToHealthComponent
+    (HealthComponent.java:62-89).
+
+    Returns (new_hp, new_shield, died).
+
+    Death semantics: `died` is True ONLY on the first alive→dead transition,
+    per engine's `currentHP <= 0.001f && oldHP > 0.0f` gate. Subsequent
+    attacks on an already-dead unit do not re-trigger death — callers rely
+    on this to avoid double-emitting GlobalDeath.
+
+    Shield absorption: if total shield >= dmg, damage is fully absorbed by
+    shields and no HP loss or death occurs. If shield is less than dmg,
+    the shield is wiped and the remainder hits HP, gated by the death
+    check above."""
     if dmg <= 0:
-        return target_hp, target_shield
+        return target_hp, target_shield, False
+    old_hp = target_hp
     if target_shield >= dmg:
-        return target_hp, target_shield - dmg
-    return target_hp - (dmg - target_shield), 0.0
+        return target_hp, target_shield - dmg, False
+    new_hp = target_hp - (dmg - target_shield)
+    died = (new_hp <= 0.001 and old_hp > 0.0)
+    return new_hp, 0.0, died
 
 
 def system_self_destruct(state: SimState, config: SimConfig, events: List[dict]) -> None:
-    """SelfDestructSystem.processSelfDestructs.
+    """SelfDestructSystem.processSelfDestructs (SelfDestructSystem.java:24-63).
 
     Gate from agent spec & bytecode: `finished_navigating AND NOT
     reached_target AND steps_taken >= selfDestructStepsRequired`. Flags
@@ -486,11 +513,36 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
     self_destruct_range; deal self_destruct_damage_tower to enemy
     structures in range; destroy the self-destructor. Units that are
     stuck but haven't walked 5 tiles are silently removed without AOE.
+
+    Event order per SDer matches engine's SelfDestructSystem.java:32-60:
+      1. For each collided victim (walker and tower interleaved by
+         collider iteration in engine; SimCore splits into walkers-
+         first-then-structures until a ProximityArena port lands —
+         the per-bucket event ordering this produces is a Cluster H
+         concern, not Cluster D).
+         a. Apply damage via HealthComponent.dealDamageToHealthComponent.
+         b. Emit GlobalDamaged (line 42).
+         c. If victim died, emit GlobalDeath (line 44).
+      2. Emit GlobalSelfDestruct event (line 50) — SimCore emits ONE
+         regardless of whether attackWalker == attackTower. The engine
+         emits two when the damage values differ; correcting that is
+         Cluster E.
+      3. Emit GlobalDeath for the SD-er itself (line 59) — always
+         fires, even if the SD dealt no damage (attacker.hp set to 0).
     """
+    # No hp filter here — engine's SD gate is nav-only
+    # (SelfDestructSystem.java:26-27). If SDer M1 kills SDer M2 (hp→0) this
+    # same frame, M2's SD still fires: M2 was in the pre-loop snapshot and
+    # engine's loop only checks nav flags, not current hp. Filtering by hp
+    # breaks SD-cascade parity on replays with dense mobile clusters.
     for m in state.mobiles:
-        if m.hp <= 0:
-            continue
         if not (m.finished_navigating and not m.reached_target):
+            continue
+        if m.breached:
+            # Breachers have reachedTarget=True so they already failed the
+            # gate above, but defensive check in case of future
+            # refactoring: breachers were disabled by BreachSystem
+            # (engine: BreachSystem.java:28) and don't SD.
             continue
         spec = config.mobile_spec(m.type_idx)
         if m.steps_taken >= spec.self_destruct_steps_required:
@@ -502,19 +554,34 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
                     continue
                 if _distance(m.xy, other.xy) > r + 1e-9:
                     continue
-                other.hp, other.shield = _apply_damage(other.hp, other.shield, dmg_walker)
+                new_hp, new_sh, died = _apply_damage(other.hp, other.shield, dmg_walker)
+                other.hp, other.shield = new_hp, new_sh
                 events.append({"type": "damage", "xy": other.xy, "dmg": dmg_walker,
                                "victim_uid": other.uid, "source_uid": m.uid})
+                if died:
+                    events.append({"type": "death", "xy": other.xy, "uid": other.uid,
+                                   "type_idx": other.type_idx, "player": other.player,
+                                   "removed": False})
             for s in list(state.structures.values()):
                 if s.hp <= 0 or s.player == m.player:
                     continue
                 if _distance(m.xy, s.xy) > r + 1e-9:
                     continue
-                s.hp -= dmg_tower
+                new_hp, _sh, died = _apply_damage(s.hp, 0.0, dmg_tower)
+                s.hp = new_hp
                 events.append({"type": "damage", "xy": s.xy, "dmg": dmg_tower,
                                "victim_uid": s.uid, "source_uid": m.uid})
+                if died:
+                    events.append({"type": "death", "xy": s.xy, "uid": s.uid,
+                                   "type_idx": s.type_idx, "player": s.player,
+                                   "removed": False})
             events.append({"type": "selfDestruct", "xy": m.xy, "uid": m.uid,
                            "player": m.player})
+        # SDer is always destroyed, even if steps_taken < minimumSteps
+        # (engine: SelfDestructSystem.java:58-60).
+        events.append({"type": "death", "xy": m.xy, "uid": m.uid,
+                       "type_idx": m.type_idx, "player": m.player,
+                       "removed": False})
         m.hp = 0
 
 
@@ -622,13 +689,35 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
         structures). Skipped entirely if no target in either list.
       * Damage applied IMMEDIATELY via dealDamageToHealthComponent.
     """
-    # Snapshot attackers: anyone with hp > 0 at phase start fires.
+    # Snapshot attackers. Engine gate is `isEnabled() || attackWhenDestroyed`
+    # (TargetAndAttackSystem.java:29-30): a unit that DIED this frame still
+    # fires if its attack component is enabled (i.e. not disabled by
+    # BreachSystem's disableGameObject). SDers set `selfDestructed=true`
+    # which triggers attackWhenDestroyed, so they also fire their last
+    # shot. Only BREACHERS are excluded — SimCore tracks that via
+    # Mobile.breached (set in system_breach).
+    #
+    # No hp filter here. Dying turrets still fire; dying mobiles (from
+    # SD or earlier attack) still fire; dying targets still get hit
+    # in _fire via the candidates' hp>0 filter.
     attacker_structs = [s for s in state.structures.values()
-                        if s.hp > 0 and s.type_idx == IDX_TURRET]
-    attacker_mobiles = [m for m in state.mobiles if m.hp > 0]
+                        if s.type_idx == IDX_TURRET]
+    attacker_mobiles = [m for m in state.mobiles if not m.breached]
 
     def _fire(att_xy, att_player, att_uid, dmg_walker, dmg_tower, att_range):
-        """Pick target (walkers first, then structures); apply damage."""
+        """Pick target (walkers first, then structures); apply damage; emit
+        attack (+ death if target died this hit).
+
+        Engine emits per hit in this order (TargetAndAttackSystem.java:
+        111-118):
+          1. GlobalAttack
+          2. GlobalDamaged   ← synthesized by _translate_events_to_buckets
+                                from the attack event (not a separate flat
+                                event here)
+          3. GlobalDeath     ← only if this hit killed the target (first
+                                alive→dead transition per HealthComponent
+                                .java:75/83)
+        """
         r = att_range
         # Walker candidates in range
         walker_candidates = []
@@ -663,14 +752,19 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
             return
         if is_walker:
             dmg = dmg_walker
-            new_hp, new_sh = _apply_damage(target.hp, target.shield, dmg)
+            new_hp, new_sh, died = _apply_damage(target.hp, target.shield, dmg)
             target.hp, target.shield = new_hp, new_sh
         else:
             dmg = dmg_tower
-            target.hp -= dmg
+            new_hp, _sh, died = _apply_damage(target.hp, 0.0, dmg)
+            target.hp = new_hp
         events.append({"type": "attack", "attacker_uid": att_uid,
                        "victim_uid": target.uid, "dmg": dmg,
                        "from_xy": att_xy, "to_xy": target.xy})
+        if died:
+            events.append({"type": "death", "xy": target.xy, "uid": target.uid,
+                           "type_idx": target.type_idx, "player": target.player,
+                           "removed": False})
 
     # Turrets first
     for s in attacker_structs:
@@ -689,26 +783,24 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
               spec.attack_damage_tower, spec.attack_range)
 
 
-def clear_destroyed(state: SimState, events: List[dict]) -> None:
+def clear_destroyed(state: SimState, events: Optional[List[dict]] = None) -> None:
+    """Pop dead units from state and keep pathfinders in sync. Does NOT emit
+    death events — those fire inline at each kill site (system_attack /
+    system_self_destruct / system_breach), matching engine's
+    TargetAndAttackSystem.java:115-118 / SelfDestructSystem.java:43-60 /
+    BreachSystem.java:32-33 emission sites.
+
+    The `events` parameter is retained for back-compat but unused (old
+    simulate_action_phase passed a flat list here). The engine's
+    Game.clearDestroyedGameObjects (Game.java:184-193) is similarly a
+    pure list-cleanup — no events."""
     to_kill = [xy for xy, s in state.structures.items() if s.hp <= 0]
     for xy in to_kill:
-        s = state.structures.pop(xy)
+        state.structures.pop(xy)
         if state.pathfinders is not None:
             for pf in state.pathfinders.values():
                 pf.remove(xy[0], xy[1])
-        events.append({"type": "death", "xy": xy, "uid": s.uid,
-                       "type_idx": s.type_idx, "player": s.player, "self_destruct": False})
-    survivors = []
-    for m in state.mobiles:
-        if m.hp > 0:
-            survivors.append(m)
-        else:
-            sd = m.finished_navigating and not m.reached_target and \
-                 m.steps_taken >= 5  # engine's stepsRequired
-            events.append({"type": "death", "xy": m.xy, "uid": m.uid,
-                           "type_idx": m.type_idx, "player": m.player,
-                           "self_destruct": sd})
-    state.mobiles = survivors
+    state.mobiles = [m for m in state.mobiles if m.hp > 0]
 
 
 # --------------------------------------------------------------- top-level
@@ -731,7 +823,6 @@ def simulate_action_phase(
     frame_events: List[dict] = []
     f = 0
     while f < max_frames:
-        clear_destroyed(state, frame_events)
         if not state.mobiles:
             break
 
@@ -743,9 +834,11 @@ def simulate_action_phase(
         system_self_destruct(state, config, frame_events)
         system_attack(state, config, frame_events)
 
-        f += 1
+        # Post-clear per frame — dead units pop before the next frame's
+        # systems run (engine: Game.java:181 end-of-engineLoop clear).
+        clear_destroyed(state)
 
-    clear_destroyed(state, frame_events)
+        f += 1
 
     p1_dmg = max(0.0, p2_start_hp - state.p2.hp)
     p2_dmg = max(0.0, p1_start_hp - state.p1.hp)
@@ -916,20 +1009,22 @@ def _translate_events_to_buckets(
                 _pid_persp(v_ply, perspective),
             ])
         elif t == "death":
-            # type_idx & player are stored on the event itself (clear_destroyed
-            # reads them off the dying Structure/Mobile before pop).
+            # type_idx & player are stamped on the event at kill time by
+            # system_attack / system_self_destruct / system_breach (and later
+            # by system_remove_own_unit in Cluster F). The `removed` flag
+            # tracks engine's GlobalDeath.removed: True only for deaths from
+            # RemoveOwnUnitSystem (refund), False for combat deaths.
             xy = e.get("xy") or (0, 0)
-            is_removed = bool(e.get("self_destruct") or False)
-            # engine's `removed` flag is True when death originated from
-            # RemoveOwnUnitSystem (refund). Our sim doesn't distinguish that
-            # yet — a SD-death reuses the flag but semantically is wrong.
-            # Known Step 2 fix.
+            # NOTE: use `get(k, default)` NOT `get(k) or default` — walls
+            # have type_idx==0 which is falsy, and `0 or -1` evaluates to
+            # -1 (this bug persisted across several commits until Cluster D
+            # finally surfaced it via inlined wall-death emission).
             buckets["death"].append([
                 [int(xy[0]), int(xy[1])],
-                int(e.get("type_idx") or -1),
+                int(e.get("type_idx", -1)),
                 str(e.get("uid")),
-                _pid_persp(int(e.get("player") or 0), perspective),
-                is_removed,
+                _pid_persp(int(e.get("player", 0)), perspective),
+                bool(e.get("removed", False)),
             ])
         elif t == "breach":
             xy = e.get("xy") or (0, 0)
@@ -1117,17 +1212,14 @@ def simulate_action_phase_iter(
     total_frame = total_frame_start
     pending_seed = list(seed_events) if seed_events else []
     while f < max_frames:
-        # Harvest deaths-from-prior-frame before we clear them so we can keep
-        # type/player info for translation.
-        flat_events: List[dict] = []
-        clear_destroyed(state, flat_events)
-        for e in flat_events:
-            if isinstance(e, dict) and e.get("type") == "death":
-                uid = str(e.get("uid"))
-                dead_lookup[uid] = (int(e.get("type_idx") or -1),
-                                    int(e.get("player") or 0))
         if not state.mobiles:
             return
+
+        # Deploy-phase spawn events seed frame 0 (engine's processInputBuild
+        # + processInputDeploy emit into the same event buckets before the
+        # first action frame's clearEvents runs).
+        flat_events: List[dict] = list(pending_seed) if pending_seed else []
+        pending_seed = []
 
         system_move(state, config, flat_events)
         system_collision(state)
@@ -1137,12 +1229,21 @@ def simulate_action_phase_iter(
         system_self_destruct(state, config, flat_events)
         system_attack(state, config, flat_events)
 
-        # Prepend deploy-phase spawn events on frame 0 only — engine
-        # accumulates them in the same event buckets before the first
-        # frame's clearEvents runs.
-        if pending_seed:
-            flat_events = pending_seed + flat_events
-            pending_seed = []
+        # Deaths now fire inline at each kill site. Harvest type/player
+        # from those flat events so the translator can resolve event
+        # references whose target has been popped by post-clear below.
+        # Use get(k, default) to tolerate type_idx==0 (walls).
+        for e in flat_events:
+            if isinstance(e, dict) and e.get("type") == "death":
+                uid = str(e.get("uid"))
+                dead_lookup[uid] = (int(e.get("type_idx", -1)),
+                                    int(e.get("player", 0)))
+
+        # Engine's end-of-gameEngineLoop clearDestroyedGameObjects
+        # (Game.java:181) removes dead units before visibles are captured.
+        # Mirror that: post-clear BEFORE build_frame_observation so the
+        # emitted p{1,2}Units reflect the survivor set.
+        clear_destroyed(state)
 
         obs = build_frame_observation(
             state, flat_events, frame_idx=f, turn=turn,
