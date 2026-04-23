@@ -365,15 +365,24 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
 
       (distance, hp+shield, |y - player_edge|, |x - 13.5|)
 
-    Mobile units can target both enemy mobiles (walker damage) and enemy
+    Mobile units target both enemy mobiles (walker damage) and enemy
     structures (tower damage); Turrets only target mobiles.
-    """
-    live_mobiles = [m for m in state.mobiles if m.hp > 0]
-    live_structs = [s for s in state.structures.values() if s.hp > 0]
 
-    # Turrets
-    for s in live_structs:
-        if s.type_idx != IDX_TURRET:
+    CRITICAL: each attacker re-filters `hp > 0` during target selection
+    because prior attackers in this frame may have killed mobiles. Without
+    this, multiple turrets target the same already-dead unit and waste
+    their shots (observed: 19 scouts "survive" when replay shows 0).
+    """
+    # Build the list of attackers up-front; target selection reads
+    # state.mobiles / state.structures live (so mutations apply).
+    attacker_structs = [s for s in state.structures.values() if s.hp > 0 and s.type_idx == IDX_TURRET]
+    attacker_mobiles = [m for m in state.mobiles if m.hp > 0]
+
+    # Turrets first (matches engine: iteration order is game-objects insertion
+    # order; Turrets existed from earlier turns so they're earlier in the list
+    # than same-turn-spawned mobiles).
+    for s in attacker_structs:
+        if s.hp <= 0:
             continue
         spec = config.structure_spec(IDX_TURRET, upgraded=s.upgraded)
         if spec.attack_damage_walker <= 0:
@@ -382,8 +391,8 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
         y_edge = 0.0 if s.player == 1 else 28.0
         best = None
         best_key = None
-        for m in live_mobiles:
-            if m.player == s.player:
+        for m in state.mobiles:
+            if m.hp <= 0 or m.player == s.player:
                 continue
             d = _distance(s.xy, m.xy)
             if d > r + 1e-9:
@@ -401,8 +410,10 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
                        "victim_uid": best.uid, "dmg": dmg,
                        "from_xy": s.xy, "to_xy": best.xy})
 
-    # Mobile attackers — refresh live list since Turrets may have killed some.
-    for m in [mm for mm in state.mobiles if mm.hp > 0]:
+    # Mobile attackers — live_mobiles may have changed; re-scan state.mobiles.
+    for m in attacker_mobiles:
+        if m.hp <= 0:
+            continue
         spec = config.mobile_spec(m.type_idx)
         if spec.attack_damage_walker <= 0 and spec.attack_damage_tower <= 0:
             continue
@@ -411,10 +422,10 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
         best = None
         best_key = None
         best_kind = None
-        # Consider enemy mobiles (walker damage)
+        # Enemy mobiles (walker damage)
         if spec.attack_damage_walker > 0:
-            for other in live_mobiles:
-                if other is m or other.player == m.player or other.hp <= 0:
+            for other in state.mobiles:
+                if other is m or other.hp <= 0 or other.player == m.player:
                     continue
                 d = _distance(m.xy, other.xy)
                 if d > r + 1e-9:
@@ -424,9 +435,9 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
                     best_key = key
                     best = other
                     best_kind = "mobile"
-        # Consider enemy structures (tower damage)
+        # Enemy structures (tower damage)
         if spec.attack_damage_tower > 0:
-            for s in live_structs:
+            for s in state.structures.values():
                 if s.hp <= 0 or s.player == m.player:
                     continue
                 d = _distance(m.xy, s.xy)
