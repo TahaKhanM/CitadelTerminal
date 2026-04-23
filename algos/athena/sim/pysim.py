@@ -59,7 +59,7 @@ from .map import (
     on_diamond,
     spawn_tile_target_edge,
 )
-from .pathfinder import navigate
+from .pathfinder import PathFinder, make_pathfinders, _HORIZONTAL, _VERTICAL, _SPAWNED
 from .state import (
     ActionResult,
     Mobile,
@@ -83,6 +83,7 @@ def _edge_set(edge: int) -> frozenset:
 
 # precompute edge sets once — used in hot path
 _EDGE_SET_CACHE = {e: _edge_set(e) for e in (EDGE_TOP_RIGHT, EDGE_TOP_LEFT, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT)}
+_EDGE_LISTS_CACHE = {e: edge_tiles(e) for e in (EDGE_TOP_RIGHT, EDGE_TOP_LEFT, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT)}
 
 
 def _distance(a: Tuple[int, int], b: Tuple[int, int]) -> float:
@@ -104,6 +105,18 @@ def _target_edge_tiles(player: int) -> frozenset:
 
 def _blocked_set(state: SimState) -> Set[Tuple[int, int]]:
     return set(state.structures.keys())
+
+
+def _ensure_pathfinders(state: SimState) -> None:
+    """Initialize 4 per-edge PathFinder instances from current structures."""
+    if state.pathfinders is not None:
+        return
+    walls = [s.xy for s in state.structures.values()]
+    state.pathfinders = make_pathfinders(
+        dimension=ARENA,
+        walls=walls,
+        edge_to_perfects=_EDGE_LISTS_CACHE,
+    )
 
 
 # ----------------------------------------------------------------- deploy
@@ -142,7 +155,9 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
             xy=(x, y), type_idx=tidx, upgraded=False,
             hp=spec.hp, uid=state.alloc_id(), player=player,
         )
-        state.structures_version += 1
+        if state.pathfinders is not None:
+            for pf in state.pathfinders.values():
+                pf.put(x, y)
 
     # Upgrades — engine's SpawnUnitsSystem (off 287–855):
     #   currentHP += (upgradeMaxHP − baseMaxHP), clamped to upgradeMaxHP.
@@ -174,24 +189,24 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
 
 # -------------------------------------------------------- per-frame systems
 
-def _recompute_path(m: Mobile, state: SimState) -> None:
-    m.path = navigate(m.xy, m.target_edge, _blocked_set(state))
-    m.path_version = state.structures_version
-
-
 def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
-    """NavigateToEdgeSystem.moveComponents — float-accumulator model.
+    """Exact port of NavigateToEdgeSystem.moveComponents (decompiled Java
+    in research/engine_decompiled/sources/.../NavigateToEdgeSystem.java:35).
 
-    Per frame, for each mobile that's still navigating:
-      buildup += speed
-      if buildup >= 0.9999:
-        buildup -= 1.0
-        step one tile along path
-      if the pathfinder returns same-tile on getStep:
-        finished_navigating = True
-        reached_target = (current tile is on target edge)
+    For each navigating mobile:
+      1. `nav.currentMoveBuildup += nav.speed`
+      2. if buildup < 0.9999 → skip frame
+      3. `buildup -= 1.0`
+      4. `nextTile = pathfinder.getStep(pos.x, pos.y, nav.lastMove)`
+      5. `nav.lastMove = (nextTile.y == pos.y) ? HORIZONTAL : VERTICAL`
+      6. if `delta == (0,0)`:
+           `finished_navigating = true`, `speed = 0`, `navigating = false`;
+           `reached_target = true` iff position matches any navigation target
+      7. else move body to nextTile, increment stepsTaken, emit GlobalMove.
     """
+    _ensure_pathfinders(state)
     target_tiles_cache: Dict[int, frozenset] = {1: _target_edge_tiles(1), 2: _target_edge_tiles(2)}
+    pathfinders = state.pathfinders
     for m in state.mobiles:
         if m.hp <= 0 or m.finished_navigating:
             continue
@@ -200,46 +215,21 @@ def system_move(state: SimState, config: SimConfig, events: List[dict]) -> None:
         if m.move_buildup < _MOVE_THRESHOLD:
             continue
         m.move_buildup -= 1.0
-
-        # Re-path if structures changed since last compute (matches engine's
-        # getStep semantics) OR path head doesn't align with current tile.
-        if (m.path_version != state.structures_version
-                or not m.path or m.path[0] != m.xy):
-            _recompute_path(m, state)
-
-        next_tile = None
-        if len(m.path) >= 2:
-            cand = m.path[1]
-            # Guard: structure may have been placed on the next tile during
-            # the same turn (e.g. deploy ordering). Re-nav in that case.
-            if cand in state.structures:
-                _recompute_path(m, state)
-                if len(m.path) >= 2 and m.path[1] not in state.structures:
-                    cand = m.path[1]
-                else:
-                    cand = None
-            next_tile = cand
-
-        if next_tile is None:
-            # Pathfinder stuck. Engine's getStep returns same-tile here.
+        pf: PathFinder = pathfinders[m.target_edge]
+        nx, ny = pf.get_step(m.xy[0], m.xy[1], m.last_move)
+        # lastMove: horizontal=1 if y unchanged, else vertical=2
+        m.last_move = _HORIZONTAL if ny == m.xy[1] else _VERTICAL
+        dx = nx - m.xy[0]
+        dy = ny - m.xy[1]
+        if dx == 0 and dy == 0:
             m.finished_navigating = True
+            # reached_target iff current position is a navigation target
             m.reached_target = m.xy in target_tiles_cache[m.player]
             continue
-
         prev = m.xy
-        m.xy = next_tile
-        m.path = m.path[1:]
+        m.xy = (nx, ny)
         m.steps_taken += 1
-        events.append({"type": "move", "uid": m.uid, "from": prev, "to": next_tile})
-        # Engine's rule: finishedNavigating is set ONLY when getStep returns
-        # the same tile as current (delta=0). Successfully moving to a new
-        # tile NEVER sets it, even if the new tile is the current path end.
-        # The next frame's move will call getStep again and set
-        # finishedNavigating if still stuck; meanwhile the attack phase
-        # this frame can still destroy the blocker.
-        if m.xy in target_tiles_cache[m.player]:
-            m.finished_navigating = True
-            m.reached_target = True
+        events.append({"type": "move", "uid": m.uid, "from": prev, "to": m.xy})
 
 
 def system_collision(state: SimState) -> None:
@@ -334,15 +324,15 @@ def _apply_damage(target_hp: float, target_shield: float, dmg: float) -> Tuple[f
 def system_self_destruct(state: SimState, config: SimConfig, events: List[dict]) -> None:
     """SelfDestructSystem.processSelfDestructs.
 
-    Gate: finished_navigating AND NOT reached_target AND steps_taken >=
-    selfDestructStepsRequired.
+    Gate from agent spec & bytecode: `finished_navigating AND NOT
+    reached_target AND steps_taken >= selfDestructStepsRequired`. Flags
+    were already set by system_move this frame (or a prior frame) via
+    the delta=0 return from get_step.
 
     Effects: deal self_destruct_damage_walker to enemy mobiles in
-    self_destruct_range; deal self_destruct_damage_tower to enemy structures
-    in range; destroy the self-destructor.
-
-    Units that are stuck but haven't walked 5 tiles are silently removed
-    without AOE.
+    self_destruct_range; deal self_destruct_damage_tower to enemy
+    structures in range; destroy the self-destructor. Units that are
+    stuck but haven't walked 5 tiles are silently removed without AOE.
     """
     for m in state.mobiles:
         if m.hp <= 0:
@@ -484,7 +474,9 @@ def clear_destroyed(state: SimState, events: List[dict]) -> None:
     to_kill = [xy for xy, s in state.structures.items() if s.hp <= 0]
     for xy in to_kill:
         s = state.structures.pop(xy)
-        state.structures_version += 1
+        if state.pathfinders is not None:
+            for pf in state.pathfinders.values():
+                pf.remove(xy[0], xy[1])
         events.append({"type": "death", "xy": xy, "uid": s.uid,
                        "type_idx": s.type_idx, "player": s.player, "self_destruct": False})
     survivors = []

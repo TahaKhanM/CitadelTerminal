@@ -61,24 +61,18 @@ class Mobile:
     # Movement bookkeeping
     spawn_xy: Tuple[int, int]
     target_edge: int       # game_map edge constant (see sim.map)
-    # Step counter: number of moves completed so far (sub-frame granularity OK).
+    # Step counter: number of moves completed so far.
     steps_taken: int = 0
     # Engine uses a float accumulator: `buildup += speed` per frame; move
     # fires and `buildup -= 1.0` when buildup >= 0.9999.
     move_buildup: float = 0.0
-    # Cache of the full remaining path (list of (x,y)), re-computed when
-    # structures change or the unit reaches end of path.
-    path: List[Tuple[int, int]] = field(default_factory=list)
-    # Already-applied shielders — engine uses one HashSet per Support; we
-    # instead track "has been shielded by UID X" per mobile so the set lookup
-    # is symmetric to the engine's model (applied on Support side).
-    shielded_by: Set[str] = field(default_factory=set)
-    # Set by system_move when pathfinder returned same-tile.
+    # `lastMove` hint passed into PathFinder.get_step() — 0=SPAWNED, 1=HORIZONTAL,
+    # 2=VERTICAL. Updated after every successful move per engine semantics.
+    last_move: int = 0
+    # Set by system_move when pathfinder returned the same tile (delta=0).
     finished_navigating: bool = False
-    # Set by system_move when finished_navigating AND xy is in target-edge set.
+    # Set by system_move when finished_navigating AND xy is in nav targets.
     reached_target: bool = False
-    # Version of state.structures at the time path was last computed.
-    path_version: int = -1
 
 
 # ------------------------------------------------------------ sim state
@@ -103,12 +97,11 @@ class SimState:
     p2: PlayerStats
     # Monotonic unit-id counter for new mobile/structure ids
     _next_id: int = 1_000_000
-    # Increments whenever structures dict mutates (add/remove). Each Mobile
-    # stores `path_version` from the last successful recompute; movement
-    # system re-paths whenever the state's version moves past the mobile's.
-    # Matches engine semantics: getStep is called every move, so when a
-    # structure dies mid-frame, the next move routes around the new gap.
-    structures_version: int = 0
+    # The 4 per-edge PathFinder instances (see sim.pathfinder). Populated by
+    # `init_pathfinders()` after the initial structures are in place and
+    # kept in sync thereafter via put()/remove() calls from
+    # apply_deploy_actions + clear_destroyed.
+    pathfinders: Optional[dict] = None
 
     # --- helpers ---
 
@@ -126,7 +119,9 @@ class SimState:
     def remove_structure(self, s: Structure) -> None:
         if self.structures.get(s.xy) is s:
             del self.structures[s.xy]
-            self.structures_version += 1
+            if self.pathfinders is not None:
+                for pf in self.pathfinders.values():
+                    pf.remove(s.xy[0], s.xy[1])
 
     def is_occupied(self, xy: Tuple[int, int]) -> bool:
         return xy in self.structures
