@@ -29,6 +29,8 @@ STARTER_KIT = REPO_ROOT / "C1GamesStarterKit-master"
 ENGINE_JAR = STARTER_KIT / "engine.jar"
 CONFIG_JSON = STARTER_KIT / "game-configs.json"
 
+subprocess.run([str(REPO_ROOT / "tools" / "apply_competition_config.sh")], check=True)
+
 
 def resolve_algo(name: str) -> Path:
     p = Path(name)

@@ -28,6 +28,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STARTER_KIT="$REPO_ROOT/C1GamesStarterKit-master"
 DEFAULT_OPPONENT="$STARTER_KIT/python-algo"
 
+"$REPO_ROOT/tools/apply_competition_config.sh"
+
 if [ $# -lt 1 ]; then
   echo "Usage: $0 <algo_name> [opponent=<starter>] [n=5]"
   echo ""
