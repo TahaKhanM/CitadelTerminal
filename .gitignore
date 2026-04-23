@@ -37,3 +37,4 @@ tools/evolve_*.pkl
 
 # Extracted action JSONs (reproduce via tools/replay_to_actions.py)
 replays/ranked/*.actions.json
+tools/cfr.jar
