@@ -202,40 +202,26 @@ at this point, the queue order — which is the push order from step
 6.1 (neighbors first, in RIGHT/LEFT/DOWN/UP order, preceded by the
 unit's own tile) — decides the tiebreak.
 
-### §6.7 CAVEAT — filter #1 has a subtle bug
-On re-reading the compacting loop at lines 371–380:
-```java
-int n = Integer.MAX_VALUE;
-int numPossibleSteps = this.possibleSteps.size();
-for (i = 0; i < numPossibleSteps; ++i) {
-    this.possibleSteps.next();
-    stepX = this.possibleSteps.currX;
-    stepY = this.possibleSteps.currY;
-    if (this.pathlength[this.index(stepX, stepY)] > s) continue;
-    s = this.pathlength[this.index(stepX, stepY)];
-    this.possibleSteps.push(stepX, stepY);
-}
-```
-`s` is a `void var7_8` in the CFR output (actually `int` with
-no-stack-slot init, same bug as `void`), initialized implicitly to 0.
-The `if` is `pathlength > s`. So the comparison starts against 0; any
-first candidate with pathlength ≥ 0 passes the check (all of them) and
-updates `s`. After that the filter narrows as `s` drops. The filter is
-NOT symmetric — it depends on candidate ORDER.
+### §6.7 Filter #1 initial value — `s` starts at MAX_VALUE
+CFR's variable naming made this ambiguous: the decompiled source shows
+`int n = Integer.MAX_VALUE;` but uses a different-looking `s` in the
+comparison. **The raw bytecode (PathFinder.class offsets 139–141)
+disambiguates**: `ldc 2147483647; istore 7` — local slot 7 is `s` and
+it IS initialized to `Integer.MAX_VALUE`. CFR just named the same slot
+inconsistently.
 
-**Interpretation:** filter #1 effectively scans front-to-back,
-re-pushing candidates whose pathlength is ≤ running min. Candidates
-pushed earlier survive even if later candidates have strictly lower
-pathlength (because the earlier ones get re-pushed BEFORE the running
-min drops). Filter #2 then enforces strict equality with the FINAL min.
+So filter #1 behaves as expected: every candidate's pathlength ≤ the
+running min gets re-pushed AND updates `s` downward. After this
+pass, `s` holds the true minimum across all candidates. The queue
+holds a suffix where each surviving entry's pathlength is ≤ the
+running-min-at-the-time-it-was-re-pushed — which may include cells
+whose pathlength exceeds the final `s`. Filter #2 then enforces strict
+equality with the final `s`, leaving only true minima.
 
-In net: after filter #2, only cells at the minimum pathlength remain,
-but the SET of candidates depends on the order they were enumerated.
-Since we enumerate in RIGHT/LEFT/DOWN/UP order after the unit's own
-tile (`unitX,unitY` is pushed first), the effective insertion order is:
-`[self, +x, -x, +y, -y]`.
-
-This bug is in the engine; we must reproduce it faithfully.
+After filter #2, the order of survivors is the enumeration order
+restricted to minima: `[self, +x, -x, +y, -y]` — this is the tiebreak
+order that decides the final step when filters #3 and #4 can't narrow
+further.
 
 ---
 
