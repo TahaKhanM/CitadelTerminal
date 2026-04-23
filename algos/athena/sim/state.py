@@ -77,6 +77,8 @@ class Mobile:
     finished_navigating: bool = False
     # Set by system_move when finished_navigating AND xy is in target-edge set.
     reached_target: bool = False
+    # Version of state.structures at the time path was last computed.
+    path_version: int = -1
 
 
 # ------------------------------------------------------------ sim state
@@ -101,6 +103,12 @@ class SimState:
     p2: PlayerStats
     # Monotonic unit-id counter for new mobile/structure ids
     _next_id: int = 1_000_000
+    # Increments whenever structures dict mutates (add/remove). Each Mobile
+    # stores `path_version` from the last successful recompute; movement
+    # system re-paths whenever the state's version moves past the mobile's.
+    # Matches engine semantics: getStep is called every move, so when a
+    # structure dies mid-frame, the next move routes around the new gap.
+    structures_version: int = 0
 
     # --- helpers ---
 
@@ -118,6 +126,7 @@ class SimState:
     def remove_structure(self, s: Structure) -> None:
         if self.structures.get(s.xy) is s:
             del self.structures[s.xy]
+            self.structures_version += 1
 
     def is_occupied(self, xy: Tuple[int, int]) -> bool:
         return xy in self.structures
