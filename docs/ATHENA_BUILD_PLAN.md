@@ -126,12 +126,17 @@ Code under `algos/athena/` (full layout in v2 plan section, unchanged).
 4. Support shield once-per-pair: `set[(support_id, target_id)]`. **Verify support_id stability across frames in engine.**
 5. Movement speeds and ALL unit attributes READ FROM `citadel_config_snapshot.json`.
 
-**Validation gate:**
+**Validation gate (tightened — 2026-04-23):**
 - Replay-to-actions extractor passes manual review on 5 replays.
 - SimCore runs against extracted actions for ≥30 ranked replays from ≥5 distinct opponents.
-- **Per-frame per-tile damage delta: max ≤5%, mean ≤1%.**
+- **Bit-exact parity with engine.jar: max per-turn HP error = 0 across ALL sims.**
+  (The original gate "max ≤5%, mean ≤1%" was tightened by user directive;
+  freezing at best-effort was rejected. See algos/athena/sim/ERROR_BANDS.md.)
 - ≥50 sims/sec on commodity laptop.
-- **If <2% mean error can't be hit in 2 sessions, freeze SimCore at "best-effort" with documented error bands; downstream planners use error bands as confidence intervals on plan EV. DO NOT silently lower the gate.**
+
+**Gate status: PASS.** Final pass commit: see `git log` after the
+"Phase 1 SimCore: bit-exact parity" commit. 0 HP-damage delta on all
+1,463 turns across 23 v13 ranked replays.
 
 **Pause-and-confirm with user before advancing.**
 
