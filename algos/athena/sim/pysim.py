@@ -73,6 +73,15 @@ from .state import (
 _MOVE_THRESHOLD = 0.9999  # engine's accumulator threshold
 
 
+def _round01(x: float) -> float:
+    """Mirror engine's PlayerStats.roundDecimals (PlayerStats.java:151-153):
+    round(x * 10) / 10 — snap to nearest 0.1. Engine applies this after
+    every addToMetal/addToFood, so persistent SP/MP values never carry
+    float-precision noise. SimCore mirrors exactly at every SP/MP
+    mutation site."""
+    return round(x * 10.0) / 10.0
+
+
 def _is_structure(type_idx: int) -> bool:
     return type_idx in STRUCTURE_TYPES
 
@@ -153,6 +162,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
             x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
             uid = str(loc[3])
             xy = (x, y)
+            placer = state.p1 if player == 1 else state.p2
             if tidx in STRUCTURE_TYPES:
                 if not on_diamond(x, y):
                     continue
@@ -162,6 +172,11 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 if xy in state.structures:
                     continue
                 spec = config.structure_spec(tidx, upgraded=False)
+                # Deduct SP cost. Engine: SpawnUnitsSystem.attemptSpawn:146
+                # → PlayerStats.playerUseResources(metalCost, foodCost)
+                # subtracts the BASE unit-config cost from metal (SP).
+                # Round to 0.1 to mirror engine's PlayerStats.roundDecimals.
+                placer.sp = _round01(placer.sp - spec.cost_sp)
                 state.structures[xy] = Structure(
                     xy=xy, type_idx=tidx, upgraded=False,
                     hp=spec.hp, uid=uid, player=player,
@@ -175,6 +190,20 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                     continue
                 base_spec = config.structure_spec(s.type_idx, upgraded=False)
                 upg_spec = config.structure_spec(s.type_idx, upgraded=True)
+                # Deduct SP cost. Engine: createUnitConfig(…, upgraded=true)
+                # builds a UnitConfig from the unit's .upgrade variant; that
+                # variant's metalCost is what playerUseResources(line 146)
+                # deducts. In our config.py, upg_spec.cost_sp holds exactly
+                # that value.
+                #
+                # KNOWN CONFIG-SNAPSHOT DRIFT (triage queue, not a Cluster B
+                # fix): our citadel_config_snapshot.json has
+                # _raw_unit_information.EF.upgrade.cost1 = 2.0, but the live
+                # ranked engine's upgrade block has NO cost1 for EF, making
+                # metalCost inherit the base's 4.0 per Config.java:184-190's
+                # copy-then-patch behavior. Until the snapshot / config
+                # loader is fixed, EF upgrades under-deduct 2 SP vs engine.
+                placer.sp = _round01(placer.sp - upg_spec.cost_sp)
                 s.upgraded = True
                 s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
                 s.uid = uid  # new uid assigned by engine on upgrade
@@ -186,6 +215,9 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 state.structures[xy] = s
             elif tidx in MOBILE_TYPES:
                 spec = config.mobile_spec(tidx)
+                # Deduct MP cost. Engine: the same playerUseResources call
+                # deducts the mobile UnitConfig's foodCost from food (MP).
+                placer.mp = _round01(placer.mp - spec.cost_mp)
                 target_edge = spawn_tile_target_edge(xy)
                 state.mobiles.append(Mobile(
                     xy=xy, type_idx=tidx,
@@ -198,6 +230,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
     # Fallback: no ordered_events. Structure, upgrade, mobile — each in its
     # own pass. Used only by callers that lack per-event ordering.
     for player, spawns in ((1, p1_spawns), (2, p2_spawns)):
+        placer = state.p1 if player == 1 else state.p2
         for loc in spawns:
             x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
             if tidx not in STRUCTURE_TYPES:
@@ -212,6 +245,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 continue
             uid = str(loc[3])
             spec = config.structure_spec(tidx, upgraded=False)
+            placer.sp = _round01(placer.sp - spec.cost_sp)
             state.structures[xy] = Structure(
                 xy=xy, type_idx=tidx, upgraded=False,
                 hp=spec.hp, uid=uid, player=player,
@@ -221,6 +255,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                     pf.put(x, y)
 
     for player, ups in ((1, p1_upgrades), (2, p2_upgrades)):
+        placer = state.p1 if player == 1 else state.p2
         for loc in ups:
             x, y = int(loc[0]), int(loc[1])
             xy = (x, y)
@@ -229,6 +264,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 continue
             base_spec = config.structure_spec(s.type_idx, upgraded=False)
             upg_spec = config.structure_spec(s.type_idx, upgraded=True)
+            placer.sp = _round01(placer.sp - upg_spec.cost_sp)
             s.upgraded = True
             s.hp = min(upg_spec.hp, s.hp + (upg_spec.hp - base_spec.hp))
             s.uid = str(loc[2])
@@ -236,12 +272,14 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
             state.structures[xy] = s
 
     for player, spawns in ((1, p1_spawns), (2, p2_spawns)):
+        placer = state.p1 if player == 1 else state.p2
         for loc in spawns:
             x, y, tidx = int(loc[0]), int(loc[1]), int(loc[2])
             if tidx not in MOBILE_TYPES:
                 continue
             uid = str(loc[3])
             spec = config.mobile_spec(tidx)
+            placer.mp = _round01(placer.mp - spec.cost_mp)
             target_edge = spawn_tile_target_edge((x, y))
             state.mobiles.append(Mobile(
                 xy=(x, y), type_idx=tidx,
@@ -369,7 +407,9 @@ def system_breach(state: SimState, config: SimConfig, events: List[dict]) -> Non
         enemy = state.player_stats(state.enemy_player(m.player))
         enemy.hp -= spec.breach_damage
         own = state.player_stats(m.player)
-        own.sp += spec.metal_for_breach
+        # Engine: PlayerStats.addToMetal(metalForBreach) applies
+        # roundDecimals after the add, so SP stays snapped to 0.1.
+        own.sp = _round01(own.sp + spec.metal_for_breach)
         events.append({"type": "breach", "xy": m.xy, "dmg": spec.breach_damage,
                        "attacker_type": m.type_idx, "attacker_uid": m.uid,
                        "attacker_player": m.player})
