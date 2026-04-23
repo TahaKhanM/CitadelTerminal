@@ -1,0 +1,243 @@
+{
+  "_source_of_truth": "live server config delivered to on_game_start, NOT C1GamesStarterKit-master/game-configs.json",
+  "_verification_date": "2026-04-23",
+  "_verification_method": "Dumped via algos/_config_inspector; cross-checked against configs/competition-game-configs.json (which apply_competition_config.sh writes into the starter kit). Both agree.",
+  "_canonical_shorthand_note": "The live server STILL uses pre-rename shorthands (FF/EF/DF/PI/EI/SI). Doc-level conceptual names (WALL/SUPPORT/TURRET/SCOUT/DEMOLISHER/INTERCEPTOR) are NOT used in runtime config. Athena code must key on the raw shorthand; map via _shorthand_to_role below if it needs the display name.",
+  "_shorthand_to_role": {
+    "FF": "WALL",
+    "EF": "SUPPORT",
+    "DF": "TURRET",
+    "PI": "SCOUT",
+    "EI": "DEMOLISHER",
+    "SI": "INTERCEPTOR",
+    "RM": "REMOVE",
+    "UP": "UPGRADE"
+  },
+  "_starter_api_shorthand_constants": {
+    "WALL": "FF",
+    "SUPPORT": "EF",
+    "TURRET": "DF",
+    "SCOUT": "PI",
+    "DEMOLISHER": "EI",
+    "INTERCEPTOR": "SI",
+    "comment": "The vendored gamelib resolves these role names via config at on_game_start (gamelib.GameState.config[unit_information]). Do the same in Athena — never hardcode."
+  },
+  "_mobile_units_cannot_upgrade": "PI, EI, SI have no 'upgrade' block. Only FF, EF, DF are upgradeable.",
+  "_resource_indices": {
+    "SP": 0,
+    "MP": 1,
+    "comment": "These are the TYPE indices used by game_state.attempt_spawn / get_resource, not quantities."
+  },
+  "_action_frame_player_index_flip": {
+    "api_convention": "game_state.GameState / GameUnit: 0 = self, 1 = opponent",
+    "raw_action_frame_convention": "on_action_frame JSON: spawn[1] / breach[4] => 1 = self, 2 = opponent",
+    "comment": "Every action-frame parser MUST handle this flip. Common bug source."
+  },
+  "_citadel_specific_rule_deltas_vs_base_game": {
+    "wall_upgrade_costs_sp": "2 SP (was free in base)",
+    "support_base_health_1": "Base Supports (EF) die to any stray attack — single-use shield dispensers",
+    "support_upgraded_health_40": "Upgraded Supports are durable",
+    "support_upgraded_shield_formula": "shield per Support per Scout = 1 + 0.7 * Y (range 7). At Y=13 ≈ 10.1 shield.",
+    "support_base_shield_formula": "Flat 3 per Support per Scout (range 3.5).",
+    "turret_upgrade_unusually_strong": "dmg 6→20, HP 60→100, range 2.5→3.5 — Citadel upgrades beat base-game (16/75/not-range-bumped)",
+    "demolisher_range_vs_base_turret_range": "Demolisher range 4.5 > base Turret range 2.5 → demolisher_line script exploits this (base turrets can't reach demolishers sitting at y=9 while they shell y≤14 structures)",
+    "demolisher_range_vs_upgraded_turret_range": "Upgraded Turret range 3.5 still < 4.5 — demolisher_line also beats upgraded-turret defense if positioned correctly",
+    "mp_decay_per_turn": "25% (rounded to nearest 0.1) before income",
+    "mp_income_per_turn": "1 + (turn // 5) MP",
+    "sp_income_per_turn": "4 SP",
+    "bonus_sp_from_damage_dealt": "+1 SP per HP of damage dealt to opponent last turn",
+    "starting_state": "HP 40, SP 8, MP 1, MP cap 150",
+    "turn_limit": 100,
+    "deploy_time_budget_seconds": 15,
+    "deploy_time_penalty_after_budget_dmg_per_sec": 1
+  },
+  "_derived_lookup_for_sim_core": {
+    "FF": {
+      "base": {"hp": 60, "cost_sp": 1, "refund_pct": 0.9, "turns_required_to_remove": 2},
+      "upgrade": {"hp": 200, "cost_sp": 2, "refund_pct": 0.8, "turns_required_to_remove": 3}
+    },
+    "EF": {
+      "base": {"hp": 1, "cost_sp": 4, "refund_pct": 0.9, "turns_required_to_remove": 2, "shield_range": 3.5, "shield_per_unit": 3.0, "shield_bonus_per_y": 0.0},
+      "upgrade": {"hp": 40, "cost_sp": 2, "refund_pct": 0.8, "turns_required_to_remove": 3, "shield_range": 7.0, "shield_per_unit": 1.0, "shield_bonus_per_y": 0.7}
+    },
+    "DF": {
+      "base": {"hp": 60, "cost_sp": 2, "refund_pct": 0.9, "turns_required_to_remove": 2, "attack_range": 2.5, "attack_damage_walker": 6.0, "attack_damage_tower": 0.0},
+      "upgrade": {"hp": 100, "cost_sp": 4, "refund_pct": 0.8, "turns_required_to_remove": 3, "attack_range": 3.5, "attack_damage_walker": 20.0, "attack_damage_tower": 0.0}
+    },
+    "PI": {"hp": 15, "cost_mp": 1, "attack_range": 3.5, "attack_damage_walker": 2.0, "attack_damage_tower": 2.0, "speed": 1.0, "self_destruct_range": 1.5, "self_destruct_damage_walker": 15.0, "self_destruct_damage_tower": 15.0, "self_destruct_steps_required": 5, "breach_damage": 1.0, "metal_for_breach": 1.0, "upgradeable": false},
+    "EI": {"hp": 5, "cost_mp": 3, "attack_range": 4.5, "attack_damage_walker": 8.0, "attack_damage_tower": 8.0, "speed": 0.5, "self_destruct_range": 1.5, "self_destruct_damage_walker": 5.0, "self_destruct_damage_tower": 5.0, "self_destruct_steps_required": 5, "breach_damage": 1.0, "metal_for_breach": 1.0, "upgradeable": false},
+    "SI": {"hp": 40, "cost_mp": 1, "attack_range": 4.5, "attack_damage_walker": 20.0, "attack_damage_tower": 0.0, "speed": 0.25, "self_destruct_range": 1.5, "self_destruct_damage_walker": 40.0, "self_destruct_damage_tower": 40.0, "self_destruct_steps_required": 5, "breach_damage": 1.0, "metal_for_breach": 1.0, "upgradeable": false}
+  },
+  "_resources_block_verbatim": {
+    "bitsPerRound": 1.0,
+    "coresPerRound": 4.0,
+    "startingBits": 1.0,
+    "turnIntervalForBitCapSchedule": 5,
+    "turnIntervalForBitSchedule": 5,
+    "bitRampBitCapGrowthRate": 5.0,
+    "bitDecayPerRound": 0.25,
+    "roundStartBitRamp": 5,
+    "bitGrowthRate": 1.0,
+    "startingHP": 40.0,
+    "startingCores": 8.0,
+    "maxBits": 150.0,
+    "coresForPlayerDamage": 1
+  },
+  "_raw_unit_information": [
+    {
+      "iconxScale": 0.5,
+      "turnsRequiredToRemove": 2,
+      "refundPercentage": 0.9,
+      "cost1": 1.0,
+      "getHitRadius": 0.01,
+      "upgrade": {
+        "iconxScale": 0.5,
+        "turnsRequiredToRemove": 3,
+        "refundPercentage": 0.8,
+        "cost1": 2.0,
+        "icon": "S3_filter",
+        "iconyScale": 0.5,
+        "startHealth": 200.0
+      },
+      "unitCategory": 0,
+      "display": "Filter",
+      "icon": "S3_filter",
+      "iconyScale": 0.5,
+      "startHealth": 60.0,
+      "shorthand": "FF"
+    },
+    {
+      "iconxScale": 0.5,
+      "refundPercentage": 0.9,
+      "cost1": 4.0,
+      "upgrade": {
+        "iconxScale": 0.5,
+        "turnsRequiredToRemove": 3,
+        "shieldBonusPerY": 0.7,
+        "refundPercentage": 0.8,
+        "cost1": 2.0,
+        "shieldRange": 7.0,
+        "shieldPerUnit": 1.0,
+        "icon": "S3_encryptor",
+        "iconyScale": 0.5,
+        "startHealth": 40.0
+      },
+      "shieldRange": 3.5,
+      "shieldPerUnit": 3.0,
+      "display": "Encryptor",
+      "icon": "S3_encryptor",
+      "iconyScale": 0.5,
+      "shorthand": "EF",
+      "turnsRequiredToRemove": 2,
+      "shieldBonusPerY": 0.0,
+      "getHitRadius": 0.01,
+      "unitCategory": 0,
+      "startHealth": 1.0,
+      "shieldDecay": 0.0
+    },
+    {
+      "iconxScale": 0.5,
+      "attackRange": 2.5,
+      "refundPercentage": 0.9,
+      "cost1": 2.0,
+      "upgrade": {
+        "iconxScale": 0.5,
+        "attackDamageWalker": 20.0,
+        "attackRange": 3.5,
+        "turnsRequiredToRemove": 3,
+        "refundPercentage": 0.8,
+        "cost1": 4.0,
+        "icon": "S3_destructor",
+        "iconyScale": 0.5,
+        "startHealth": 100.0
+      },
+      "display": "Destructor",
+      "icon": "S3_destructor",
+      "iconyScale": 0.5,
+      "shorthand": "DF",
+      "attackDamageWalker": 6.0,
+      "turnsRequiredToRemove": 2,
+      "getHitRadius": 0.01,
+      "unitCategory": 0,
+      "startHealth": 60.0,
+      "attackDamageTower": 0.0
+    },
+    {
+      "iconxScale": 0.5,
+      "attackRange": 3.5,
+      "selfDestructDamageTower": 15.0,
+      "cost2": 1.0,
+      "metalForBreach": 1.0,
+      "display": "Ping",
+      "icon": "S3_ping",
+      "selfDestructStepsRequired": 5,
+      "iconyScale": 0.5,
+      "shorthand": "PI",
+      "playerBreachDamage": 1.0,
+      "speed": 1.0,
+      "attackDamageWalker": 2.0,
+      "getHitRadius": 0.01,
+      "unitCategory": 1,
+      "selfDestructDamageWalker": 15.0,
+      "startHealth": 15.0,
+      "selfDestructRange": 1.5,
+      "attackDamageTower": 2.0
+    },
+    {
+      "iconxScale": 0.5,
+      "attackRange": 4.5,
+      "selfDestructDamageTower": 5.0,
+      "cost2": 3.0,
+      "metalForBreach": 1.0,
+      "display": "EMP",
+      "icon": "S3_emp",
+      "selfDestructStepsRequired": 5,
+      "iconyScale": 0.5,
+      "shorthand": "EI",
+      "playerBreachDamage": 1.0,
+      "speed": 0.5,
+      "attackDamageWalker": 8.0,
+      "getHitRadius": 0.01,
+      "unitCategory": 1,
+      "selfDestructDamageWalker": 5.0,
+      "startHealth": 5.0,
+      "selfDestructRange": 1.5,
+      "attackDamageTower": 8.0
+    },
+    {
+      "iconxScale": 0.5,
+      "attackRange": 4.5,
+      "selfDestructDamageTower": 40.0,
+      "cost2": 1.0,
+      "metalForBreach": 1.0,
+      "display": "Scrambler",
+      "icon": "S3_scrambler",
+      "selfDestructStepsRequired": 5,
+      "iconyScale": 0.5,
+      "shorthand": "SI",
+      "playerBreachDamage": 1.0,
+      "speed": 0.25,
+      "attackDamageWalker": 20.0,
+      "getHitRadius": 0.01,
+      "unitCategory": 1,
+      "selfDestructDamageWalker": 40.0,
+      "startHealth": 40.0,
+      "selfDestructRange": 1.5,
+      "attackDamageTower": 0.0
+    },
+    {
+      "iconxScale": 0.5,
+      "display": "Remove",
+      "icon": "S3_removal",
+      "iconyScale": 0.5,
+      "shorthand": "RM"
+    },
+    {
+      "iconxScale": 0.5,
+      "display": "Upgrade",
+      "icon": "S3_upgrade",
+      "iconyScale": 0.5,
+      "shorthand": "UP"
+    }
+  ]
+}
