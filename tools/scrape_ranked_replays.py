@@ -3,43 +3,46 @@
 scrape_ranked_replays.py — download your uploaded algos' ranked replays from
 terminal.c1games.com.
 
-Auth model:
-  - Cookie-based. The tool uses an authenticated session cookie saved at
-    ~/.c1_session.json (overridable). You get the cookie once via the
-    `login` subcommand (headed Selenium) OR by pasting your browser's cookie
-    header directly with `login --paste`.
-  - All match/replay downloads are pure `requests` calls — no browser needed
-    at run time.
+Verified against the live site 2026-04-23:
+  PUBLIC (no cookie needed):
+    GET /api/game/leaderboard               → list algos (global; excludes
+                                              private algos like yours)
+    GET /api/game/competition               → list competitions
+    GET /api/game/algo/{id}/matches         → any algo's match history
+  AUTH-GATED (need your cookie):
+    GET /api/game/user                      → whoami (401 unauth)
+    GET /api/game/algo/{id}                 → algo detail (403 unauth)
+    (replay-download endpoint not yet known — use `harvest` to discover)
+  405/unclear:
+    GET /api/game/algo                      → 405 (exists but wrong verb)
+
+Workflow:
+  1. You tell us your algo's ID (it's in the URL on terminal.c1games.com
+     after you click into one of your algos on My Algos).
+  2. `list-matches --algo <id>` works RIGHT NOW, no login required — your
+     own algo's match history is public.
+  3. For `download`, cookies ARE required. `login` first, then `download`.
+     If the current guesses for the replay-download path return 404/403,
+     run `harvest --browser chrome`, click into a match and hit the replay
+     viewer once; we log the real URL. Paste it into ENDPOINTS['download_replay']
+     and re-run download.
 
 Subcommands:
   login [--paste | --browser chrome|firefox]
       One-time: capture the logged-in session cookie.
   whoami
-      Verify the cookie is live (hits a self-info endpoint; prints user).
-  discover [--probe]
-      Hit a menu of likely API endpoints, print status+truncated body for
-      each. Use this first time to confirm current API shape if the
-      defaults below change.
-  harvest [--browser chrome|firefox] [--pages URL...]
-      Open a browser, you click through My Algos / an algo's matches /
-      open a replay; we log every XHR/fetch the page issued to a JSON
-      file. Use when `discover` shows 404 HTML — the site's API schema
-      changes between seasons.
-  list-algos
-      List your uploaded algos (algo_id + name).
+      GET /api/game/user — verifies the cookie.
+  discover
+      Probe the ENDPOINTS dict; flag drift.
+  harvest --browser chrome [--out data/c1_api_harvest.json]
+      Open Chrome with your cookies; click around; we log every XHR/fetch.
+  find-algos [--contains SUBSTR | --user DISPLAY_NAME | --all]
+      Leaderboard-only (public). Useful for looking up *opponent* algo IDs,
+      NOT your own algos (private algos don't appear there).
   list-matches --algo ALGO_ID [--ranked-only] [--limit N]
-      List matches played by that algo, ranked first.
+      List matches. Public endpoint — works without cookies.
   download --algo ALGO_ID [--ranked-only] [--limit N] [--out DIR]
-      Download each match's replay as <algo>_<date>_vs_<opp>_<elo>_<result>.replay
-
-Examples:
-    python3 tools/scrape_ranked_replays.py login --browser firefox
-    python3 tools/scrape_ranked_replays.py list-algos
-    python3 tools/scrape_ranked_replays.py download --algo 12345 --limit 30 \\
-         --ranked-only --out replays/ranked/
-
-If a hard-coded endpoint returns 404, run `discover` and update the
-ENDPOINTS dict below — the C1 site has changed path schemes in the past.
+      Download each match's replay. Requires cookies.
 """
 
 from __future__ import annotations
@@ -72,18 +75,21 @@ DEFAULT_OUT_DIR = Path(__file__).resolve().parent.parent / "replays" / "ranked"
 # (forum.c1games.com/t/using-the-terminal-api/806 and prior scrapers that
 # hit /api/game/algo/mine). If any returns 404/HTML instead of JSON, run
 # `discover` and patch this dict.
+# Endpoints verified against the live site on 2026-04-23 (see docstring for details).
+# Paths marked "public" respond without any cookie; "auth" returns 401/403 unauth.
 ENDPOINTS = {
-    "whoami":       "/api/user/mine",
-    "list_algos":   "/api/game/algo/mine",
-    # For a specific algo, its matches list:
-    "list_matches": "/api/game/algo/{algo_id}/matches",
-    # For a specific match, the replay file:
-    "download_replay": "/api/game/replay/{match_id}",
-    # Fallback candidates (some generations of the site):
-    "_alt_list_matches_1": "/api/game/match?algo={algo_id}",
-    "_alt_list_matches_2": "/api/game/algo/{algo_id}/history",
-    "_alt_download_replay_1": "/api/game/match/{match_id}/replay",
-    "_alt_download_replay_2": "/api/game/download-replay?match={match_id}",
+    "whoami":        "/api/game/user",                       # auth; public returns 401 JSON
+    "leaderboard":   "/api/game/leaderboard",                # public
+    "algo_detail":   "/api/game/algo/{algo_id}",             # auth (private fields)
+    "list_matches":  "/api/game/algo/{algo_id}/matches",     # public! works for any algo id
+    # Replay-download endpoint needs an authenticated session. We confirmed
+    # /api/game/match exists and returns 403 unauthenticated. We try these
+    # variants in order until one yields a JSON/newline-delimited replay.
+    "download_replay":  "/api/game/match/{match_id}",
+    "_alt_replay_post": "/api/game/match",                   # POST with {"id": ...}
+    "_alt_replay_1":    "/api/game/match/{match_id}/replay",
+    "_alt_replay_2":    "/api/game/replay/{match_id}",
+    "_alt_replay_3":    "/api/game/algo/{algo_id}/matches/{match_id}",
 }
 
 
@@ -185,16 +191,26 @@ class Client:
     def get_json(self, path: str) -> Any:
         r = self.get(path)
         ct = r.headers.get("Content-Type", "")
+        if r.status_code == 401:
+            raise AuthError(f"GET {path} → 401 (session expired or missing). "
+                            f"Run `login` to refresh.")
+        if r.status_code == 403:
+            raise AuthError(f"GET {path} → 403 (forbidden for this user). "
+                            f"Body: {r.text[:120]!r}")
         if r.status_code != 200:
-            raise RuntimeError(
-                f"GET {path} → {r.status_code} {ct} body[:200]={r.text[:200]!r}"
-            )
+            raise ApiError(f"GET {path} → {r.status_code} {ct} body[:200]={r.text[:200]!r}")
         if "application/json" not in ct:
-            raise RuntimeError(
-                f"GET {path} → 200 but not JSON; body[:200]={r.text[:200]!r} — "
-                "cookie likely expired or endpoint path changed."
-            )
+            raise ApiError(f"GET {path} → 200 but not JSON; body[:200]={r.text[:200]!r}. "
+                           "Endpoint path may have changed — run `discover`.")
         return r.json()
+
+
+class AuthError(RuntimeError):
+    pass
+
+
+class ApiError(RuntimeError):
+    pass
 
 
 # ------------------------------------------------------------------ helpers
@@ -208,22 +224,35 @@ def _first_matching(d: Any, keys: List[str], default=None):
     return default
 
 
-def _normalize_match_row(row: Dict[str, Any]) -> Dict[str, Any]:
-    """Best-effort normalization. The site has returned varying schemas over
-    the years; we try common key names and keep the raw row around."""
-    rid = _first_matching(row, ["id", "matchId", "match_id", "replayId"])
-    ranked = _first_matching(row, ["ranked", "isRanked", "is_ranked"], default=False)
-    date = _first_matching(row, ["date", "created", "createdAt", "timestamp"])
-    result = _first_matching(row, ["result", "winner", "outcome"])
-    p1 = _first_matching(row, ["player1", "p1", "algo1", "my"], default={})
-    p2 = _first_matching(row, ["player2", "p2", "algo2", "opponent"], default={})
-    p1n = _first_matching(p1 if isinstance(p1, dict) else {}, ["name", "algoName", "user"])
-    p2n = _first_matching(p2 if isinstance(p2, dict) else {}, ["name", "algoName", "user"])
-    p1e = _first_matching(p1 if isinstance(p1, dict) else {}, ["elo", "rating"])
-    p2e = _first_matching(p2 if isinstance(p2, dict) else {}, ["elo", "rating"])
+def _normalize_match_row(row: Dict[str, Any], focus_algo_id: Optional[int] = None) -> Dict[str, Any]:
+    """Turn a /matches row into {id, ranked, date, won, opp_name, opp_elo, crashed, replay}.
+    Verified schema 2026-04-23: winning_algo/losing_algo dicts, subComp (None=ranked), turns, crashed, replay."""
+    rid = row.get("id")
+    sub = row.get("subComp")
+    # Ranked = not part of a tournament/subcompetition.
+    ranked = sub is None
+    date = row.get("date")
+    wa = row.get("winning_algo") or {}
+    la = row.get("losing_algo") or {}
+    # Who won from focus_algo's perspective?
+    won = None
+    if focus_algo_id is not None:
+        if isinstance(wa, dict) and wa.get("id") == focus_algo_id:
+            won = True
+        elif isinstance(la, dict) and la.get("id") == focus_algo_id:
+            won = False
+    # Opponent = the algo that isn't us.
+    if focus_algo_id is not None and isinstance(wa, dict) and wa.get("id") == focus_algo_id:
+        opp = la
+    else:
+        opp = wa if (focus_algo_id is not None and isinstance(la, dict) and la.get("id") == focus_algo_id) else la
+    opp_name = (opp or {}).get("name") if isinstance(opp, dict) else None
+    opp_elo  = (opp or {}).get("rating") if isinstance(opp, dict) else None
     return {
-        "id": rid, "ranked": bool(ranked), "date": date, "result": result,
-        "p1_name": p1n, "p2_name": p2n, "p1_elo": p1e, "p2_elo": p2e,
+        "id": rid, "ranked": bool(ranked), "date": date, "won": won,
+        "opp_name": opp_name, "opp_elo": opp_elo,
+        "turns": row.get("turns"), "crashed": bool(row.get("crashed")),
+        "has_replay": bool(row.get("replay")),
         "_raw": row,
     }
 
@@ -259,7 +288,14 @@ def cmd_login(args) -> int:
 def cmd_whoami(args) -> int:
     jar = load_cookie_jar(Path(args.cookie_file))
     c = Client(jar)
-    data = c.get_json(ENDPOINTS["whoami"])
+    try:
+        data = c.get_json(ENDPOINTS["whoami"])
+    except AuthError as e:
+        print(f"Not authenticated: {e}")
+        return 2
+    except ApiError as e:
+        print(f"API error: {e}")
+        return 3
     print(json.dumps(data, indent=2))
     return 0
 
@@ -377,146 +413,194 @@ def cmd_harvest(args) -> int:
 
 
 def cmd_list_algos(args) -> int:
-    jar = load_cookie_jar(Path(args.cookie_file))
+    """List uploaded algos. The C1 site does NOT expose a `my-algos` JSON
+    endpoint publicly; we approximate by pulling the global leaderboard
+    (public, no auth required) and filtering by --user or --contains.
+    With --all we dump the full leaderboard."""
+    jar_path = Path(args.cookie_file)
+    jar = {} if args.no_cookie else (load_cookie_jar(jar_path) if jar_path.exists() else {})
     c = Client(jar)
-    data = c.get_json(ENDPOINTS["list_algos"])
-    # Common envelope shapes: {"algos": [...]}, {"data": {"algos": [...]}}, or a bare list
-    rows: List[Dict[str, Any]] = []
-    for candidate in [data, data.get("data") if isinstance(data, dict) else None]:
-        if isinstance(candidate, dict):
-            for key in ("algos", "results", "items"):
-                if isinstance(candidate.get(key), list):
-                    rows = candidate[key]
-                    break
-        if rows:
-            break
-    if not rows and isinstance(data, list):
-        rows = data
-    if not rows:
-        print("Couldn't find algo list in response. Raw body:")
-        print(json.dumps(data, indent=2)[:2000])
+    try:
+        data = c.get_json(ENDPOINTS["leaderboard"])
+    except (AuthError, ApiError) as e:
+        print(f"leaderboard fetch failed: {e}")
+        return 3
+    algos = data.get("data", {}).get("algos", []) if isinstance(data, dict) else []
+    if not algos:
+        print("leaderboard returned no algos; raw[:400]:", json.dumps(data)[:400])
+        return 3
+
+    user = (args.user or "").lower().strip()
+    contains = (args.contains or "").lower().strip()
+    filtered = []
+    for a in algos:
+        u = ((a.get("user") or {}).get("displayName") if isinstance(a.get("user"), dict) else a.get("user")) or ""
+        name = a.get("name") or ""
+        if user and u.lower() != user:
+            continue
+        if contains and contains not in name.lower():
+            continue
+        filtered.append(a)
+    if not args.all and not user and not contains:
+        print("Pass one of: --user DISPLAY_NAME, --contains SUBSTRING, or --all")
+        print(f"(leaderboard has {len(algos)} algos total)")
         return 1
-    print(f"{'algo_id':<14} {'name':<40} status/elo")
-    print("-" * 72)
-    for row in rows:
-        rid = _first_matching(row, ["id", "algoId", "algo_id"])
-        name = _first_matching(row, ["name", "algoName", "title"])
-        status = _first_matching(row, ["status", "state"])
-        elo = _first_matching(row, ["elo", "rating"])
-        print(f"{str(rid):<14} {str(name)[:40]:<40} {status} / {elo}")
+    if args.all:
+        filtered = algos
+    print(f"{'algo_id':<10} {'rating':<7} {'lang':<7} {'user':<24} {'name':<30} created")
+    print("-" * 100)
+    for a in filtered:
+        u = (a.get("user") or {}).get("displayName") if isinstance(a.get("user"), dict) else (a.get("user") or "?")
+        print(f"{str(a.get('id')):<10} {str(a.get('rating',''))[:6]:<7} "
+              f"{str(a.get('language',''))[:6]:<7} {str(u)[:24]:<24} "
+              f"{str(a.get('name',''))[:30]:<30} {str(a.get('createdAt',''))[:10]}")
+    print(f"\n{len(filtered)} algo(s) shown (of {len(algos)} total).")
     return 0
 
 
 def _fetch_matches(c: Client, algo_id: str, limit: Optional[int]) -> List[Dict[str, Any]]:
-    """Try the primary list-matches endpoint, then each `_alt_list_matches_*` fallback."""
-    candidates = [
-        ENDPOINTS["list_matches"],
-        ENDPOINTS["_alt_list_matches_1"],
-        ENDPOINTS["_alt_list_matches_2"],
-    ]
-    last_err = None
-    for tpl in candidates:
-        path = tpl.format(algo_id=algo_id)
-        if limit:
-            sep = "&" if "?" in path else "?"
-            path = f"{path}{sep}limit={limit}"
-        try:
-            data = c.get_json(path)
-        except Exception as e:
-            last_err = e
-            continue
-        # Extract list from common envelopes
-        rows: List[Dict[str, Any]] = []
-        if isinstance(data, list):
-            rows = data
-        elif isinstance(data, dict):
-            for key in ("matches", "results", "items", "data"):
-                if isinstance(data.get(key), list):
-                    rows = data[key]
-                    break
-        if rows:
-            return rows
-        last_err = RuntimeError(f"no rows in {path} ({list(data.keys()) if isinstance(data, dict) else type(data).__name__})")
-    raise RuntimeError(f"All list-matches endpoints failed. Last: {last_err}")
+    """GET /api/game/algo/{id}/matches. Public — no auth required."""
+    path = ENDPOINTS["list_matches"].format(algo_id=algo_id)
+    if limit:
+        sep = "&" if "?" in path else "?"
+        path = f"{path}{sep}limit={limit}"
+    data = c.get_json(path)
+    inner = data.get("data", data) if isinstance(data, dict) else data
+    rows = inner.get("matches", []) if isinstance(inner, dict) else (inner if isinstance(inner, list) else [])
+    return rows
 
 
 def cmd_list_matches(args) -> int:
-    jar = load_cookie_jar(Path(args.cookie_file))
+    jar_path = Path(args.cookie_file)
+    jar = {} if args.no_cookie else (load_cookie_jar(jar_path) if jar_path.exists() else {})
     c = Client(jar)
-    rows = _fetch_matches(c, args.algo, args.limit)
-    rows = [_normalize_match_row(r) for r in rows]
+    try:
+        raw_rows = _fetch_matches(c, args.algo, args.limit)
+    except (AuthError, ApiError) as e:
+        print(f"list-matches failed: {e}")
+        return 3
+    try:
+        algo_int = int(args.algo)
+    except ValueError:
+        algo_int = None
+    rows = [_normalize_match_row(r, algo_int) for r in raw_rows]
     if args.ranked_only:
         rows = [r for r in rows if r["ranked"]]
-    print(f"{'match_id':<14} {'date':<22} {'ranked':<7} vs {'opp':<20} elo  result")
-    print("-" * 90)
+    if not rows:
+        print("No matches found (after ranked-only filter).")
+        return 0
+    print(f"{'match_id':<10} {'date':<22} {'ranked':<7} {'won':<5} vs {'opp':<18} elo  turns  crashed  replay")
+    print("-" * 105)
     for r in rows:
-        opp = r["p2_name"] or "?"
-        elo = r["p2_elo"] or ""
-        res = r["result"] or ""
-        print(f"{str(r['id']):<14} {str(r['date'])[:22]:<22} {str(r['ranked']):<7} vs {str(opp)[:20]:<20} {str(elo):<5} {res}")
+        print(f"{str(r['id']):<10} {str(r['date'])[:22]:<22} {str(r['ranked']):<7} "
+              f"{str(r['won']):<5} vs {str(r['opp_name'] or '?')[:18]:<18} "
+              f"{str(r['opp_elo'] or ''):<5} {str(r['turns']):<6} "
+              f"{str(r['crashed']):<8} {str(r['has_replay'])}")
+    print(f"\n{len(rows)} row(s).")
     return 0
 
 
-def _download_one(c: Client, match_id: str, dest: Path) -> bool:
-    """Try primary + fallback replay endpoints."""
-    for tpl_key in ("download_replay", "_alt_download_replay_1", "_alt_download_replay_2"):
-        path = ENDPOINTS[tpl_key].format(match_id=match_id)
+def _looks_like_replay(text: str) -> bool:
+    """Replay files are newline-delimited JSON; first line must be an object."""
+    head = text[:200].lstrip()
+    if not head:
+        return False
+    if head.startswith(("<!DOCTYPE", "<html", "<?xml")):
+        return False
+    return head.startswith("{")
+
+
+def _download_one(c: Client, algo_id: str, match_id: str, dest: Path) -> tuple[bool, str]:
+    """Try each candidate replay endpoint. Returns (ok, diagnostic)."""
+    last = "no candidates tried"
+    # GET variants
+    for key in ("download_replay", "_alt_replay_1", "_alt_replay_2", "_alt_replay_3"):
+        path = ENDPOINTS[key].format(match_id=match_id, algo_id=algo_id)
         r = c.get(path)
-        if r.status_code != 200:
-            continue
-        # Replay files are newline-delimited JSON; reject HTML
-        first = r.text[:80].lstrip()
-        if first.startswith("<!DOCTYPE") or first.startswith("<html"):
-            continue
-        if not first.startswith("{"):
-            continue
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        with open(dest, "wb") as f:
-            f.write(r.content)
-        return True
-    return False
+        if r.status_code == 200 and _looks_like_replay(r.text):
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with open(dest, "wb") as f:
+                f.write(r.content)
+            return True, f"ok via {key}={path}"
+        ct = r.headers.get("Content-Type", "?").split(";")[0]
+        last = f"{key}: {r.status_code} {ct}"
+    # POST variants
+    path = ENDPOINTS["_alt_replay_post"]
+    for body in ({"id": int(match_id)}, {"match_id": int(match_id)}, {"matchId": int(match_id)}):
+        r = c.s.post(BASE + path, json=body, timeout=30)
+        if r.status_code == 200 and _looks_like_replay(r.text):
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with open(dest, "wb") as f:
+                f.write(r.content)
+            return True, f"ok via POST {path} body={body}"
+        ct = r.headers.get("Content-Type", "?").split(";")[0]
+        last = f"POST {path} body={body}: {r.status_code} {ct}"
+    return False, last
 
 
 def cmd_download(args) -> int:
-    jar = load_cookie_jar(Path(args.cookie_file))
+    jar_path = Path(args.cookie_file)
+    if not jar_path.exists():
+        print(f"No cookies at {jar_path}. Replay downloads require auth — run `login` first.")
+        return 2
+    jar = load_cookie_jar(jar_path)
     c = Client(jar)
-    rows = _fetch_matches(c, args.algo, args.limit)
-    rows = [_normalize_match_row(r) for r in rows]
+    try:
+        raw_rows = _fetch_matches(c, args.algo, args.limit)
+    except (AuthError, ApiError) as e:
+        print(f"list-matches failed: {e}")
+        return 3
+    try:
+        algo_int = int(args.algo)
+    except ValueError:
+        algo_int = None
+    rows = [_normalize_match_row(r, algo_int) for r in raw_rows]
     if args.ranked_only:
         rows = [r for r in rows if r["ranked"]]
+    rows = [r for r in rows if r["has_replay"]]
     if args.limit:
         rows = rows[: args.limit]
     if not rows:
-        print("No matches to download.")
+        print("No matches to download after filters.")
         return 0
 
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"Downloading {len(rows)} replays to {out_dir}…")
     ok = fail = 0
+    first_failure_diag = None
     for i, r in enumerate(rows, 1):
         if not r["id"]:
             print(f"[{i}] skip: no match id in row {r['_raw']}")
             fail += 1
             continue
-        ts = _safe_name(r["date"] or datetime.utcnow().isoformat(), "unknown")
-        opp = _safe_name(r["p2_name"] or "opp", "opp")
-        elo = _safe_name(str(r["p2_elo"] or ""), "")
-        res = _safe_name(str(r["result"] or ""), "res")
-        name = f"algo{args.algo}_{ts}_vs_{opp}_{elo}_{res}_{r['id']}.replay"
+        ts = _safe_name((r["date"] or datetime.utcnow().isoformat()).replace(":", "-"), "unknown")
+        opp = _safe_name(r["opp_name"] or "opp", "opp")
+        elo = _safe_name(str(r["opp_elo"] or ""), "")
+        res = "win" if r["won"] else ("loss" if r["won"] is False else "r")
+        name = f"algo{args.algo}_{ts}_vs_{opp}_{elo}_{res}_m{r['id']}.replay"
         dest = out_dir / name
         if dest.exists() and not args.overwrite:
             print(f"[{i}/{len(rows)}] skip existing {dest.name}")
             continue
-        ok_one = _download_one(c, str(r["id"]), dest)
+        ok_one, diag = _download_one(c, args.algo, str(r["id"]), dest)
         if ok_one:
             ok += 1
-            print(f"[{i}/{len(rows)}] ✓ {dest.name}")
+            print(f"[{i}/{len(rows)}] ✓ {dest.name}  [{diag}]")
         else:
             fail += 1
-            print(f"[{i}/{len(rows)}] ✗ match {r['id']} (all endpoints failed)")
+            if first_failure_diag is None:
+                first_failure_diag = diag
+            print(f"[{i}/{len(rows)}] ✗ match {r['id']}  [last: {diag}]")
+            if fail >= 3 and ok == 0:
+                print("Aborting: first 3 downloads all failed. Likely endpoint mismatch.")
+                print("Run `harvest --browser chrome` to see the real replay URL, then")
+                print("patch ENDPOINTS['download_replay'] in this file.")
+                break
         time.sleep(args.sleep)
-    print(f"\nDone: {ok} downloaded, {fail} failed, total attempted {len(rows)}.")
+    print(f"\nDone: {ok} downloaded, {fail} failed, attempted {ok+fail}.")
+    if first_failure_diag:
+        print(f"First failure diag: {first_failure_diag}")
     return 0 if fail == 0 else 3
 
 
@@ -547,13 +631,18 @@ def main() -> int:
     ph.add_argument("--out", default="data/c1_api_harvest.json")
     ph.set_defaults(func=cmd_harvest)
 
-    pa = sub.add_parser("list-algos", help="list your uploaded algos")
+    pa = sub.add_parser("find-algos", help="search the public leaderboard (opponent lookup; does NOT show your private algos)")
+    pa.add_argument("--user", help="filter by displayName (exact, case-insensitive)")
+    pa.add_argument("--contains", help="filter by algo name substring")
+    pa.add_argument("--all", action="store_true", help="show the whole leaderboard")
+    pa.add_argument("--no-cookie", action="store_true", help="don't require a saved cookie (leaderboard is public)")
     pa.set_defaults(func=cmd_list_algos)
 
-    pm = sub.add_parser("list-matches", help="list matches for one algo")
+    pm = sub.add_parser("list-matches", help="list matches for one algo (public — no auth required)")
     pm.add_argument("--algo", required=True)
     pm.add_argument("--limit", type=int)
     pm.add_argument("--ranked-only", action="store_true")
+    pm.add_argument("--no-cookie", action="store_true")
     pm.set_defaults(func=cmd_list_matches)
 
     pdn = sub.add_parser("download", help="download replay files")
