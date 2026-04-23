@@ -8,9 +8,12 @@ description: Run a round-robin local tournament between multiple Citadel Termina
 Runs N algos in round-robin pairs, outputs a win-rate table.
 
 ## When to use
-- User has multiple variants (v1, v2, v3) and asks "which is best?".
-- Validating that a new change actually improves performance against its predecessors.
-- Before uploading — one last filtering step.
+- Comparing **different offensive archetypes** (center-Scout rush vs Demolisher-train vs Interceptor+Scout mix vs self-destruct wave, etc.) — this is the primary intended use now that v13-family variants all mirror-tie 40-40.
+- Measuring a new archetype against the opp_* baseline suite plus v13 to see whether it clears the ceiling.
+- Final sanity pass before uploading — which of the shortlisted archetypes is strongest.
+
+## When NOT to use
+- Tuning within the v13 family (center-only Scout archetype). Per [memory: v13 mirror-ceiling](../../../.claude/projects/-Users-tahakhan-Documents-Work-Projects-CitadelTerminal/memory/v13_mirror_ceiling.md), every v13-family variant mirror-ties v13 at 40-40 regardless of defensive tuning — a tournament between v13/v14/v15/v18/v19 produces an uninformative tie matrix. Diversify offense first ([`docs/ADVANCED_STRATEGIES_PROMPT.md`](../../../docs/ADVANCED_STRATEGIES_PROMPT.md) §5.2–§5.6), then bring the new archetypes here.
 
 ## Steps
 

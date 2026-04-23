@@ -1,4 +1,19 @@
-"""Validate gamelib_ext.simulator against real .replay files.
+"""BLOCKED — validator for gamelib_ext/simulator.py (currently non-functional).
+
+Status: `gamelib_ext/simulator.py` was deleted during the Tier 2 cleanup
+because the v1 simulator had ~30 % aggregate error — too high for any Tier 2
+search strategy (MCTS, minimax, forward-simulation-based CMA-ES) to rely on.
+Running this file today will ImportError on the `from gamelib_ext.simulator
+import ...` line below.
+
+Kept as-is so that, when a rebuilt Tier 0 simulator lands, this validator
+can be re-enabled without rewriting the replay-iteration logic. A rebuilt
+simulator must clear the same pass bar before being trusted:
+
+  Pass bar: aggregate |err| < 5 % on each replay's totals.
+
+Usage (post-rebuild only):
+  python3 tools/validate_simulator.py <replay1> [replay2 ...]
 
 For each turn T:
   1. Seed a SimState from the first action-phase frame of turn T (which
@@ -7,11 +22,6 @@ For each turn T:
   3. Sum the engine's events across all action frames of turn T to get
      ground-truth totals (damage to each side, breaches).
   4. Compare: report per-turn and aggregate error.
-
-Usage:
-  python3 tools/validate_simulator.py <replay1> [replay2 ...]
-
-Pass bar: aggregate |err| < 5 % on each replay's totals.
 """
 
 import json

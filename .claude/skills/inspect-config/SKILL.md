@@ -13,23 +13,20 @@ Some values in this competition are ambiguous across doc sources (most notably t
 - Before writing strategy code that depends on a specific number.
 - Answering questions like "does upgraded Support actually scale with Y?"
 
-## ⚠ Important: where the config comes from
+## ⚠ Important: local config drift is already patched
 
-When you run the inspector **locally**, it reads whatever config the local engine loads — which is [`C1GamesStarterKit-master/game-configs.json`](../../../C1GamesStarterKit-master/game-configs.json). That file is the **base game** snapshot and does NOT reflect the special-competition values. Running `_config_inspector` locally will show you:
-- Wall upgrade HP 150 (base), NOT 200 (competition)
-- Support base HP 30 (base), NOT 1 (competition)
-- Upgraded Support `shieldPerUnit: 4, shieldBonusPerY: 0` (base), potentially different in competition
-- Starting HP 30 / Cores 40 / Bits 5 (base), NOT HP 40 / SP 8 / MP 1 (competition)
-- And so on.
+The base-game `C1GamesStarterKit-master/game-configs.json` drifts from competition values (most notably EF as the old Encryptor with `shieldRange: 0`). This has been reconciled — see [`configs/competition-game-configs.json`](../../../configs/competition-game-configs.json) and [`tools/apply_competition_config.sh`](../../../tools/apply_competition_config.sh). All the match-running tools (`run.sh`, `bestof.py`, `tournament.py`, `eval.sh`) apply this patch before launching the engine, so local matches already run with competition values.
 
-To see the **competition** config you need one of:
+This skill's role is now **parity verification**, not drift discovery:
+- Confirm the patched local config matches the latest competition replay's header.
+- Detect when a competition rule change invalidates the tracked patch.
+- Re-verify any value the docs flag as ambiguous.
 
-1. **Upload the inspector to the competition server**, let it play at least one ranked match, then download the replay. The replay header contains the competition-delivered config.
-2. **Feed it a replay from a competition match** via `test_algo`:
-   ```bash
-   ./tools/test.sh _config_inspector path/to/competition.replay
-   ```
-   The `test_algo` binary replays stored states and hands the stored config to your algo's `on_game_start`, letting you read the real competition values.
+To verify against a **real competition** match, feed the inspector a downloaded replay:
+```bash
+./tools/test.sh _config_inspector path/to/competition.replay
+```
+The `test_algo` binary hands the replay's stored config to `on_game_start`, letting you compare competition values against the patched local config.
 
 ## Steps
 
@@ -37,7 +34,7 @@ To see the **competition** config you need one of:
    ```bash
    ./tools/run.sh _config_inspector _config_inspector
    ```
-   Useful as a sanity check — but remember, this shows BASE-GAME values unless you've swapped `game-configs.json` for competition values.
+   `run.sh` applies `configs/competition-game-configs.json` before launch, so the dumped values are the patched-competition values. If you want to see the raw base-game config, invoke `run_match.py` directly without the wrapper.
 
 2. **Retrieve the stderr output**. The `run.sh` wrapper calls `run_match.py` which streams stderr to the console. Key blocks to look for:
    - `RESOURCES:` — the `resources` config block (decay rates, income, HP)

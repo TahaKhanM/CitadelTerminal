@@ -65,6 +65,55 @@ Good ideation output is a 1-paragraph strategy description plus an expected outc
 
 ---
 
+## 2.5. Tier 1 tuning vs Tier 5 archetype design — pick the right lever
+
+Not every "idea" is the same size. Before writing code, decide which *tier* the change lives at. Getting this wrong wastes entire sessions.
+
+### The two modes
+
+| Mode | What you're doing | Signal you're looking for | Right tool |
+|---|---|---|---|
+| **Tier 1 tuning** | Keep the offensive archetype. Adjust defensive placements, upgrade order, thresholds, caravan sizing, resource allocation. | Win-rate delta against a *weaker* opponent. | `/bestof` with n=10+, `/tournament` **only after** multiple variants clear the baseline. |
+| **Tier 5 archetype design** | Replace the offensive archetype itself — a fundamentally different way of scoring (e.g. Demolisher+Support train, Interceptor+Scout mixed wave, scripted self-destruct, own-wall path engineering, remove-and-relocate). | Does the new archetype break a known ceiling that tuning can't? | `/new-algo` + a deliberate plan from [`docs/ADVANCED_STRATEGIES_PROMPT.md`](ADVANCED_STRATEGIES_PROMPT.md) §5.2–§5.6. |
+
+### The v13 mirror ceiling — why this distinction matters here
+
+The v1–v19 line all share **one offensive archetype**: center-only Scouts from [13,0]/[14,0], Demolishers only when enemy front ≥ 10. Against any v13-family defense (12+ turret ring at y=11, center upgraded), that archetype deterministically ties at **40–40**:
+
+- `/bestof v14_support_caravan v13_second_ring 20` → 0 W / 20 T
+- `/bestof v18_predictive v13_second_ring 10` → 0 W / 10 T
+- v13 vs v13 mirror → 40–40 every game
+
+Three independent sessions (original, Track A, Track B amended) confirmed this. Caravan shields, Markov spawn prediction, CMA-ES hyperparameter search — none broke the tie, because the ceiling is **offensive archetype**, not defensive tuning. CMA-ES specifically reported `top10_var=0.000` against v13 because every config produces the same 40–40 outcome (no fitness gradient to climb).
+
+Full writeup: [`memory/v13_mirror_ceiling.md`](../.claude/projects/-Users-tahakhan-Documents-Work-Projects-CitadelTerminal/memory/v13_mirror_ceiling.md).
+
+### Red flags that you're about to repeat v14/v15/v18/v19
+
+If your plan is:
+
+- "Add more X to v13's defense" (another turret ring, more walls, different upgrade order)
+- "Tune v13's thresholds" (spawn threshold, wave size, caravan size)
+- "Re-run CMA-ES / evolve.py against v13 with a different fitness function"
+- "Add a spawn predictor to v13" (v13 spawns are deterministic — nothing to predict)
+- "Make another caravan variant"
+
+…you are in Tier 1 mode inside a saturated region. **Push back before writing code.** The unblock is always a different offensive archetype, not more defensive knobs.
+
+### The Tier 5 menu (in order of preference)
+
+From [`docs/ADVANCED_STRATEGIES_PROMPT.md`](ADVANCED_STRATEGIES_PROMPT.md) § A Tier 5 — none of these have been tried in v1–v19:
+
+1. **§5.2 Demolisher + Support train** — Demolishers kill structures from range 4.5; upgraded back-row Supports shield them. Removes the 60-dmg/frame turret focus-fire problem entirely.
+2. **§5.3 Interceptor + Scout mixed wave** — Interceptors (40 HP, 20 dmg vs mobile) soak focus-fire; Scouts trail behind to score.
+3. **§5.4 Scripted self-destruct** — SD range 1.5 damage = starting HP, requires ≥5 tiles traveled. Engineer a path that guarantees high-HP mobiles detonate adjacent to the enemy wall-turret stack.
+4. **§5.5 Own-wall path engineering** — Place friendly walls to force your *own* mobile units around a longer but lower-damage path, avoiding the v13 ring.
+5. **§5.6 Remove-and-relocate** — Use the remove mechanic to temporarily open lanes on your side turn-by-turn, redirecting spawns through corridors the opponent's turrets don't cover.
+
+When in doubt: if the last four iterations all tied v13 at 40–40, **stop tuning and build a Tier 5 archetype**.
+
+---
+
 ## 3. Scaffold a new algo variant
 
 ```
@@ -378,8 +427,8 @@ Here's a realistic 30-minute iteration.
          Edited to add 2 upgraded Supports at [13,13] [14,13] before
          demolisher spawns start (turn 8+).
          (Note from UNITS_REFERENCE.md: upgraded Support at Y=13 gives
-         4.9 shield/unit if the Y-bonus reading is correct — I'll log
-         the actual shield field on turn 0 to confirm.)
+         1 + 0.7 × 13 = 10.1 shield/unit — verified against the live
+         competition config.)
 
          /test-algo v2_demo_shielded   → clean
          /run-match v2_demo_shielded v1_demo_reactive   → v2 wins HP 22-0
