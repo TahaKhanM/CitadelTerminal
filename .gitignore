@@ -19,6 +19,9 @@ Thumbs.db
 replays/*
 !replays/.gitkeep
 !replays/*_elo_*.replay
+!replays/ranked/
+replays/ranked/*
+!replays/ranked/*.replay
 
 # Built algo zips
 algos/*.zip
