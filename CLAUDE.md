@@ -18,6 +18,7 @@ CitadelTerminal/
 │   ├── TARGETING_AND_PATHING.md   ← engine's movement/targeting/self-destruct rules
 │   ├── API_REFERENCE.md           ← GameState / GameMap / GameUnit methods
 │   ├── STRATEGY_GUIDE.md          ← archetypes, math, common patterns & counters
+│   ├── CLAUDE_WORKFLOW.md         ← the iteration loop: ideate → edit → test → match → analyze → upload
 │   └── LOCAL_TESTING.md           ← how to run matches locally and test syntax
 ├── algos/                         ← user's algorithms live here (one folder per algo)
 ├── tools/                         ← helper scripts (match runners, replay analysis)
@@ -85,7 +86,12 @@ Invoke these with `/<skill-name>` when the user asks for related work:
 - **`/new-algo`** — scaffold a new algo folder from the starter template.
 - **`/run-match`** — run a local match between two algos; stream or tail output.
 - **`/test-algo`** — fast syntax/runtime check against an existing replay.
+- **`/bestof`** — run 2N matches with a Wilson 95 % CI on the win rate (decides close calls).
+- **`/tournament`** — round-robin between 3+ algos with ranked standings.
 - **`/analyze-replay`** — parse a `.replay` file and summarize what happened.
+- **`/profile-turns`** — report per-turn compute time vs. the 15-second budget.
+- **`/inspect-config`** — dump the live server config so you can resolve any doc ambiguity.
+- **`/upload-algo`** — zip the algo for manual upload to the competition site.
 - **`/competition-reference`** — quickly surface exact unit numbers or rules.
 
 Skills live under `.claude/skills/` and each has its own SKILL.md with invocation details.
@@ -97,7 +103,7 @@ Skills live under `.claude/skills/` and each has its own SKILL.md with invocatio
 1. **Starter-kit config is outdated.** `C1GamesStarterKit-master/game-configs.json` uses pre-rename shorthands (FF/EF/DF/PI/EI/SI → Wall/Support/Turret/Scout/Demolisher/Interceptor) AND its numeric values predate the competition changes. Treat it as engine-plumbing reference only — quote competition numbers from `docs/UNITS_REFERENCE.md`.
 2. **"Bits" and "Cores" are old names.** In the current docs and this project, say **Mobile Points (MP)** and **Structure Points (SP)**. Old variable names in the starter code (`MP = 1`, `SP = 0`) are *resource-type indices*, not quantities.
 3. **Walls upgrade now costs SP.** In the base game, upgrading a Wall was free. In this competition it costs 2 SP. Factor this into defense budgeting.
-4. **Support HP is 1 in this competition.** Supports die to any stray attack. Protect them with walls or accept them as single-shot shield dispensers. Base shield is **3** per unit (range 3.5); upgraded shield is likely `1 + 0.3 × Y` per unit (range 7) — see `docs/UNITS_REFERENCE.md` for the Doc-1-vs-Doc-4 reconciliation, and verify at runtime.
+4. **Base Support HP is 1; upgraded Support HP is 40.** Base Supports die to any stray attack (one-shot shield dispensers). Upgraded Supports are durable anchors. Base shield is **3** per unit (range 3.5); **upgraded shield is `1 + 0.7 × Y` per unit (range 7)** — at Y=13 that's 10.1 shield per Support per Scout, so 4 back-row upgraded Supports ≈ 40 shield per Scout. Numbers verified from the live config extracted from an official downloaded replay.
 5. **Upgraded Turrets gain more in this competition** than in the base game (20 dmg / 100 HP vs 16 / 75) — upgrades are unusually strong here.
 6. **`player_index`** in the starter code is 0 for you and 1 for opponent. In raw action-frame JSON (`on_action_frame`) the convention flips to 1 = you, 2 = opponent. Easy bug source.
 7. **Always work from the bottom half.** Write all coordinates as if you're the bottom player; the engine auto-mirrors when you're actually on top.

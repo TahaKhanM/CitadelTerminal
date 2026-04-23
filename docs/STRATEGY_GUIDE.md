@@ -11,8 +11,8 @@ Every decision ultimately routes through the resource engine. Internalize these:
 | SP income | 4/turn baseline + (damage dealt last turn) |
 | MP income | `1 + turn // 5`/turn |
 | MP decay | 25 %/turn |
-| MP to SP conversion | 1 HP scored = +1 SP next turn |
-| Wall SP/HP | 1 SP → 60 HP (base) or 3 SP → 200 HP (upgraded) — **22 % more HP/SP upgraded**, plus area denial |
+| MP to SP conversion | 1 HP scored = **+2 SP** next turn (+1 SP scoring award per unit that breached + +1 SP damage bonus per HP taken off opponent) |
+| Wall SP/HP | 1 SP → 60 HP (base) or 3 SP → 200 HP (upgraded). Upgraded ratio 66.7 HP/SP is **~11 % better** than base 60 HP/SP. But the *marginal* cost of the upgrade is 140 extra HP for 2 SP = **70 HP/SP marginal** — best effective use of SP for HP in the game, so long as you were going to build the wall anyway. |
 | Turret SP/DPS | 2 SP → 6 dmg/frame → 6 DPS at range 2.5; 6 SP → 20 DPS at range 3.5. Upgrading ≈ **3.3× damage + 2× range area** |
 
 Takeaways:
@@ -60,7 +60,7 @@ Long-range attackers (range 4.5) sit on y=11 behind a line of walls. Because the
 
 Starter algo implements a basic version: build a wall row on y=11, spawn demolishers at [24, 10].
 
-**Math**: Demolisher has 5 HP and 8 dmg (per Doc 4). Against an enemy unupgraded Turret (6 dmg/frame), the Demolisher dies in 1 frame but gets off 8 dmg before dying. Efficient ONLY if wall-protected — raw, you trade 3 MP for 8 structure damage. With 1-2 wall layers between the Demolisher and the Turret, a single Demolisher can take out a base Turret (60 HP → 8 × ~8 frames); two or three are needed for an upgraded Turret (100 HP).
+**Math**: Demolisher has 5 HP and 8 dmg (per Doc 4). Turrets don't have LoS blocking — walls don't "shield" a Demolisher from Turret fire directly. Instead, walls are used as a **pathing barrier** so the Demolisher stops short inside your own territory and fires into enemy range (4.5 tiles) from a position the enemy's 2.5-range Turrets can't reach back to. The starter algo's Demolisher-line places walls on y=11 so Demolishers stop at y=10, out of a 2.5-range Turret's reach but within their own 4.5-range to shred any enemy structure on y=12-14. Each frame the Demolisher is in-range of a Turret on y≤14, it deals 8 damage. Base Turret (60 HP) needs 8 attack-frames to kill; upgraded Turret (100 HP) needs 13.
 
 ### 3.3 Interceptor stall / self-destruct bomb
 
@@ -71,13 +71,18 @@ Interceptors have 40 HP and don't damage structures. Two uses:
 
 The trick with #2 is getting one to actually reach the dead-end. Usually combined with a removed-wall setup: wall off a path, opponent builds around it, you remove the wall mid-deploy so the Interceptor's pathing changes and it can enter.
 
-### 3.4 Support-stacked Scout "caravan"
+### 3.4 Support-stacked Scout "caravan" ⭐ HIGH VALUE
 
-Stack 3-4 upgraded Supports on back row (`[12,13] [13,13] [14,13] [15,13]`). Per the most likely reading of the competition rules (see `UNITS_REFERENCE.md`, Support section), each upgraded Support at Y=13 grants `1 + 0.3·13 = 4.9` shield per Scout passing through. Four of them on the back row stack to ~19.6 extra HP per Scout — roughly doubling a 15-HP Scout's durability.
+Stack 3-4 upgraded Supports on back row (`[12,13] [13,13] [14,13] [15,13]`). Verified against the competition's live config (extracted from an official replay):
 
-⚠️ If the alternative reading is correct and upgraded Supports grant only a flat 1 shield/unit (no Y bonus), this strategy is much weaker (4 shield total per Scout from 4 Supports — not game-changing). Before committing heavy SP to this plan, confirm by inspecting the actual config at runtime: `self.config["unitInformation"][1]["upgrade"]`.
+- **Upgraded shield formula**: `1 + 0.7 × Y_position` per Support per unit.
+- **At Y=13 (back row)**: each Support grants **10.1 shield per Scout** that passes through its range-7 aura.
+- **Four back-row Supports**: stack to ~40 shield per Scout — turning 15-HP Scouts into 55-HP tanks. Mass rushes become nearly unstoppable through a normal defense.
+- **Upgraded Support HP = 40** (NOT 1 like base): they tank stray hits and persist across many turns, amortizing the setup cost.
 
-Cost: 4 × (4 + 4) = 32 SP for 4 upgraded Supports. Expensive — plan for ~5 turns of income to set up. Pays off across many attack waves if the Y-bonus formula is in effect.
+Cost: 4 × (4 + 4) = 32 SP for 4 upgraded Supports. Budget for ~5 turns of income to set up. Once live, this subsidizes EVERY offensive wave for the rest of the game — it's the best SP-to-damage conversion at the back row.
+
+Strategic implication: this archetype is **significantly stronger than earlier doc versions (with the outdated 0.3×Y formula) suggested**. Against defenses built by the starter algo or naive reactive bots, an upgraded-Support Scout caravan can score 5+ HP per wave reliably.
 
 ### 3.5 "Remove + replace" for SP efficiency
 

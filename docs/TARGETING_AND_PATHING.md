@@ -88,7 +88,7 @@ The engine recomputes each unit's path **every time it steps**, NOT just at spaw
 - A single Support NEVER shields the same unit twice. But N different Supports can all shield the same unit (stacking).
 - There's no limit on total shield stacked on one unit.
 
-**Placement math**: an upgraded Support at `[13, 13]` grants `1 + 0.3 × 13 = 4.9` per-unit shield. The range of 7 covers everything from roughly `[6..20, 6..20]` — effectively half your territory. Stacking 3 upgraded Supports at the back row means a charging Scout picks up 14.7 shield on its way out of your base.
+**Placement math** (verified from live config): an upgraded Support at `[13, 13]` grants `1 + 0.7 × 13 = 10.1` per-unit shield. The range of 7 covers everything from roughly `[6..20, 6..20]` — effectively half your territory. Stacking 3 upgraded Supports at the back row means a charging Scout picks up **30+ shield** on its way out of your base (doubling its 15-HP base to effectively 45+ HP).
 
 ## Action-frame JSON (for `on_action_frame`)
 

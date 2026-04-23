@@ -42,7 +42,7 @@ Fast-lookup skill for competition rules, unit stats, API signatures, and formula
 | Turret (DF) | 2 SP | 60 (100 upg) | 2.5 (3.5 upg) | 6 (20 upg) | — |
 | Turret upgrade | +4 SP | — | — | — | — |
 | Scout (PI) | 1 MP | 15 | 3.5 | 2 (both types) | 1 |
-| Demolisher (EI) | 3 MP | 5 | 4.5 | 6 (both types) | 2 |
+| Demolisher (EI) | 3 MP | 5 | 4.5 | 8 (both types) | 2 |
 | Interceptor (SI) | 1 MP | 40 | 4.5 | 20 vs mobile, 0 vs structure | 4 |
 
 ### Economy
@@ -69,20 +69,23 @@ Fast-lookup skill for competition rules, unit stats, API signatures, and formula
 - Requires ≥5 tiles traveled before SD deals damage
 - Only damages enemy units; friendly units are untouched
 
-### Refund formula
+### Refund & removal
 ```
-refund_SP = 0.9 × InitialCost × (CurrentHP / StartingHP)   (rounded to 0.1)
+base structure:     refund = 0.9 × InitialCost × (CurrentHP / StartingHP)   (rounded 0.1)
+upgraded structure: refund = 0.8 × InitialCost × (CurrentHP / StartingHP)
+turnsRequiredToRemove = 2 (base) / 3 (upgraded)
 ```
+Upgraded structures refund ~11% less AND take an extra turn to clear — upgrade-then-remove is lossy.
 
-### Support shield formulas (combining Doc 1 + Doc 4)
+### Support shield formulas (verified against official replay's live config)
 ```
-base_shield_per_unit       = 3        (flat, range 3.5)
-upgraded_shield_per_unit   = 1 + 0.3 × Y_position    (range 7)
+base_shield_per_unit       = 3        (flat, range 3.5, 1 HP)
+upgraded_shield_per_unit   = 1 + 0.7 × Y_position   (range 7, 40 HP)
 ```
-Maximum upgraded value at Y=13: `1 + 0.3 × 13 = 4.9` shield per unit.
-Minimum upgraded value at Y=0: `1 + 0 = 1` — LESS than base (3). Only upgrade deep Supports.
+Maximum upgraded value at Y=13: `1 + 0.7 × 13 = 10.1` shield per unit.
+Minimum upgraded value at Y=0: `1` — LESS than base (3). Only upgrade Supports at Y≥3.
 
-⚠️ There is an alternate reading where competition upgraded Supports give a flat 1 shield/unit (no Y bonus). Docs are ambiguous; verify against `self.config["unitInformation"][1]["upgrade"]` at runtime.
+**Upgrading is tanky**: base Support HP=1 → upgraded HP=**40**. Upgraded Supports survive stray hits and persist across many turns.
 
 ### Arena geometry
 - 28 × 28 grid, diamond-shaped playable region

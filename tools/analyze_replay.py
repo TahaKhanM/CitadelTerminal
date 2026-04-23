@@ -24,6 +24,27 @@ UNIT_NAMES = {
     "SI": "Interceptor",
 }
 
+# Engine death events use an integer unit-type index, not the shorthand.
+# Index → name mapping matches config["unitInformation"] order:
+UNIT_IDX_NAMES = {
+    0: "Wall",
+    1: "Support",
+    2: "Turret",
+    3: "Scout",
+    4: "Demolisher",
+    5: "Interceptor",
+    6: "Remove",
+    7: "Upgrade",
+}
+
+
+def _unit_label(value):
+    """Normalize a death-event's unit_type field to a human name.
+    The engine may use a shorthand string ('FF') or an integer index (0)."""
+    if isinstance(value, (int, float)):
+        return UNIT_IDX_NAMES.get(int(value), f"type_{value}")
+    return UNIT_NAMES.get(value, str(value))
+
 
 def load_replay(path: Path):
     frames = []
@@ -65,12 +86,25 @@ def summarize(path: Path) -> str:
             breaches_by_turn[turn][idx] += 1
             breach_locations["P1" if owner == 1 else "P2"][tuple(loc)] += 1
 
-    # Deaths by unit type and player
+    # Deaths by unit type and player. Death event shape varies across engine
+    # versions; typically [location, unit_type, ..., player]. We defensively
+    # pull location at index 0 and unit_type from index 1, and the player from
+    # the last integer-looking field.
     deaths = Counter()
     for f in game_frames:
         for d in f.get("events", {}).get("death", []):
-            _, unit_type, _, _, player = d
-            deaths[(player, unit_type)] += 1
+            if len(d) < 2:
+                continue
+            unit_type = d[1]
+            # Player id is the last int in the tuple (1 = P1, 2 = P2)
+            player = None
+            for field in reversed(d):
+                if isinstance(field, (int, float)) and field in (1, 2):
+                    player = int(field)
+                    break
+            if player is None:
+                continue
+            deaths[(player, _unit_label(unit_type))] += 1
 
     # Max compute time per side
     p1_max_ms = max(f["p1Stats"][3] for f in game_frames)
@@ -99,8 +133,8 @@ def summarize(path: Path) -> str:
     lines.append("")
     lines.append("Attrition (unit deaths):")
     by_player = defaultdict(Counter)
-    for (pl, ut), n in deaths.items():
-        by_player[pl][UNIT_NAMES.get(ut, ut)] += n
+    for (pl, name), n in deaths.items():
+        by_player[pl][name] += n
     for pl in (1, 2):
         summary = ", ".join(f"{k}={v}" for k, v in by_player[pl].most_common())
         lines.append(f"  P{pl}: {summary or '(none)'}")

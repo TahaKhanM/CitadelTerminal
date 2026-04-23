@@ -33,9 +33,13 @@ python3 tools/analyze_replay.py replays/<file>.replay
 | Path | Contents |
 |---|---|
 | [`CLAUDE.md`](CLAUDE.md) | Orientation for Claude Code sessions — start here |
+| [`docs/CLAUDE_WORKFLOW.md`](docs/CLAUDE_WORKFLOW.md) | **The iteration loop** — how to actually use Claude Code to develop algos |
 | [`docs/`](docs/) | Rules, unit reference, API, map, strategy, local-testing guides |
 | `algos/` | Your algorithms (one directory each) |
-| `tools/` | Helper scripts: `run.sh`, `test.sh`, `new_algo.sh`, `tournament.py`, `analyze_replay.py` |
+| `tools/` | Match running: `run.sh`, `test.sh`, `bestof.py` (parallel), `tournament.py` (parallel), `eval.sh`. Replay analysis: `analyze_replay.py`, `detailed_replay.py`, `batch_replays.py`, `profile_turns.py`. Algo management: `new_algo.sh`, `diff_algos.sh`. |
+| [`docs/BASELINE_BUILDING_PROMPT.md`](docs/BASELINE_BUILDING_PROMPT.md) | Two prompts for a fresh Claude Code session: **best-algo** (60-120 min, adaptive/opponent-modeled) and **baseline** (30-60 min, faster bar) |
+| [`docs/OBTAINING_REPLAYS.md`](docs/OBTAINING_REPLAYS.md) | How to download official replays and why screen recording is not a substitute |
+| [`docs/RUST_MIGRATION.md`](docs/RUST_MIGRATION.md) | Phase-2 playbook: when and how to port the algo to Rust (read only after Python plateaus ~1900 ELO) |
 | `replays/` | Local replay files produced by `tools/run.sh` |
 | `C1GamesStarterKit-master/` | Official starter kit (engine.jar, sample algo, test/zip binaries) — treat as read-only |
 | `Citadel Context Files/` | Original docs (HTML + screenshots + video transcripts) |
@@ -49,8 +53,13 @@ python3 tools/analyze_replay.py replays/<file>.replay
 | `/new-algo` | Scaffold a new algo folder |
 | `/run-match` | Run a local match between two algos |
 | `/test-algo` | Quick syntax/runtime check against a replay |
-| `/analyze-replay` | Parse and summarize a `.replay` file |
+| `/bestof` | Play the same matchup N times (2N including both sides) with confidence interval |
 | `/tournament` | Round-robin between 3+ algos |
+| `/analyze-replay` | Quick summary of a `.replay` file |
+| `/detailed-replay` | Deep section-by-section analysis of one replay (use for official replays) |
+| `/batch-replays` | Aggregate analysis across many replays — breach hot spots, compute trends, outliers |
+| `/profile-turns` | Report per-turn compute time vs. the 15 s budget |
+| `/inspect-config` | Dump the live server config (resolves doc ambiguities) |
 | `/upload-algo` | Zip an algo for upload |
 | `/competition-reference` | Fast lookup for exact rules, stats, formulas |
 | `/skill-creator-terminal` | Scaffold a new skill for this project |
