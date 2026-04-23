@@ -1,0 +1,4584 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package scala.reflect.runtime;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import scala.Array$;
+import scala.Function0;
+import scala.Function1;
+import scala.Function2;
+import scala.MatchError;
+import scala.None$;
+import scala.Option;
+import scala.Predef$;
+import scala.Predef$ArrowAssoc$;
+import scala.Predef$any2stringadd$;
+import scala.Product;
+import scala.Product$class;
+import scala.ScalaReflectionException;
+import scala.Serializable;
+import scala.Some;
+import scala.StringContext;
+import scala.Tuple2;
+import scala.collection.AbstractIterable;
+import scala.collection.AbstractTraversable;
+import scala.collection.Iterable$;
+import scala.collection.Iterator;
+import scala.collection.LinearSeqOptimized;
+import scala.collection.Seq;
+import scala.collection.Seq$;
+import scala.collection.SeqLike;
+import scala.collection.SetLike;
+import scala.collection.TraversableOnce;
+import scala.collection.immutable.$colon$colon;
+import scala.collection.immutable.List;
+import scala.collection.immutable.List$;
+import scala.collection.immutable.Nil$;
+import scala.collection.immutable.Set;
+import scala.collection.immutable.StringOps;
+import scala.collection.mutable.ArrayOps;
+import scala.collection.mutable.ListBuffer;
+import scala.collection.mutable.StringBuilder;
+import scala.collection.mutable.WeakHashMap;
+import scala.math.Ordering$String$;
+import scala.ref.WeakReference;
+import scala.reflect.ClassTag;
+import scala.reflect.ClassTag$;
+import scala.reflect.NameTransformer$;
+import scala.reflect.ScalaSignature;
+import scala.reflect.api.JavaUniverse;
+import scala.reflect.api.JavaUniverse$JavaMirror$class;
+import scala.reflect.api.Mirrors;
+import scala.reflect.api.Symbols;
+import scala.reflect.internal.AnnotationInfos;
+import scala.reflect.internal.Definitions;
+import scala.reflect.internal.JavaAccFlags$;
+import scala.reflect.internal.Mirrors;
+import scala.reflect.internal.MissingRequirementError;
+import scala.reflect.internal.MissingRequirementError$;
+import scala.reflect.internal.Names;
+import scala.reflect.internal.Positions;
+import scala.reflect.internal.Printers;
+import scala.reflect.internal.PrivateWithin;
+import scala.reflect.internal.Required;
+import scala.reflect.internal.Scopes;
+import scala.reflect.internal.StdNames;
+import scala.reflect.internal.StdNames$nme$;
+import scala.reflect.internal.Symbols;
+import scala.reflect.internal.Trees;
+import scala.reflect.internal.Types;
+import scala.reflect.internal.pickling.ByteCodecs$;
+import scala.reflect.internal.settings.MutableSettings;
+import scala.reflect.internal.settings.MutableSettings$;
+import scala.reflect.internal.transform.Transforms;
+import scala.reflect.internal.util.Position;
+import scala.reflect.internal.util.StripMarginInterpolator;
+import scala.reflect.io.AbstractFile;
+import scala.reflect.package$;
+import scala.reflect.runtime.HasJavaClass;
+import scala.reflect.runtime.JavaMirrors$JavaMirror$;
+import scala.reflect.runtime.JavaMirrors$JavaMirror$FromJavaClassCompleter$;
+import scala.reflect.runtime.JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1$;
+import scala.reflect.runtime.JavaMirrors$JavaMirror$JavaAnnotationProxy$;
+import scala.reflect.runtime.JavaMirrors$JavaMirror$toAnnotArg$;
+import scala.reflect.runtime.JavaMirrors$JavaMirror$unpickler$;
+import scala.reflect.runtime.ReflectError;
+import scala.reflect.runtime.ReflectionUtils$;
+import scala.reflect.runtime.ReflectionUtils$EnclosedInClass$;
+import scala.reflect.runtime.ReflectionUtils$EnclosedInConstructor$;
+import scala.reflect.runtime.ReflectionUtils$EnclosedInMethod$;
+import scala.reflect.runtime.ReflectionUtils$EnclosedInPackage$;
+import scala.reflect.runtime.ReflectionUtils$PrimitiveOrArray$;
+import scala.reflect.runtime.SymbolLoaders;
+import scala.reflect.runtime.SymbolTable;
+import scala.reflect.runtime.SynchronizedSymbols;
+import scala.reflect.runtime.SynchronizedSymbols$SynchronizedSymbol$class;
+import scala.reflect.runtime.SynchronizedSymbols$SynchronizedTypeSymbol$class;
+import scala.reflect.runtime.TwoWayCaches;
+import scala.runtime.BoxedUnit;
+import scala.runtime.BoxesRunTime;
+import scala.runtime.Nothing$;
+import scala.runtime.ObjectRef;
+import scala.runtime.ScalaRunTime$;
+import scala.util.matching.Regex;
+
+@ScalaSignature(bytes="\u0006\u0001=ucAC\u0001\u0003!\u0003\r\tA\u0002\u0005\u0010Z\tY!*\u0019<b\u001b&\u0014(o\u001c:t\u0015\t\u0019A!A\u0004sk:$\u0018.\\3\u000b\u0005\u00151\u0011a\u0002:fM2,7\r\u001e\u0006\u0002\u000f\u0005)1oY1mCN!\u0001!C\b\u0016!\tQQ\"D\u0001\f\u0015\taA!\u0001\u0005j]R,'O\\1m\u0013\tq1BA\u0006Ts6\u0014w\u000e\u001c+bE2,\u0007C\u0001\t\u0014\u001b\u0005\t\"B\u0001\n\u0005\u0003\r\t\u0007/[\u0005\u0003)E\u0011ABS1wCVs\u0017N^3sg\u0016\u0004\"AF\f\u000e\u0003\tI!\u0001\u0007\u0002\u0003\u0019Q;xnV1z\u0007\u0006\u001c\u0007.Z:\t\u000bi\u0001A\u0011\u0001\u000f\u0002\r\u0011Jg.\u001b;%\u0007\u0001!\u0012!\b\t\u0003=}i\u0011AB\u0005\u0003A\u0019\u0011A!\u00168ji\"A!\u0005\u0001EC\u0002\u0013%1%A\u0004nSJ\u0014xN]:\u0016\u0003\u0011\u0002B!\n\u0016-i5\taE\u0003\u0002(Q\u00059Q.\u001e;bE2,'BA\u0015\u0007\u0003)\u0019w\u000e\u001c7fGRLwN\\\u0005\u0003W\u0019\u00121bV3bW\"\u000b7\u000f['baB\u0011QFM\u0007\u0002])\u0011q\u0006M\u0001\u0005Y\u0006twMC\u00012\u0003\u0011Q\u0017M^1\n\u0005Mr#aC\"mCN\u001cHj\\1eKJ\u00042!\u000e\u001d;\u001b\u00051$BA\u001c\u0007\u0003\r\u0011XMZ\u0005\u0003sY\u0012QbV3bWJ+g-\u001a:f]\u000e,\u0007CA\u001e=\u001b\u0005\u0001a\u0001B\u001f\u0001\u0001y\u0012!BS1wC6K'O]8s'\rat\b\u0012\t\u0003w\u0001K!!\u0011\"\u0003\u000bI{w\u000e^:\n\u0005\r[!aB'jeJ|'o\u001d\t\u0003w\u0015K!!P\n\t\u0011\u001dc$\u0011!Q\u0001\n!\u000bQa\\<oKJ\u0004\"aO%\n\u0005)[%AB*z[\n|G.\u0003\u0002M\u0017\t91+_7c_2\u001c\b\u0002\u0003(=\u0005\u000b\u0007I\u0011A(\u0002\u0017\rd\u0017m]:M_\u0006$WM]\u000b\u0002Y!A\u0011\u000b\u0010B\u0001B\u0003%A&\u0001\u0007dY\u0006\u001c8\u000fT8bI\u0016\u0014\b\u0005C\u0003Ty\u0011\u0005A+\u0001\u0004=S:LGO\u0010\u000b\u0004uU3\u0006\"B$S\u0001\u0004A\u0005\"\u0002(S\u0001\u0004a\u0003b\u0002-=\u0005\u0004%\t!W\u0001\tk:Lg/\u001a:tKV\t1\b\u0003\u0004\\y\u0001\u0006IaO\u0001\nk:Lg/\u001a:tK\u0002B\u0011\"\u0018\u001f\t\u0006\u0004%\t\u0001\u00020\u0002\u001dI,h\u000eR3gS:LG/[8ogV\tq\f\u0005\u0002aK:\u00111(Y\u0005\u0003E\u000e\f1\u0002Z3gS:LG/[8og&\u0011Am\u0003\u0002\f\t\u00164\u0017N\\5uS>t7/\u0003\u0002gO\nq!+\u001e8EK\u001aLg.\u001b;j_:\u001c\u0018B\u00015d\u0005A!UMZ5oSRLwN\\:DY\u0006\u001c8\u000f\u0003\u0005ky!\u0005\t\u0015)\u0003`\u0003=\u0011XO\u001c#fM&t\u0017\u000e^5p]N\u0004\u0003\u0002\u00037=\u0011\u000b\u0007I\u0011I7\u0002\u0017I{w\u000e\u001e)bG.\fw-Z\u000b\u0002]J\u0019qn]<\u0007\tA\f\bA\u001c\u0002\ryI,g-\u001b8f[\u0016tGO\u0010\u0005\terB\t\u0011)Q\u0005]\u0006a!k\\8u!\u0006\u001c7.Y4fAA\u0011A/^\u0007\u0002y%\u0011a\u000f\u0011\u0002\f%>|G\u000fU1dW\u0006<W\r\u0005\u0002<q&\u0011\u0011P\u001f\u0002\u0017'ft7\r\u001b:p]&TX\r\u001a+fe6\u001c\u00160\u001c2pY&\u00111P\u0001\u0002\u0014'ft7\r\u001b:p]&TX\rZ*z[\n|Gn\u001d\u0005\t{rB)\u0019!C!}\u0006I!k\\8u\u00072\f7o]\u000b\u0002\u007fJ1\u0011\u0011AA\u0004\u0003\u001b1Q\u0001]A\u0002\u0001}D\u0011\"!\u0002=\u0011\u0003\u0005\u000b\u0015B@\u0002\u0015I{w\u000e^\"mCN\u001c\b\u0005E\u0002u\u0003\u0013I1!a\u0003A\u0005%\u0011vn\u001c;DY\u0006\u001c8\u000fE\u0002<\u0003\u001fI1!!\u0005{\u0005u\u0019\u0016P\\2ie>t\u0017N_3e\u001b>$W\u000f\\3DY\u0006\u001c8oU=nE>d\u0007BCA\u000by!\u0015\r\u0011\"\u0011\u0002\u0018\u0005aQ)\u001c9usB\u000b7m[1hKV\u0011\u0011\u0011\u0004\n\u0006\u00037\t\tc\u001e\u0004\u0007a\u0006u\u0001!!\u0007\t\u0015\u0005}A\b#A!B\u0013\tI\"A\u0007F[B$\u0018\u0010U1dW\u0006<W\r\t\t\u0004i\u0006\r\u0012bAA\u0013\u0001\naQ)\u001c9usB\u000b7m[1hK\"Q\u0011\u0011\u0006\u001f\t\u0006\u0004%\t%a\u000b\u0002#\u0015k\u0007\u000f^=QC\u000e\\\u0017mZ3DY\u0006\u001c8/\u0006\u0002\u0002.I1\u0011qFA\u001b\u0003\u001b1a\u0001]A\u0019\u0001\u00055\u0002BCA\u001ay!\u0005\t\u0015)\u0003\u0002.\u0005\u0011R)\u001c9usB\u000b7m[1hK\u000ec\u0017m]:!!\r!\u0018qG\u0005\u0004\u0003s\u0001%!E#naRL\b+Y2lC\u001e,7\t\\1tg\"Q\u0011Q\b\u001f\t\u0006\u0004%\t%a\u0010\u0002\u0015I|w\u000e\u001e'pC\u0012,'/\u0006\u0002\u0002BI1\u00111IA%\u0003'2a\u0001]A#\u0001\u0005\u0005\u0003BCA$y!\u0005\t\u0015)\u0003\u0002B\u0005Y!o\\8u\u0019>\fG-\u001a:!!\rY\u00141J\u0005\u0005\u0003\u001b\nyE\u0001\u0005MCjLH+\u001f9f\u0013\r\t\tf\u0003\u0002\u0006)f\u0004Xm\u001d\t\u0004w\u0005U\u0013\u0002BA,\u0003\u001f\u0012QC\u00127bO\u0006;gn\\:uS\u000e\u001cu.\u001c9mKR,'\u000fC\u0004\u0002\\q\"\t%!\u0018\u0002\u001bM$\u0018\r^5d!\u0006\u001c7.Y4f)\u0011\ty&!\u001a\u0011\u0007m\n\t'C\u0002\u0002d-\u0013A\"T8ek2,7+_7c_2D\u0001\"a\u001a\u0002Z\u0001\u0007\u0011\u0011N\u0001\tMVdGN\\1nKB!\u00111NA9\u001d\rq\u0012QN\u0005\u0004\u0003_2\u0011A\u0002)sK\u0012,g-\u0003\u0003\u0002t\u0005U$AB*ue&twMC\u0002\u0002p\u0019A\u0011\"!\u001f=\u0005\u0004%I!a\u001f\u0002\u0015\rd\u0017m]:DC\u000eDW-\u0006\u0002\u0002~A91(a \u0002\u0004\u0006\u0015\u0016bAAA/\tYAk^8XCf\u001c\u0015m\u00195fa\u0011\t))a$\u0011\u000b5\n9)a#\n\u0007\u0005%eFA\u0003DY\u0006\u001c8\u000f\u0005\u0003\u0002\u000e\u0006=E\u0002\u0001\u0003\r\u0003#\u000b\u0019*!A\u0001\u0002\u000b\u0005\u0011q\u0013\u0002\u0004?\u0012\n\u0004\u0002CAKy\u0001\u0006I!! \u0002\u0017\rd\u0017m]:DC\u000eDW\rI\t\u0005\u00033\u000by\nE\u0002\u001f\u00037K1!!(\u0007\u0005\u001dqu\u000e\u001e5j]\u001e\u00042AHAQ\u0013\r\t\u0019K\u0002\u0002\u0004\u0003:L\bcA\u001e\u0002(&\u0019\u0011\u0011V&\u0003\u0017\rc\u0017m]:Ts6\u0014w\u000e\u001c\u0005\n\u0003[c$\u0019!C\u0005\u0003_\u000bA\u0002]1dW\u0006<WmQ1dQ\u0016,\"!!-\u0011\u000fm\ny(a-\u0002`A\u0019Q&!.\n\u0007\u0005]fFA\u0004QC\u000e\\\u0017mZ3\t\u0011\u0005mF\b)A\u0005\u0003c\u000bQ\u0002]1dW\u0006<WmQ1dQ\u0016\u0004\u0003\"CA`y\t\u0007I\u0011BAa\u0003-iW\r\u001e5pI\u000e\u000b7\r[3\u0016\u0005\u0005\r\u0007cB\u001e\u0002\u0000\u0005\u0015\u0017q\u001a\t\u0005\u0003\u000f\fY-\u0004\u0002\u0002J*\u0011QAL\u0005\u0005\u0003\u001b\fIM\u0001\u0004NKRDw\u000e\u001a\t\u0004w\u0005E\u0017bAAj\u0017\naQ*\u001a;i_\u0012\u001c\u00160\u001c2pY\"A\u0011q\u001b\u001f!\u0002\u0013\t\u0019-\u0001\u0007nKRDw\u000eZ\"bG\",\u0007\u0005C\u0005\u0002\\r\u0012\r\u0011\"\u0003\u0002^\u0006\u00012m\u001c8tiJ,8\r^8s\u0007\u0006\u001c\u0007.Z\u000b\u0003\u0003?\u0004raOA@\u0003C\fy\r\r\u0003\u0002d\u0006-\bCBAd\u0003K\fI/\u0003\u0003\u0002h\u0006%'aC\"p]N$(/^2u_J\u0004B!!$\u0002l\u0012a\u0011Q^Ax\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\n\u0019q\f\n\u001a\t\u0011\u0005EH\b)A\u0005\u0003?\f\u0011cY8ogR\u0014Xo\u0019;pe\u000e\u000b7\r[3!\u0011%\t)\u0010\u0010b\u0001\n\u0013\t90\u0001\u0006gS\u0016dGmQ1dQ\u0016,\"!!?\u0011\u000fm\ny(a?\u0003\u0002A!\u0011qYA\u007f\u0013\u0011\ty0!3\u0003\u000b\u0019KW\r\u001c3\u0011\u0007m\u0012\u0019!C\u0002\u0003\u0006-\u0013!\u0002V3s[NKXNY8m\u0011!\u0011I\u0001\u0010Q\u0001\n\u0005e\u0018a\u00034jK2$7)Y2iK\u0002B\u0011B!\u0004=\u0005\u0004%IAa\u0004\u0002\u0017Q\u0004\u0018M]1n\u0007\u0006\u001c\u0007.Z\u000b\u0003\u0005#\u0001raOA@\u0005'\u0011i\u0003\r\u0003\u0003\u0016\tu\u0001CBAd\u0005/\u0011Y\"\u0003\u0003\u0003\u001a\u0005%'\u0001\u0004+za\u00164\u0016M]5bE2,\u0007\u0003BAG\u0005;!ABa\b\u0003\"\u0005\u0005\t\u0011!B\u0001\u0005K\u00111a\u0018\u00134\u0011!\u0011\u0019\u0003\u0010Q\u0001\n\tE\u0011\u0001\u0004;qCJ\fWnQ1dQ\u0016\u0004\u0013\u0003BAM\u0005O\u0001B!a2\u0003*%!!1FAe\u0005I9UM\\3sS\u000e$Um\u00197be\u0006$\u0018n\u001c8\u0011\u0007m\u0012y#C\u0002\u00032-\u0013!\u0002V=qKNKXNY8m\u0011!\u0011)\u0004\u0010C\u0001\u0005\t]\u0012a\u0002;p'\u000e\fG.Y\u000b\u0007\u0005s\u0011\tF!\u0011\u0015\r\tm\"q\fB3)\u0011\u0011iD!\u0016\u0015\t\t}\"Q\t\t\u0005\u0003\u001b\u0013\t\u0005\u0002\u0005\u0003D\tM\"\u0019AAL\u0005\u0005\u0019\u0006B\u0003B$\u0005g\t\t\u0011q\u0001\u0003J\u0005QQM^5eK:\u001cW\rJ\u0019\u0011\u000bY\u0011YEa\u0014\n\u0007\t5#A\u0001\u0007ICNT\u0015M^1DY\u0006\u001c8\u000f\u0005\u0003\u0002\u000e\nEC\u0001\u0003B*\u0005g\u0011\r!a&\u0003\u0003)C\u0001Ba\u0016\u00034\u0001\u0007!\u0011L\u0001\u0005E>$\u0017\u0010\u0005\u0005\u001f\u00057R$q\nB \u0013\r\u0011iF\u0002\u0002\n\rVt7\r^5p]JB\u0001B!\u0019\u00034\u0001\u0007!1M\u0001\u0006G\u0006\u001c\u0007.\u001a\t\bw\u0005}$q\nB \u0011!\u00119Ga\rA\u0002\t=\u0013aA6fs\"I!1\u000e\u001fC\u0002\u0013-!QN\u0001\u0012G2\f7o\u001d%bg*\u000bg/Y\"mCN\u001cXC\u0001B8!\u00151\"1\nB9a\u0011\u0011\u0019Ha\u001e\u0011\u000b5\n9I!\u001e\u0011\t\u00055%q\u000f\u0003\r\u0005s\u0012Y(!A\u0001\u0002\u000b\u0005\u0011q\u0013\u0002\u0004?\u0012\"\u0004\u0002\u0003B?y\u0001\u0006IAa \u0002%\rd\u0017m]:ICNT\u0015M^1DY\u0006\u001c8\u000f\t\t\u0006-\t-#\u0011\u0011\u0019\u0005\u0005\u0007\u00139\tE\u0003.\u0003\u000f\u0013)\t\u0005\u0003\u0002\u000e\n\u001dE\u0001\u0004B=\u0005w\n\t\u0011!A\u0003\u0002\u0005]\u0005\"\u0003BFy\t\u0007I1\u0002BG\u0003AiW\r\u001e5ICNT\u0015M^1DY\u0006\u001c8/\u0006\u0002\u0003\u0010B)aCa\u0013\u0002F\"A!1\u0013\u001f!\u0002\u0013\u0011y)A\tnKRD\u0007*Y:KCZ\f7\t\\1tg\u0002B\u0011Ba&=\u0005\u0004%YA!'\u0002#\u0019LW\r\u001c3ICNT\u0015M^1DY\u0006\u001c8/\u0006\u0002\u0003\u001cB)aCa\u0013\u0002|\"A!q\u0014\u001f!\u0002\u0013\u0011Y*\u0001\ngS\u0016dG\rS1t\u0015\u00064\u0018m\u00117bgN\u0004\u0003\"\u0003BRy\t\u0007I1\u0002BS\u0003I\u0019wN\\:ue\"\u000b7OS1wC\u000ec\u0017m]:\u0016\u0005\t\u001d\u0006#\u0002\f\u0003L\t%\u0006\u0007\u0002BV\u0005_\u0003b!a2\u0002f\n5\u0006\u0003BAG\u0005_#AB!-\u00034\u0006\u0005\t\u0011!B\u0001\u0003/\u00131a\u0018\u00136\u0011!\u0011)\f\u0010Q\u0001\n\t]\u0016aE2p]N$(\u000fS1t\u0015\u00064\u0018m\u00117bgN\u0004\u0003#\u0002\f\u0003L\te\u0006\u0007\u0002B^\u0005\u007f\u0003b!a2\u0002f\nu\u0006\u0003BAG\u0005\u007f#AB!-\u00034\u0006\u0005\t\u0011!B\u0001\u0003/C\u0011Ba1=\u0005\u0004%YA!2\u0002%Q\u0004\u0018M]1n\u0011\u0006\u001c(*\u0019<b\u00072\f7o]\u000b\u0003\u0005\u000f\u0004RA\u0006B&\u0005\u0013\u0004DAa3\u0003PB1\u0011q\u0019B\f\u0005\u001b\u0004B!!$\u0003P\u0012a!\u0011\u001bBj\u0003\u0003\u0005\tQ!\u0001\u0003&\t\u0019q\f\n\u001c\t\u0011\tUG\b)A\u0005\u0005/\f1\u0003\u001e9be\u0006l\u0007*Y:KCZ\f7\t\\1tg\u0002\u0002RA\u0006B&\u00053\u0004DAa7\u0003`B1\u0011q\u0019B\f\u0005;\u0004B!!$\u0003`\u0012a!\u0011\u001bBj\u0003\u0003\u0005\tQ!\u0001\u0003&!9!1\u001d\u001f\u0005\n\t\u0015\u0018!B1c_J$H\u0003BAM\u0005OD\u0001B!;\u0003b\u0002\u0007\u0011\u0011N\u0001\u0004[N<\u0007b\u0002Bwy\u0011%!q^\u0001\u0010\u000bJ\u0014xN]%o]\u0016\u00148\t\\1tgR!\u0011\u0011\u0014By\u0011\u001d\u0011\u0019Pa;A\u0002!\u000b1a]=n\u0011\u001d\u00119\u0010\u0010C\u0005\u0005s\f\u0001#\u0012:s_JLeN\\3s\u001b>$W\u000f\\3\u0015\t\u0005e%1 \u0005\b\u0005g\u0014)\u00101\u0001I\u0011\u001d\u0011y\u0010\u0010C\u0005\u0007\u0003\t\u0001#\u0012:s_J\u001cF/\u0019;jG\u000ec\u0017m]:\u0015\t\u0005e51\u0001\u0005\b\u0005g\u0014i\u00101\u0001I\u0011\u001d\u00199\u0001\u0010C\u0005\u0007\u0013\t\u0011#\u0012:s_J\u001cF/\u0019;jG6{G-\u001e7f)\u0011\tIja\u0003\t\u000f\tM8Q\u0001a\u0001\u0011\"91q\u0002\u001f\u0005\n\rE\u0011AD#se>\u0014hj\u001c;NK6\u0014WM\u001d\u000b\u0007\u00033\u001b\u0019b!\u0006\t\u000f\tM8Q\u0002a\u0001\u0011\"1qi!\u0004A\u0002!Cqa!\u0007=\t\u0013\u0019Y\"A\u0007FeJ|'OT8u\r&,G\u000e\u001a\u000b\u0005\u00033\u001bi\u0002C\u0004\u0003t\u000e]\u0001\u0019\u0001%\t\u000f\r\u0005B\b\"\u0003\u0004$\u0005\u0019RI\u001d:pe:{GoQ8ogR\u0014Xo\u0019;peR1\u0011\u0011TB\u0013\u0007OAqAa=\u0004 \u0001\u0007\u0001\n\u0003\u0004H\u0007?\u0001\r\u0001\u0013\u0005\b\u0007WaD\u0011BB\u0017\u0003U)%O]8s\u0003J\u0014\u0018-_\"p]N$(/^2u_J$b!!'\u00040\rE\u0002b\u0002Bz\u0007S\u0001\r\u0001\u0013\u0005\u0007\u000f\u000e%\u0002\u0019\u0001%\t\u000f\rUB\b\"\u0003\u00048\u0005IQI\u001d:pe\u001a\u0013X-\u001a\u000b\u0007\u00033\u001bId!\u0010\t\u000f\rm21\u0007a\u0001\u0011\u00061Q.Z7cKJDqaa\u0010\u00044\u0001\u0007\u0001*\u0001\u0005ge\u0016,G+\u001f9f\u0011\u001d\u0019\u0019\u0005\u0010C\u0005\u0007\u000b\nQ#\u0012:s_JtuN\\#ySN$XM\u001c;GS\u0016dG\r\u0006\u0003\u0002\u001a\u000e\u001d\u0003b\u0002Bz\u0007\u0003\u0002\r\u0001S\u0004\b\u0007\u0017b\u0004\u0012BB'\u0003)!x.\u00118o_R\f%o\u001a\t\u0004i\u000e=caBB)y!%11\u000b\u0002\u000bi>\feN\\8u\u0003J<7\u0003BB(\u0007+\u00022AHB,\u0013\r\u0019IF\u0002\u0002\u0007\u0003:L(+\u001a4\t\u000fM\u001by\u0005\"\u0001\u0004^Q\u00111Q\n\u0005\u000b\u0007C\u001ayE1A\u0005\u0002\r\r\u0014aC*ue&twm\u00117bgN,\"a!\u001a\u0011\u000b5\n9)!\u001b\t\u0013\r%4q\nQ\u0001\n\r\u0015\u0014\u0001D*ue&twm\u00117bgN\u0004\u0003BCB7\u0007\u001f\u0012\r\u0011\"\u0001\u0004p\u0005Q1\t\\1tg\u000ec\u0017m]:\u0016\u0005\rE\u0004#B\u0017\u0002\b\u000eM\u0004\u0007BB;\u0007s\u0002R!LAD\u0007o\u0002B!!$\u0004z\u0011a11PB?\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\n\u0019q\f\n\u001d\t\u0013\r}4q\nQ\u0001\n\rE\u0014aC\"mCN\u001c8\t\\1tg\u0002:\u0001ba!\u0004P!\u00051QQ\u0001\u000f!JLW.\u001b;jm\u0016\u001cE.Y:t!\u0011\u00199i!#\u000e\u0005\r=c\u0001CBF\u0007\u001fB\ta!$\u0003\u001dA\u0013\u0018.\\5uSZ,7\t\\1tgN!1\u0011RB+\u0011\u001d\u00196\u0011\u0012C\u0001\u0007##\"a!\"\t\u0011\rU5\u0011\u0012C\u0001\u0007/\u000bq!\u001e8baBd\u0017\u0010\u0006\u0003\u0004\u001a\u000e}\u0005c\u0001\u0010\u0004\u001c&\u00191Q\u0014\u0004\u0003\u000f\t{w\u000e\\3b]\"A1\u0011UBJ\u0001\u0004\u0019\u0019+A\u0001ya\u0011\u0019)k!+\u0011\u000b5\n9ia*\u0011\t\u000555\u0011\u0016\u0003\r\u0007W\u001by*!A\u0001\u0002\u000b\u0005\u0011q\u0013\u0002\u0004?\u0012Jt\u0001CBX\u0007\u001fB\ta!-\u0002\u0013\u0015sW/\\\"mCN\u001c\b\u0003BBD\u0007g3\u0001b!.\u0004P!\u00051q\u0017\u0002\n\u000b:,Xn\u00117bgN\u001cBaa-\u0004V!91ka-\u0005\u0002\rmFCABY\u0011!\u0019)ja-\u0005\u0002\r}F\u0003BBM\u0007\u0003D\u0001b!)\u0004>\u0002\u000711\u0019\u0019\u0005\u0007\u000b\u001cI\rE\u0003.\u0003\u000f\u001b9\r\u0005\u0003\u0002\u000e\u000e%G\u0001DBf\u0007\u0003\f\t\u0011!A\u0003\u0002\u0005]%\u0001B0%cA:\u0001ba4\u0004P!\u00051\u0011[\u0001\u000b\u0003J\u0014\u0018-_\"mCN\u001c\b\u0003BBD\u0007'4\u0001b!6\u0004P!\u00051q\u001b\u0002\u000b\u0003J\u0014\u0018-_\"mCN\u001c8\u0003BBj\u0007+BqaUBj\t\u0003\u0019Y\u000e\u0006\u0002\u0004R\"A1QSBj\t\u0003\u0019y\u000e\u0006\u0003\u0004\u001a\u000e\u0005\b\u0002CBQ\u0007;\u0004\raa91\t\r\u00158\u0011\u001e\t\u0006[\u0005\u001d5q\u001d\t\u0005\u0003\u001b\u001bI\u000f\u0002\u0007\u0004l\u000e\u0005\u0018\u0011!A\u0001\u0006\u0003\t9J\u0001\u0003`IE\nt\u0001CBx\u0007\u001fB\ta!=\u0002\u001f\u0005sgn\u001c;bi&|gn\u00117bgN\u0004Baa\"\u0004t\u001aA1Q_B(\u0011\u0003\u00199PA\bB]:|G/\u0019;j_:\u001cE.Y:t'\u0011\u0019\u0019p!\u0016\t\u000fM\u001b\u0019\u0010\"\u0001\u0004|R\u00111\u0011\u001f\u0005\t\u0007+\u001b\u0019\u0010\"\u0001\u0004\u0000R!1\u0011\u0014C\u0001\u0011!\u0019\tk!@A\u0002\u0011\r\u0001\u0007\u0002C\u0003\t\u0013\u0001R!LAD\t\u000f\u0001B!!$\u0005\n\u0011aA1\u0002C\u0001\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\n!q\fJ\u00193\u000f!!yaa\u0014\t\u0002\u0011E\u0011aC\"p]N$\u0018M\u001c;Be\u001e\u0004Baa\"\u0005\u0014\u0019AAQCB(\u0011\u0003!9BA\u0006D_:\u001cH/\u00198u\u0003J<7\u0003\u0002C\n\u0007+Bqa\u0015C\n\t\u0003!Y\u0002\u0006\u0002\u0005\u0012!AAq\u0004C\n\t\u0003!\t#\u0001\u0007f]VlGk\\*z[\n|G\u000eF\u0002I\tGA\u0001\u0002\"\n\u0005\u001e\u0001\u0007AqE\u0001\u0005K:,X\u000e\r\u0003\u0005*\u0011E\u0002#B\u0017\u0005,\u0011=\u0012b\u0001C\u0017]\t!QI\\;n!\u0011\ti\t\"\r\u0005\u0019\u0011MB1EA\u0001\u0002\u0003\u0015\t!a&\u0003\t}#\u0013g\r\u0005\t\u0007+#\u0019\u0002\"\u0001\u00058Q!A\u0011\bC !\u0015qB1HAP\u0013\r!iD\u0002\u0002\u0007\u001fB$\u0018n\u001c8\t\u0011\u0011\u0005CQ\u0007a\u0001\t\u0007\nab]2iK6\f\u0017I\u001c3WC2,X\rE\u0004\u001f\t\u000b\"I%a(\n\u0007\u0011\u001dcA\u0001\u0004UkBdWM\r\u0019\u0005\t\u0017\"y\u0005E\u0003.\u0003\u000f#i\u0005\u0005\u0003\u0002\u000e\u0012=C\u0001\u0004C)\t\u007f\t\t\u0011!A\u0003\u0002\u0005]%\u0001B0%cQB\u0001\u0002\"\u0016\u0004P\u0011\u0005AqK\u0001\u0006CB\u0004H.\u001f\u000b\u0005\t3\"\u0019\u0007E\u0002<\t7JA\u0001\"\u0018\u0005`\t\t2\t\\1tg\u001aLG.Z!o]>$\u0018I]4\n\u0007\u0011\u00054BA\bB]:|G/\u0019;j_:LeNZ8t\u0011!!\t\u0005b\u0015A\u0002\u0011\u0015\u0004c\u0002\u0010\u0005F\u0011\u001d\u0014q\u0014\u0019\u0005\tS\"i\u0007E\u0003.\u0003\u000f#Y\u0007\u0005\u0003\u0002\u000e\u00125D\u0001\u0004C8\tG\n\t\u0011!A\u0003\u0002\u0005]%\u0001B0%cU2a\u0001b\u001d=\t\u0012U$a\u0005&bm\u0006\feN\\8uCRLwN\u001c)s_bL8\u0003\u0003C9\to\"i\bb!\u0011\u0007m\"I(\u0003\u0003\u0005|\u0011}#AD!o]>$\u0018\r^5p]&sgm\u001c\t\u0004=\u0011}\u0014b\u0001CA\r\t9\u0001K]8ek\u000e$\bc\u0001\u0010\u0005\u0006&\u0019Aq\u0011\u0004\u0003\u0019M+'/[1mSj\f'\r\\3\t\u0017\u0011-E\u0011\u000fBK\u0002\u0013\u0005AQR\u0001\u0005U\u0006tg.\u0006\u0002\u0005\u0010B!A\u0011\u0013CL\u001b\t!\u0019JC\u0002\u0005\u0016:\n!\"\u00198o_R\fG/[8o\u0013\u0011!I\nb%\u0003\u0015\u0005sgn\u001c;bi&|g\u000eC\u0006\u0005\u001e\u0012E$\u0011#Q\u0001\n\u0011=\u0015!\u00026b]:\u0004\u0003bB*\u0005r\u0011\u0005A\u0011\u0015\u000b\u0005\tG#)\u000bE\u0002u\tcB\u0001\u0002b#\u0005 \u0002\u0007Aq\u0012\u0005\u000b\tS#\tH1A\u0005B\u0011-\u0016aA1uaV\u0011AQ\u0016\t\u0004w\u0011=\u0016\u0002\u0002CY\u0003\u001f\u0012A\u0001V=qK\"IAQ\u0017C9A\u0003%AQV\u0001\u0005CR\u0004\b\u0005\u0003\u0006\u0005:\u0012E$\u0019!C!\tw\u000bA!\u0019:hgV\u0011AQ\u0018\t\u0007\t\u007f#)\rb3\u000f\u0007y!\t-C\u0002\u0005D\u001a\tq\u0001]1dW\u0006<W-\u0003\u0003\u0005H\u0012%'\u0001\u0002'jgRT1\u0001b1\u0007!\rYDQZ\u0005\u0005\t\u001f$\tN\u0001\u0003Ue\u0016,\u0017b\u0001Cj\u0017\t)AK]3fg\"IAq\u001bC9A\u0003%AQX\u0001\u0006CJ<7\u000f\t\u0005\t\t7$\t\b\"\u0011\u0005^\u0006AqN]5hS:\fG.\u0006\u0002\u0005L\"AA\u0011\u001dC9\t\u0003\"\u0019/A\u0006tKR|%/[4j]\u0006dG\u0003\u0002Cs\tOl!\u0001\"\u001d\t\u0011\u0011%Hq\u001ca\u0001\t\u0017\f\u0011\u0001\u001e\u0005\t\t[$\t\b\"\u0011\u0005p\u0006\u0019\u0001o\\:\u0016\u0005\u0011E\bcA\u001e\u0005t&!AQ\u001fC|\u0005!\u0001vn]5uS>t\u0017b\u0001C}\u0017\tI\u0001k\\:ji&|gn\u001d\u0005\t\t{$\t\b\"\u0011\u0005\u0000\u000611/\u001a;Q_N$B\u0001\":\u0006\u0002!AAQ\u001eC~\u0001\u0004!\t\u0010\u0003\u0005\u0006\u0006\u0011ED\u0011IC\u0004\u0003!!xn\u0015;sS:<GCAA5\u0011-)Y\u0001\"\u001d\t\u0006\u0004%\t%\"\u0004\u0002\r\u0005\u001c8o\\2t+\t)y\u0001\u0005\u0004\u0005@\u0012\u0015W\u0011\u0003\t\b=\u0011\u0015S1\u0003C-!\rYTQC\u0005\u0005\u000b/)IB\u0001\u0003OC6,\u0017bAC\u000e\u0017\t)a*Y7fg\"YQq\u0004C9\u0011\u0003\u0005\u000b\u0015BC\b\u0003\u001d\t7o]8dg\u0002B!\"b\t\u0005r\u0005\u0005I\u0011AC\u0013\u0003\u0011\u0019w\u000e]=\u0015\t\u0011\rVq\u0005\u0005\u000b\t\u0017+\t\u0003%AA\u0002\u0011=\u0005BCC\u0016\tc\n\n\u0011\"\u0001\u0006.\u0005q1m\u001c9zI\u0011,g-Y;mi\u0012\nTCAC\u0018U\u0011!y)\"\r,\u0005\u0015M\u0002\u0003BC\u001b\u000b{i!!b\u000e\u000b\t\u0015eR1H\u0001\nk:\u001c\u0007.Z2lK\u0012T1\u0001\"&\u0007\u0013\u0011)y$b\u000e\u0003#Ut7\r[3dW\u0016$g+\u0019:jC:\u001cW\r\u0003\u0006\u0006D\u0011E\u0014\u0011!C!\u000b\u000b\nQ\u0002\u001d:pIV\u001cG\u000f\u0015:fM&DXCAC$!\riS\u0011J\u0005\u0004\u0003gr\u0003BCC'\tc\n\t\u0011\"\u0001\u0006P\u0005a\u0001O]8ek\u000e$\u0018I]5usV\u0011Q\u0011\u000b\t\u0004=\u0015M\u0013bAC+\r\t\u0019\u0011J\u001c;\t\u0015\u0015eC\u0011OA\u0001\n\u0003)Y&\u0001\bqe>$Wo\u0019;FY\u0016lWM\u001c;\u0015\t\u0005}UQ\f\u0005\u000b\u000b?*9&!AA\u0002\u0015E\u0013a\u0001=%c!QQ1\rC9\u0003\u0003%\t%\"\u001a\u0002\u001fA\u0014x\u000eZ;di&#XM]1u_J,\"!b\u001a\u0011\r\u0015%T1NAP\u001b\u0005A\u0013bAC7Q\tA\u0011\n^3sCR|'\u000f\u0003\u0006\u0006r\u0011E\u0014\u0011!C\u0001\u000bg\n\u0001bY1o\u000bF,\u0018\r\u001c\u000b\u0005\u00073+)\b\u0003\u0006\u0006`\u0015=\u0014\u0011!a\u0001\u0003?;\u0011\"\"\u001f=\u0003\u0003EI!b\u001f\u0002')\u000bg/Y!o]>$\u0018\r^5p]B\u0013x\u000e_=\u0011\u0007Q,iHB\u0005\u0005tq\n\t\u0011#\u0003\u0006\u0000M1QQPCA\t\u0007\u0003\u0002\"b!\u0006\b\u0012=E1U\u0007\u0003\u000b\u000bS!a\u0001\u0004\n\t\u0015%UQ\u0011\u0002\u0012\u0003\n\u001cHO]1di\u001a+hn\u0019;j_:\f\u0004bB*\u0006~\u0011\u0005QQ\u0012\u000b\u0003\u000bwB!\"\"\u0002\u0006~\u0005\u0005IQICI)\t)9\u0005\u0003\u0006\u0005V\u0015u\u0014\u0011!CA\u000b+#B\u0001b)\u0006\u0018\"AA1RCJ\u0001\u0004!y\t\u0003\u0006\u0004\u0016\u0016u\u0014\u0011!CA\u000b7#B!\"(\u0006 B)a\u0004b\u000f\u0005\u0010\"QQ\u0011UCM\u0003\u0003\u0005\r\u0001b)\u0002\u0007a$\u0003\u0007\u0003\u0004\u0006y\u0011\u0005QQU\u000b\u0005\u000bO+\t\r\u0006\u0003\u0006*\u0016\u0015G\u0003BCV\u000bg\u00032aOCW\u0013\u0011)y+\"-\u0003\u001d%s7\u000f^1oG\u0016l\u0015N\u001d:pe&\u00111)\u0005\u0005\u000b\u000bk+\u0019+!AA\u0004\u0015]\u0016AC3wS\u0012,gnY3%eA1Q\u0011XC^\u000b\u007fk\u0011\u0001B\u0005\u0004\u000b{#!\u0001C\"mCN\u001cH+Y4\u0011\t\u00055U\u0011\u0019\u0003\t\u000b\u0007,\u0019K1\u0001\u0002\u0018\n\tA\u000b\u0003\u0005\u0006H\u0016\r\u0006\u0019AC`\u0003\ry'M\u001b\u0005\b\u000b\u0017dD\u0011ACg\u00031\u0011XM\u001a7fGR\u001cE.Y:t)\u0011)y-\"6\u0011\u0007m*\t.\u0003\u0003\u0006T\u0016E&aC\"mCN\u001cX*\u001b:s_JD\u0001\"b6\u0006J\u0002\u0007\u0011QU\u0001\u0004G2\u001c\bbBCny\u0011\u0005QQ\\\u0001\u000ee\u00164G.Z2u\u001b>$W\u000f\\3\u0015\t\u0015}WQ\u001d\t\u0004w\u0015\u0005\u0018\u0002BCr\u000bc\u0013A\"T8ek2,W*\u001b:s_JD\u0001\"b:\u0006Z\u0002\u0007\u0011qL\u0001\u0004[>$\u0007bBCvy\u0011\u0005QQ^\u0001\reVtG/[7f\u00072\f7o\u001d\u000b\u0005\u000b_,)\u0010E\u0002<\u000bcL1!b=\u0014\u00051\u0011VO\u001c;j[\u0016\u001cE.Y:t\u0011!)90\";A\u0002\u00115\u0016a\u0001;qK\"9Q1\u001e\u001f\u0005\u0002\u0015mH\u0003BCx\u000b{D\u0001\"b6\u0006z\u0002\u0007\u0011Q\u0015\u0005\b\r\u0003aD\u0011\u0001D\u0002\u0003-\u0019G.Y:t'fl'm\u001c7\u0015\t\u0005\u0015fQ\u0001\u0005\t\r\u000f)y\u00101\u0001\u0006p\u0006)!\u000f^2mg\"9a1\u0002\u001f\u0005\u0002\u00195\u0011\u0001D7pIVdWmU=nE>dG\u0003BA0\r\u001fA\u0001Bb\u0002\u0007\n\u0001\u0007Qq\u001e\u0005\b\r'aD\u0011\u0002D\u000b\u0003=)gn];sS:<gj\u001c;Ge\u0016,G\u0003\u0002D\f\rC!2!\bD\r\u0011%\u00119F\"\u0005\u0005\u0002\u00041Y\u0002E\u0003\u001f\r;\ty*C\u0002\u0007 \u0019\u0011\u0001\u0002\u00102z]\u0006lWM\u0010\u0005\b\u0005g4\t\u00021\u0001I\u0011\u001d1)\u0003\u0010C\u0005\rO\tQb\u00195fG.lU-\u001c2fe>3G#B\u000f\u0007*\u0019-\u0002b\u0002Bz\rG\u0001\r\u0001\u0013\u0005\b\u000f\u001a\r\u0002\u0019AAS\u0011\u001d1y\u0003\u0010C\u0005\rc\t!c\u00195fG.\u001cuN\\:ueV\u001cGo\u001c:PMR)QDb\r\u00076!9!1\u001fD\u0017\u0001\u0004A\u0005bB$\u0007.\u0001\u0007\u0011Q\u0015\u0005\b\rsaD\u0011\u0002D\u001e\u00031\u0001(/Z2jg\u0016\u001cE.Y:t+\u00111iDb\u0018\u0015\t\u0019}bq\r\u000b\u0005\r\u00032\t\u0007\r\u0005\u0007D\u0019\u001dc1\u000bD,!\u0015i\u0013q\u0011D#!\u0011\tiIb\u0012\u0005\u0019\u0019%cqGA\u0001\u0002\u0003\u0015\tAb\u0013\u0003\t}#\u0004HN\t\u0005\r\u001b\nyJ\u0005\u0004\u0007P\u0019EcQ\u000b\u0004\u0007a\u001a]\u0002A\"\u0014\u0011\t\u00055e1\u000b\u0003\r\u0003#39$!A\u0001\u0002\u000b\u0005\u0011q\u0013\t\u0005\u0003\u001b39\u0006\u0002\u0007\u0007Z\u0019]\u0012\u0011!A\u0001\u0006\u00031YF\u0001\u0002@aE!\u0011\u0011\u0014D/!\u0011\tiIb\u0018\u0005\u0011\u0015\rgq\u0007b\u0001\u0003/C!Bb\u0019\u00078\u0005\u0005\t9\u0001D3\u0003))g/\u001b3f]\u000e,Ge\r\t\u0007\u000bs+YL\"\u0018\t\u0011\u0019%dq\u0007a\u0001\r;\n\u0001\"\u001b8ti\u0006t7-\u001a\u0004\u0007\r[bDAb\u001c\u0003%)\u000bg/Y%ogR\fgnY3NSJ\u0014xN]\u000b\u0005\rc2Ih\u0005\u0004\u0007l\rUS1\u0016\u0005\f\rS2YG!b\u0001\n\u00031)(\u0006\u0002\u0007xA!\u0011Q\u0012D=\t!)\u0019Mb\u001bC\u0002\u0005]\u0005b\u0003D?\rW\u0012\t\u0011)A\u0005\ro\n\u0011\"\u001b8ti\u0006t7-\u001a\u0011\t\u0017\u0019\u0005e1\u000eB\u0002B\u0003-a1Q\u0001\u000bKZLG-\u001a8dK\u0012\"\u0004CBC]\u000bw39\bC\u0004T\rW\"\tAb\"\u0015\t\u0019%eq\u0012\u000b\u0005\r\u00173i\tE\u0003u\rW29\b\u0003\u0005\u0007\u0002\u001a\u0015\u00059\u0001DB\u0011!1IG\"\"A\u0002\u0019]\u0004\u0002\u0003DJ\rW\"\tA\"&\u0002\rMLXNY8m+\t\t)\u000b\u0003\u0005\u0007\u001a\u001a-D\u0011\u0001DN\u00031\u0011XM\u001a7fGR4\u0015.\u001a7e)\u00111iJb)\u0011\u0007m2y*\u0003\u0003\u0007\"\u0016E&a\u0003$jK2$W*\u001b:s_JD\u0001B\"*\u0007\u0018\u0002\u0007!\u0011A\u0001\u0006M&,G\u000e\u001a\u0005\t\rS3Y\u0007\"\u0001\u0007,\u0006i!/\u001a4mK\u000e$X*\u001a;i_\u0012$BA\",\u00074B\u00191Hb,\n\t\u0019EV\u0011\u0017\u0002\r\u001b\u0016$\bn\u001c3NSJ\u0014xN\u001d\u0005\t\rk39\u000b1\u0001\u0002P\u00061Q.\u001a;i_\u0012D\u0001\"b3\u0007l\u0011\u0005a\u0011\u0018\u000b\u0005\u000b\u001f4Y\f\u0003\u0005\u0006X\u001a]\u0006\u0019AAS\u0011!)YNb\u001b\u0005\u0002\u0019}F\u0003BCp\r\u0003D\u0001\"b:\u0007>\u0002\u0007\u0011q\f\u0005\t\u000b\u000b1Y\u0007\"\u0011\u0006\b\u00191aq\u0019\u001f\u0005\r\u0013\u0014\u0011\u0004R3sSZ,GMV1mk\u0016\u001cE.Y:t\u001b\u0016$\u0018\rZ1uCN!aQYB+\u0011-1iM\"2\u0003\u0002\u0003\u0006I\u0001\",\u0002\t%tgm\u001c\u0005\b'\u001a\u0015G\u0011\u0001Di)\u00111\u0019N\"6\u0011\u0007Q4)\r\u0003\u0005\u0007N\u001a=\u0007\u0019\u0001CW\u0011)1\u0019J\"2C\u0002\u0013\u0005a\u0011\\\u000b\u0002\u0011\"AaQ\u001cDcA\u0003%\u0001*A\u0004ts6\u0014w\u000e\u001c\u0011\t\u0015\u0019\u0005hQ\u0019b\u0001\n\u00031\u0019/A\njg\u0012+'/\u001b<fIZ\u000bG.^3DY\u0006\u001c8/\u0006\u0002\u0004\u001a\"Iaq\u001dDcA\u0003%1\u0011T\u0001\u0015SN$UM]5wK\u00124\u0016\r\\;f\u00072\f7o\u001d\u0011\t\u0017\u0019-hQ\u0019EC\u0002\u0013\u0005aQ^\u0001\u0006E>DXM]\u000b\u0003\r_\u0004DA\"=\u0007vB1\u0011qYAs\rg\u0004B!!$\u0007v\u0012aa\u0011\fD|\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\"Ya\u0011 Dc\u0011\u0003\u0005\u000b\u0015\u0002Dx\u0003\u0019\u0011w\u000e_3sA!YaQ Dc\u0011\u000b\u0007I\u0011\u0001D\u0000\u0003\u001d)hNY8yKJ,\"!!2\t\u0017\u001d\raQ\u0019E\u0001B\u0003&\u0011QY\u0001\tk:\u0014w\u000e_3sA\u00191qq\u0001\u001f\u0005\u000f\u0013\u0011qBS1wC\u001aKW\r\u001c3NSJ\u0014xN]\n\u0007\u000f\u000b\u0019)F\"(\t\u0017\u001d5qQ\u0001BC\u0002\u0013\u0005qqB\u0001\te\u0016\u001cW-\u001b<feV\u0011\u0011q\u0014\u0005\f\u000f'9)A!A!\u0002\u0013\ty*A\u0005sK\u000e,\u0017N^3sA!Ya1SD\u0003\u0005\u000b\u0007I\u0011AD\f+\t\u0011\t\u0001C\u0006\u0007^\u001e\u0015!\u0011!Q\u0001\n\t\u0005\u0001bCD\u000f\u000f\u000b\u0011\t\u0011)A\u0005\r'\f\u0001\"\\3uC\u0012\fG/\u0019\u0005\b'\u001e\u0015A\u0011AD\u0011)!9\u0019c\"\n\b(\u001d%\u0002c\u0001;\b\u0006!AqQBD\u0010\u0001\u0004\ty\n\u0003\u0005\u0007\u0014\u001e}\u0001\u0019\u0001B\u0001\u0011!9ibb\bA\u0002\u0019M\u0007bB*\b\u0006\u0011\u0005qQ\u0006\u000b\u0007\u000fG9yc\"\r\t\u0011\u001d5q1\u0006a\u0001\u0003?C\u0001Bb%\b,\u0001\u0007!\u0011\u0001\u0005\t\u000fk9)\u0001\"\u0001\b8\u0005!!-\u001b8e)\u00119\u0019c\"\u000f\t\u0011\u001dmr1\u0007a\u0001\u0003?\u000b1B\\3x%\u0016\u001cW-\u001b<fe\"YqqHD\u0003\u0011\u000b\u0007I\u0011AD!\u0003\u0019Qg-[3mIV\u0011\u00111 \u0005\f\u000f\u000b:)\u0001#A!B\u0013\tY0A\u0004kM&,G\u000e\u001a\u0011\t\u0011\u001d%sQ\u0001C\u0001\u000f\u001f\t1aZ3u\u0011!9ie\"\u0002\u0005\u0002\u001d=\u0013aA:fiR\u0019Qd\"\u0015\t\u0011\u001dMs1\na\u0001\u0003?\u000bQA^1mk\u0016D\u0001\"\"\u0002\b\u0006\u0011\u0005Sq\u0001\u0005\b\u000f3bD\u0011BD.\u0003)I7oR3u\u00072\f7o\u001d\u000b\u0005\u00073;i\u0006\u0003\u0005\b`\u001d]\u0003\u0019AAh\u0003\u0011iW\r\u001e5\t\u000f\u001d\rD\b\"\u0003\bf\u0005q\u0011n]*ue&twmQ8oG\u0006$H\u0003BBM\u000fOB\u0001bb\u0018\bb\u0001\u0007\u0011q\u001a\u0005\u000b\u000fWb\u0004R1A\u0005\u0002\u001d5\u0014\u0001\u00072zi\u0016\u001cw\u000eZ3mKN\u001cX*\u001a;i_\u0012|uO\\3sgV\u0011qq\u000e\t\u0006\u000fc:9\bS\u0007\u0003\u000fgR1a\"\u001e)\u0003%IW.\\;uC\ndW-\u0003\u0003\bz\u001dM$aA*fi\"QqQ\u0010\u001f\t\u0002\u0003\u0006Kab\u001c\u00023\tLH/Z2pI\u0016dWm]:NKRDw\u000eZ(x]\u0016\u00148\u000f\t\u0005\u000b\u000f\u0003c\u0004R1A\u0005\u0002\u001d5\u0014\u0001\u00072zi\u0016\u001cw\u000eZ3gk2|%M[3di6+G\u000f[8eg\"QqQ\u0011\u001f\t\u0002\u0003\u0006Kab\u001c\u00023\tLH/Z2pI\u00164W\u000f\\(cU\u0016\u001cG/T3uQ>$7\u000f\t\u0005\b\u000f\u0013cD\u0011BDF\u0003QI7OQ=uK\u000e|G-\u001a7fgNlU\r\u001e5pIR!1\u0011TDG\u0011!9yfb\"A\u0002\u0005=\u0007bBDIy\u0011%q1S\u0001\u000eSN\u0014\u0015PT1nKB\u000b'/Y7\u0015\t\reuQ\u0013\u0005\t\u000f/;y\t1\u0001\u0005.\u0006\t\u0001\u000fC\u0004\b\u001cr\"Ia\"(\u0002#%\u001ch+\u00197vK\u000ec\u0017m]:QCJ\fW\u000e\u0006\u0003\u0004\u001a\u001e}\u0005\u0002CDL\u000f3\u0003\r\u0001\",\t\u000f\u001d\rF\b\"\u0003\b&\u0006qQn['fi\"|G-T5se>\u0014X\u0003BDT\u000fg#ba\"+\b6\u001e]F\u0003\u0002DW\u000fWC!b\",\b\"\u0006\u0005\t9ADX\u0003))g/\u001b3f]\u000e,G%\u000e\t\u0007\u000bs+Yl\"-\u0011\t\u00055u1\u0017\u0003\t\u000b\u0007<\tK1\u0001\u0002\u0018\"AqQBDQ\u0001\u00049\t\f\u0003\u0005\u0007\u0014\u001e\u0005\u0006\u0019AAh\r\u001d9Y\fPA\u0005\u000f{\u0013\u0001CS1wC6+G\u000f[8e\u001b&\u0014(o\u001c:\u0014\r\u001de6Q\u000bDW\u0011-1\u0019j\"/\u0003\u0006\u0004%\ta\"1\u0016\u0005\u0005=\u0007b\u0003Do\u000fs\u0013\t\u0011)A\u0005\u0003\u001fD1bb2\b:\n\u0015\r\u0011\"\u0005\bJ\u0006\u0019!/\u001a;\u0016\u0005\u0019M\u0007bCDg\u000fs\u0013\t\u0011)A\u0005\r'\fAA]3uA!91k\"/\u0005\u0002\u001dEGCBDj\u000f+<9\u000eE\u0002u\u000fsC\u0001Bb%\bP\u0002\u0007\u0011q\u001a\u0005\t\u000f\u000f<y\r1\u0001\u0007T\"Yq1\\D]\u0011\u000b\u0007I\u0011\u0001D\u0000\u0003\u0015QW.\u001a;i\u0011-9yn\"/\t\u0002\u0003\u0006K!!2\u0002\r)lW\r\u001e5!\u0011-9\u0019o\"/\t\u0006\u0004%\ta\":\u0002\u000f)\u001cwN\\:ueV\u0011qq\u001d\u0019\u0005\u000fS<i\u000f\u0005\u0004\u0002H\u0006\u0015x1\u001e\t\u0005\u0003\u001b;i\u000f\u0002\u0007\bp\u001eE\u0018\u0011!A\u0001\u0006\u0003\t9J\u0001\u0003`IQ\u0012\u0004bCDz\u000fsC\t\u0011)Q\u0005\u000fO\f\u0001B[2p]N$(\u000f\t\u0005\t\u000fo<I\f\"\u0001\bz\u0006Q!.\u001b8w_.,'/Y<\u0015\t\u0005}u1 \u0005\t\ts;)\u00101\u0001\b~B1AqXD\u0000\u0003?KA\u0001#\u0001\u0005J\n\u00191+Z9\t\u0011!\u0015q\u0011\u0018C\u0001\u0011\u000f\tqA[5om>\\W\r\u0006\u0003\u0002 \"%\u0001\u0002\u0003C]\u0011\u0007\u0001\ra\"@\t\u0011\u0015\u0015q\u0011\u0018C!\u000b\u000f1a\u0001c\u0004=\t!E!a\u0006&bm\u00064\u0016M\\5mY\u0006lU\r\u001e5pI6K'O]8s'\u0011Aiab5\t\u0017\u001d5\u0001R\u0002BC\u0002\u0013\u0005qq\u0002\u0005\f\u000f'AiA!A!\u0002\u0013\ty\nC\u0007\u0007\u0014\"5!\u0011!Q\u0001\n\u0005=wq\u0018\u0005\u000e\u000f\u000fDiA!A!\u0002\u00131\u0019n\"2\t\u000fMCi\u0001\"\u0001\t\u001eQA\u0001r\u0004E\u0011\u0011GA)\u0003E\u0002u\u0011\u001bA\u0001b\"\u0004\t\u001c\u0001\u0007\u0011q\u0014\u0005\t\r'CY\u00021\u0001\u0002P\"Aqq\u0019E\u000e\u0001\u00041\u0019\u000eC\u0004T\u0011\u001b!\t\u0001#\u000b\u0015\r!}\u00012\u0006E\u0017\u0011!9i\u0001c\nA\u0002\u0005}\u0005\u0002\u0003DJ\u0011O\u0001\r!a4\t\u0011\u001dU\u0002R\u0002C\u0001\u0011c!B\u0001c\b\t4!Aq1\bE\u0018\u0001\u0004\ty\n\u0003\u0005\u0005V!5A\u0011\u0001E\u001c)\u0011\ty\n#\u000f\t\u0011\u0011e\u0006R\u0007a\u0001\u0011w\u0001RA\bE\u001f\u0003?K1\u0001c\u0010\u0007\u0005)a$/\u001a9fCR,GM\u0010\u0004\u0007\u0011\u0007bD\u0001#\u0012\u00031)\u000bg/\u0019,b]&dG.Y'fi\"|G-T5se>\u0014\bg\u0005\u0003\tB!}\u0001\"DD\u0007\u0011\u0003\u0012\t\u0011)A\u0005\u0003?C\u0019\u0002C\u0007\u0007\u0014\"\u0005#\u0011!Q\u0001\n\u0005=wq\u0018\u0005\u000e\u000f\u000fD\tE!A!\u0002\u00131\u0019n\"2\t\u000fMC\t\u0005\"\u0001\tPQA\u0001\u0012\u000bE*\u0011+B9\u0006E\u0002u\u0011\u0003B\u0001b\"\u0004\tN\u0001\u0007\u0011q\u0014\u0005\t\r'Ci\u00051\u0001\u0002P\"Aqq\u0019E'\u0001\u00041\u0019\u000eC\u0004T\u0011\u0003\"\t\u0001c\u0017\u0015\r!E\u0003R\fE0\u0011!9i\u0001#\u0017A\u0002\u0005}\u0005\u0002\u0003DJ\u00113\u0002\r!a4\t\u0011\u001dU\u0002\u0012\tC!\u0011G\"B\u0001#\u0015\tf!Aq1\bE1\u0001\u0004\ty\n\u0003\u0005\bx\"\u0005C\u0011\tE5)\u0011\ty\nc\u001b\t\u0011\u0011e\u0006r\ra\u0001\u000f{4a\u0001c\u001c=\t!E$\u0001\u0007&bm\u00064\u0016M\\5mY\u0006lU\r\u001e5pI6K'O]8scM!\u0001R\u000eE\u0010\u001159i\u0001#\u001c\u0003\u0002\u0003\u0006I!a(\t\u0014!ia1\u0013E7\u0005\u0003\u0005\u000b\u0011BAh\u000f\u007fCQbb2\tn\t\u0005\t\u0015!\u0003\u0007T\u001e\u0015\u0007bB*\tn\u0011\u0005\u00012\u0010\u000b\t\u0011{By\b#!\t\u0004B\u0019A\u000f#\u001c\t\u0011\u001d5\u0001\u0012\u0010a\u0001\u0003?C\u0001Bb%\tz\u0001\u0007\u0011q\u001a\u0005\t\u000f\u000fDI\b1\u0001\u0007T\"91\u000b#\u001c\u0005\u0002!\u001dEC\u0002E?\u0011\u0013CY\t\u0003\u0005\b\u000e!\u0015\u0005\u0019AAP\u0011!1\u0019\n#\"A\u0002\u0005=\u0007\u0002CD\u001b\u0011[\"\t\u0005c$\u0015\t!u\u0004\u0012\u0013\u0005\t\u000fwAi\t1\u0001\u0002 \"Aqq\u001fE7\t\u0003B)\n\u0006\u0003\u0002 \"]\u0005\u0002\u0003C]\u0011'\u0003\ra\"@\u0007\r!mE\b\u0002EO\u0005aQ\u0015M^1WC:LG\u000e\\1NKRDw\u000eZ'jeJ|'OM\n\u0005\u00113Cy\u0002C\u0007\b\u000e!e%\u0011!Q\u0001\n\u0005}\u00052\u0003\u0005\u000e\r'CIJ!A!\u0002\u0013\tymb0\t\u001b\u001d\u001d\u0007\u0012\u0014B\u0001B\u0003%a1[Dc\u0011\u001d\u0019\u0006\u0012\u0014C\u0001\u0011O#\u0002\u0002#+\t,\"5\u0006r\u0016\t\u0004i\"e\u0005\u0002CD\u0007\u0011K\u0003\r!a(\t\u0011\u0019M\u0005R\u0015a\u0001\u0003\u001fD\u0001bb2\t&\u0002\u0007a1\u001b\u0005\b'\"eE\u0011\u0001EZ)\u0019AI\u000b#.\t8\"AqQ\u0002EY\u0001\u0004\ty\n\u0003\u0005\u0007\u0014\"E\u0006\u0019AAh\u0011!9)\u0004#'\u0005B!mF\u0003\u0002EU\u0011{C\u0001bb\u000f\t:\u0002\u0007\u0011q\u0014\u0005\t\u000foDI\n\"\u0011\tBR!\u0011q\u0014Eb\u0011!!I\fc0A\u0002\u001duhA\u0002Edy\u0011AIM\u0001\rKCZ\fg+\u00198jY2\fW*\u001a;i_\u0012l\u0015N\u001d:peN\u001aB\u0001#2\t !iqQ\u0002Ec\u0005\u0003\u0005\u000b\u0011BAP\u0011'AQBb%\tF\n\u0005\t\u0015!\u0003\u0002P\u001e}\u0006\"DDd\u0011\u000b\u0014\t\u0011)A\u0005\r'<)\rC\u0004T\u0011\u000b$\t\u0001c5\u0015\u0011!U\u0007r\u001bEm\u00117\u00042\u0001\u001eEc\u0011!9i\u0001#5A\u0002\u0005}\u0005\u0002\u0003DJ\u0011#\u0004\r!a4\t\u0011\u001d\u001d\u0007\u0012\u001ba\u0001\r'Dqa\u0015Ec\t\u0003Ay\u000e\u0006\u0004\tV\"\u0005\b2\u001d\u0005\t\u000f\u001bAi\u000e1\u0001\u0002 \"Aa1\u0013Eo\u0001\u0004\ty\r\u0003\u0005\b6!\u0015G\u0011\tEt)\u0011A)\u000e#;\t\u0011\u001dm\u0002R\u001da\u0001\u0003?C\u0001bb>\tF\u0012\u0005\u0003R\u001e\u000b\u0005\u0003?Cy\u000f\u0003\u0005\u0005:\"-\b\u0019AD\u007f\r\u0019A\u0019\u0010\u0010\u0003\tv\nA\"*\u0019<b-\u0006t\u0017\u000e\u001c7b\u001b\u0016$\bn\u001c3NSJ\u0014xN\u001d\u001b\u0014\t!E\br\u0004\u0005\u000e\u000f\u001bA\tP!A!\u0002\u0013\ty\nc\u0005\t\u001b\u0019M\u0005\u0012\u001fB\u0001B\u0003%\u0011qZD`\u0011599\r#=\u0003\u0002\u0003\u0006IAb5\bF\"91\u000b#=\u0005\u0002!}H\u0003CE\u0001\u0013\u0007I)!c\u0002\u0011\u0007QD\t\u0010\u0003\u0005\b\u000e!u\b\u0019AAP\u0011!1\u0019\n#@A\u0002\u0005=\u0007\u0002CDd\u0011{\u0004\rAb5\t\u000fMC\t\u0010\"\u0001\n\fQ1\u0011\u0012AE\u0007\u0013\u001fA\u0001b\"\u0004\n\n\u0001\u0007\u0011q\u0014\u0005\t\r'KI\u00011\u0001\u0002P\"AqQ\u0007Ey\t\u0003J\u0019\u0002\u0006\u0003\n\u0002%U\u0001\u0002CD\u001e\u0013#\u0001\r!a(\t\u0011\u001d]\b\u0012\u001fC!\u00133!B!a(\n\u001c!AA\u0011XE\f\u0001\u00049iP\u0002\u0004\n q\"\u0011\u0012\u0005\u0002\u000f\u001b\u0016$\bn\u001c3NKR\fG-\u0019;b'\u0011Iib!\u0016\t\u0017\u0019M\u0015R\u0004B\u0001B\u0003%\u0011q\u001a\u0005\b'&uA\u0011AE\u0014)\u0011II#c\u000b\u0011\u0007QLi\u0002\u0003\u0005\u0007\u0014&\u0015\u0002\u0019AAh\u0011)Iy##\bC\u0002\u0013%\u0011\u0012G\u0001\u0007a\u0006\u0014\u0018-\\:\u0016\u0005%M\u0002\u0003\u0002\u0010\n6!K1!c\u000e\u0007\u0005\u0015\t%O]1z\u0011%IY$#\b!\u0002\u0013I\u0019$A\u0004qCJ\fWn\u001d\u0011\t\u0015%}\u0012R\u0004b\u0001\n\u0013I\t%\u0001\u0006wG6+G/\u00193bi\u0006,\"!c\u0011\u0011\u000byI)Db5\t\u0013%\u001d\u0013R\u0004Q\u0001\n%\r\u0013a\u0003<d\u001b\u0016$\u0018\rZ1uC\u0002B!\"c\u0013\n\u001e\t\u0007I\u0011AE'\u0003!I7OQ=OC6,WCAE(!\u0015q\u0012RGBM\u0011%I\u0019&#\b!\u0002\u0013Iy%A\u0005jg\nKh*Y7fA!Aa\u0011]E\u000f\t\u0003I9\u0006\u0006\u0003\u0004\u001a&e\u0003\u0002CE.\u0013+\u0002\r!\"\u0015\u0002\u0003%D\u0001\"c\u0018\n\u001e\u0011\u0005\u0011\u0012M\u0001\u000ea\u0006\u0014\u0018-\\+oE>DXM]:\u0015\t\u0005\u0015\u00172\r\u0005\t\u00137Ji\u00061\u0001\u0006R!Q\u0011rME\u000f\u0005\u0004%\t!b\u0014\u0002\u0015A\f'/Y7D_VtG\u000fC\u0005\nl%u\u0001\u0015!\u0003\u0006R\u0005Y\u0001/\u0019:b[\u000e{WO\u001c;!\u0011)99-#\bC\u0002\u0013\u0005q\u0011\u001a\u0005\n\u000f\u001bLi\u0002)A\u0005\r'4a!c\u001d=\t%U$\u0001\b&bm\u0006$&/\u00198tM>\u0014X.\u001b8h\u001b\u0016$\bn\u001c3NSJ\u0014xN]\n\u0005\u0013c:\u0019\u000eC\u0006\b\u000e%E$Q1A\u0005\u0002\u001d=\u0001bCD\n\u0013c\u0012\t\u0011)A\u0005\u0003?CQBb%\nr\t\u0005\t\u0015!\u0003\u0002P\u001e}\u0006bCD\u000f\u0013c\u0012\t\u0011)A\u0005\u0013SAqaUE9\t\u0003I\t\t\u0006\u0005\n\u0004&\u0015\u0015rQEE!\r!\u0018\u0012\u000f\u0005\t\u000f\u001bIy\b1\u0001\u0002 \"Aa1SE@\u0001\u0004\ty\r\u0003\u0005\b\u001e%}\u0004\u0019AE\u0015\u0011\u001d\u0019\u0016\u0012\u000fC\u0001\u0013\u001b#b!c!\n\u0010&E\u0005\u0002CD\u0007\u0013\u0017\u0003\r!a(\t\u0011\u0019M\u00152\u0012a\u0001\u0003\u001fD\u0001b\"\u000e\nr\u0011\u0005\u0013R\u0013\u000b\u0005\u0013\u0007K9\n\u0003\u0005\b<%M\u0005\u0019AAP\u0011!!)&#\u001d\u0005\u0002%mE\u0003BAP\u0013;C\u0001\u0002\"/\n\u001a\u0002\u0007\u00012\b\u0004\u0007\u0013CcD!c)\u00031\tKH/Z2pI\u0016dWm]:NKRDw\u000eZ'jeJ|'/\u0006\u0003\n&&56CBEP\u0007+2i\u000bC\u0006\b\u000e%}%Q1A\u0005\u0002%%VCAEV!\u0011\ti)#,\u0005\u0011\u0015\r\u0017r\u0014b\u0001\u0003/C1bb\u0005\n \n\u0005\t\u0015!\u0003\n,\"Ya1SEP\u0005\u000b\u0007I\u0011ADa\u0011-1i.c(\u0003\u0002\u0003\u0006I!a4\t\u0017%]\u0016r\u0014B\u0002B\u0003-\u0011\u0012X\u0001\u000bKZLG-\u001a8dK\u00122\u0004CBC]\u000bwKY\u000bC\u0004T\u0013?#\t!#0\u0015\r%}\u0016RYEd)\u0011I\t-c1\u0011\u000bQLy*c+\t\u0011%]\u00162\u0018a\u0002\u0013sC\u0001b\"\u0004\n<\u0002\u0007\u00112\u0016\u0005\t\r'KY\f1\u0001\u0002P\"AqQGEP\t\u0003IY\r\u0006\u0003\nB&5\u0007\u0002CD\u001e\u0013\u0013\u0004\r!a(\t\u0011\u0015\u0015\u0011r\u0014C!\u000b\u000fA\u0001\u0002\"\u0016\n \u0012\u0005\u00112\u001b\u000b\u0005\u0003?K)\u000e\u0003\u0005\u0005:&E\u0007\u0019\u0001E\u001e\r\u001dII\u000ePA\u0005\u00137\u0014!CS1wCR+W\u000e\u001d7bi\u0016l\u0015N\u001d:peN1\u0011r[B+\u0013;\u00042aOEp\u0013\u0011I\t/\"-\u0003\u001dQ+W\u000e\u001d7bi\u0016l\u0015N\u001d:pe\"91+c6\u0005\u0002%\u0015HCAEt!\r!\u0018r\u001b\u0005\t\u0013WL9N\"\u0001\nn\u0006)q.\u001e;feV\u00111Q\u000b\u0005\t\u0013cL9N\"\u0001\u0007\u0016\u00069QM]1tkJ,gABE{y\u0011I9PA\bKCZ\f7\t\\1tg6K'O]8s'\u0019I\u00190c:\u0006P\"Y\u00112^Ez\u0005\u000b\u0007I\u0011AEw\u0011-Ii0c=\u0003\u0002\u0003\u0006Ia!\u0016\u0002\r=,H/\u001a:!\u0011-1\u0019*c=\u0003\u0006\u0004%\tA\"&\t\u0017\u0019u\u00172\u001fB\u0001B\u0003%\u0011Q\u0015\u0005\b'&MH\u0011\u0001F\u0003)\u0019Q9A#\u0003\u000b\fA\u0019A/c=\t\u0011%-(2\u0001a\u0001\u0007+B\u0001Bb%\u000b\u0004\u0001\u0007\u0011Q\u0015\u0005\t\u0013cL\u0019\u0010\"\u0001\u0007\u0016\"A!\u0012CEz\t\u00031\u0019/\u0001\u0005jgN#\u0018\r^5d\u0011!Q)\"c=\u0005\u0002)]\u0011A\u0005:fM2,7\r^\"p]N$(/^2u_J$BA\",\u000b\u001a!A!2\u0004F\n\u0001\u0004\ty-A\u0006d_:\u001cHO];di>\u0014\b\u0002CC\u0003\u0013g$\t%b\u0002\u0007\r)\u0005B\b\u0002F\u0012\u0005AQ\u0015M^1N_\u0012,H.Z'jeJ|'o\u0005\u0004\u000b %\u001dXq\u001c\u0005\f\u0013WTyB!b\u0001\n\u0003Ii\u000fC\u0006\n~*}!\u0011!Q\u0001\n\rU\u0003b\u0003DJ\u0015?\u0011)\u0019!C\u0001\u0015W)\"!a\u0018\t\u0017\u0019u'r\u0004B\u0001B\u0003%\u0011q\f\u0005\b'*}A\u0011\u0001F\u0019)\u0019Q\u0019D#\u000e\u000b8A\u0019AOc\b\t\u0011%-(r\u0006a\u0001\u0007+B\u0001Bb%\u000b0\u0001\u0007\u0011q\f\u0005\t\u0013cTy\u0002\"\u0001\u0007\u0016\"A!\u0012\u0003F\u0010\t\u00031\u0019\u000f\u0003\u0005\u0007j)}A\u0011AD\b\u0011!))Ac\b\u0005B\u0015\u001d\u0001b\u0002F\"y\u0011%!RI\u0001\tKJ\f7/Z:U_R11\u0011\u0014F$\u0015\u0013Bqab\u0018\u000bB\u0001\u0007\u0001\n\u0003\u0005\b\\*\u0005\u0003\u0019AAc\u0011\u001dQ\u0019\u0005\u0010C\u0005\u0015\u001b\"ba!'\u000bP)E\u0003bBD0\u0015\u0017\u0002\r\u0001\u0013\u0005\t\u000fGTY\u00051\u0001\u000bTA\"!R\u000bF-!\u0019\t9-!:\u000bXA!\u0011Q\u0012F-\t1QYF#\u0015\u0002\u0002\u0003\u0005)\u0011AAL\u0005\u0011yF%\r\u001c\t\u000f)}C\b\"\u0001\u000bb\u0005I!.\u0019<b\u00072\f7o\u001d\u000b\u0005\u0015GRi\u0007\r\u0003\u000bf)%\u0004#B\u0017\u0002\b*\u001d\u0004\u0003BAG\u0015S\"ABc\u001b\u000b^\u0005\u0005\t\u0011!B\u0001\u0003/\u0013Aa\u0018\u00132o!A!r\u000eF/\u0001\u0004\tI'\u0001\u0003qCRD\u0007b\u0002F:y\u0011\u0005!RO\u0001\riJL(*\u0019<b\u00072\f7o\u001d\u000b\u0005\u0015oR\u0019\tE\u0003\u001f\twQI\b\r\u0003\u000b|)}\u0004#B\u0017\u0002\b*u\u0004\u0003BAG\u0015\u007f\"AB#!\u000br\u0005\u0005\t\u0011!B\u0001\u0003/\u0013Aa\u0018\u00132q!A!r\u000eF9\u0001\u0004\tI\u0007C\u0004\u000b\br\"\tA##\u0002\u001d5L'O]8s\t\u00164\u0017N\\5oOR\u0019!Hc#\t\u0011)5%R\u0011a\u0001\u0015\u001f\u000baA[2mCjT\b\u0007\u0002FI\u0015+\u0003R!LAD\u0015'\u0003B!!$\u000b\u0016\u0012a!r\u0013FF\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\n!q\fJ\u0019:\u000f\u001dQY\n\u0010E\u0005\u0015;\u000b\u0011\"\u001e8qS\u000e\\G.\u001a:\u0011\u0007QTyJB\u0004\u000b\"rBIAc)\u0003\u0013Ut\u0007/[2lY\u0016\u00148\u0003\u0002FP\u0015K\u0003BAc*\u000b.6\u0011!\u0012\u0016\u0006\u0004\u0015W[\u0011\u0001\u00039jG.d\u0017N\\4\n\t)=&\u0012\u0016\u0002\n+:\u0004\u0016nY6mKJDqa\u0015FP\t\u0003Q\u0019\f\u0006\u0002\u000b\u001e\"I!r\u0017FP\u0005\u0004%\t!W\u0001\fgfl'm\u001c7UC\ndW\r\u0003\u0005\u000b<*}\u0005\u0015!\u0003<\u00031\u0019\u00180\u001c2pYR\u000b'\r\\3!\u0011\u001dQy\f\u0010C\u0001\u0015\u0003\fQ\"\u001e8qS\u000e\\G.Z\"mCN\u001cHcB\u000f\u000bD*\u001d'2\u001a\u0005\b\u0015\u000bTi\f1\u0001I\u0003\u0015\u0019G.\u0019>{\u0011\u001dQIM#0A\u0002!\u000ba!\\8ek2,\u0007\u0002\u0003FG\u0015{\u0003\rA#41\t)='2\u001b\t\u0006[\u0005\u001d%\u0012\u001b\t\u0005\u0003\u001bS\u0019\u000e\u0002\u0007\u000bV*-\u0017\u0011!A\u0001\u0006\u0003\t9J\u0001\u0003`II\u0002\u0004b\u0002Fmy\u0011%!2\\\u0001\u0014GJ,\u0017\r^3UsB,\u0007+\u0019:b[\u0016$XM\u001d\u000b\u0005\u0005[Qi\u000e\u0003\u0005\u000b`*]\u0007\u0019\u0001Fq\u0003\u0015QGO^1sa\u0011Q\u0019Oc:\u0011\r\u0005\u001d'q\u0003Fs!\u0011\tiIc:\u0005\u0019)%(R\\A\u0001\u0002\u0003\u0015\tA!\n\u0003\t}##'\r\u0004\u0007\u0015[dDAc<\u0003%QK\b/\u001a)be\u0006l7i\\7qY\u0016$XM]\n\u0007\u0015W\fI%a\u0015\t\u0017)}'2\u001eB\u0001B\u0003%!2\u001f\u0019\u0005\u0015kTI\u0010\u0005\u0004\u0002H\n]!r\u001f\t\u0005\u0003\u001bSI\u0010\u0002\u0007\u000b|*E\u0018\u0011!A\u0001\u0006\u0003\u0011)C\u0001\u0003`II\u0012\u0004bB*\u000bl\u0012\u0005!r \u000b\u0005\u0017\u0003Y\u0019\u0001E\u0002u\u0015WD\u0001Bc8\u000b~\u0002\u00071R\u0001\u0019\u0005\u0017\u000fYY\u0001\u0005\u0004\u0002H\n]1\u0012\u0002\t\u0005\u0003\u001b[Y\u0001\u0002\u0007\u000b|.\r\u0011\u0011!A\u0001\u0006\u0003\u0011)\u0003\u0003\u0005\f\u0010)-H\u0011IF\t\u0003\u0011aw.\u00193\u0015\u0007uY\u0019\u0002C\u0004\u0003t.5\u0001\u0019\u0001%\t\u0011-]!2\u001eC!\u00173\t\u0001bY8na2,G/\u001a\u000b\u0004;-m\u0001b\u0002Bz\u0017+\u0001\r\u0001\u0013\u0005\b\u0017?aD\u0011BF\u0011\u0003Q\t7o]5h]\u0006\u001b8o\\2jCR,GMR5mKR9Qdc\t\f&-\u001d\u0002b\u0002Fc\u0017;\u0001\r\u0001\u0013\u0005\b\u0015\u0013\\i\u00021\u0001I\u0011!Qii#\bA\u0002-%\u0002\u0007BF\u0016\u0017_\u0001R!LAD\u0017[\u0001B!!$\f0\u0011a1\u0012GF\u0014\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\n!q\f\n\u001a4\u0011\u001dY)\u0004\u0010C\u0005\u0017o\tqbY8qs\u0006sgn\u001c;bi&|gn\u001d\u000b\u0006;-e22\b\u0005\b\u0005g\\\u0019\u00041\u0001I\u0011!!Yic\rA\u0002-u\u0002\u0003BAd\u0017\u007fIAa#\u0011\u0002J\n\u0001\u0012I\u001c8pi\u0006$X\rZ#mK6,g\u000e\u001e\u0004\u0007\u0017\u000bbTac\u0012\u0003\u0013)\u001cE.Y:t\u001fB\u001c8\u0003BF\"\u0007+B1B#2\fD\t\u0015\r\u0011\"\u0001\fLU\u00111R\n\u0019\u0005\u0017\u001fZ\u0019\u0006E\u0003.\u0003\u000f[\t\u0006\u0005\u0003\u0002\u000e.MC\u0001DF+\u0017/\n\t\u0011!A\u0003\u0002\u0005]%\u0001B0%eQB1b#\u0017\fD\t\u0005\t\u0015!\u0003\f\\\u000511\r\\1{u\u0002\u0002Da#\u0018\fbA)Q&a\"\f`A!\u0011QRF1\t1Y)fc\u0016\u0002\u0002\u0003\u0005)\u0011AAL\u0011\u001d\u001962\tC\u0001\u0017K\"Bac\u001a\fjA\u0019Aoc\u0011\t\u0011)\u001572\ra\u0001\u0017W\u0002Da#\u001c\frA)Q&a\"\fpA!\u0011QRF9\t1Y)f#\u001b\u0002\u0002\u0003\u0005)\u0011AAL\u0011!Y)hc\u0011\u0005\u0002-]\u0014!\u00036bm\u00064E.Y4t+\tYI\bE\u0002\u000b\u0017wJ1a# \f\u00051Q\u0015M^1BG\u000e4E.Y4t\u0011!Y\tic\u0011\u0005\u0002-\r\u0015AC:dC2\fg\t\\1hgV\u00111R\u0011\t\u0004=-\u001d\u0015bAFE\r\t!Aj\u001c8h\u0011%Yi\tPA\u0001\n\u0017Yy)A\u0005k\u00072\f7o](qgR!1rMFI\u0011!Q)mc#A\u0002-M\u0005\u0007BFK\u00173\u0003R!LAD\u0017/\u0003B!!$\f\u001a\u0012a1RKFI\u0003\u0003\u0005\tQ!\u0001\u0002\u0018\u001a11R\u0014\u001f\u0006\u0017?\u0013!B['f[\n,'o\u00149t'\u0011YYj!\u0016\t\u0017\rm22\u0014BC\u0002\u0013\u000512U\u000b\u0003\u0017K\u0003B!a2\f(&!1\u0012VAe\u0005\u0019iU-\u001c2fe\"Y1RVFN\u0005\u0003\u0005\u000b\u0011BFS\u0003\u001diW-\u001c2fe\u0002BqaUFN\t\u0003Y\t\f\u0006\u0003\f4.U\u0006c\u0001;\f\u001c\"A11HFX\u0001\u0004Y)\u000b\u0003\u0005\fv-mE\u0011AF<\u0011!Y\tic'\u0005\u0002-\r\u0005\"CF_y\u0005\u0005I1BF`\u0003)QW*Z7cKJ|\u0005o\u001d\u000b\u0005\u0017g[\t\r\u0003\u0005\u0004<-m\u0006\u0019AFS\r\u0019Y)\r\u0010\u0003\fH\n1bI]8n\u0015\u00064\u0018m\u00117bgN\u001cu.\u001c9mKR,'o\u0005\u0005\fD\u0006%3\u0012ZA*!\rY42\u001a\u0004\n\u0017\u001b\u0004\u0001\u0013aI\u0001\u0017\u001f\u0014!CS1wC\u000ec\u0017m]:D_6\u0004H.\u001a;feN!12ZB+\u0011)Q)mc1\u0003\u0002\u0003\u0006I\u0001\u0013\u0005\u000b\u0015\u0013\\\u0019M!A!\u0002\u0013A\u0005b\u0003FG\u0017\u0007\u0014\t\u0011)A\u0005\u0017/\u0004Da#7\f^B)Q&a\"\f\\B!\u0011QRFo\t1Yyn#6\u0002\u0002\u0003\u0005)\u0011AAL\u0005\u0011yFEM\u001b\t\u000fM[\u0019\r\"\u0001\fdRA1R]Ft\u0017S\\Y\u000fE\u0002u\u0017\u0007DqA#2\fb\u0002\u0007\u0001\nC\u0004\u000bJ.\u0005\b\u0019\u0001%\t\u0011)55\u0012\u001da\u0001\u0017[\u0004Dac<\ftB)Q&a\"\frB!\u0011QRFz\t1Yync;\u0002\u0002\u0003\u0005)\u0011AAL\u0011)Y9pc1C\u0002\u0013\u000512Q\u0001\u0006M2\fwm\u001d\u0005\n\u0017w\\\u0019\r)A\u0005\u0017\u000b\u000baA\u001a7bON\u0004\u0003BCF\u0000\u0017\u0007\u0004\r\u0011\"\u0003\u0006P\u0005a\u0001/\u0019:f]R\u001cH*\u001a<fY\"QA2AFb\u0001\u0004%I\u0001$\u0002\u0002!A\f'/\u001a8ug2+g/\u001a7`I\u0015\fHcA\u000f\r\b!QQq\fG\u0001\u0003\u0003\u0005\r!\"\u0015\t\u00131-12\u0019Q!\n\u0015E\u0013!\u00049be\u0016tGo\u001d'fm\u0016d\u0007\u0005\u0003\u0006\r\u0010-\r\u0007\u0019!C\u0005\u0019#\t!\u0003]3oI&tw\rT8bI\u0006\u001bG/[8ogV\u0011A2\u0003\t\u0007\t\u007f#)\r$\u0006\u0011\tya9\"H\u0005\u0004\u001931!!\u0003$v]\u000e$\u0018n\u001c81\u0011)aibc1A\u0002\u0013%ArD\u0001\u0017a\u0016tG-\u001b8h\u0019>\fG-Q2uS>t7o\u0018\u0013fcR\u0019Q\u0004$\t\t\u0015\u0015}C2DA\u0001\u0002\u0004a\u0019\u0002C\u0005\r&-\r\u0007\u0015)\u0003\r\u0014\u0005\u0019\u0002/\u001a8eS:<Gj\\1e\u0003\u000e$\u0018n\u001c8tA!QA\u0012FFb\u0005\u0004%I\u0001d\u000b\u0002\u001dI,G.\u0019;fINKXNY8mgV\u0011AR\u0006\t\u0006\u000fcby\u0003S\u0005\u0005\t\u000f<\u0019\bC\u0005\r4-\r\u0007\u0015!\u0003\r.\u0005y!/\u001a7bi\u0016$7+_7c_2\u001c\b\u0005\u0003\u0005\f\u0010-\rG\u0011\tG\u001c)\riB\u0012\b\u0005\b\u0005gd)\u00041\u0001I\u0011!Y9bc1\u0005B1uBcA\u000f\r@!9!1\u001fG\u001e\u0001\u0004A\u0005b\u0002G\"\u0017\u0007$\t\u0001H\u0001\rG>l\u0007\u000f\\3uKJ+7\u000f\u001e\u0004\b\u0019\u000fZ\u0019\r\u0001G%\u00051a\u0015M_=Q_2LH+\u001f9f'\u0019a)%!\u0013\u0002T!YAR\nG#\u0005\u000b\u0007I\u0011\tG(\u0003)!\u0018\u0010]3QCJ\fWn]\u000b\u0003\u0019#\u0002R\u0001b0\u0005F\"C1\u0002$\u0016\rF\t\u0005\t\u0015!\u0003\rR\u0005YA/\u001f9f!\u0006\u0014\u0018-\\:!\u0011\u001d\u0019FR\tC\u0001\u00193\"B\u0001d\u0017\r`A!AR\fG#\u001b\tY\u0019\r\u0003\u0005\rN1]\u0003\u0019\u0001G)\u0011!Y9\u0002$\u0012\u0005B1\rDcA\u000f\rf!9!1\u001fG1\u0001\u0004A\u0005b\u0002G5y\u0011%A2N\u0001\rM>dGn\\<Ti\u0006$\u0018n\u0019\u000b\u0006\u001125Dr\u000e\u0005\b\u0015\u000bd9\u00071\u0001I\u0011!a\t\bd\u001aA\u0002-e\u0014\u0001B7pINDq\u0001$\u001b=\t\u0013a)\bF\u0004I\u0019obI\bd\u001f\t\u000f)\u0015G2\u000fa\u0001\u0011\"9!\u0012\u001aG:\u0001\u0004A\u0005\u0002\u0003G9\u0019g\u0002\ra#\u001f\u0007\r1}D(\u0001GA\u0005%\u0011\u0016n\u00195DY\u0006\u001c8o\u0005\u0003\r~\rU\u0003b\u0003FG\u0019{\u0012\t\u0011)A\u0005\u0019\u000b\u0003D\u0001d\"\r\fB)Q&a\"\r\nB!\u0011Q\u0012GF\t1ai\td!\u0002\u0002\u0003\u0005)\u0011AAL\u0005\u0011yFE\r\u001c\t\u000fMci\b\"\u0001\r\u0012R!A2\u0013GK!\r!HR\u0010\u0005\t\u0015\u001bcy\t1\u0001\r\u0018B\"A\u0012\u0014GO!\u0015i\u0013q\u0011GN!\u0011\ti\t$(\u0005\u001915ERSA\u0001\u0002\u0003\u0015\t!a&\t\u00111\u0005FR\u0010C\u0001\rG\fQ\"[:M_\u000e\fGn\u00117bgN\u0004\u0004\"\u0003GSy\u0005\u0005I1\u0001GT\u0003%\u0011\u0016n\u00195DY\u0006\u001c8\u000f\u0006\u0003\r\u00142%\u0006\u0002\u0003FG\u0019G\u0003\r\u0001d+1\t15F\u0012\u0017\t\u0006[\u0005\u001dEr\u0016\t\u0005\u0003\u001bc\t\f\u0002\u0007\r\u000e2%\u0016\u0011!A\u0001\u0006\u0003\t9\nC\u0004\r6r\"I\u0001d.\u0002\rM|uO\\3s)\rAE\u0012\u0018\u0005\t\u0015\u001bc\u0019\f1\u0001\r<B\"AR\u0018Ga!\u0015i\u0013q\u0011G`!\u0011\ti\t$1\u0005\u00191\rG\u0012XA\u0001\u0002\u0003\u0015\t!a&\u0003\t}##g\u000e\u0005\b\u0019kcD\u0011\u0002Gd)\rAE\u0012\u001a\u0005\t\u0019\u0017d)\r1\u0001\f&\u00069!.\\3nE\u0016\u0014\bb\u0002G[y\u0011%Ar\u001a\u000b\u0004\u00112E\u0007\u0002\u0003Fp\u0019\u001b\u0004\r\u0001d51\t1UG\u0012\u001c\t\u0007\u0003\u000f\u00149\u0002d6\u0011\t\u00055E\u0012\u001c\u0003\r\u00197d\t.!A\u0001\u0002\u000b\u0005!Q\u0005\u0002\u0005?\u0012\u0012\u0004\bC\u0004\r`r\"I\u0001$9\u0002\r1|wn[;q)\u0015AE2\u001dGs\u0011\u001dQ)\r$8A\u0002!C\u0001\u0002d:\r^\u0002\u0007\u0011\u0011N\u0001\u0006U:\fW.\u001a\u0005\b\u0019WdD\u0011\u0001Gw\u00035iW\r\u001e5pIR{7kY1mCR!\u0011q\u001aGx\u0011!9Y\u000e$;A\u0002\u0005\u0015\u0007b\u0002Gzy\u0011%AR_\u0001\u000f[\u0016$\bn\u001c3U_N\u001b\u0017\r\\12)\u0011\ty\rd>\t\u0011\u001dmG\u0012\u001fa\u0001\u0003\u000bDq\u0001d?=\t\u0003ai0\u0001\nd_:\u001cHO];di>\u0014Hk\\*dC2\fG\u0003BAh\u0019\u007fD\u0001bb9\rz\u0002\u0007Q\u0012\u0001\u0019\u0005\u001b\u0007i9\u0001\u0005\u0004\u0002H\u0006\u0015XR\u0001\t\u0005\u0003\u001bk9\u0001\u0002\u0007\u000e\n1}\u0018\u0011!A\u0001\u0006\u0003\t9J\u0001\u0003`IIJ\u0004bBG\u0007y\u0011%QrB\u0001\u0014G>t7\u000f\u001e:vGR|'\u000fV8TG\u0006d\u0017-\r\u000b\u0005\u0003\u001fl\t\u0002\u0003\u0005\bd6-\u0001\u0019AG\na\u0011i)\"$\u0007\u0011\r\u0005\u001d\u0017Q]G\f!\u0011\ti)$\u0007\u0005\u00195mQ\u0012CA\u0001\u0002\u0003\u0015\t!a&\u0003\t}#3\u0007\r\u0005\b\u001b?aD\u0011AG\u0011\u00039\u0001\u0018mY6bO\u0016$vnU2bY\u0006$B!a\u0018\u000e$!AQREG\u000f\u0001\u0004\t\u0019,\u0001\u0003ka.<\u0007bBG\u0015y\u0011\u0005Q2F\u0001\u0013a\u0006\u001c7.Y4f\u001d\u0006lW\rV8TG\u0006d\u0017\r\u0006\u0003\u0002`55\u0002\u0002CA4\u001bO\u0001\r!!\u001b\t\u000f5EB\b\"\u0003\u000e4\u0005y1oY1mCNKW\u000e\u001d7f\u001d\u0006lW\r\u0006\u0003\u000e65m\u0002cA\u001e\u000e8%!Q\u0012HC\r\u0005!!\u0016\u0010]3OC6,\u0007\u0002\u0003FG\u001b_\u0001\r!$\u00101\t5}R2\t\t\u0006[\u0005\u001dU\u0012\t\t\u0005\u0003\u001bk\u0019\u0005\u0002\u0007\u000eF5m\u0012\u0011!A\u0001\u0006\u0003\t9J\u0001\u0003`IM\n\u0004bBG%y\u0011\u0005Q2J\u0001\rG2\f7o\u001d+p'\u000e\fG.\u0019\u000b\u0005\u0003Kki\u0005\u0003\u0005\u000b\u000e6\u001d\u0003\u0019AG(a\u0011i\t&$\u0016\u0011\u000b5\n9)d\u0015\u0011\t\u00055UR\u000b\u0003\r\u001b/ji%!A\u0001\u0002\u000b\u0005\u0011q\u0013\u0002\u0005?\u0012\u001a$\u0007C\u0004\u000e\\q\"I!$\u0018\u0002\u001b\rd\u0017m]:U_N\u001b\u0017\r\\12)\u0011\t)+d\u0018\t\u0011)5U\u0012\fa\u0001\u001bC\u0002D!d\u0019\u000ehA)Q&a\"\u000efA!\u0011QRG4\t1iI'd\u0018\u0002\u0002\u0003\u0005)\u0011AAL\u0005\u0011yFeM\u001a\t\u000f55D\b\"\u0001\u000ep\u0005\u0001B/\u001f9f!\u0006\u0014\u0018-\u001c+p'\u000e\fG.\u0019\u000b\u0005\u0005[i\t\b\u0003\u0005\u000et5-\u0004\u0019AG;\u0003\u0019Q\u0007/\u0019:b[B\"QrOG>!\u0019\t9Ma\u0006\u000ezA!\u0011QRG>\t1ii($\u001d\u0002\u0002\u0003\u0005)\u0011\u0001B\u0013\u0005\u0011yFe\r\u001b\t\u000f5\u0005E\b\"\u0003\u000e\u0004\u0006\tB/\u001f9f!\u0006\u0014\u0018-\u001c+p'\u000e\fG.Y\u0019\u0015\t\t5RR\u0011\u0005\t\u001bgjy\b1\u0001\u000e\bB\"Q\u0012RGG!\u0019\t9Ma\u0006\u000e\fB!\u0011QRGG\t1iy)$\"\u0002\u0002\u0003\u0005)\u0011\u0001B\u0013\u0005\u0011yFeM\u001b\t\u000f5ME\b\"\u0001\u000e\u0016\u0006Ir-\u001a8fe&\u001cG)Z2mCJ\fG/[8o)>\u001c6-\u00197b)\rAUr\u0013\u0005\t\u001b3k\t\n1\u0001\u0003(\u0005)!\u000eZ3dY\"9QR\u0014\u001f\u0005\u00025}\u0015\u0001\u0006:fM2,7\r^'f[\n,'\u000fV8TG\u0006d\u0017\rF\u0002I\u001bCC\u0001\"d)\u000e\u001c\u0002\u00071RU\u0001\u0002[\"9Qr\u0015\u001f\u0005\n5%\u0016\u0001\u0004;be\u001e\u001cHk\\*dC2\fGCBGV\u001bck\u0019\fE\u0004\u001f\t\u000bji+d,\u0011\r\u0011}FQ\u0019CW!\u0019!y\f\"2\u0003.!1q)$*A\u0002!C\u0001\u0002\"/\u000e&\u0002\u0007QR\u0017\t\u0007\t\u007f#)-d.\u0011\t\u0005\u001dW\u0012X\u0005\u0005\tc\u000bI\rC\u0004\u000e>r\"\t!d0\u0002\u0017QL\b/\u001a+p'\u000e\fG.\u0019\u000b\u0005\t[k\t\r\u0003\u0005\u000eD6m\u0006\u0019AG\\\u0003\u0011QG\u000f]3\t\u000f5\u001dG\b\"\u0003\u000eJ\u0006i!n\u00197bgN\f5oU2bY\u0006$B!!*\u000eL\"A!RRGc\u0001\u0004ii\r\r\u0003\u000eP6M\u0007#B\u0017\u0002\b6E\u0007\u0003BAG\u001b'$A\"$6\u000eL\u0006\u0005\t\u0011!B\u0001\u0003/\u0013Aa\u0018\u00134o!9Q\u0012\u001c\u001f\u0005\n5m\u0017A\u00046dY\u0006\u001c8/Q:TG\u0006d\u0017-\r\u000b\u0005\u0003Kki\u000e\u0003\u0005\u000b\u000e6]\u0007\u0019AGpa\u0011i\t/$:\u0011\u000b5\n9)d9\u0011\t\u00055UR\u001d\u0003\r\u001bOli.!A\u0001\u0002\u000b\u0005\u0011q\u0013\u0002\u0005?\u0012\u001a\u0004\bC\u0004\u000elr\"I!$<\u0002\u001b)4\u0017.\u001a7e\u0003N\u001c6-\u00197b)\u0011\u0011\t!d<\t\u0011\u001d}R\u0012\u001ea\u0001\u0003wDq!d==\t\u0013i)0\u0001\bkM&,G\u000eZ!t'\u000e\fG.Y\u0019\u0015\t\t\u0005Qr\u001f\u0005\t\u000f\u007fi\t\u00101\u0001\u0002|\"9Q2 \u001f\u0005\n5u\u0018aC:fi6+G\u000f\u001b+za\u0016$\u0012\u0002SG\u0000\u001d\u0003q)A$\u0003\t\u000f\u001d}S\u0012 a\u0001\u0011\"Aa2AG}\u0001\u0004a\t&A\u0004ua\u0006\u0014\u0018-\\:\t\u00119\u001dQ\u0012 a\u0001\u001b[\u000b\u0011\u0002]1sC6$\b/Z:\t\u00119-Q\u0012 a\u0001\t[\u000baA]3tiB,\u0007b\u0002H\by\u0011%a\u0012C\u0001\u000fU6,G\u000f[8e\u0003N\u001c6-\u00197b)\u0011\tyMd\u0005\t\u0011\u001dmgR\u0002a\u0001\u0003\u000bDqAd\u0006=\t\u0013qI\"A\bk[\u0016$\bn\u001c3BgN\u001b\u0017\r\\12)\u0011\tyMd\u0007\t\u0011\u001dmgR\u0003a\u0001\u0003\u000bDqAd\b=\t\u0013q\t#\u0001\bkG>t7\u000f\u001e:BgN\u001b\u0017\r\\1\u0015\t\u0005=g2\u0005\u0005\t\u000fGti\u00021\u0001\u000f&A\"ar\u0005H\u0016!\u0019\t9-!:\u000f*A!\u0011Q\u0012H\u0016\t1qiCd\t\u0002\u0002\u0003\u0005)\u0011AAL\u0005\u0011yFeM\u001d\t\u000f9EB\b\"\u0003\u000f4\u0005y!nY8ogR\u0014\u0018i]*dC2\f\u0017\u0007\u0006\u0003\u0002P:U\u0002\u0002CDr\u001d_\u0001\rAd\u000e1\t9ebR\b\t\u0007\u0003\u000f\f)Od\u000f\u0011\t\u00055eR\b\u0003\r\u001d\u007fq)$!A\u0001\u0002\u000b\u0005\u0011q\u0013\u0002\u0005?\u0012\"\u0004\u0007C\u0004\u000fDq\"\tA$\u0012\u0002\u0017\rd\u0017m]:U_*\u000bg/\u0019\u000b\u0005\u001d\u000fr\t\u0006\r\u0003\u000fJ95\u0003#B\u0017\u0002\b:-\u0003\u0003BAG\u001d\u001b\"ABd\u0014\u000fB\u0005\u0005\t\u0011!B\u0001\u0003/\u0013Aa\u0018\u00135c!A!R\u0019H!\u0001\u0004\t)\u000b\u000b\u0004\u000fB9Uc\u0012\r\t\u0006=9]c2L\u0005\u0004\u001d32!A\u0002;ie><8\u000fE\u0002.\u001d;J1Ad\u0018/\u0005Y\u0019E.Y:t\u001d>$hi\\;oI\u0016C8-\u001a9uS>t7E\u0001H.\u0011%q)\u0007\u0010b\u0001\n\u0013q9'\u0001\fQC\u000e\\\u0017mZ3B]\u0012\u001cE.Y:t!\u0006$H/\u001a:o+\tqI\u0007\u0005\u0003\u000fl9UTB\u0001H7\u0015\u0011qyG$\u001d\u0002\u00115\fGo\u00195j]\u001eT1Ad\u001d\u0007\u0003\u0011)H/\u001b7\n\t9]dR\u000e\u0002\u0006%\u0016<W\r\u001f\u0005\t\u001dwb\u0004\u0015!\u0003\u000fj\u00059\u0002+Y2lC\u001e,\u0017I\u001c3DY\u0006\u001c8\u000fU1ui\u0016\u0014h\u000e\t\u0005\b\u001d\u007fbD\u0011\u0002HA\u00031)\u0007\u0010]1oI\u0016$g*Y7f)\u0011\tIGd!\t\u000f\tMhR\u0010a\u0001\u0011\"9ar\u0011\u001f\u0005\u00029%\u0015a\u00034jK2$Gk\u001c&bm\u0006$B!a?\u000f\f\"AaR\u0012HC\u0001\u0004\u0011\t!A\u0002gY\u0012DqA$%=\t\u0003q\u0019*\u0001\u0007nKRDw\u000e\u001a+p\u0015\u00064\u0018\r\u0006\u0003\u0002F:U\u0005\u0002CD0\u001d\u001f\u0003\r!a4\t\u000f9eE\b\"\u0001\u000f\u001c\u0006\t2m\u001c8tiJ,8\r^8s)>T\u0015M^1\u0015\t9ueR\u0015\u0019\u0005\u001d?s\u0019\u000b\u0005\u0004\u0002H\u0006\u0015h\u0012\u0015\t\u0005\u0003\u001bs\u0019\u000b\u0002\u0007\bp:]\u0015\u0011!A\u0001\u0006\u0003\t9\n\u0003\u0005\u000f(:]\u0005\u0019AAh\u0003\u0019\u0019wN\\:ue\"9a2\u0016\u001f\u0005\u000295\u0016a\u0004;za\u0016$vNS1wC\u000ec\u0017m]:\u0015\t9=f\u0012\u0018\u0019\u0005\u001dcs)\fE\u0003.\u0003\u000fs\u0019\f\u0005\u0003\u0002\u000e:UF\u0001\u0004H\\\u001dS\u000b\t\u0011!A\u0003\u0002\u0005]%\u0001B0%iMB\u0001\"b>\u000f*\u0002\u0007AQ\u0016\u0005\r\u001d{c$\u0011!A\u0001\n\u0003\u0001arX\u00014g\u000e\fG.\u0019\u0013sK\u001adWm\u0019;%eVtG/[7fI)\u000bg/Y'jeJ|'o\u001d\u0013%[\u0006\\WmU2bY\u0006\u0004\u0016mY6bO\u0016$B!a\u0018\u000fB\"A\u0011q\rH^\u0001\u0004\tI\u0007C\u0005\u000fF\u0002A\t\u0011)Q\u0005I\u0005AQ.\u001b:s_J\u001c\b\u0005C\u0004\u000fJ\u0002!IAd3\u0002\u0019\r\u0014X-\u0019;f\u001b&\u0014(o\u001c:\u0015\r95g2\u001bHk!\rYdrZ\u0003\u0006\u001d#\u0004\u0001E\u000f\u0002\u0007\u001b&\u0014(o\u001c:\t\r\u001ds9\r1\u0001I\u0011\u001dq9Nd2A\u00021\n!a\u00197\t\u00139m\u0007A1A\u0005\u00049u\u0017!C'jeJ|'\u000fV1h+\tqy\u000e\u0005\u0004\u0006:\u0016mfR\u001a\u0005\t\u001dG\u0004\u0001\u0015!\u0003\u000f`\u0006QQ*\u001b:s_J$\u0016m\u001a\u0011\t\u00159\u001d\b\u0001#b\u0001\n\u0003rI/\u0001\u0006s_>$X*\u001b:s_J,\"A$4\t\u001595\b\u0001#A!B\u0013qi-A\u0006s_>$X*\u001b:s_J\u0004\u0003B\u0002Hy\u0001\u0011\u0005q*A\bs_>$8\t\\1tg2{\u0017\rZ3s\u0011\u001dq)\u0010\u0001C\u0001\u001do\fQB];oi&lW-T5se>\u0014H\u0003\u0002Hg\u001dsDqAd6\u000ft\u0002\u0007A\u0006C\u0004\u000f~\u0002!\tEd@\u0002#Y\fG.\u001b3bi\u0016\u001cE.Y:t\u0013:4w\u000eF\u0002\u001e\u001f\u0003A\u0001bd\u0001\u000f|\u0002\u0007qRA\u0001\u0003iB\u00042aOH\u0004\u0013\u0011yI!a\u0014\u0003\u001b\rc\u0017m]:J]\u001a|G+\u001f9f\u0011\u001dyi\u0001\u0001C!\u001f\u001f\tqB\\3x!\u0006\u001c7.Y4f'\u000e|\u0007/\u001a\u000b\u0005\u001f#yY\u0002E\u0002<\u001f'IAa$\u0006\u0010\u0018\ta\u0001+Y2lC\u001e,7kY8qK&\u0019q\u0012\u0004\u0002\u0003\u001bMKXNY8m\u0019>\fG-\u001a:t\u0011\u001dyibd\u0003A\u0002!\u000b\u0001\u0002]6h\u00072\f7o\u001d\u0005\b\u001fC\u0001A\u0011IH\u0012\u00039\u00198m\u001c9f)J\fgn\u001d4pe6$Ba$\n\u00108Q!qrEH\u0019!\rYt\u0012F\u0005\u0005\u001fWyiCA\u0003TG>\u0004X-C\u0002\u00100-\u0011aaU2pa\u0016\u001c\b\"CH\u001a\u001f?!\t\u0019AH\u001b\u0003\ty\u0007\u000fE\u0003\u001f\r;y9\u0003\u0003\u0004H\u001f?\u0001\r\u0001\u0013\u0005\b\u001fw\u0001A\u0011IH\u001f\u0003Ai\u0017N\u001d:peRC\u0017\r\u001e'pC\u0012,G\r\u0006\u0003\u000fN>}\u0002b\u0002Bz\u001fs\u0001\r\u0001\u0013\u0005\b\u001f\u0007\u0002A\u0011IH#\u0003-i\u0017n]:j]\u001eDun\\6\u0015\u000b!{9e$\u0013\t\r\u001d{\t\u00051\u0001I\u0011!yYe$\u0011A\u0002\u0015M\u0011\u0001\u00028b[\u0016Dabd\u0014\u0001!\u0003\r\t\u0011!C\u0005\u001f#z9&A\ttkB,'\u000fJ7jgNLgn\u001a%p_.$R\u0001SH*\u001f+BaaRH'\u0001\u0004A\u0005\u0002CH&\u001f\u001b\u0002\r!b\u0005\n\u0007=\rS\u0002E\u0002\u0017\u001f7J!A\u0004\u0002")
+public interface JavaMirrors
+extends JavaUniverse,
+TwoWayCaches {
+    public void scala$reflect$runtime$JavaMirrors$_setter_$MirrorTag_$eq(ClassTag var1);
+
+    public /* synthetic */ Symbols.Symbol scala$reflect$runtime$JavaMirrors$$super$missingHook(Symbols.Symbol var1, Names.Name var2);
+
+    public WeakHashMap<ClassLoader, WeakReference<JavaMirror>> scala$reflect$runtime$JavaMirrors$$mirrors();
+
+    public ClassTag<JavaMirror> MirrorTag();
+
+    public JavaMirror rootMirror();
+
+    public ClassLoader rootClassLoader();
+
+    @Override
+    public JavaMirror runtimeMirror(ClassLoader var1);
+
+    public void validateClassInfo(Types.ClassInfoType var1);
+
+    public SymbolLoaders.PackageScope newPackageScope(Symbols.Symbol var1);
+
+    public Scopes.Scope scopeTransform(Symbols.Symbol var1, Function0<Scopes.Scope> var2);
+
+    public JavaMirror mirrorThatLoaded(Symbols.Symbol var1);
+
+    public Symbols.Symbol missingHook(Symbols.Symbol var1, Names.Name var2);
+
+    public class JavaMirror
+    extends Mirrors.Roots
+    implements JavaUniverse.JavaMirror {
+        private final ClassLoader classLoader;
+        private final SymbolTable universe;
+        private Definitions.DefinitionsClass.RunDefinitions runDefinitions;
+        private Mirrors.Roots.RootPackage RootPackage;
+        private Mirrors.Roots.RootClass RootClass;
+        private Mirrors.Roots.EmptyPackage EmptyPackage;
+        private Mirrors.Roots.EmptyPackageClass EmptyPackageClass;
+        private Types.FlagAgnosticCompleter rootLoader;
+        private final TwoWayCaches.TwoWayCache<Class<?>, Symbols.ClassSymbol> classCache;
+        private final TwoWayCaches.TwoWayCache<Package, Symbols.ModuleSymbol> packageCache;
+        private final TwoWayCaches.TwoWayCache<Method, Symbols.MethodSymbol> methodCache;
+        private final TwoWayCaches.TwoWayCache<Constructor<?>, Symbols.MethodSymbol> constructorCache;
+        private final TwoWayCaches.TwoWayCache<Field, Symbols.TermSymbol> fieldCache;
+        private final TwoWayCaches.TwoWayCache<TypeVariable<? extends GenericDeclaration>, Symbols.TypeSymbol> tparamCache;
+        private final HasJavaClass<Class<?>> classHasJavaClass;
+        private final HasJavaClass<Method> methHasJavaClass;
+        private final HasJavaClass<Field> fieldHasJavaClass;
+        private final HasJavaClass<Constructor<?>> constrHasJavaClass;
+        private final HasJavaClass<TypeVariable<? extends GenericDeclaration>> tparamHasJavaClass;
+        private Set<Symbols.Symbol> bytecodelessMethodOwners;
+        private Set<Symbols.Symbol> bytecodefulObjectMethods;
+        private final Regex scala$reflect$runtime$JavaMirrors$JavaMirror$$PackageAndClassPattern;
+        private volatile JavaMirrors$JavaMirror$toAnnotArg$ toAnnotArg$module;
+        private volatile JavaMirrors$JavaMirror$JavaAnnotationProxy$ scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$module;
+        private volatile JavaMirrors$JavaMirror$unpickler$ unpickler$module;
+        private volatile byte bitmap$0;
+
+        private Definitions.DefinitionsClass.RunDefinitions runDefinitions$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 1) == 0) {
+                    this.runDefinitions = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().new Definitions.DefinitionsClass.RunDefinitions();
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 1);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.runDefinitions;
+            }
+        }
+
+        private Mirrors.Roots.RootPackage RootPackage$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 2) == 0) {
+                    this.RootPackage = (Mirrors.Roots.RootPackage)((Object)new SynchronizedSymbols.SynchronizedTermSymbol(this){
+                        private final /* synthetic */ JavaMirror $outer;
+                        private volatile boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        private volatile long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+
+                        public /* synthetic */ int scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$validTo() {
+                            return super.validTo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$info() {
+                            return super.info();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$rawInfo() {
+                            return super.rawInfo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignature() {
+                            return super.typeSignature();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignatureIn(Types.Type site) {
+                            return super.typeSignatureIn(site);
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeParams() {
+                            return super.typeParams();
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$unsafeTypeParams() {
+                            return super.unsafeTypeParams();
+                        }
+
+                        public boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized_$eq(boolean x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized = x$1;
+                        }
+
+                        public long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask_$eq(long x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask = x$1;
+                        }
+
+                        public boolean isThreadsafe(Symbols.SymbolOps purpose) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.isThreadsafe(this, purpose);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markFlagsCompleted(long mask) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markFlagsCompleted(this, mask);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markAllCompleted() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markAllCompleted(this);
+                        }
+
+                        public <T> T gilSynchronizedIfNotThreadsafe(Function0<T> body2) {
+                            return (T)SynchronizedSymbols$SynchronizedSymbol$class.gilSynchronizedIfNotThreadsafe(this, body2);
+                        }
+
+                        public int validTo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.validTo(this);
+                        }
+
+                        public Types.Type info() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.info(this);
+                        }
+
+                        public Types.Type rawInfo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.rawInfo(this);
+                        }
+
+                        public Types.Type typeSignature() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignature(this);
+                        }
+
+                        public Types.Type typeSignatureIn(Types.Type site) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignatureIn(this, site);
+                        }
+
+                        public List<Symbols.Symbol> typeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeParams(this);
+                        }
+
+                        public List<Symbols.Symbol> unsafeTypeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.unsafeTypeParams(this);
+                        }
+
+                        public Symbols.AbstractTypeSymbol createAbstractTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAbstractTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.AliasTypeSymbol createAliasTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAliasTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TypeSkolem createTypeSkolemSymbol(Names.TypeName name, Object origin, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createTypeSkolemSymbol(this, name, origin, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleClassSymbol createModuleClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageClassSymbol createPackageClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.RefinementClassSymbol createRefinementClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createRefinementClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createImplClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createImplClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageObjectClassSymbol createPackageObjectClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageObjectClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.MethodSymbol createMethodSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createMethodSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createModuleSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createPackageSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueParameterSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueParameterSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueMemberSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueMemberSymbol(this, name, pos, newFlags);
+                        }
+
+                        public /* synthetic */ SynchronizedSymbols scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$$outer() {
+                            return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                            SynchronizedSymbols$SynchronizedSymbol$class.$init$(this);
+                        }
+                    }.markFlagsCompleted(-1L));
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 2);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.RootPackage;
+            }
+        }
+
+        private Mirrors.Roots.RootClass RootClass$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 4) == 0) {
+                    this.RootClass = (Mirrors.Roots.RootClass)((Object)new SynchronizedSymbols.SynchronizedModuleClassSymbol(this){
+                        private final /* synthetic */ JavaMirror $outer;
+                        private final Object scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock;
+                        private volatile boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        private volatile long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+                        private volatile boolean bitmap$0;
+
+                        private Object scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock$lzycompute() {
+                            JavaMirror$$anon$1 var1_1 = this;
+                            synchronized (var1_1) {
+                                if (!this.bitmap$0) {
+                                    this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock = SynchronizedSymbols$SynchronizedTypeSymbol$class.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock(this);
+                                    this.bitmap$0 = true;
+                                }
+                                // ** MonitorExit[this] (shouldn't be in output)
+                                return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock;
+                            }
+                        }
+
+                        public Object scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock() {
+                            return this.bitmap$0 ? this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock : this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock$lzycompute();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$super$tpe_$times() {
+                            return super.tpe_$times();
+                        }
+
+                        public Types.Type tpe_$times() {
+                            return SynchronizedSymbols$SynchronizedTypeSymbol$class.tpe_$times(this);
+                        }
+
+                        public /* synthetic */ int scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$validTo() {
+                            return super.validTo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$info() {
+                            return super.info();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$rawInfo() {
+                            return super.rawInfo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignature() {
+                            return super.typeSignature();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignatureIn(Types.Type site) {
+                            return super.typeSignatureIn(site);
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeParams() {
+                            return super.typeParams();
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$unsafeTypeParams() {
+                            return super.unsafeTypeParams();
+                        }
+
+                        public boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized_$eq(boolean x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized = x$1;
+                        }
+
+                        public long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask_$eq(long x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask = x$1;
+                        }
+
+                        public boolean isThreadsafe(Symbols.SymbolOps purpose) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.isThreadsafe(this, purpose);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markFlagsCompleted(long mask) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markFlagsCompleted(this, mask);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markAllCompleted() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markAllCompleted(this);
+                        }
+
+                        public <T> T gilSynchronizedIfNotThreadsafe(Function0<T> body2) {
+                            return (T)SynchronizedSymbols$SynchronizedSymbol$class.gilSynchronizedIfNotThreadsafe(this, body2);
+                        }
+
+                        public int validTo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.validTo(this);
+                        }
+
+                        public Types.Type info() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.info(this);
+                        }
+
+                        public Types.Type rawInfo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.rawInfo(this);
+                        }
+
+                        public Types.Type typeSignature() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignature(this);
+                        }
+
+                        public Types.Type typeSignatureIn(Types.Type site) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignatureIn(this, site);
+                        }
+
+                        public List<Symbols.Symbol> typeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeParams(this);
+                        }
+
+                        public List<Symbols.Symbol> unsafeTypeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.unsafeTypeParams(this);
+                        }
+
+                        public Symbols.AbstractTypeSymbol createAbstractTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAbstractTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.AliasTypeSymbol createAliasTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAliasTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TypeSkolem createTypeSkolemSymbol(Names.TypeName name, Object origin, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createTypeSkolemSymbol(this, name, origin, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleClassSymbol createModuleClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageClassSymbol createPackageClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.RefinementClassSymbol createRefinementClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createRefinementClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createImplClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createImplClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageObjectClassSymbol createPackageObjectClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageObjectClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.MethodSymbol createMethodSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createMethodSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createModuleSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createPackageSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueParameterSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueParameterSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueMemberSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueMemberSymbol(this, name, pos, newFlags);
+                        }
+
+                        public /* synthetic */ SynchronizedSymbols scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$$outer() {
+                            return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+                        }
+
+                        public /* synthetic */ SynchronizedSymbols scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$$outer() {
+                            return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                            SynchronizedSymbols$SynchronizedSymbol$class.$init$(this);
+                            SynchronizedSymbols$SynchronizedTypeSymbol$class.$init$(this);
+                        }
+                    }.markFlagsCompleted(-1L));
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 4);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.RootClass;
+            }
+        }
+
+        private Mirrors.Roots.EmptyPackage EmptyPackage$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 8) == 0) {
+                    this.EmptyPackage = (Mirrors.Roots.EmptyPackage)((Object)new SynchronizedSymbols.SynchronizedTermSymbol(this){
+                        private final /* synthetic */ JavaMirror $outer;
+                        private volatile boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        private volatile long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+
+                        public /* synthetic */ int scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$validTo() {
+                            return super.validTo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$info() {
+                            return super.info();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$rawInfo() {
+                            return super.rawInfo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignature() {
+                            return super.typeSignature();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignatureIn(Types.Type site) {
+                            return super.typeSignatureIn(site);
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeParams() {
+                            return super.typeParams();
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$unsafeTypeParams() {
+                            return super.unsafeTypeParams();
+                        }
+
+                        public boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized_$eq(boolean x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized = x$1;
+                        }
+
+                        public long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask_$eq(long x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask = x$1;
+                        }
+
+                        public boolean isThreadsafe(Symbols.SymbolOps purpose) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.isThreadsafe(this, purpose);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markFlagsCompleted(long mask) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markFlagsCompleted(this, mask);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markAllCompleted() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markAllCompleted(this);
+                        }
+
+                        public <T> T gilSynchronizedIfNotThreadsafe(Function0<T> body2) {
+                            return (T)SynchronizedSymbols$SynchronizedSymbol$class.gilSynchronizedIfNotThreadsafe(this, body2);
+                        }
+
+                        public int validTo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.validTo(this);
+                        }
+
+                        public Types.Type info() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.info(this);
+                        }
+
+                        public Types.Type rawInfo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.rawInfo(this);
+                        }
+
+                        public Types.Type typeSignature() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignature(this);
+                        }
+
+                        public Types.Type typeSignatureIn(Types.Type site) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignatureIn(this, site);
+                        }
+
+                        public List<Symbols.Symbol> typeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeParams(this);
+                        }
+
+                        public List<Symbols.Symbol> unsafeTypeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.unsafeTypeParams(this);
+                        }
+
+                        public Symbols.AbstractTypeSymbol createAbstractTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAbstractTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.AliasTypeSymbol createAliasTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAliasTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TypeSkolem createTypeSkolemSymbol(Names.TypeName name, Object origin, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createTypeSkolemSymbol(this, name, origin, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleClassSymbol createModuleClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageClassSymbol createPackageClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.RefinementClassSymbol createRefinementClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createRefinementClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createImplClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createImplClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageObjectClassSymbol createPackageObjectClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageObjectClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.MethodSymbol createMethodSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createMethodSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createModuleSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createPackageSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueParameterSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueParameterSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueMemberSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueMemberSymbol(this, name, pos, newFlags);
+                        }
+
+                        public /* synthetic */ SynchronizedSymbols scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$$outer() {
+                            return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                            SynchronizedSymbols$SynchronizedSymbol$class.$init$(this);
+                        }
+                    }.markFlagsCompleted(-1L));
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 8);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.EmptyPackage;
+            }
+        }
+
+        private Mirrors.Roots.EmptyPackageClass EmptyPackageClass$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 0x10) == 0) {
+                    this.EmptyPackageClass = (Mirrors.Roots.EmptyPackageClass)((Object)new SynchronizedSymbols.SynchronizedModuleClassSymbol(this){
+                        private final /* synthetic */ JavaMirror $outer;
+                        private final Object scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock;
+                        private volatile boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        private volatile long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+                        private volatile boolean bitmap$0;
+
+                        private Object scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock$lzycompute() {
+                            JavaMirror$$anon$2 var1_1 = this;
+                            synchronized (var1_1) {
+                                if (!this.bitmap$0) {
+                                    this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock = SynchronizedSymbols$SynchronizedTypeSymbol$class.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock(this);
+                                    this.bitmap$0 = true;
+                                }
+                                // ** MonitorExit[this] (shouldn't be in output)
+                                return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock;
+                            }
+                        }
+
+                        public Object scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock() {
+                            return this.bitmap$0 ? this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock : this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$tpeLock$lzycompute();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$super$tpe_$times() {
+                            return super.tpe_$times();
+                        }
+
+                        public Types.Type tpe_$times() {
+                            return SynchronizedSymbols$SynchronizedTypeSymbol$class.tpe_$times(this);
+                        }
+
+                        public /* synthetic */ int scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$validTo() {
+                            return super.validTo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$info() {
+                            return super.info();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$rawInfo() {
+                            return super.rawInfo();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignature() {
+                            return super.typeSignature();
+                        }
+
+                        public /* synthetic */ Types.Type scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeSignatureIn(Types.Type site) {
+                            return super.typeSignatureIn(site);
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$typeParams() {
+                            return super.typeParams();
+                        }
+
+                        public /* synthetic */ List scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$super$unsafeTypeParams() {
+                            return super.unsafeTypeParams();
+                        }
+
+                        public boolean scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized_$eq(boolean x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initialized = x$1;
+                        }
+
+                        public long scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask() {
+                            return this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask;
+                        }
+
+                        public void scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask_$eq(long x$1) {
+                            this.scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$_initializationMask = x$1;
+                        }
+
+                        public boolean isThreadsafe(Symbols.SymbolOps purpose) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.isThreadsafe(this, purpose);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markFlagsCompleted(long mask) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markFlagsCompleted(this, mask);
+                        }
+
+                        public SynchronizedSymbols.SynchronizedSymbol markAllCompleted() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.markAllCompleted(this);
+                        }
+
+                        public <T> T gilSynchronizedIfNotThreadsafe(Function0<T> body2) {
+                            return (T)SynchronizedSymbols$SynchronizedSymbol$class.gilSynchronizedIfNotThreadsafe(this, body2);
+                        }
+
+                        public int validTo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.validTo(this);
+                        }
+
+                        public Types.Type info() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.info(this);
+                        }
+
+                        public Types.Type rawInfo() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.rawInfo(this);
+                        }
+
+                        public Types.Type typeSignature() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignature(this);
+                        }
+
+                        public Types.Type typeSignatureIn(Types.Type site) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeSignatureIn(this, site);
+                        }
+
+                        public List<Symbols.Symbol> typeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.typeParams(this);
+                        }
+
+                        public List<Symbols.Symbol> unsafeTypeParams() {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.unsafeTypeParams(this);
+                        }
+
+                        public Symbols.AbstractTypeSymbol createAbstractTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAbstractTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.AliasTypeSymbol createAliasTypeSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createAliasTypeSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TypeSkolem createTypeSkolemSymbol(Names.TypeName name, Object origin, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createTypeSkolemSymbol(this, name, origin, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleClassSymbol createModuleClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageClassSymbol createPackageClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.RefinementClassSymbol createRefinementClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createRefinementClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.ClassSymbol createImplClassSymbol(Names.TypeName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createImplClassSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.PackageObjectClassSymbol createPackageObjectClassSymbol(Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageObjectClassSymbol(this, pos, newFlags);
+                        }
+
+                        public Symbols.MethodSymbol createMethodSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createMethodSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createModuleSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createModuleSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.ModuleSymbol createPackageSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createPackageSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueParameterSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueParameterSymbol(this, name, pos, newFlags);
+                        }
+
+                        public Symbols.TermSymbol createValueMemberSymbol(Names.TermName name, Position pos, long newFlags) {
+                            return SynchronizedSymbols$SynchronizedSymbol$class.createValueMemberSymbol(this, name, pos, newFlags);
+                        }
+
+                        public /* synthetic */ SynchronizedSymbols scala$reflect$runtime$SynchronizedSymbols$SynchronizedTypeSymbol$$$outer() {
+                            return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+                        }
+
+                        public /* synthetic */ SynchronizedSymbols scala$reflect$runtime$SynchronizedSymbols$SynchronizedSymbol$$$outer() {
+                            return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                            SynchronizedSymbols$SynchronizedSymbol$class.$init$(this);
+                            SynchronizedSymbols$SynchronizedTypeSymbol$class.$init$(this);
+                        }
+                    }.markFlagsCompleted(-1L));
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 0x10);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.EmptyPackageClass;
+            }
+        }
+
+        private Types.FlagAgnosticCompleter rootLoader$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 0x20) == 0) {
+                    this.rootLoader = new Types.FlagAgnosticCompleter(this){
+                        private final /* synthetic */ JavaMirror $outer;
+
+                        public void complete(Symbols.Symbol sym) {
+                            sym.setInfo(new SymbolLoaders.LazyPackageType(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                            super((scala.reflect.internal.SymbolTable)((Object)$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+                        }
+                    };
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 0x20);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.rootLoader;
+            }
+        }
+
+        private JavaMirrors$JavaMirror$toAnnotArg$ scala$reflect$runtime$JavaMirrors$JavaMirror$$toAnnotArg$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if (this.toAnnotArg$module == null) {
+                    this.toAnnotArg$module = new JavaMirrors$JavaMirror$toAnnotArg$(this);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.toAnnotArg$module;
+            }
+        }
+
+        private JavaMirrors$JavaMirror$JavaAnnotationProxy$ scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if (this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$module == null) {
+                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$module = new JavaMirrors$JavaMirror$JavaAnnotationProxy$(this);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$module;
+            }
+        }
+
+        private Set bytecodelessMethodOwners$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 0x40) == 0) {
+                    this.bytecodelessMethodOwners = (Set)((SetLike)Predef$.MODULE$.Set().apply(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyClass(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyValClass(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyRefClass(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ObjectClass(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ArrayClass()}))).$plus$plus(((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ScalaPrimitiveValueClasses());
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 0x40);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.bytecodelessMethodOwners;
+            }
+        }
+
+        private Set bytecodefulObjectMethods$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if ((byte)(this.bitmap$0 & 0x80) == 0) {
+                    this.bytecodefulObjectMethods = (Set)((SetLike)Predef$.MODULE$.Set().apply(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_clone(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_equals(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_finalize(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_hashCode(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_toString(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_notify(), ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_notifyAll()}))).$plus$plus(((Symbols.Symbol)((Object)((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ObjectClass().info().member(((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().wait_()).asTerm())).alternatives().map(new Serializable(this){
+                        public static final long serialVersionUID = 0L;
+
+                        public final Symbols.MethodSymbol apply(Symbols.Symbol x$7) {
+                            return (Symbols.MethodSymbol)x$7.asMethod();
+                        }
+                    }, List$.MODULE$.canBuildFrom()));
+                    this.bitmap$0 = (byte)(this.bitmap$0 | 0x80);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.bytecodefulObjectMethods;
+            }
+        }
+
+        private JavaMirrors$JavaMirror$unpickler$ unpickler$lzycompute() {
+            JavaMirror javaMirror = this;
+            synchronized (javaMirror) {
+                if (this.unpickler$module == null) {
+                    this.unpickler$module = new JavaMirrors$JavaMirror$unpickler$(this);
+                }
+                // ** MonitorExit[this] (shouldn't be in output)
+                return this.unpickler$module;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return JavaUniverse$JavaMirror$class.toString(this);
+        }
+
+        @Override
+        public ClassLoader classLoader() {
+            return this.classLoader;
+        }
+
+        @Override
+        public SymbolTable universe() {
+            return this.universe;
+        }
+
+        public Definitions.DefinitionsClass.RunDefinitions runDefinitions() {
+            return (byte)(this.bitmap$0 & 1) == 0 ? this.runDefinitions$lzycompute() : this.runDefinitions;
+        }
+
+        @Override
+        public Mirrors.Roots.RootPackage RootPackage() {
+            return (byte)(this.bitmap$0 & 2) == 0 ? this.RootPackage$lzycompute() : this.RootPackage;
+        }
+
+        @Override
+        public Mirrors.Roots.RootClass RootClass() {
+            return (byte)(this.bitmap$0 & 4) == 0 ? this.RootClass$lzycompute() : this.RootClass;
+        }
+
+        @Override
+        public Mirrors.Roots.EmptyPackage EmptyPackage() {
+            return (byte)(this.bitmap$0 & 8) == 0 ? this.EmptyPackage$lzycompute() : this.EmptyPackage;
+        }
+
+        @Override
+        public Mirrors.Roots.EmptyPackageClass EmptyPackageClass() {
+            return (byte)(this.bitmap$0 & 0x10) == 0 ? this.EmptyPackageClass$lzycompute() : this.EmptyPackageClass;
+        }
+
+        public Types.FlagAgnosticCompleter rootLoader() {
+            return (byte)(this.bitmap$0 & 0x20) == 0 ? this.rootLoader$lzycompute() : this.rootLoader;
+        }
+
+        @Override
+        public Symbols.ModuleSymbol staticPackage(String fullname) {
+            Symbols.ModuleSymbol moduleSymbol;
+            try {
+                moduleSymbol = super.staticPackage(fullname);
+            }
+            catch (ScalaReflectionException scalaReflectionException) {
+                moduleSymbol = this.scala$reflect$runtime$JavaMirrors$$makeScalaPackage(fullname);
+            }
+            return moduleSymbol;
+        }
+
+        private TwoWayCaches.TwoWayCache<Class<?>, Symbols.ClassSymbol> classCache() {
+            return this.classCache;
+        }
+
+        private TwoWayCaches.TwoWayCache<Package, Symbols.ModuleSymbol> packageCache() {
+            return this.packageCache;
+        }
+
+        private TwoWayCaches.TwoWayCache<Method, Symbols.MethodSymbol> methodCache() {
+            return this.methodCache;
+        }
+
+        private TwoWayCaches.TwoWayCache<Constructor<?>, Symbols.MethodSymbol> constructorCache() {
+            return this.constructorCache;
+        }
+
+        private TwoWayCaches.TwoWayCache<Field, Symbols.TermSymbol> fieldCache() {
+            return this.fieldCache;
+        }
+
+        private TwoWayCaches.TwoWayCache<TypeVariable<? extends GenericDeclaration>, Symbols.TypeSymbol> tparamCache() {
+            return this.tparamCache;
+        }
+
+        public <J, S> S toScala(TwoWayCaches.TwoWayCache<J, S> cache, J key, Function2<JavaMirror, J, S> body2, HasJavaClass<J> evidence$1) {
+            return cache.toScala(key, (Function0<S>)((Object)new Serializable(this, key, body2, evidence$1){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Object key$1;
+                private final Function2 body$1;
+                private final HasJavaClass evidence$1$1;
+
+                public final S apply() {
+                    HasJavaClass hasJavaClass = this.evidence$1$1;
+                    Predef$ predef$ = Predef$.MODULE$;
+                    Class<?> jclazz = hasJavaClass.getClazz().apply(this.key$1);
+                    return (S)this.body$1.apply(this.$outer.mirrorDefining(jclazz), this.key$1);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.key$1 = key$1;
+                    this.body$1 = body$1;
+                    this.evidence$1$1 = evidence$1$1;
+                }
+            }));
+        }
+
+        private HasJavaClass<Class<?>> classHasJavaClass() {
+            return this.classHasJavaClass;
+        }
+
+        private HasJavaClass<Method> methHasJavaClass() {
+            return this.methHasJavaClass;
+        }
+
+        private HasJavaClass<Field> fieldHasJavaClass() {
+            return this.fieldHasJavaClass;
+        }
+
+        private HasJavaClass<Constructor<?>> constrHasJavaClass() {
+            return this.constrHasJavaClass;
+        }
+
+        private HasJavaClass<TypeVariable<? extends GenericDeclaration>> tparamHasJavaClass() {
+            return this.tparamHasJavaClass;
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(String msg) {
+            throw new ScalaReflectionException(msg);
+        }
+
+        private Nothing$ ErrorInnerClass(Symbols.Symbol sym) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " is an inner class, use reflectClass on an InstanceMirror to obtain its ClassMirror"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{sym})));
+        }
+
+        private Nothing$ ErrorInnerModule(Symbols.Symbol sym) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " is an inner module, use reflectModule on an InstanceMirror to obtain its ModuleMirror"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{sym})));
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorStaticClass(Symbols.Symbol sym) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " is a static class, use reflectClass on a RuntimeMirror to obtain its ClassMirror"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{sym})));
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorStaticModule(Symbols.Symbol sym) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " is a static module, use reflectModule on a RuntimeMirror to obtain its ModuleMirror"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{sym})));
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotMember(Symbols.Symbol sym, Symbols.Symbol owner2) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"expected a member of ", ", you provided ", " ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{owner2, sym.kindString(), sym.fullName()})));
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotField(Symbols.Symbol sym) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"expected a field or an accessor method symbol, you provided ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{sym})));
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotConstructor(Symbols.Symbol sym, Symbols.Symbol owner2) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"expected a constructor of ", ", you provided ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{owner2, sym})));
+        }
+
+        private Nothing$ ErrorArrayConstructor(Symbols.Symbol sym, Symbols.Symbol owner2) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"Cannot instantiate arrays with mirrors. Consider using `scala.reflect.ClassTag(<class of element>).newArray(<length>)` instead"})).s(Nil$.MODULE$));
+        }
+
+        private Nothing$ ErrorFree(Symbols.Symbol member, Symbols.Symbol freeType) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"cannot reflect ", " ", ", because it's a member of a weak type ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{member.kindString(), member.name(), freeType.name()})));
+        }
+
+        public Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNonExistentField(Symbols.Symbol sym) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(((StripMarginInterpolator)((scala.reflect.internal.SymbolTable)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).StringContextStripMarginOps().apply(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"Scala field ", " of ", " isn't represented as a Java field, nor does it have a\n          |Java accessor method. One common reason for this is that it may be a private class parameter\n          |not used outside the primary constructor."})))).sm(Predef$.MODULE$.genericWrapArray(new Object[]{sym.name(), sym.owner()})));
+        }
+
+        public JavaMirrors$JavaMirror$toAnnotArg$ scala$reflect$runtime$JavaMirrors$JavaMirror$$toAnnotArg() {
+            return this.toAnnotArg$module == null ? this.scala$reflect$runtime$JavaMirrors$JavaMirror$$toAnnotArg$lzycompute() : this.toAnnotArg$module;
+        }
+
+        public JavaMirrors$JavaMirror$JavaAnnotationProxy$ scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy() {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$module == null ? this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$lzycompute() : this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy$module;
+        }
+
+        @Override
+        public <T> Mirrors.InstanceMirror reflect(T obj, ClassTag<T> evidence$2) {
+            return new JavaInstanceMirror<T>(this, obj, evidence$2);
+        }
+
+        public Mirrors.ClassMirror reflectClass(Symbols.ClassSymbol cls) {
+            if (cls.isStatic()) {
+                return new JavaClassMirror(this, null, cls);
+            }
+            throw this.ErrorInnerClass(cls);
+        }
+
+        public Mirrors.ModuleMirror reflectModule(Symbols.ModuleSymbol mod) {
+            if (mod.isStatic()) {
+                return new JavaModuleMirror(this, null, mod);
+            }
+            throw this.ErrorInnerModule(mod);
+        }
+
+        public Class<?> runtimeClass(Types.Type tpe) {
+            return this.typeToJavaClass(tpe);
+        }
+
+        public Class<?> runtimeClass(Symbols.ClassSymbol cls) {
+            return this.classToJava(cls);
+        }
+
+        public Symbols.ClassSymbol classSymbol(Class<?> rtcls) {
+            return this.classToScala(rtcls);
+        }
+
+        public Symbols.ModuleSymbol moduleSymbol(Class<?> rtcls) {
+            return (Symbols.ModuleSymbol)this.classToScala(rtcls).companionModule().asModule();
+        }
+
+        private void ensuringNotFree(Symbols.Symbol sym, Function0<Object> body2) {
+            Option<Symbols.Symbol> freeType = sym.ownerChain().find((Function1<Symbols.Symbol, Object>)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final boolean apply(Symbols.Symbol x$5) {
+                    return x$5.isFreeType();
+                }
+            }));
+            if (freeType instanceof Some) {
+                Some some = (Some)freeType;
+                throw this.ErrorFree(sym, (Symbols.Symbol)some.x());
+            }
+            body2.apply();
+        }
+
+        public void scala$reflect$runtime$JavaMirrors$JavaMirror$$checkMemberOf(Symbols.Symbol sym, Symbols.ClassSymbol owner2) {
+            Symbols.Symbol symbol = sym.owner();
+            Symbols.ClassSymbol classSymbol = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyClass();
+            if (symbol == null ? classSymbol != null : !symbol.equals(classSymbol)) {
+                Symbols.Symbol symbol2 = sym.owner();
+                Symbols.AliasTypeSymbol aliasTypeSymbol = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyRefClass();
+                if (symbol2 == null ? aliasTypeSymbol != null : !symbol2.equals(aliasTypeSymbol)) {
+                    Symbols.Symbol symbol3 = sym.owner();
+                    Symbols.ClassSymbol classSymbol2 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ObjectClass();
+                    if (symbol3 == null ? classSymbol2 != null : !symbol3.equals(classSymbol2)) {
+                        Symbols.Symbol symbol4 = sym.owner();
+                        Symbols.ClassSymbol classSymbol3 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyValClass();
+                        if (!(symbol4 != null ? !symbol4.equals(classSymbol3) : classSymbol3 != null)) {
+                            if (!owner2.isPrimitiveValueClass() && !owner2.isDerivedValueClass()) {
+                                throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotMember(sym, owner2);
+                            }
+                        } else {
+                            this.ensuringNotFree(sym, (Function0<Object>)((Object)new Serializable(this, sym, owner2){
+                                public static final long serialVersionUID = 0L;
+                                private final /* synthetic */ JavaMirror $outer;
+                                private final Symbols.Symbol sym$1;
+                                private final Symbols.ClassSymbol owner$1;
+
+                                public final Object apply() {
+                                    if (this.owner$1.info().baseClasses().contains(this.sym$1.owner())) {
+                                        return BoxedUnit.UNIT;
+                                    }
+                                    throw this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotMember(this.sym$1, this.owner$1);
+                                }
+                                {
+                                    if ($outer == null) {
+                                        throw null;
+                                    }
+                                    this.$outer = $outer;
+                                    this.sym$1 = sym$1;
+                                    this.owner$1 = owner$1;
+                                }
+                            }));
+                        }
+                    }
+                }
+            }
+        }
+
+        public void scala$reflect$runtime$JavaMirrors$JavaMirror$$checkConstructorOf(Symbols.Symbol sym, Symbols.ClassSymbol owner2) {
+            if (sym.isClassConstructor()) {
+                Symbols.ClassSymbol classSymbol = owner2;
+                Symbols.ClassSymbol classSymbol2 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ArrayClass();
+                if (!(classSymbol != null ? !classSymbol.equals(classSymbol2) : classSymbol2 != null)) {
+                    throw this.ErrorArrayConstructor(sym, owner2);
+                }
+                this.ensuringNotFree(sym, (Function0<Object>)((Object)new Serializable(this, sym, owner2){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ JavaMirror $outer;
+                    private final Symbols.Symbol sym$2;
+                    private final Symbols.ClassSymbol owner$2;
+
+                    public final Object apply() {
+                        if (this.owner$2.info().decls().toList().contains(this.sym$2)) {
+                            return BoxedUnit.UNIT;
+                        }
+                        throw this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotConstructor(this.sym$2, this.owner$2);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                        this.sym$2 = sym$2;
+                        this.owner$2 = owner$2;
+                    }
+                }));
+                return;
+            }
+            throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotConstructor(sym, owner2);
+        }
+
+        public <T> Class<? super Object> scala$reflect$runtime$JavaMirrors$JavaMirror$$preciseClass(T instance, ClassTag<T> evidence$3) {
+            Class<?> staticClazz = package$.MODULE$.classTag(evidence$3).runtimeClass();
+            Class<?> dynamicClazz = instance.getClass();
+            return staticClazz.isPrimitive() ? staticClazz : dynamicClazz;
+        }
+
+        public boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$isGetClass(Symbols.MethodSymbol meth) {
+            return meth.name().string_$eq$eq("getClass") && ((SeqLike)((Object)meth.paramss().flatten((Function1)Predef$.MODULE$.$conforms()))).isEmpty();
+        }
+
+        public boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$isStringConcat(Symbols.MethodSymbol meth) {
+            Symbols.MethodSymbol methodSymbol = meth;
+            Symbols.MethodSymbol methodSymbol2 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().String_$plus();
+            return !(methodSymbol == null ? methodSymbol2 != null : !methodSymbol.equals(methodSymbol2)) || meth.owner().isPrimitiveValueClass() && meth.returnType().$eq$colon$eq((Types.Type)((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().StringClass().toType());
+        }
+
+        public Set<Symbols.Symbol> bytecodelessMethodOwners() {
+            return (byte)(this.bitmap$0 & 0x40) == 0 ? this.bytecodelessMethodOwners$lzycompute() : this.bytecodelessMethodOwners;
+        }
+
+        public Set<Symbols.Symbol> bytecodefulObjectMethods() {
+            return (byte)(this.bitmap$0 & 0x80) == 0 ? this.bytecodefulObjectMethods$lzycompute() : this.bytecodefulObjectMethods;
+        }
+
+        private boolean isBytecodelessMethod(Symbols.MethodSymbol meth) {
+            block3: {
+                block2: {
+                    if (this.scala$reflect$runtime$JavaMirrors$JavaMirror$$isGetClass(meth) || this.scala$reflect$runtime$JavaMirrors$JavaMirror$$isStringConcat(meth) || meth.owner().isPrimitiveValueClass()) break block2;
+                    Symbols.MethodSymbol methodSymbol = meth;
+                    Symbols.TermSymbol termSymbol = this.runDefinitions().Predef_classOf();
+                    if ((methodSymbol == null ? termSymbol != null : !methodSymbol.equals(termSymbol)) && !meth.isMacro()) break block3;
+                }
+                return true;
+            }
+            return this.bytecodelessMethodOwners().apply(meth.owner()) && !this.bytecodefulObjectMethods().apply(meth);
+        }
+
+        public boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$isByNameParam(Types.Type p) {
+            return ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().isByNameParamType(p);
+        }
+
+        public boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$isValueClassParam(Types.Type p) {
+            return p.typeSymbol().isDerivedValueClass();
+        }
+
+        public <T> Mirrors.MethodMirror scala$reflect$runtime$JavaMirrors$JavaMirror$$mkMethodMirror(T receiver, Symbols.MethodSymbol symbol, ClassTag<T> evidence$5) {
+            Mirrors.MethodMirror methodMirror;
+            if (this.isBytecodelessMethod(symbol)) {
+                methodMirror = new BytecodelessMethodMirror<T>(this, receiver, symbol, evidence$5);
+            } else if (this.existsParam$1((Function1)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final boolean apply(Types.Type p) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$isByNameParam(p);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }), symbol) || this.existsParam$1((Function1)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final boolean apply(Types.Type p) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$isValueClassParam(p);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }), symbol)) {
+                methodMirror = new JavaTransformingMethodMirror(this, receiver, symbol);
+            } else {
+                int n = ((LinearSeqOptimized)((Object)symbol.paramss().flatten((Function1)Predef$.MODULE$.$conforms()))).length();
+                switch (n) {
+                    default: {
+                        methodMirror = new JavaVanillaMethodMirror(this, receiver, symbol);
+                        break;
+                    }
+                    case 4: {
+                        methodMirror = new JavaVanillaMethodMirror4(this, receiver, symbol);
+                        break;
+                    }
+                    case 3: {
+                        methodMirror = new JavaVanillaMethodMirror3(this, receiver, symbol);
+                        break;
+                    }
+                    case 2: {
+                        methodMirror = new JavaVanillaMethodMirror2(this, receiver, symbol);
+                        break;
+                    }
+                    case 1: {
+                        methodMirror = new JavaVanillaMethodMirror1(this, receiver, symbol);
+                        break;
+                    }
+                    case 0: {
+                        methodMirror = new JavaVanillaMethodMirror0(this, receiver, symbol);
+                    }
+                }
+            }
+            return methodMirror;
+        }
+
+        /*
+         * Enabled force condition propagation
+         * Lifted jumps to return sites
+         */
+        public boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$erasesTo(Symbols.Symbol meth, Method jmeth) {
+            Types.Type mtpe = ((Transforms)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).transformedType(meth);
+            List list2 = mtpe.paramTypes().map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Class<?> apply(Types.Type tpe) {
+                    return this.$outer.runtimeClass(tpe);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom());
+            List list3 = Predef$.MODULE$.refArrayOps((Object[])jmeth.getParameterTypes()).toList();
+            if (list2 == null) {
+                if (list3 != null) {
+                    return false;
+                }
+            } else if (!((Object)list2).equals(list3)) return false;
+            Class<?> clazz = this.runtimeClass(mtpe.resultType());
+            Class<?> clazz2 = jmeth.getReturnType();
+            if (clazz == null) {
+                if (clazz2 == null) return true;
+                return false;
+            } else {
+                if (!clazz.equals(clazz2)) return false;
+                return true;
+            }
+        }
+
+        /*
+         * Enabled force condition propagation
+         * Lifted jumps to return sites
+         */
+        public boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$erasesTo(Symbols.Symbol meth, Constructor<?> jconstr) {
+            Types.Type mtpe = ((Transforms)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).transformedType(meth);
+            List list2 = mtpe.paramTypes().map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Class<?> apply(Types.Type tpe) {
+                    return this.$outer.runtimeClass(tpe);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom());
+            List list3 = Predef$.MODULE$.refArrayOps((Object[])jconstr.getParameterTypes()).toList();
+            if (list2 == null) {
+                if (list3 != null) {
+                    return false;
+                }
+            } else if (!((Object)list2).equals(list3)) return false;
+            Class<?> clazz = this.runtimeClass(mtpe.resultType());
+            Class<?> clazz2 = jconstr.getDeclaringClass();
+            if (clazz == null) {
+                if (clazz2 == null) return true;
+                return false;
+            } else {
+                if (!clazz.equals(clazz2)) return false;
+                return true;
+            }
+        }
+
+        public Class<?> javaClass(String path) {
+            return Class.forName(path, true, this.classLoader());
+        }
+
+        public Option<Class<?>> tryJavaClass(String path) {
+            Throwable throwable2;
+            block2: {
+                Option option;
+                try {
+                    option = new Some(this.javaClass(path));
+                }
+                catch (Throwable throwable2) {
+                    boolean bl = throwable2 instanceof LinkageError ? true : throwable2 instanceof ClassNotFoundException;
+                    if (!bl) break block2;
+                    option = None$.MODULE$;
+                }
+                return option;
+            }
+            throw throwable2;
+        }
+
+        public JavaMirror mirrorDefining(Class<?> jclazz) {
+            ClassLoader cl;
+            ClassLoader classLoader = cl = jclazz.getClassLoader();
+            ClassLoader classLoader2 = this.classLoader();
+            return !(classLoader != null ? !classLoader.equals(classLoader2) : classLoader2 != null) ? this : this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().runtimeMirror(cl);
+        }
+
+        private JavaMirrors$JavaMirror$unpickler$ unpickler() {
+            return this.unpickler$module == null ? this.unpickler$lzycompute() : this.unpickler$module;
+        }
+
+        public void unpickleClass(Symbols.Symbol clazz, Symbols.Symbol module, Class<?> jclazz) {
+            try {
+                Option option;
+                block7: {
+                    Option option2;
+                    block9: {
+                        block6: {
+                            block8: {
+                                block5: {
+                                    this.markAbsent$1(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoType(), clazz, module);
+                                    option = this.loadBytes$1("scala.reflect.ScalaSignature", ClassTag$.MODULE$.apply(String.class), jclazz);
+                                    if (!(option instanceof Some)) break block5;
+                                    Some some = (Some)option;
+                                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().info((Function0<String>)((Object)new Serializable(this, clazz, module){
+                                        public static final long serialVersionUID = 0L;
+                                        private final Symbols.Symbol clazz$2;
+                                        private final Symbols.Symbol module$1;
+
+                                        public final String apply() {
+                                            return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"unpickling Scala ", " and ", ", owner = ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.clazz$2, this.module$1, this.clazz$2.owner()}));
+                                        }
+                                        {
+                                            this.clazz$2 = clazz$2;
+                                            this.module$1 = module$1;
+                                        }
+                                    }));
+                                    byte[] bytes2 = ((String)some.x()).getBytes();
+                                    int len = ByteCodecs$.MODULE$.decode(bytes2);
+                                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$$assignAssociatedFile(clazz, module, jclazz);
+                                    this.unpickler().unpickle((byte[])Predef$.MODULE$.byteArrayOps(bytes2).take(len), 0, clazz, module, jclazz.getName());
+                                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{clazz, module}));
+                                    break block6;
+                                }
+                                if (!None$.MODULE$.equals(option)) break block7;
+                                option2 = this.loadBytes$1("scala.reflect.ScalaLongSignature", ClassTag$.MODULE$.apply(ScalaRunTime$.MODULE$.arrayClass(String.class)), jclazz);
+                                if (!(option2 instanceof Some)) break block8;
+                                Some some = (Some)option2;
+                                this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().info((Function0<String>)((Object)new Serializable(this, clazz, module){
+                                    public static final long serialVersionUID = 0L;
+                                    private final Symbols.Symbol clazz$2;
+                                    private final Symbols.Symbol module$1;
+
+                                    public final String apply() {
+                                        return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"unpickling Scala ", " and ", " with long Scala signature"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.clazz$2, this.module$1}));
+                                    }
+                                    {
+                                        this.clazz$2 = clazz$2;
+                                        this.module$1 = module$1;
+                                    }
+                                }));
+                                byte[] encoded = (byte[])Predef$.MODULE$.refArrayOps((Object[])some.x()).flatMap(new Serializable(this){
+                                    public static final long serialVersionUID = 0L;
+
+                                    public final ArrayOps<Object> apply(String x$14) {
+                                        return Predef$.MODULE$.byteArrayOps(x$14.getBytes());
+                                    }
+                                }, Array$.MODULE$.canBuildFrom(ClassTag$.MODULE$.Byte()));
+                                int len = ByteCodecs$.MODULE$.decode(encoded);
+                                byte[] decoded = (byte[])Predef$.MODULE$.byteArrayOps(encoded).take(len);
+                                this.scala$reflect$runtime$JavaMirrors$JavaMirror$$assignAssociatedFile(clazz, module, jclazz);
+                                this.unpickler().unpickle(decoded, 0, clazz, module, jclazz.getName());
+                                this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{clazz, module}));
+                                break block6;
+                            }
+                            if (!None$.MODULE$.equals(option2)) break block9;
+                            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().info((Function0<String>)((Object)new Serializable(this, jclazz){
+                                public static final long serialVersionUID = 0L;
+                                private final Class jclazz$1;
+
+                                public final String apply() {
+                                    return new StringBuilder().append((Object)"translating reflection info for Java ").append(this.jclazz$1).toString();
+                                }
+                                {
+                                    this.jclazz$1 = jclazz$1;
+                                }
+                            }));
+                            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().initClassAndModule(clazz, module, new FromJavaClassCompleter(this, clazz, module, jclazz));
+                        }
+                        return;
+                    }
+                    throw new MatchError(option2);
+                }
+                throw new MatchError(option);
+            }
+            catch (IOException iOException) {
+                throw this.handleError$1(iOException, clazz, module);
+            }
+            catch (MissingRequirementError missingRequirementError) {
+                throw this.handleError$1(missingRequirementError, clazz, module);
+            }
+        }
+
+        /*
+         * WARNING - void declaration
+         */
+        public Symbols.TypeSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$createTypeParameter(TypeVariable<? extends GenericDeclaration> jtvar) {
+            void var2_6;
+            Symbols.Symbol qual$1 = this.sOwner(jtvar);
+            Names.TypeName x$44 = ((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).newTypeName(jtvar.getName());
+            Position x$45 = qual$1.newTypeParameter$default$2();
+            long x$46 = qual$1.newTypeParameter$default$3();
+            Symbols.TypeSymbol tparam = (Symbols.TypeSymbol)qual$1.newTypeParameter(x$44, x$45, x$46).setInfo(new TypeParamCompleter(this, jtvar));
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markFlagsCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{tparam}), -1L);
+            this.tparamCache().enter(jtvar, tparam);
+            return var2_6;
+        }
+
+        public void scala$reflect$runtime$JavaMirrors$JavaMirror$$assignAssociatedFile(Symbols.Symbol clazz, Symbols.Symbol module, Class<?> jclazz) {
+            AbstractFile associatedFile = ReflectionUtils$.MODULE$.associatedFile(jclazz);
+            clazz.associatedFile_$eq(associatedFile);
+            Symbols.Symbol symbol = module;
+            Symbols.NoSymbol noSymbol = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+            if (symbol == null ? noSymbol != null : !symbol.equals(noSymbol)) {
+                module.associatedFile_$eq(associatedFile);
+            }
+        }
+
+        public void scala$reflect$runtime$JavaMirrors$JavaMirror$$copyAnnotations(Symbols.Symbol sym, AnnotatedElement jann) {
+            List list2;
+            Object[] objectArray = jann.getAnnotations();
+            Predef$ predef$ = Predef$.MODULE$;
+            sym.setAnnotations(Predef$.MODULE$.refArrayOps((Object[])new ArrayOps.ofRef<Object>(objectArray).map(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$JavaAnnotationProxy(), Array$.MODULE$.canBuildFrom(ClassTag$.MODULE$.apply(JavaAnnotationProxy.class)))).toList());
+            if (jann instanceof Method) {
+                Method method = (Method)jann;
+                Object[] objectArray2 = method.getExceptionTypes();
+                Predef$ predef$2 = Predef$.MODULE$;
+                list2 = new ArrayOps.ofRef<Object>(objectArray2).toList();
+            } else if (jann instanceof Constructor) {
+                Constructor constructor = (Constructor)jann;
+                Object[] objectArray3 = constructor.getExceptionTypes();
+                Predef$ predef$3 = Predef$.MODULE$;
+                list2 = new ArrayOps.ofRef<Object>(objectArray3).toList();
+            } else {
+                list2 = Nil$.MODULE$;
+            }
+            List list3 = list2;
+            while (!((AbstractIterable)list3).isEmpty()) {
+                Class clazz = (Class)((AbstractIterable)list3).head();
+                Symbols.Symbol cfr_ignored_0 = (Symbols.Symbol)sym.addThrowsAnnotation(this.classSymbol(clazz));
+                list3 = (List)((AbstractTraversable)list3).tail();
+            }
+        }
+
+        public jClassOps scala$reflect$runtime$JavaMirrors$JavaMirror$$jClassOps(Class<?> clazz) {
+            return new jClassOps(this, clazz);
+        }
+
+        public jMemberOps scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(Member member) {
+            return new jMemberOps(this, member);
+        }
+
+        private Symbols.Symbol followStatic(Symbols.Symbol clazz, int mods) {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$followStatic(clazz, clazz.companionModule(), mods);
+        }
+
+        public Symbols.Symbol scala$reflect$runtime$JavaMirrors$JavaMirror$$followStatic(Symbols.Symbol clazz, Symbols.Symbol module, int mods) {
+            Symbols.Symbol symbol;
+            return JavaAccFlags$.MODULE$.scala$reflect$internal$JavaAccFlags$$has$extension(mods, 8) ? ((symbol = module.moduleClass()) != symbol.scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol() ? symbol : clazz) : clazz;
+        }
+
+        public RichClass RichClass(Class<?> jclazz) {
+            return new RichClass(this, jclazz);
+        }
+
+        private Symbols.Symbol sOwner(Class<?> jclazz) {
+            Symbols.Symbol symbol;
+            if (ReflectionUtils$PrimitiveOrArray$.MODULE$.unapply(jclazz)) {
+                symbol = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ScalaPackageClass();
+            } else {
+                Option option = ReflectionUtils$EnclosedInMethod$.MODULE$.unapply(jclazz);
+                if (option.isEmpty()) {
+                    Option option2 = ReflectionUtils$EnclosedInConstructor$.MODULE$.unapply(jclazz);
+                    if (option2.isEmpty()) {
+                        Option option3 = ReflectionUtils$EnclosedInClass$.MODULE$.unapply(jclazz);
+                        if (option3.isEmpty()) {
+                            Option option4 = ReflectionUtils$EnclosedInPackage$.MODULE$.unapply(jclazz);
+                            if (option4.isEmpty()) {
+                                String string2 = jclazz.getName();
+                                Predef$ predef$ = Predef$.MODULE$;
+                                symbol = this.packageNameToScala((String)new StringOps(string2).take(jclazz.getName().lastIndexOf(46))).moduleClass();
+                            } else {
+                                symbol = this.packageToScala((Package)option4.get()).moduleClass();
+                            }
+                        } else {
+                            symbol = this.followStatic(this.classToScala((Class)option3.get()), this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jClassOps(jclazz).javaFlags());
+                        }
+                    } else {
+                        symbol = this.constructorToScala((Constructor)option2.get());
+                    }
+                } else {
+                    symbol = this.methodToScala((Method)option.get());
+                }
+            }
+            return symbol;
+        }
+
+        private Symbols.Symbol sOwner(Member jmember) {
+            return this.followStatic(this.classToScala(jmember.getDeclaringClass()), this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jmember).javaFlags());
+        }
+
+        private Symbols.Symbol sOwner(TypeVariable<? extends GenericDeclaration> jtvar) {
+            return this.genericDeclarationToScala(jtvar.getGenericDeclaration());
+        }
+
+        private Symbols.Symbol lookup(Symbols.Symbol clazz, String jname) {
+            Symbols.Symbol symbol;
+            Serializable serializable = new Serializable(this, clazz, jname){
+                public static final long serialVersionUID = 0L;
+                public final /* synthetic */ JavaMirror $outer;
+                public final Symbols.Symbol clazz$4;
+                public final String jname$1;
+
+                public final Symbols.Symbol apply() {
+                    Symbols.Symbol symbol;
+                    List<Symbols.Symbol> list2 = this.clazz$4.info().decls().iterator().filter((Function1<Symbols.Symbol, Object>)((Object)new Serializable(this){
+                        public static final long serialVersionUID = 0L;
+                        private final /* synthetic */ JavaMirror$$anonfun$lookup$1 $outer;
+
+                        public final boolean apply(Symbols.Symbol x$20) {
+                            return this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$approximateMatch$1(x$20, this.$outer.jname$1);
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                        }
+                    })).toList();
+                    Some<List<A>> some = List$.MODULE$.unapplySeq(list2);
+                    if (!some.isEmpty() && some.get() != null && ((LinearSeqOptimized)some.get()).lengthCompare(0) == 0) {
+                        symbol = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                    } else {
+                        Some<List<A>> some2 = List$.MODULE$.unapplySeq(list2);
+                        if (!some2.isEmpty() && some2.get() != null && ((LinearSeqOptimized)some2.get()).lengthCompare(1) == 0) {
+                            Symbols.Symbol sym = (Symbols.Symbol)((LinearSeqOptimized)some2.get()).apply(0);
+                            symbol = sym;
+                        } else {
+                            symbol = this.clazz$4.newOverloaded(((Symbols.Symbol)list2.head()).tpe().prefix(), list2);
+                        }
+                    }
+                    return symbol;
+                }
+
+                public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$$outer() {
+                    return this.$outer;
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.clazz$4 = clazz$4;
+                    this.jname$1 = jname$1;
+                }
+            };
+            Symbols.Symbol symbol2 = clazz.info().decl(((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).newTermName(jname));
+            if (symbol2 != symbol2.scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol()) {
+                symbol = symbol2;
+            } else {
+                Symbols.Symbol symbol3;
+                List<Symbols.Symbol> x11 = clazz.info().decls().iterator().filter((Function1<Symbols.Symbol, Object>)((Object)new /* invalid duplicate definition of identical inner class */)).toList();
+                Some o81 = List$.MODULE$.unapplySeq(x11);
+                if (!o81.isEmpty() && o81.get() != null && ((LinearSeqOptimized)o81.get()).lengthCompare(0) == 0) {
+                    symbol3 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                } else {
+                    Some o101 = List$.MODULE$.unapplySeq(x11);
+                    if (!o101.isEmpty() && o101.get() != null && ((LinearSeqOptimized)o101.get()).lengthCompare(1) == 0) {
+                        Symbols.Symbol sym1 = (Symbols.Symbol)((LinearSeqOptimized)o101.get()).apply(0);
+                        symbol3 = sym1;
+                    } else {
+                        symbol3 = clazz.newOverloaded(((Symbols.Symbol)x11.head()).tpe_$times().prefix(), x11);
+                    }
+                }
+                symbol = symbol3;
+            }
+            return symbol;
+        }
+
+        public Symbols.MethodSymbol methodToScala(Method jmeth) {
+            return this.toScala(this.methodCache(), (Object)jmeth, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.MethodSymbol apply(JavaMirror x$21, Method x$22) {
+                    return x$21.scala$reflect$runtime$JavaMirrors$JavaMirror$$methodToScala1(x$22);
+                }
+            }), this.methHasJavaClass());
+        }
+
+        public Symbols.MethodSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$methodToScala1(Method jmeth) {
+            Class<?> jOwner = jmeth.getDeclaringClass();
+            Symbols.ClassSymbol preOwner = this.classToScala(jOwner);
+            int n = new jMemberOps(this, jmeth).javaFlags();
+            Symbols.Symbol owner2 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$followStatic(preOwner, ((Symbols.Symbol)preOwner).companionModule(), n);
+            Symbols.SymbolApi symbolApi = this.lookup(owner2, jmeth.getName()).suchThat((Function1)((Object)new Serializable(this, jmeth){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Method jmeth$1;
+
+                public final boolean apply(Symbols.Symbol x$23) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$erasesTo(x$23, this.jmeth$1);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.jmeth$1 = jmeth$1;
+                }
+            }));
+            return (Symbols.MethodSymbol)((Symbols.SymbolContextApiImpl)(symbolApi != ((Symbols.Symbol)symbolApi).scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol() ? symbolApi : (Symbols.Symbol)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jmethodAsScala(jmeth))).asMethod();
+        }
+
+        public Symbols.MethodSymbol constructorToScala(Constructor<?> jconstr) {
+            return this.toScala(this.constructorCache(), (Object)jconstr, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.MethodSymbol apply(JavaMirror x$24, Constructor<?> x$25) {
+                    return x$24.scala$reflect$runtime$JavaMirrors$JavaMirror$$constructorToScala1(x$25);
+                }
+            }), this.constrHasJavaClass());
+        }
+
+        public Symbols.MethodSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$constructorToScala1(Constructor<?> jconstr) {
+            int n = new jMemberOps(this, jconstr).javaFlags();
+            Symbols.ClassSymbol classSymbol = this.classToScala(jconstr.getDeclaringClass());
+            Symbols.Symbol owner2 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$followStatic(classSymbol, ((Symbols.Symbol)classSymbol).companionModule(), n);
+            Symbols.SymbolApi symbolApi = this.lookup(owner2, jconstr.getName()).suchThat((Function1)((Object)new Serializable(this, jconstr){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Constructor jconstr$1;
+
+                public final boolean apply(Symbols.Symbol x$26) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$erasesTo(x$26, this.jconstr$1);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.jconstr$1 = jconstr$1;
+                }
+            }));
+            return (Symbols.MethodSymbol)((Symbols.SymbolContextApiImpl)(symbolApi != ((Symbols.Symbol)symbolApi).scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol() ? symbolApi : (Symbols.Symbol)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jconstrAsScala(jconstr))).asMethod();
+        }
+
+        public Symbols.ModuleSymbol packageToScala(Package jpkg) {
+            return this.packageCache().toScala(jpkg, (Function0<Symbols.ModuleSymbol>)((Object)new Serializable(this, jpkg){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Package jpkg$1;
+
+                public final Symbols.ModuleSymbol apply() {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$$makeScalaPackage(this.jpkg$1.getName());
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.jpkg$1 = jpkg$1;
+                }
+            }));
+        }
+
+        public Symbols.ModuleSymbol packageNameToScala(String fullname) {
+            Package jpkg;
+            String string2 = fullname;
+            return string2 != null && string2.equals("") ? this.EmptyPackage() : ((jpkg = Package.getPackage(fullname)) == null ? this.scala$reflect$runtime$JavaMirrors$$makeScalaPackage(fullname) : this.packageToScala(jpkg));
+        }
+
+        public Symbols.ModuleSymbol scala$reflect$runtime$JavaMirrors$$makeScalaPackage(String fullname) {
+            String string2 = fullname;
+            return string2 != null && string2.equals("") ? this.EmptyPackage() : this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().gilSynchronized(new Serializable(this, fullname){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final String fullname$1;
+
+                public final Symbols.ModuleSymbol apply() {
+                    Symbols.Symbol opkg;
+                    block7: {
+                        Symbols.ModuleSymbol moduleSymbol;
+                        block6: {
+                            Names.TermName name;
+                            Symbols.Symbol owner2;
+                            block5: {
+                                Symbols.ModuleSymbol moduleSymbol2;
+                                int split2 = this.fullname$1.lastIndexOf(46);
+                                if (split2 > 0) {
+                                    String string2 = this.fullname$1;
+                                    Predef$ predef$ = Predef$.MODULE$;
+                                    moduleSymbol2 = this.$outer.packageNameToScala((String)new StringOps(string2).take(split2));
+                                } else {
+                                    moduleSymbol2 = this.$outer.RootPackage();
+                                }
+                                Mirrors.Roots.RootPackage ownerModule = moduleSymbol2;
+                                owner2 = ownerModule.moduleClass();
+                                name = ((Names)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).TermNameOps(((Names)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).TermName().apply(this.fullname$1)).drop(split2 + 1);
+                                opkg = owner2.info().decl(name);
+                                if (!opkg.hasPackageFlag()) break block5;
+                                moduleSymbol = (Symbols.ModuleSymbol)opkg.asModule();
+                                break block6;
+                            }
+                            Symbols.Symbol symbol = opkg;
+                            Symbols.NoSymbol noSymbol = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                            if (symbol != null ? !symbol.equals(noSymbol) : noSymbol != null) break block7;
+                            Symbols.ModuleSymbol pkg = owner2.newPackage(name, owner2.newPackage$default$2(), owner2.newPackage$default$3());
+                            pkg.moduleClass().setInfo(new SymbolLoaders.LazyPackageType(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+                            pkg.setInfoAndEnter(pkg.moduleClass().tpe());
+                            this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markFlagsCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{pkg}), -1L);
+                            this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().info((Function0<String>)((Object)new Serializable(this, pkg){
+                                public static final long serialVersionUID = 0L;
+                                private final Symbols.ModuleSymbol pkg$1;
+
+                                public final String apply() {
+                                    return new StringBuilder().append((Object)"made Scala ").append(this.pkg$1).toString();
+                                }
+                                {
+                                    this.pkg$1 = pkg$1;
+                                }
+                            }));
+                            moduleSymbol = pkg;
+                        }
+                        return moduleSymbol;
+                    }
+                    throw new ReflectError(Predef$any2stringadd$.MODULE$.$plus$extension(Predef$.MODULE$.any2stringadd(opkg), " is not a package"));
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.fullname$1 = fullname$1;
+                }
+            });
+        }
+
+        private Names.TypeName scalaSimpleName(Class<?> jclazz) {
+            boolean isObject;
+            Symbols.Symbol owner2 = this.sOwner(jclazz);
+            Class<?> enclosingClass = jclazz.getEnclosingClass();
+            String prefix = enclosingClass == null ? "" : enclosingClass.getName();
+            boolean bl = isObject = owner2.isModuleClass() && !owner2.isPackageClass();
+            if (isObject && !prefix.endsWith(((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().MODULE_SUFFIX_STRING())) {
+                prefix = new StringBuilder().append((Object)prefix).append((Object)((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().MODULE_SUFFIX_STRING()).toString();
+            }
+            Predef$.MODULE$.assert(jclazz.getName().startsWith(prefix));
+            String name = jclazz.getName().substring(prefix.length());
+            name = name.substring(name.lastIndexOf(".") + 1);
+            return ((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).newTypeName(name);
+        }
+
+        public Symbols.ClassSymbol classToScala(Class<?> jclazz) {
+            return this.toScala(this.classCache(), (Object)jclazz, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.ClassSymbol apply(JavaMirror x$27, Class<?> x$28) {
+                    return x$27.scala$reflect$runtime$JavaMirrors$JavaMirror$$classToScala1(x$28);
+                }
+            }), this.classHasJavaClass());
+        }
+
+        /*
+         * Unable to fully structure code
+         * Could not resolve type clashes
+         */
+        public Symbols.ClassSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$classToScala1(Class<?> jclazz) {
+            block4: {
+                block7: {
+                    block6: {
+                        block5: {
+                            block3: {
+                                v0 = jname = ((Names)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).newTypeName(jclazz.getName());
+                                var2_3 = ((StdNames)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).fulltpnme().RuntimeNothing();
+                                if (v0 != null ? v0.equals(var2_3) == false : var2_3 != null) break block3;
+                                v1 /* !! */  = ((Definitions)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).definitions().NothingClass();
+                                break block4;
+                            }
+                            v2 = jname;
+                            var3_4 = ((StdNames)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).fulltpnme().RuntimeNull();
+                            if (v2 != null ? v2.equals(var3_4) == false : var3_4 != null) break block5;
+                            v1 /* !! */  = ((Definitions)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).definitions().NullClass();
+                            break block4;
+                        }
+                        owner = this.sOwner(jclazz);
+                        simpleName = this.scalaSimpleName(jclazz);
+                        if (!jclazz.isMemberClass() || jname.endsWith((var4_7 = ((StdNames)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).nme()).IMPL_CLASS_SUFFIX())) break block6;
+                        v3 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$lookupClass$1(owner, simpleName);
+                        break block7;
+                    }
+                    if (this.RichClass(jclazz).isLocalClass0()) ** GOTO lbl-1000
+                    var5_8 = ReflectionUtils$.MODULE$;
+                    var6_9 = Predef$.MODULE$;
+                    if (Predef$any2stringadd$.MODULE$.$plus$extension(jname, ".class").endsWith("$class.class")) lbl-1000:
+                    // 2 sources
+
+                    {
+                        v3 = (var9_10 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$lookupClass$1(owner, simpleName)) != var9_10.scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol() ? var9_10 : (Symbols.Symbol)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jclassAsScala(jclazz);
+                    } else {
+                        v3 = jclazz.isArray() != false ? ((Definitions)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).definitions().ArrayClass() : ((var10_11 = ((Definitions)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).definitions().javaTypeToValueClass(jclazz)) != var10_11.scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol() ? var10_11 : this.scala$reflect$runtime$JavaMirrors$JavaMirror$$lookupClass$1(owner, simpleName));
+                    }
+                }
+                cls = v3;
+                var12_13 = cls.isType();
+                var11_14 = Predef$.MODULE$;
+                if (!var12_13) {
+                    v4 = cls;
+                    var13_15 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                    throw new AssertionError((Object)new StringBuilder().append((Object)"assertion failed: ").append((Object)new StringBuilder().append((Object)(!(v4 != null ? v4.equals(var13_15) == false : var13_15 != null) ? "no symbol could be" : new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"not a type: symbol ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{cls})))).append((Object)new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{" loaded from ", " in ", " with name ", " and classloader ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{jclazz, owner, simpleName, this.classLoader()}))).toString()).toString());
+                }
+                v1 /* !! */  = (Symbols.ClassSymbol)cls.asClass();
+            }
+            return v1 /* !! */ ;
+        }
+
+        public Symbols.TypeSymbol typeParamToScala(TypeVariable<? extends GenericDeclaration> jparam) {
+            return this.toScala(this.tparamCache(), (Object)jparam, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.TypeSymbol apply(JavaMirror x$30, TypeVariable<? extends GenericDeclaration> x$31) {
+                    return x$30.scala$reflect$runtime$JavaMirrors$JavaMirror$$typeParamToScala1(x$31);
+                }
+            }), this.tparamHasJavaClass());
+        }
+
+        public Symbols.TypeSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$typeParamToScala1(TypeVariable<? extends GenericDeclaration> jparam) {
+            Symbols.Symbol owner2 = this.genericDeclarationToScala(jparam.getGenericDeclaration());
+            Types.Type type = owner2.info();
+            if (type instanceof Types.PolyType) {
+                Types.PolyType polyType = (Types.PolyType)type;
+                return (Symbols.TypeSymbol)((Symbols.SymbolApi)polyType.typeParams().find((Function1<Symbols.Symbol, Object>)((Object)new Serializable(this, jparam){
+                    public static final long serialVersionUID = 0L;
+                    private final TypeVariable jparam$1;
+
+                    public final boolean apply(Symbols.Symbol x$32) {
+                        return x$32.name().string_$eq$eq(this.jparam$1.getName());
+                    }
+                    {
+                        this.jparam$1 = jparam$1;
+                    }
+                })).get()).asType();
+            }
+            throw new MatchError(type);
+        }
+
+        public Symbols.Symbol genericDeclarationToScala(GenericDeclaration jdecl) {
+            block5: {
+                Symbols.Symbol symbol;
+                block3: {
+                    block4: {
+                        block2: {
+                            if (!(jdecl instanceof Class)) break block2;
+                            Class clazz = (Class)jdecl;
+                            symbol = this.classToScala(clazz);
+                            break block3;
+                        }
+                        if (!(jdecl instanceof Method)) break block4;
+                        Method method = (Method)jdecl;
+                        symbol = this.methodToScala(method);
+                        break block3;
+                    }
+                    if (!(jdecl instanceof Constructor)) break block5;
+                    Constructor constructor = (Constructor)jdecl;
+                    symbol = this.constructorToScala(constructor);
+                }
+                return symbol;
+            }
+            throw new MatchError(jdecl);
+        }
+
+        public Symbols.Symbol reflectMemberToScala(Member m) {
+            block4: {
+                Symbols.Symbol symbol;
+                block3: {
+                    block2: {
+                        if (!(m instanceof GenericDeclaration)) break block2;
+                        symbol = this.genericDeclarationToScala((GenericDeclaration)((Object)m));
+                        break block3;
+                    }
+                    if (!(m instanceof Field)) break block4;
+                    Field field2 = (Field)m;
+                    symbol = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jfieldAsScala(field2);
+                }
+                return symbol;
+            }
+            throw new MatchError(m);
+        }
+
+        private Tuple2<List<Types.Type>, List<Symbols.TypeSymbol>> targsToScala(Symbols.Symbol owner2, List<Type> args) {
+            ListBuffer tparams2 = new ListBuffer();
+            return new Tuple2<List<Types.Type>, List<Symbols.TypeSymbol>>(args.map(new Serializable(this, owner2, tparams2){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Symbols.Symbol owner$4;
+                private final ListBuffer tparams$1;
+
+                public final Types.Type apply(Type arg) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$targToScala$1(arg, this.owner$4, this.tparams$1);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.owner$4 = owner$4;
+                    this.tparams$1 = tparams$1;
+                }
+            }, List$.MODULE$.canBuildFrom()), tparams2.toList());
+        }
+
+        public Types.Type typeToScala(Type jtpe) {
+            block10: {
+                Types.Type type;
+                block6: {
+                    block9: {
+                        block7: {
+                            Tuple2<List<Types.Type>, List<Symbols.TypeSymbol>> tuple2;
+                            block8: {
+                                block5: {
+                                    Types.Type type2;
+                                    if (!(jtpe instanceof Class)) break block5;
+                                    Class clazz = (Class)jtpe;
+                                    if (clazz.isArray()) {
+                                        type2 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().arrayType(this.typeToScala(clazz.getComponentType()));
+                                    } else {
+                                        Symbols.ClassSymbol clazz2 = this.classToScala(clazz);
+                                        type2 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().rawToExistential().apply(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().typeRef(clazz2.owner().thisType(), clazz2, Nil$.MODULE$));
+                                    }
+                                    type = type2;
+                                    break block6;
+                                }
+                                if (!(jtpe instanceof ParameterizedType)) break block7;
+                                ParameterizedType parameterizedType = (ParameterizedType)jtpe;
+                                Symbols.ClassSymbol sym = this.classToScala((Class)parameterizedType.getRawType());
+                                Types.Type pre = sym.owner().thisType();
+                                Type[] args0 = parameterizedType.getActualTypeArguments();
+                                tuple2 = this.targsToScala(pre.typeSymbol(), Predef$.MODULE$.refArrayOps((Object[])args0).toList());
+                                if (tuple2 == null) break block8;
+                                Tuple2<List<Types.Type>, List<Symbols.TypeSymbol>> tuple22 = new Tuple2<List<Types.Type>, List<Symbols.TypeSymbol>>(tuple2._1(), tuple2._2());
+                                List<Types.Type> args = tuple22._1();
+                                List<Symbols.Symbol> bounds = tuple22._2();
+                                type = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().newExistentialType(bounds, this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().typeRef(pre, sym, args));
+                                break block6;
+                            }
+                            throw new MatchError(tuple2);
+                        }
+                        if (!(jtpe instanceof GenericArrayType)) break block9;
+                        GenericArrayType genericArrayType = (GenericArrayType)jtpe;
+                        type = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().arrayType(this.typeToScala(genericArrayType.getGenericComponentType()));
+                        break block6;
+                    }
+                    if (!(jtpe instanceof TypeVariable)) break block10;
+                    TypeVariable typeVariable = (TypeVariable)jtpe;
+                    Symbols.TypeSymbol tparam = this.typeParamToScala(typeVariable);
+                    type = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().typeRef(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoPrefix(), tparam, Nil$.MODULE$);
+                }
+                return type;
+            }
+            throw new MatchError(jtpe);
+        }
+
+        public Symbols.ClassSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jclassAsScala(Class<?> jclazz) {
+            return this.toScala(this.classCache(), (Object)jclazz, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.ClassSymbol apply(JavaMirror x$34, Class<?> x$35) {
+                    return x$34.scala$reflect$runtime$JavaMirrors$JavaMirror$$jclassAsScala1(x$35);
+                }
+            }), this.classHasJavaClass());
+        }
+
+        public Symbols.ClassSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jclassAsScala1(Class<?> jclazz) {
+            Symbols.Symbol owner2 = this.sOwner(jclazz);
+            Names.TypeName name = this.scalaSimpleName(jclazz);
+            Serializable completer = new Serializable(this, jclazz){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Class jclazz$3;
+
+                public final FromJavaClassCompleter apply(Symbols.Symbol clazz, Symbols.Symbol module) {
+                    return new FromJavaClassCompleter(this.$outer, clazz, module, this.jclazz$3);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.jclazz$3 = jclazz$3;
+                }
+            };
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().initAndEnterClassAndModule(owner2, name, (Function2<Symbols.Symbol, Symbols.Symbol, Types.LazyType>)((Object)completer))._1();
+        }
+
+        public Symbols.TermSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jfieldAsScala(Field jfield) {
+            return this.toScala(this.fieldCache(), (Object)jfield, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.TermSymbol apply(JavaMirror x$36, Field x$37) {
+                    return x$36.scala$reflect$runtime$JavaMirrors$JavaMirror$$jfieldAsScala1(x$37);
+                }
+            }), this.fieldHasJavaClass());
+        }
+
+        /*
+         * WARNING - void declaration
+         */
+        public Symbols.TermSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jfieldAsScala1(Field jfield) {
+            void var2_2;
+            Symbols.TermSymbol field2 = (Symbols.TermSymbol)this.sOwner(jfield).newValue(((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).newTermName(jfield.getName()), ((Positions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).NoPosition(), this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jfield).scalaFlags()).setInfo(this.typeToScala(jfield.getGenericType()));
+            this.fieldCache().enter(jfield, field2);
+            ((PrivateWithin)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).propagatePackageBoundary(jfield, Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{field2}));
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$copyAnnotations(field2, jfield);
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{field2}));
+            return var2_2;
+        }
+
+        private Symbols.Symbol setMethType(Symbols.Symbol meth, List<Symbols.Symbol> tparams2, List<Types.Type> paramtpes, Types.Type restpe) {
+            return meth.setInfo(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().GenPolyType().apply(tparams2, new Types.MethodType((scala.reflect.internal.SymbolTable)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()), meth.owner().newSyntheticValueParams(paramtpes.map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Types.Type apply(Types.Type tp) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().objToAny(tp);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom())), restpe)));
+        }
+
+        public Symbols.MethodSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jmethodAsScala(Method jmeth) {
+            return this.toScala(this.methodCache(), (Object)jmeth, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.MethodSymbol apply(JavaMirror x$38, Method x$39) {
+                    return x$38.scala$reflect$runtime$JavaMirrors$JavaMirror$$jmethodAsScala1(x$39);
+                }
+            }), this.methHasJavaClass());
+        }
+
+        /*
+         * WARNING - void declaration
+         */
+        public Symbols.MethodSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jmethodAsScala1(Method jmeth) {
+            void var3_3;
+            Symbols.Symbol clazz = this.sOwner(jmeth);
+            Symbols.MethodSymbol meth = clazz.newMethod(((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).newTermName(jmeth.getName()), ((Positions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).NoPosition(), this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jmeth).scalaFlags());
+            this.methodCache().enter(jmeth, meth);
+            List<Symbols.Symbol> tparams2 = Predef$.MODULE$.refArrayOps((Object[])jmeth.getTypeParameters()).toList().map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Symbols.TypeSymbol apply(TypeVariable<? extends GenericDeclaration> jtvar) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$createTypeParameter(jtvar);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom());
+            List<Types.Type> paramtpes = Predef$.MODULE$.refArrayOps((Object[])jmeth.getGenericParameterTypes()).toList().map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Types.Type apply(Type jtpe) {
+                    return this.$outer.typeToScala(jtpe);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom());
+            Types.Type resulttpe = this.typeToScala(jmeth.getGenericReturnType());
+            this.setMethType(meth, tparams2, paramtpes, resulttpe);
+            ((PrivateWithin)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).propagatePackageBoundary(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jmeth).javaFlags(), Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{meth}));
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$copyAnnotations(meth, jmeth);
+            Object object = JavaAccFlags$.MODULE$.isVarargs$extension(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jmeth).javaFlags()) ? meth.modifyInfo((Function1<Types.Type, Types.Type>)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Types.Type apply(Types.Type tp) {
+                    return ((scala.reflect.internal.SymbolTable)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).arrayToRepeated(tp);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            })) : BoxedUnit.UNIT;
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{meth}));
+            return var3_3;
+        }
+
+        public Symbols.MethodSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jconstrAsScala(Constructor<?> jconstr) {
+            return this.toScala(this.constructorCache(), (Object)jconstr, (Function2)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Symbols.MethodSymbol apply(JavaMirror x$40, Constructor<?> x$41) {
+                    return x$40.scala$reflect$runtime$JavaMirrors$JavaMirror$$jconstrAsScala1(x$41);
+                }
+            }), this.constrHasJavaClass());
+        }
+
+        /*
+         * WARNING - void declaration
+         */
+        public Symbols.MethodSymbol scala$reflect$runtime$JavaMirrors$JavaMirror$$jconstrAsScala1(Constructor<?> jconstr) {
+            void var3_3;
+            Symbols.Symbol clazz = this.sOwner(jconstr);
+            Symbols.MethodSymbol constr = clazz.newConstructor(((Positions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).NoPosition(), this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jconstr).scalaFlags());
+            this.constructorCache().enter(jconstr, constr);
+            List<Symbols.Symbol> tparams2 = Predef$.MODULE$.refArrayOps((Object[])jconstr.getTypeParameters()).toList().map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Symbols.TypeSymbol apply(TypeVariable<? extends GenericDeclaration> jtvar) {
+                    return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$createTypeParameter(jtvar);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom());
+            List<Types.Type> paramtpes = Predef$.MODULE$.refArrayOps((Object[])jconstr.getGenericParameterTypes()).toList().map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Types.Type apply(Type jtpe) {
+                    return this.$outer.typeToScala(jtpe);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            }, List$.MODULE$.canBuildFrom());
+            this.setMethType(constr, tparams2, paramtpes, clazz.tpe_$times());
+            constr.setInfo(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().GenPolyType().apply(tparams2, new Types.MethodType((scala.reflect.internal.SymbolTable)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()), clazz.newSyntheticValueParams(paramtpes), clazz.tpe())));
+            ((PrivateWithin)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).propagatePackageBoundary(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jconstr).javaFlags(), Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{constr}));
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$copyAnnotations(constr, jconstr);
+            Object object = JavaAccFlags$.MODULE$.isVarargs$extension(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(jconstr).javaFlags()) ? constr.modifyInfo((Function1<Types.Type, Types.Type>)((Object)new Serializable(this){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+
+                public final Types.Type apply(Types.Type tp) {
+                    return ((scala.reflect.internal.SymbolTable)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).arrayToRepeated(tp);
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                }
+            })) : BoxedUnit.UNIT;
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{constr}));
+            return var3_3;
+        }
+
+        public Class<?> classToJava(Symbols.ClassSymbol clazz) throws ClassNotFoundException {
+            return this.classCache().toJava(clazz, (Function0<Class<?>>)((Object)new Serializable(this, clazz){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Symbols.ClassSymbol clazz$1;
+
+                public final Class<Object> apply() {
+                    block12: {
+                        block13: {
+                            Class<Object> clazz;
+                            block10: {
+                                Option<A> option;
+                                String string2;
+                                block11: {
+                                    block9: {
+                                        if (!this.clazz$1.isPrimitiveValueClass()) break block9;
+                                        clazz = ((Definitions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().valueClassToJavaType(this.clazz$1);
+                                        break block10;
+                                    }
+                                    Symbols.ClassSymbol classSymbol = this.clazz$1;
+                                    Symbols.ClassSymbol classSymbol2 = ((Definitions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ArrayClass();
+                                    if (!(classSymbol != null ? !classSymbol.equals(classSymbol2) : classSymbol2 != null)) {
+                                        throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$noClass$1();
+                                    }
+                                    if (!this.clazz$1.isTopLevel()) break block11;
+                                    clazz = this.$outer.javaClass(this.clazz$1.javaClassName());
+                                    break block10;
+                                }
+                                if (!this.clazz$1.owner().isClass()) break block12;
+                                boolean childOfClass = !this.clazz$1.owner().isModuleClass();
+                                boolean childOfTopLevel = this.clazz$1.owner().isTopLevel();
+                                boolean childOfTopLevelObject = this.clazz$1.owner().isModuleClass() && childOfTopLevel;
+                                Class<?> ownerClazz = this.$outer.classToJava((Symbols.ClassSymbol)this.clazz$1.owner().asClass());
+                                if (childOfTopLevelObject) {
+                                    String string3 = ownerClazz.getName();
+                                    Predef$ predef$ = Predef$.MODULE$;
+                                    ownerClazz = Class.forName(new StringOps(string3).stripSuffix("$"), true, ownerClazz.getClassLoader());
+                                }
+                                Class<?>[] ownerChildren = ownerClazz.getDeclaredClasses();
+                                ObjectRef<String> fullNameOfJavaClass = ObjectRef.create(ownerClazz.getName());
+                                if (childOfClass || childOfTopLevel) {
+                                    fullNameOfJavaClass.elem = new StringBuilder().append((Object)((String)fullNameOfJavaClass.elem)).append((Object)"$").toString();
+                                }
+                                fullNameOfJavaClass.elem = new StringBuilder().append((Object)((String)fullNameOfJavaClass.elem)).append(this.clazz$1.name()).toString();
+                                String string4 = (String)fullNameOfJavaClass.elem;
+                                Option<List<String>> option2 = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$PackageAndClassPattern().unapplySeq(string4);
+                                if (!option2.isEmpty() && option2.get() != null && ((LinearSeqOptimized)option2.get()).lengthCompare(2) == 0) {
+                                    String pack = (String)((LinearSeqOptimized)option2.get()).apply(0);
+                                    String clazzName = (String)((LinearSeqOptimized)option2.get()).apply(1);
+                                    string2 = new StringBuilder().append((Object)pack).append((Object)((StdNames)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).compactifyName(clazzName)).toString();
+                                } else {
+                                    string2 = ((StdNames)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).compactifyName((String)fullNameOfJavaClass.elem);
+                                }
+                                fullNameOfJavaClass.elem = string2;
+                                if (this.clazz$1.isModuleClass()) {
+                                    fullNameOfJavaClass.elem = new StringBuilder().append((Object)((String)fullNameOfJavaClass.elem)).append((Object)"$").toString();
+                                }
+                                if ((option = Predef$.MODULE$.refArrayOps((Object[])ownerChildren).find(new Serializable(this, fullNameOfJavaClass){
+                                    public static final long serialVersionUID = 0L;
+                                    private final ObjectRef fullNameOfJavaClass$1;
+
+                                    public final boolean apply(Class<?> x$42) {
+                                        String string2 = x$42.getName();
+                                        String string3 = (String)this.fullNameOfJavaClass$1.elem;
+                                        return !(string2 != null ? !string2.equals(string3) : string3 != null);
+                                    }
+                                    {
+                                        this.fullNameOfJavaClass$1 = fullNameOfJavaClass$1;
+                                    }
+                                })).isEmpty()) break block13;
+                                clazz = (Class)option.get();
+                            }
+                            return clazz;
+                        }
+                        throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$noClass$1();
+                    }
+                    throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$noClass$1();
+                }
+
+                public final Nothing$ scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$noClass$1() {
+                    throw new ClassNotFoundException(new StringBuilder().append((Object)"no Java class corresponding to ").append(this.clazz$1).append((Object)" found").toString());
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.clazz$1 = clazz$1;
+                }
+            }));
+        }
+
+        public Regex scala$reflect$runtime$JavaMirrors$JavaMirror$$PackageAndClassPattern() {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$PackageAndClassPattern;
+        }
+
+        public String scala$reflect$runtime$JavaMirrors$JavaMirror$$expandedName(Symbols.Symbol sym) {
+            return sym.isPrivate() ? ((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().expandedName(sym.name().toTermName(), sym.owner()).toString() : sym.name().toString();
+        }
+
+        public Field fieldToJava(Symbols.TermSymbol fld) {
+            return this.fieldCache().toJava(fld, (Function0<Field>)((Object)new Serializable(this, fld){
+                public static final long serialVersionUID = 0L;
+                private final /* synthetic */ JavaMirror $outer;
+                private final Symbols.TermSymbol fld$1;
+
+                public final Field apply() {
+                    Field field2;
+                    Class<?> jclazz = this.$outer.classToJava((Symbols.ClassSymbol)this.fld$1.owner().asClass());
+                    String jname = ((Names)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).TermNameOps(this.fld$1.name()).dropLocal().toString();
+                    try {
+                        field2 = jclazz.getDeclaredField(jname);
+                    }
+                    catch (NoSuchFieldException noSuchFieldException) {
+                        field2 = jclazz.getDeclaredField(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$expandedName(this.fld$1));
+                    }
+                    return field2;
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.fld$1 = fld$1;
+                }
+            }));
+        }
+
+        public Method methodToJava(Symbols.MethodSymbol meth) {
+            return this.methodCache().toJava(meth, (Function0<Method>)((Object)new Serializable(this, meth){
+                public static final long serialVersionUID = 0L;
+                public final /* synthetic */ JavaMirror $outer;
+                private final Symbols.MethodSymbol meth$1;
+
+                public final Method apply() {
+                    Method method;
+                    Class<?> jclazz = this.$outer.classToJava((Symbols.ClassSymbol)this.meth$1.owner().asClass());
+                    List<A> paramClasses = ((Transforms)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).transformedType(this.meth$1).paramTypes().map(new Serializable(this){
+                        public static final long serialVersionUID = 0L;
+                        private final /* synthetic */ JavaMirror$$anonfun$methodToJava$1 $outer;
+
+                        public final Class<?> apply(Types.Type tpe) {
+                            return this.$outer.$outer.typeToJavaClass(tpe);
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                        }
+                    }, List$.MODULE$.canBuildFrom());
+                    String jname = ((Names)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).TermNameOps(this.meth$1.name()).dropLocal().toString();
+                    try {
+                        method = jclazz.getDeclaredMethod(jname, (Class[])paramClasses.toArray(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().RuntimeClassTag()));
+                    }
+                    catch (NoSuchMethodException noSuchMethodException) {
+                        method = jclazz.getDeclaredMethod(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$expandedName(this.meth$1), (Class[])paramClasses.toArray(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().RuntimeClassTag()));
+                    }
+                    return method;
+                }
+
+                public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$$outer() {
+                    return this.$outer;
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.meth$1 = meth$1;
+                }
+            }));
+        }
+
+        public Constructor<?> constructorToJava(Symbols.MethodSymbol constr) {
+            return this.constructorCache().toJava(constr, (Function0<Constructor<?>>)((Object)new Serializable(this, constr){
+                public static final long serialVersionUID = 0L;
+                public final /* synthetic */ JavaMirror $outer;
+                private final Symbols.MethodSymbol constr$1;
+
+                public final Constructor<?> apply() {
+                    List<?> list2;
+                    Class<?> jclazz = this.$outer.classToJava((Symbols.ClassSymbol)this.constr$1.owner().asClass());
+                    List<?> paramClasses = ((Transforms)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).transformedType(this.constr$1).paramTypes().map(new Serializable(this){
+                        public static final long serialVersionUID = 0L;
+                        private final /* synthetic */ JavaMirror$$anonfun$constructorToJava$1 $outer;
+
+                        public final Class<?> apply(Types.Type tpe) {
+                            return this.$outer.$outer.typeToJavaClass(tpe);
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                        }
+                    }, List$.MODULE$.canBuildFrom());
+                    if (this.constr$1.owner().owner().isStaticOwner()) {
+                        list2 = paramClasses;
+                    } else {
+                        Class<?> clazz = jclazz.getEnclosingClass();
+                        list2 = paramClasses.$plus$colon(clazz, List$.MODULE$.canBuildFrom());
+                    }
+                    List<?> effectiveParamClasses = list2;
+                    return jclazz.getDeclaredConstructor((Class[])effectiveParamClasses.toArray(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().RuntimeClassTag()));
+                }
+
+                public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$$anonfun$$$outer() {
+                    return this.$outer;
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.constr$1 = constr$1;
+                }
+            }));
+        }
+
+        public Class<?> typeToJavaClass(Types.Type tpe) {
+            block7: {
+                Class<?> clazz;
+                block3: {
+                    Types.SingleType singleType;
+                    block6: {
+                        Types.TypeRef typeRef;
+                        boolean bl;
+                        block5: {
+                            block4: {
+                                block2: {
+                                    bl = false;
+                                    typeRef = null;
+                                    if (!(tpe instanceof Types.ExistentialType)) break block2;
+                                    Types.ExistentialType existentialType = (Types.ExistentialType)tpe;
+                                    clazz = this.typeToJavaClass(existentialType.underlying());
+                                    break block3;
+                                }
+                                if (!(tpe instanceof Types.TypeRef)) break block4;
+                                bl = true;
+                                typeRef = (Types.TypeRef)tpe;
+                                Symbols.ClassSymbol classSymbol = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ArrayClass();
+                                Symbols.Symbol symbol = typeRef.sym();
+                                if (classSymbol != null ? !classSymbol.equals(symbol) : symbol != null) break block4;
+                                Some<List<Types.Type>> some = List$.MODULE$.unapplySeq(typeRef.args());
+                                if (some.isEmpty() || some.get() == null || ((LinearSeqOptimized)some.get()).lengthCompare(1) != 0) break block4;
+                                Types.Type elemtpe = (Types.Type)((LinearSeqOptimized)some.get()).apply(0);
+                                clazz = ScalaRunTime$.MODULE$.arrayClass(this.typeToJavaClass(elemtpe));
+                                break block3;
+                            }
+                            if (!bl || !(typeRef.sym() instanceof Symbols.ClassSymbol)) break block5;
+                            Symbols.ClassSymbol classSymbol = (Symbols.ClassSymbol)typeRef.sym();
+                            clazz = this.classToJava((Symbols.ClassSymbol)classSymbol.asClass());
+                            break block3;
+                        }
+                        if (!bl || !(typeRef.sym() instanceof Symbols.AliasTypeSymbol)) break block6;
+                        clazz = this.typeToJavaClass(typeRef.dealias());
+                        break block3;
+                    }
+                    if (!(tpe instanceof Types.SingleType) || !((singleType = (Types.SingleType)tpe).sym() instanceof Symbols.ModuleSymbol)) break block7;
+                    Symbols.ModuleSymbol moduleSymbol = (Symbols.ModuleSymbol)singleType.sym();
+                    clazz = this.classToJava((Symbols.ClassSymbol)moduleSymbol.moduleClass().asClass());
+                }
+                return clazz;
+            }
+            throw new NoClassDefFoundError(new StringBuilder().append((Object)"no Java class corresponding to ").append(tpe).append((Object)" found").toString());
+        }
+
+        public /* synthetic */ SymbolTable scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer() {
+            return (SymbolTable)((Object)this.$outer);
+        }
+
+        @Override
+        public /* synthetic */ JavaUniverse scala$reflect$api$JavaUniverse$JavaMirror$$$outer() {
+            return this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer();
+        }
+
+        private final boolean existsParam$1(Function1 pred, Symbols.MethodSymbol symbol$1) {
+            return ((LinearSeqOptimized)((List)symbol$1.paramss().flatten((Function1)Predef$.MODULE$.$conforms())).map(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Types.Type apply(Symbols.Symbol x$8) {
+                    return x$8.info();
+                }
+            }, List$.MODULE$.canBuildFrom())).exists(pred);
+        }
+
+        private final void markAbsent$1(Types.Type tpe, Symbols.Symbol clazz$2, Symbols.Symbol module$1) {
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().setAllInfos(clazz$2, module$1, tpe);
+        }
+
+        private final Nothing$ handleError$1(Exception ex, Symbols.Symbol clazz$2, Symbols.Symbol module$1) {
+            this.markAbsent$1(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().ErrorType(), clazz$2, module$1);
+            MutableSettings.SettingValue settingValue = ((Required)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).settings().debug();
+            MutableSettings$ mutableSettings$ = MutableSettings$.MODULE$;
+            if (BoxesRunTime.unboxToBoolean(settingValue.value())) {
+                ex.printStackTrace();
+            }
+            String msg = ex.getMessage();
+            return MissingRequirementError$.MODULE$.signal(new StringBuilder().append((Object)(msg == null ? new StringBuilder().append((Object)"reflection error while loading ").append(clazz$2.name()).toString() : new StringBuilder().append((Object)"error while loading ").append(clazz$2.name()).toString())).append((Object)", ").append((Object)msg).toString());
+        }
+
+        private final Option loadAnnotation$1(String name, Class jclazz$1) {
+            Option option;
+            Serializable serializable = new Serializable(this, jclazz$1, name){
+                public static final long serialVersionUID = 0L;
+                public final /* synthetic */ JavaMirror $outer;
+                public final Class jclazz$1;
+                public final String name$1;
+
+                /*
+                 * WARNING - void declaration
+                 */
+                public final Option<Annotation> apply(Class<?> annotClass) {
+                    void var3_3;
+                    Annotation[] anns = this.jclazz$1.getAnnotations();
+                    Option<Annotation> result2 = Predef$.MODULE$.refArrayOps((Object[])anns).find(new Serializable(this, annotClass){
+                        public static final long serialVersionUID = 0L;
+                        private final Class annotClass$1;
+
+                        public final boolean apply(Annotation x$12) {
+                            Class<? extends Annotation> clazz = x$12.annotationType();
+                            Class clazz2 = this.annotClass$1;
+                            return !(clazz != null ? !clazz.equals(clazz2) : clazz2 != null);
+                        }
+                        {
+                            this.annotClass$1 = annotClass$1;
+                        }
+                    });
+                    if (result2.isEmpty() && Predef$.MODULE$.refArrayOps((Object[])anns).exists(new Serializable(this){
+                        public static final long serialVersionUID = 0L;
+                        private final /* synthetic */ JavaMirror$$anonfun$loadAnnotation$1$1 $outer;
+
+                        public final boolean apply(Annotation x$13) {
+                            String string2 = x$13.annotationType().getName();
+                            String string3 = this.$outer.name$1;
+                            return !(string2 != null ? !string2.equals(string3) : string3 != null);
+                        }
+                        {
+                            if ($outer == null) {
+                                throw null;
+                            }
+                            this.$outer = $outer;
+                        }
+                    })) {
+                        throw new ClassNotFoundException(((StripMarginInterpolator)((scala.reflect.internal.SymbolTable)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).StringContextStripMarginOps().apply(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"Mirror classloader mismatch: ", " (loaded by ", ")\n                  |is unrelated to the mirror's classloader: (", ")"})))).sm(Predef$.MODULE$.genericWrapArray(new Object[]{this.jclazz$1, ReflectionUtils$.MODULE$.show(this.jclazz$1.getClassLoader()), ReflectionUtils$.MODULE$.show(this.$outer.classLoader())})));
+                    }
+                    return var3_3;
+                }
+                {
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    this.jclazz$1 = jclazz$1;
+                    this.name$1 = name$1;
+                }
+            };
+            Option<Class<?>> option2 = this.tryJavaClass(name);
+            if (!option2.isEmpty()) {
+                Class<?> clazz = option2.get();
+                Annotation[] anns1 = jclazz$1.getAnnotations();
+                Object[] objectArray = anns1;
+                Predef$ predef$ = Predef$.MODULE$;
+                Option<Annotation> result1 = new ArrayOps.ofRef<Object>(objectArray).find(new /* invalid duplicate definition of identical inner class */);
+                if (result1.isEmpty()) {
+                    Object[] objectArray2 = anns1;
+                    Predef$ predef$2 = Predef$.MODULE$;
+                    if (new ArrayOps.ofRef<Object>(objectArray2).exists(new /* invalid duplicate definition of identical inner class */)) {
+                        throw new ClassNotFoundException(((StripMarginInterpolator)((scala.reflect.internal.SymbolTable)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).StringContextStripMarginOps().apply(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"Mirror classloader mismatch: ", " (loaded by ", ")\n                  |is unrelated to the mirror's classloader: (", ")"})))).sm(Predef$.MODULE$.genericWrapArray(new Object[]{jclazz$1, ReflectionUtils$.MODULE$.show(jclazz$1.getClassLoader()), ReflectionUtils$.MODULE$.show(this.classLoader())})));
+                    }
+                }
+                option = result1;
+            } else {
+                option = None$.MODULE$;
+            }
+            return option;
+        }
+
+        private final Option loadBytes$1(String name, ClassTag evidence$7, Class jclazz$1) {
+            Option option;
+            Option option2 = this.loadAnnotation$1(name, jclazz$1);
+            if (!option2.isEmpty()) {
+                Annotation annotation = (Annotation)option2.get();
+                Method bytesMethod1 = annotation.annotationType().getMethod("bytes", new Class[0]);
+                Some<Object> some = new Some<Object>(bytesMethod1.invoke((Object)annotation, new Object[0]));
+                option = some;
+            } else {
+                option = None$.MODULE$;
+            }
+            return option;
+        }
+
+        public final boolean scala$reflect$runtime$JavaMirrors$JavaMirror$$approximateMatch$1(Symbols.Symbol sym, String jstr) {
+            return sym.name().string_$eq$eq(jstr) || sym.isPrivate() && ((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().expandedName(sym.name().toTermName(), sym.owner()).string_$eq$eq(jstr);
+        }
+
+        public final Symbols.Symbol scala$reflect$runtime$JavaMirrors$JavaMirror$$coreLookup$1(Names.Name name, Symbols.Symbol owner$3) {
+            Symbols.Symbol symbol;
+            Symbols.Symbol symbol2 = owner$3.info().decl(name);
+            if (symbol2 != symbol2.scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol()) {
+                symbol = symbol2;
+            } else {
+                Symbols.Symbol symbol3;
+                if (name.startsWith(((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().NAME_JOIN_STRING(), 0)) {
+                    Names.NameOps<Names.Name> nameOps = ((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).AnyNameOps(name);
+                    symbol3 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$coreLookup$1(((Names.Name)nameOps.name).subName(1, ((Names.Name)nameOps.name).length()), owner$3);
+                } else {
+                    symbol3 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                }
+                symbol = symbol3;
+            }
+            return symbol;
+        }
+
+        public final Symbols.Symbol scala$reflect$runtime$JavaMirrors$JavaMirror$$lookupClass$1(Symbols.Symbol owner$3, Names.TypeName simpleName$1) {
+            Symbols.Symbol symbol;
+            StdNames$nme$ stdNames$nme$ = ((StdNames)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme();
+            return simpleName$1.endsWith(stdNames$nme$.MODULE_SUFFIX_NAME()) ? ((symbol = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$coreLookup$1(((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).TypeNameOps(simpleName$1).stripSuffix(NameTransformer$.MODULE$.MODULE_SUFFIX_STRING()).toTermName(), owner$3)) == symbol.scala$reflect$internal$Symbols$Symbol$$$outer().NoSymbol() ? symbol : symbol.moduleClass()) : this.scala$reflect$runtime$JavaMirrors$JavaMirror$$coreLookup$1(simpleName$1, owner$3);
+        }
+
+        public final Types.Type scala$reflect$runtime$JavaMirrors$JavaMirror$$targToScala$1(Type arg, Symbols.Symbol owner$4, ListBuffer tparams$1) {
+            Types.Type type;
+            if (arg instanceof WildcardType) {
+                WildcardType wildcardType = (WildcardType)arg;
+                Symbols.TypeSymbol tparam = (Symbols.TypeSymbol)owner$4.newExistential(((Names)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).newTypeName(new StringBuilder().append((Object)"T$").append(BoxesRunTime.boxToInteger(tparams$1.length())).toString()), owner$4.newExistential$default$2(), owner$4.newExistential$default$3()).setInfo(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().TypeBounds().apply(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().lub(Predef$.MODULE$.refArrayOps((Object[])wildcardType.getLowerBounds()).toList().map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ JavaMirror $outer;
+
+                    public final Types.Type apply(Type jtpe) {
+                        return this.$outer.typeToScala(jtpe);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, List$.MODULE$.canBuildFrom())), this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().glb(Predef$.MODULE$.refArrayOps((Object[])wildcardType.getUpperBounds()).toList().map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ JavaMirror $outer;
+
+                    public final Types.Type apply(Type jtpe) {
+                        return this.$outer.typeToScala(jtpe);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, List$.MODULE$.canBuildFrom()).map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ JavaMirror $outer;
+
+                    public final Types.Type apply(Types.Type tp) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().objToAny(tp);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, List$.MODULE$.canBuildFrom()))));
+                tparams$1.$plus$eq(tparam);
+                type = this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().typeRef(this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoPrefix(), tparam, Nil$.MODULE$);
+            } else {
+                type = this.typeToScala(arg);
+            }
+            return type;
+        }
+
+        public JavaMirror(SymbolTable $outer, Symbols.Symbol owner2, ClassLoader classLoader) {
+            this.classLoader = classLoader;
+            super((scala.reflect.internal.SymbolTable)((Object)$outer), owner2);
+            JavaUniverse$JavaMirror$class.$init$(this);
+            this.universe = $outer;
+            this.classCache = new TwoWayCaches.TwoWayCache($outer);
+            this.packageCache = new TwoWayCaches.TwoWayCache($outer);
+            this.methodCache = new TwoWayCaches.TwoWayCache($outer);
+            this.constructorCache = new TwoWayCaches.TwoWayCache($outer);
+            this.fieldCache = new TwoWayCaches.TwoWayCache($outer);
+            this.tparamCache = new TwoWayCaches.TwoWayCache($outer);
+            this.classHasJavaClass = new HasJavaClass(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Class<?> apply(Class<?> x) {
+                    return Predef$.MODULE$.identity(x);
+                }
+            });
+            this.methHasJavaClass = new HasJavaClass(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Class<?> apply(Method x$1) {
+                    return x$1.getDeclaringClass();
+                }
+            });
+            this.fieldHasJavaClass = new HasJavaClass(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Class<?> apply(Field x$2) {
+                    return x$2.getDeclaringClass();
+                }
+            });
+            this.constrHasJavaClass = new HasJavaClass(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Class<?> apply(Constructor<?> x$3) {
+                    return x$3.getDeclaringClass();
+                }
+            });
+            this.tparamHasJavaClass = new HasJavaClass(new Serializable(this){
+                public static final long serialVersionUID = 0L;
+
+                public final Class<?> apply(TypeVariable<? extends GenericDeclaration> tparam) {
+                    GenericDeclaration genericDeclaration;
+                    block5: {
+                        Class<Object> clazz;
+                        block3: {
+                            block4: {
+                                block2: {
+                                    Class<?> clazz2;
+                                    genericDeclaration = tparam.getGenericDeclaration();
+                                    if (!(genericDeclaration instanceof Class)) break block2;
+                                    clazz = clazz2 = (Class<?>)genericDeclaration;
+                                    break block3;
+                                }
+                                if (!(genericDeclaration instanceof Method)) break block4;
+                                Method method = (Method)genericDeclaration;
+                                clazz = method.getDeclaringClass();
+                                break block3;
+                            }
+                            if (!(genericDeclaration instanceof Constructor)) break block5;
+                            Constructor constructor = (Constructor)genericDeclaration;
+                            clazz = constructor.getDeclaringClass();
+                        }
+                        return clazz;
+                    }
+                    throw new MatchError(genericDeclaration);
+                }
+            });
+            Predef$ predef$ = Predef$.MODULE$;
+            this.scala$reflect$runtime$JavaMirrors$JavaMirror$$PackageAndClassPattern = new StringOps("(.*\\.)(.*)$").r();
+        }
+
+        public class jClassOps {
+            private final Class<?> clazz;
+            public final /* synthetic */ JavaMirror $outer;
+
+            public Class<?> clazz() {
+                return this.clazz;
+            }
+
+            public int javaFlags() {
+                return JavaAccFlags$.MODULE$.apply(this.clazz());
+            }
+
+            public long scalaFlags() {
+                return JavaAccFlags$.MODULE$.toScalaFlags$extension(this.javaFlags());
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$jClassOps$$$outer() {
+                return this.$outer;
+            }
+
+            public jClassOps(JavaMirror $outer, Class<?> clazz) {
+                this.clazz = clazz;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+        }
+
+        public class RichClass {
+            private final Class<?> jclazz;
+            public final /* synthetic */ JavaMirror $outer;
+
+            public boolean isLocalClass0() {
+                return this.jclazz.getEnclosingClass() != null && !this.jclazz.isMemberClass();
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$RichClass$$$outer() {
+                return this.$outer;
+            }
+
+            public RichClass(JavaMirror $outer, Class<?> jclazz) {
+                this.jclazz = jclazz;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+        }
+
+        public class jMemberOps {
+            private final Member member;
+            public final /* synthetic */ JavaMirror $outer;
+
+            public Member member() {
+                return this.member;
+            }
+
+            public int javaFlags() {
+                return JavaAccFlags$.MODULE$.apply(this.member());
+            }
+
+            public long scalaFlags() {
+                return JavaAccFlags$.MODULE$.toScalaFlags$extension(this.javaFlags());
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$jMemberOps$$$outer() {
+                return this.$outer;
+            }
+
+            public jMemberOps(JavaMirror $outer, Member member) {
+                this.member = member;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+        }
+
+        public class MethodMetadata {
+            private final Symbols.Symbol[] params;
+            private final DerivedValueClassMetadata[] vcMetadata;
+            private final boolean[] isByName;
+            private final int paramCount;
+            private final DerivedValueClassMetadata ret;
+
+            private Symbols.Symbol[] params() {
+                return this.params;
+            }
+
+            private DerivedValueClassMetadata[] vcMetadata() {
+                return this.vcMetadata;
+            }
+
+            public boolean[] isByName() {
+                return this.isByName;
+            }
+
+            public boolean isDerivedValueClass(int i) {
+                return this.vcMetadata()[i].isDerivedValueClass();
+            }
+
+            public Method paramUnboxers(int i) {
+                return this.vcMetadata()[i].unboxer();
+            }
+
+            public int paramCount() {
+                return this.paramCount;
+            }
+
+            public DerivedValueClassMetadata ret() {
+                return this.ret;
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$MethodMetadata$$$outer() {
+                return JavaMirror.this;
+            }
+
+            public MethodMetadata(Symbols.MethodSymbol symbol) {
+                if (JavaMirror.this == null) {
+                    throw null;
+                }
+                this.params = (Symbols.Symbol[])((TraversableOnce)((Object)symbol.paramss().flatten((Function1)Predef$.MODULE$.$conforms()))).toArray(JavaMirror.this.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().SymbolTag());
+                this.vcMetadata = (DerivedValueClassMetadata[])Predef$.MODULE$.refArrayOps((Object[])this.params()).map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ MethodMetadata $outer;
+
+                    public final DerivedValueClassMetadata apply(Symbols.Symbol p) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$MethodMetadata$$$outer().new DerivedValueClassMetadata(p.info());
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, Array$.MODULE$.canBuildFrom(ClassTag$.MODULE$.apply(DerivedValueClassMetadata.class)));
+                this.isByName = (boolean[])Predef$.MODULE$.refArrayOps((Object[])this.params()).map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ MethodMetadata $outer;
+
+                    public final boolean apply(Symbols.Symbol p) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$MethodMetadata$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$isByNameParam(p.info());
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, Array$.MODULE$.canBuildFrom(ClassTag$.MODULE$.Boolean()));
+                this.paramCount = this.params().length;
+                this.ret = new DerivedValueClassMetadata(symbol.returnType());
+            }
+        }
+
+        public class JavaClassMirror
+        extends JavaTemplateMirror
+        implements Mirrors.ClassMirror {
+            private final Object outer;
+            private final Symbols.ClassSymbol symbol;
+
+            @Override
+            public Object outer() {
+                return this.outer;
+            }
+
+            @Override
+            public Symbols.ClassSymbol symbol() {
+                return this.symbol;
+            }
+
+            @Override
+            public Symbols.ClassSymbol erasure() {
+                return this.symbol();
+            }
+
+            @Override
+            public boolean isStatic() {
+                return false;
+            }
+
+            public Mirrors.MethodMirror reflectConstructor(Symbols.MethodSymbol constructor) {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaClassMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$checkConstructorOf(constructor, this.symbol());
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaClassMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$mkMethodMirror(this.outer(), constructor, ClassTag$.MODULE$.AnyRef());
+            }
+
+            public String toString() {
+                return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"class mirror for ", " (bound to ", ")"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol().fullName(), this.outer()}));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaClassMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaClassMirror(JavaMirror $outer, Object outer, Symbols.ClassSymbol symbol) {
+                this.outer = outer;
+                this.symbol = symbol;
+            }
+        }
+
+        public class JavaFieldMirror
+        implements Mirrors.FieldMirror {
+            private final Object receiver;
+            private final Symbols.TermSymbol symbol;
+            private final DerivedValueClassMetadata metadata;
+            private Field jfield;
+            public final /* synthetic */ JavaMirror $outer;
+            private volatile boolean bitmap$0;
+
+            private Field jfield$lzycompute() {
+                JavaFieldMirror javaFieldMirror = this;
+                synchronized (javaFieldMirror) {
+                    if (!this.bitmap$0) {
+                        this.jfield = package$.MODULE$.ensureAccessible(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaFieldMirror$$$outer().fieldToJava(this.symbol()));
+                        this.bitmap$0 = true;
+                    }
+                    // ** MonitorExit[this] (shouldn't be in output)
+                    return this.jfield;
+                }
+            }
+
+            @Override
+            public Object receiver() {
+                return this.receiver;
+            }
+
+            @Override
+            public Symbols.TermSymbol symbol() {
+                return this.symbol;
+            }
+
+            @Override
+            public JavaFieldMirror bind(Object newReceiver) {
+                return new JavaFieldMirror(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaFieldMirror$$$outer(), newReceiver, this.symbol(), this.metadata);
+            }
+
+            public Field jfield() {
+                return this.bitmap$0 ? this.jfield : this.jfield$lzycompute();
+            }
+
+            @Override
+            public Object get() {
+                Object value = this.jfield().get(this.receiver());
+                return this.metadata.isDerivedValueClass() ? this.metadata.boxer().newInstance(value) : value;
+            }
+
+            @Override
+            public void set(Object value) {
+                this.jfield().set(this.receiver(), this.metadata.isDerivedValueClass() ? this.metadata.unboxer().invoke(value, new Object[0]) : value);
+            }
+
+            public String toString() {
+                return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"field mirror for ", " (bound to ", ")"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{((Printers)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaFieldMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).showDecl(this.symbol()), this.receiver()}));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaFieldMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaFieldMirror(JavaMirror $outer, Object receiver, Symbols.TermSymbol symbol, DerivedValueClassMetadata metadata) {
+                this.receiver = receiver;
+                this.symbol = symbol;
+                this.metadata = metadata;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+
+            public JavaFieldMirror(JavaMirror $outer, Object receiver, Symbols.TermSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.info()));
+            }
+        }
+
+        public class JavaModuleMirror
+        extends JavaTemplateMirror
+        implements Mirrors.ModuleMirror {
+            private final Object outer;
+            private final Symbols.ModuleSymbol symbol;
+
+            @Override
+            public Object outer() {
+                return this.outer;
+            }
+
+            @Override
+            public Symbols.ModuleSymbol symbol() {
+                return this.symbol;
+            }
+
+            @Override
+            public Symbols.ClassSymbol erasure() {
+                return (Symbols.ClassSymbol)this.symbol().moduleClass().asClass();
+            }
+
+            @Override
+            public boolean isStatic() {
+                return true;
+            }
+
+            @Override
+            public Object instance() {
+                return this.symbol().isTopLevel() ? ReflectionUtils$.MODULE$.staticSingletonInstance(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaModuleMirror$$$outer().classLoader(), this.symbol().fullName()) : (this.outer() == null ? ReflectionUtils$.MODULE$.staticSingletonInstance(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaModuleMirror$$$outer().classToJava((Symbols.ClassSymbol)this.symbol().moduleClass().asClass())) : ReflectionUtils$.MODULE$.innerSingletonInstance(this.outer(), this.symbol().name().toString()));
+            }
+
+            public String toString() {
+                return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"module mirror for ", " (bound to ", ")"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol().fullName(), this.outer()}));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaModuleMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaModuleMirror(JavaMirror $outer, Object outer, Symbols.ModuleSymbol symbol) {
+                this.outer = outer;
+                this.symbol = symbol;
+            }
+        }
+
+        public abstract class JavaMethodMirror
+        implements Mirrors.MethodMirror {
+            private final Symbols.MethodSymbol symbol;
+            private final DerivedValueClassMetadata ret;
+            private Method jmeth;
+            private Constructor<?> jconstr;
+            public final /* synthetic */ JavaMirror $outer;
+            private volatile byte bitmap$0;
+
+            private Method jmeth$lzycompute() {
+                JavaMethodMirror javaMethodMirror = this;
+                synchronized (javaMethodMirror) {
+                    if ((byte)(this.bitmap$0 & 1) == 0) {
+                        this.jmeth = package$.MODULE$.ensureAccessible(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaMethodMirror$$$outer().methodToJava(this.symbol()));
+                        this.bitmap$0 = (byte)(this.bitmap$0 | 1);
+                    }
+                    // ** MonitorExit[this] (shouldn't be in output)
+                    return this.jmeth;
+                }
+            }
+
+            private Constructor jconstr$lzycompute() {
+                JavaMethodMirror javaMethodMirror = this;
+                synchronized (javaMethodMirror) {
+                    if ((byte)(this.bitmap$0 & 2) == 0) {
+                        this.jconstr = package$.MODULE$.ensureAccessible(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaMethodMirror$$$outer().constructorToJava(this.symbol()));
+                        this.bitmap$0 = (byte)(this.bitmap$0 | 2);
+                    }
+                    // ** MonitorExit[this] (shouldn't be in output)
+                    return this.jconstr;
+                }
+            }
+
+            @Override
+            public Symbols.MethodSymbol symbol() {
+                return this.symbol;
+            }
+
+            public DerivedValueClassMetadata ret() {
+                return this.ret;
+            }
+
+            public Method jmeth() {
+                return (byte)(this.bitmap$0 & 1) == 0 ? this.jmeth$lzycompute() : this.jmeth;
+            }
+
+            public Constructor<?> jconstr() {
+                return (byte)(this.bitmap$0 & 2) == 0 ? this.jconstr$lzycompute() : this.jconstr;
+            }
+
+            public Object jinvokeraw(Seq<Object> args) {
+                Object object;
+                if (this.symbol().isConstructor()) {
+                    if (this.receiver() == null) {
+                        object = this.jconstr().newInstance((Object[])args.toArray(ClassTag$.MODULE$.AnyRef()));
+                    } else {
+                        Object object2 = this.receiver();
+                        object = this.jconstr().newInstance((Object[])args.$plus$colon(object2, Seq$.MODULE$.canBuildFrom()).toArray(ClassTag$.MODULE$.AnyRef()));
+                    }
+                } else {
+                    object = this.jmeth().invoke(this.receiver(), (Object[])args.toArray(ClassTag$.MODULE$.AnyRef()));
+                }
+                return object;
+            }
+
+            /*
+             * Enabled aggressive block sorting
+             */
+            public Object jinvoke(Seq<Object> args) {
+                Object object;
+                Object result2 = this.jinvokeraw(args);
+                if (!this.symbol().isConstructor()) {
+                    Class<?> clazz = this.jmeth().getReturnType();
+                    Class<Void> clazz2 = Void.TYPE;
+                    if (!(clazz != null ? !clazz.equals(clazz2) : clazz2 != null)) {
+                        object = BoxedUnit.UNIT;
+                        return object;
+                    }
+                }
+                if (!this.symbol().isConstructor() && this.ret().isDerivedValueClass()) {
+                    object = this.ret().boxer().newInstance(result2);
+                    return object;
+                }
+                object = result2;
+                return object;
+            }
+
+            public String toString() {
+                String what = this.symbol().isConstructor() ? "constructor mirror" : "method mirror";
+                return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " for ", " (bound to ", ")"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{what, ((Printers)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).showDecl(this.symbol()), this.receiver()}));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaMethodMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaMethodMirror(JavaMirror $outer, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                this.symbol = symbol;
+                this.ret = ret;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+        }
+
+        public class JavaInstanceMirror<T>
+        implements Mirrors.InstanceMirror {
+            private final T instance;
+            private final ClassTag<T> evidence$4;
+            public final /* synthetic */ JavaMirror $outer;
+
+            public T instance() {
+                return this.instance;
+            }
+
+            @Override
+            public Symbols.ClassSymbol symbol() {
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().classSymbol(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$preciseClass(this.instance(), this.evidence$4));
+            }
+
+            /*
+             * WARNING - void declaration
+             */
+            public Mirrors.FieldMirror reflectField(Symbols.TermSymbol field2) {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$checkMemberOf(field2, this.symbol());
+                if (field2.isMethod() && !field2.isAccessor() || field2.isModule()) {
+                    throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNotField(field2);
+                }
+                Names.TermName name = field2.isAccessor() ? field2.localName() : field2.name();
+                Symbols.TermSymbol field1 = (Symbols.TermSymbol)field2.owner().info().decl(name).asTerm();
+                try {
+                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().fieldToJava(field1);
+                }
+                catch (NoSuchFieldException noSuchFieldException) {
+                    void var3_3;
+                    throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorNonExistentField((Symbols.Symbol)var3_3);
+                }
+                return new JavaFieldMirror(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer(), this.instance(), field1);
+            }
+
+            public Mirrors.MethodMirror reflectMethod(Symbols.MethodSymbol method) {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$checkMemberOf(method, this.symbol());
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$mkMethodMirror(this.instance(), method, this.evidence$4);
+            }
+
+            public Mirrors.ClassMirror reflectClass(Symbols.ClassSymbol cls) {
+                if (cls.isStatic()) {
+                    throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorStaticClass(cls);
+                }
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$checkMemberOf(cls, this.symbol());
+                return new JavaClassMirror(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer(), this.instance(), cls);
+            }
+
+            public Mirrors.ModuleMirror reflectModule(Symbols.ModuleSymbol mod) {
+                if (mod.isStatic()) {
+                    throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$ErrorStaticModule(mod);
+                }
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$checkMemberOf(mod, this.symbol());
+                return new JavaModuleMirror(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer(), this.instance(), mod);
+            }
+
+            public String toString() {
+                return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"instance mirror for ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.instance()}));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaInstanceMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaInstanceMirror(JavaMirror $outer, T instance, ClassTag<T> evidence$4) {
+                this.instance = instance;
+                this.evidence$4 = evidence$4;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+        }
+
+        public class TypeParamCompleter
+        extends Types.LazyType
+        implements Types.FlagAgnosticCompleter {
+            private final TypeVariable<? extends GenericDeclaration> jtvar;
+            public final /* synthetic */ JavaMirror $outer;
+
+            @Override
+            public void load(Symbols.Symbol sym) {
+                this.complete(sym);
+            }
+
+            @Override
+            public void complete(Symbols.Symbol sym) {
+                sym.setInfo(this.scala$reflect$runtime$JavaMirrors$JavaMirror$TypeParamCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().TypeBounds().upper(this.scala$reflect$runtime$JavaMirrors$JavaMirror$TypeParamCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().glb(Predef$.MODULE$.refArrayOps((Object[])this.jtvar.getBounds()).toList().map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ TypeParamCompleter $outer;
+
+                    public final Types.Type apply(Type jtpe) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$TypeParamCompleter$$$outer().typeToScala(jtpe);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, List$.MODULE$.canBuildFrom()).map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ TypeParamCompleter $outer;
+
+                    public final Types.Type apply(Types.Type tp) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$TypeParamCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().objToAny(tp);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, List$.MODULE$.canBuildFrom()))));
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$TypeParamCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{sym}));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$TypeParamCompleter$$$outer() {
+                return this.$outer;
+            }
+
+            public TypeParamCompleter(JavaMirror $outer, TypeVariable<? extends GenericDeclaration> jtvar) {
+                this.jtvar = jtvar;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+                super((scala.reflect.internal.SymbolTable)((Object)$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+            }
+        }
+
+        public abstract class JavaTemplateMirror
+        implements Mirrors.TemplateMirror {
+            public abstract Object outer();
+
+            public abstract Symbols.ClassSymbol erasure();
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaTemplateMirror$$$outer() {
+                return JavaMirror.this;
+            }
+
+            public JavaTemplateMirror() {
+                if (JavaMirror.this == null) {
+                    throw null;
+                }
+            }
+        }
+
+        public class JavaAnnotationProxy
+        extends AnnotationInfos.AnnotationInfo
+        implements Product,
+        Serializable {
+            private final Annotation jann;
+            private final Types.Type atp;
+            private final List<Trees.Tree> args;
+            private List<Tuple2<Names.Name, AnnotationInfos.ClassfileAnnotArg>> assocs;
+            public final /* synthetic */ JavaMirror $outer;
+            private volatile boolean bitmap$0;
+
+            private List assocs$lzycompute() {
+                JavaAnnotationProxy javaAnnotationProxy = this;
+                synchronized (javaAnnotationProxy) {
+                    if (!this.bitmap$0) {
+                        this.assocs = Predef$.MODULE$.refArrayOps((Object[])Predef$.MODULE$.refArrayOps((Object[])this.jann().annotationType().getDeclaredMethods()).sortBy(new Serializable(this){
+                            public static final long serialVersionUID = 0L;
+
+                            public final String apply(Method x$4) {
+                                return x$4.getName();
+                            }
+                        }, Ordering$String$.MODULE$)).toList().map(new Serializable(this){
+                            public static final long serialVersionUID = 0L;
+                            private final /* synthetic */ JavaAnnotationProxy $outer;
+
+                            public final Tuple2<Names.TermName, AnnotationInfos.ClassfileAnnotArg> apply(Method m) {
+                                Object object = m.invoke((Object)this.$outer.jann(), new Object[0]);
+                                Class<?> clazz = Predef$.MODULE$.ArrowAssoc(m.getReturnType());
+                                Predef$ArrowAssoc$ predef$ArrowAssoc$ = Predef$ArrowAssoc$.MODULE$;
+                                AnnotationInfos.ClassfileAnnotArg classfileAnnotArg = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$toAnnotArg().apply(new Tuple2<Class<?>, Object>(clazz, object));
+                                Names.TermName termName = Predef$.MODULE$.ArrowAssoc(((Names)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).TermName().apply(m.getName()));
+                                Predef$ArrowAssoc$ predef$ArrowAssoc$2 = Predef$ArrowAssoc$.MODULE$;
+                                return new Tuple2<Names.TermName, AnnotationInfos.ClassfileAnnotArg>(termName, classfileAnnotArg);
+                            }
+                            {
+                                if ($outer == null) {
+                                    throw null;
+                                }
+                                this.$outer = $outer;
+                            }
+                        }, List$.MODULE$.canBuildFrom());
+                        this.bitmap$0 = true;
+                    }
+                    // ** MonitorExit[this] (shouldn't be in output)
+                    return this.assocs;
+                }
+            }
+
+            public Annotation jann() {
+                return this.jann;
+            }
+
+            @Override
+            public Types.Type atp() {
+                return this.atp;
+            }
+
+            @Override
+            public List<Trees.Tree> args() {
+                return this.args;
+            }
+
+            @Override
+            public Trees.Tree original() {
+                return ((Trees)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).EmptyTree();
+            }
+
+            @Override
+            public JavaAnnotationProxy setOriginal(Trees.Tree t) {
+                throw new Exception(new StringBuilder().append((Object)"setOriginal inapplicable for ").append(this).toString());
+            }
+
+            @Override
+            public Position pos() {
+                return ((Positions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).NoPosition();
+            }
+
+            @Override
+            public JavaAnnotationProxy setPos(Position pos) {
+                throw new Exception(new StringBuilder().append((Object)"setPos inapplicable for ").append(this).toString());
+            }
+
+            public String toString() {
+                return ((AnnotationInfos)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).completeAnnotationToString(this);
+            }
+
+            @Override
+            public List<Tuple2<Names.Name, AnnotationInfos.ClassfileAnnotArg>> assocs() {
+                return this.bitmap$0 ? this.assocs : this.assocs$lzycompute();
+            }
+
+            public JavaAnnotationProxy copy(Annotation jann) {
+                return new JavaAnnotationProxy(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer(), jann);
+            }
+
+            public Annotation copy$default$1() {
+                return this.jann();
+            }
+
+            @Override
+            public String productPrefix() {
+                return "JavaAnnotationProxy";
+            }
+
+            @Override
+            public int productArity() {
+                return 1;
+            }
+
+            @Override
+            public Object productElement(int x$1) {
+                switch (x$1) {
+                    default: {
+                        throw new IndexOutOfBoundsException(((Object)BoxesRunTime.boxToInteger(x$1)).toString());
+                    }
+                    case 0: 
+                }
+                return this.jann();
+            }
+
+            @Override
+            public Iterator<Object> productIterator() {
+                return ScalaRunTime$.MODULE$.typedProductIterator(this);
+            }
+
+            @Override
+            public boolean canEqual(Object x$1) {
+                return x$1 instanceof JavaAnnotationProxy;
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaAnnotationProxy$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaAnnotationProxy(JavaMirror $outer, Annotation jann) {
+                this.jann = jann;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+                super((scala.reflect.internal.SymbolTable)((Object)$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+                Product$class.$init$(this);
+                this.atp = $outer.classToScala(jann.annotationType()).toType();
+                this.args = Nil$.MODULE$;
+            }
+        }
+
+        public class FromJavaClassCompleter
+        extends Types.LazyType
+        implements JavaClassCompleter,
+        Types.FlagAgnosticCompleter {
+            public final Symbols.Symbol scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz;
+            public final Symbols.Symbol scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module;
+            public final Class<?> scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz;
+            private final long flags;
+            private int scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel;
+            private List<Function0<BoxedUnit>> scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions;
+            private final List<Symbols.Symbol> relatedSymbols;
+            public final /* synthetic */ JavaMirror $outer;
+
+            public long flags() {
+                return this.flags;
+            }
+
+            public int scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel() {
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel;
+            }
+
+            public void scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel_$eq(int x$1) {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel = x$1;
+            }
+
+            public List<Function0<BoxedUnit>> scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions() {
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions;
+            }
+
+            public void scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions_$eq(List<Function0<BoxedUnit>> x$1) {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions = x$1;
+            }
+
+            private List<Symbols.Symbol> relatedSymbols() {
+                return this.relatedSymbols;
+            }
+
+            /*
+             * Unable to fully structure code
+             */
+            @Override
+            public void load(Symbols.Symbol sym) {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().debugInfo((Function0<String>)new Serializable(this, sym){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ FromJavaClassCompleter $outer;
+                    private final Symbols.Symbol sym$4;
+
+                    public final String apply() {
+                        return new StringBuilder().append((Object)"completing from Java ").append(this.sym$4).append((Object)"/").append((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz.fullName()).toString();
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                        this.sym$4 = sym$4;
+                    }
+                });
+                v0 = sym;
+                var2_2 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz;
+                if (!(v0 == null ? var2_2 != null : v0.equals(var2_2) == false)) ** GOTO lbl-1000
+                v1 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module;
+                var3_3 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                if (!(v1 == null ? var3_3 != null : v1.equals(var3_3) == false)) ** GOTO lbl-1000
+                v2 = sym;
+                var4_4 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module;
+                if (!(v2 == null ? var4_4 != null : v2.equals(var4_4) == false)) ** GOTO lbl-1000
+                v3 = sym;
+                var5_5 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module.moduleClass();
+                if (!(v3 != null ? v3.equals(var5_5) == false : var5_5 != null)) lbl-1000:
+                // 3 sources
+
+                {
+                    v4 = true;
+                } else lbl-1000:
+                // 2 sources
+
+                {
+                    v4 = false;
+                }
+                var7_6 = v4;
+                var6_7 = Predef$.MODULE$;
+                if (!var7_6) {
+                    throw new AssertionError((Object)new StringBuilder().append((Object)"assertion failed: ").append(sym).toString());
+                }
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$assignAssociatedFile(this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz, this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module, this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz);
+                ((PrivateWithin)this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()).propagatePackageBoundary(this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz, this.relatedSymbols());
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$copyAnnotations(this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz, this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz);
+                var9_8 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getTypeParameters();
+                var8_9 = Predef$.MODULE$;
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz.setInfo(new LazyPolyType(this, new ArrayOps.ofRef<Object>(var9_8).toList().map(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ FromJavaClassCompleter $outer;
+
+                    public final Symbols.TypeSymbol apply(TypeVariable<? extends GenericDeclaration> jtvar) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$createTypeParameter(jtvar);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                }, List$.MODULE$.canBuildFrom())));
+                v5 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module;
+                var10_10 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                if (v5 == null ? var10_10 != null : v5.equals(var10_10) == false) {
+                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module.setInfo(this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module.moduleClass().tpe_$times());
+                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module.moduleClass().setInfo(new LazyPolyType(this, Nil$.MODULE$));
+                }
+            }
+
+            @Override
+            public void complete(Symbols.Symbol sym) {
+                this.load(sym);
+                this.completeRest();
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz, this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module}));
+            }
+
+            public void completeRest() {
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().gilSynchronized(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    public final /* synthetic */ FromJavaClassCompleter $outer;
+
+                    public final void apply() {
+                        this.apply$mcV$sp();
+                    }
+
+                    public void apply$mcV$sp() {
+                        List<Types.Type> list2;
+                        List<Symbols.Symbol> tparams2 = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz.rawInfo().typeParams();
+                        this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel_$eq(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel() + 1);
+                        Type jsuperclazz = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getGenericSuperclass();
+                        List<A> ifaces = Predef$.MODULE$.refArrayOps((Object[])this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getGenericInterfaces()).toList().map(new Serializable(this){
+                            public static final long serialVersionUID = 0L;
+                            private final /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1 $outer;
+
+                            public final Types.Type apply(Type jtpe) {
+                                return this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().typeToScala(jtpe);
+                            }
+                            {
+                                if ($outer == null) {
+                                    throw null;
+                                }
+                                this.$outer = $outer;
+                            }
+                        }, List$.MODULE$.canBuildFrom());
+                        boolean isAnnotation = JavaAccFlags$.MODULE$.isAnnotation$extension(JavaAccFlags$.MODULE$.apply(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz));
+                        if (isAnnotation) {
+                            Types.Type type = ((Definitions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnnotationClass().tpe();
+                            Types.Type type2 = ((Definitions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ClassfileAnnotationClass().tpe();
+                            list2 = ifaces.$colon$colon(type2).$colon$colon(type);
+                        } else if (this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.isInterface()) {
+                            Types.Type type = ((Definitions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().ObjectTpe();
+                            list2 = ifaces.$colon$colon(type);
+                        } else {
+                            Types.Type type = jsuperclazz == null ? ((Definitions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().AnyTpe() : this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().typeToScala(jsuperclazz);
+                            list2 = ifaces.$colon$colon(type);
+                        }
+                        List<Types.Type> parents2 = list2;
+                        this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz.setInfo(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().GenPolyType().apply(tparams2, new Types.ClassInfoType((scala.reflect.internal.SymbolTable)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()), parents2, (Scopes.Scope)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().newScope()), this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz)));
+                        Symbols.Symbol symbol = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module;
+                        Symbols.NoSymbol noSymbol = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                        Object object = !(symbol != null ? !symbol.equals(noSymbol) : noSymbol != null) ? BoxedUnit.UNIT : this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module.moduleClass().setInfo(new Types.ClassInfoType((scala.reflect.internal.SymbolTable)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()), Nil$.MODULE$, (Scopes.Scope)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().newScope()), this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module.moduleClass()));
+                        Predef$.MODULE$.refArrayOps((Object[])this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getDeclaredClasses()).foreach(new Serializable(this){
+                            public static final long serialVersionUID = 0L;
+                            private final /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1 $outer;
+
+                            public final Symbols.ClassSymbol apply(Class<?> jinner) {
+                                return this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jclassAsScala(jinner);
+                            }
+                            {
+                                if ($outer == null) {
+                                    throw null;
+                                }
+                                this.$outer = $outer;
+                            }
+                        });
+                        this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions_$eq(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions().$colon$colon(new Serializable(this){
+                            public static final long serialVersionUID = 0L;
+                            public final /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1 $outer;
+
+                            public final void apply() {
+                                this.apply$mcV$sp();
+                            }
+
+                            public void apply$mcV$sp() {
+                                Predef$.MODULE$.refArrayOps((Object[])this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getDeclaredFields()).foreach(new Serializable(this){
+                                    public static final long serialVersionUID = 0L;
+                                    private final /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1$$anonfun$apply$mcV$sp$1 $outer;
+
+                                    public final Symbols.Symbol apply(Field f) {
+                                        return this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$enter$1(this.$outer.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jfieldAsScala(f), this.$outer.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(f).javaFlags());
+                                    }
+                                    {
+                                        if ($outer == null) {
+                                            throw null;
+                                        }
+                                        this.$outer = $outer;
+                                    }
+                                });
+                                Predef$.MODULE$.refArrayOps((Object[])this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getDeclaredMethods()).foreach(new Serializable(this){
+                                    public static final long serialVersionUID = 0L;
+                                    private final /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1$$anonfun$apply$mcV$sp$1 $outer;
+
+                                    public final Symbols.Symbol apply(Method m) {
+                                        return this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$enter$1(this.$outer.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jmethodAsScala(m), this.$outer.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(m).javaFlags());
+                                    }
+                                    {
+                                        if ($outer == null) {
+                                            throw null;
+                                        }
+                                        this.$outer = $outer;
+                                    }
+                                });
+                                Predef$.MODULE$.refArrayOps((Object[])this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getConstructors()).foreach(new Serializable(this){
+                                    public static final long serialVersionUID = 0L;
+                                    private final /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1$$anonfun$apply$mcV$sp$1 $outer;
+
+                                    public final Symbols.Symbol apply(Constructor<?> c) {
+                                        return this.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$enter$1(this.$outer.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jconstrAsScala(c), this.$outer.$outer.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$jMemberOps(c).javaFlags());
+                                    }
+                                    {
+                                        if ($outer == null) {
+                                            throw null;
+                                        }
+                                        this.$outer = $outer;
+                                    }
+                                });
+                                this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$enterEmptyCtorIfNecessary$1();
+                            }
+
+                            public /* synthetic */ JavaMirror$FromJavaClassCompleter$$anonfun$completeRest$1 scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$anonfun$$$outer() {
+                                return this.$outer;
+                            }
+                            {
+                                if ($outer == null) {
+                                    throw null;
+                                }
+                                this.$outer = $outer;
+                            }
+                        }));
+                        if (this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel() == 0) {
+                            while (this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions().nonEmpty()) {
+                                Function0<BoxedUnit> item = this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions().head();
+                                this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions_$eq((List)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions().tail());
+                                item.apply$mcV$sp();
+                            }
+                        }
+                        return;
+                        finally {
+                            this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel_$eq(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel() - 1);
+                        }
+                    }
+
+                    public /* synthetic */ FromJavaClassCompleter scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$$outer() {
+                        return this.$outer;
+                    }
+
+                    public final Symbols.Symbol scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$enter$1(Symbols.Symbol sym, int mods) {
+                        return this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$followStatic(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz, this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module, mods).info().decls().enter(sym);
+                    }
+
+                    public final void scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$anonfun$$enterEmptyCtorIfNecessary$1() {
+                        if (Predef$.MODULE$.refArrayOps((Object[])this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz.getConstructors()).isEmpty()) {
+                            this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz.info().decls().enter(this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz.newClassConstructor(((Positions)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).NoPosition()));
+                        }
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                });
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer() {
+                return this.$outer;
+            }
+
+            public FromJavaClassCompleter(JavaMirror $outer, Symbols.Symbol clazz, Symbols.Symbol module, Class<?> jclazz) {
+                Object object;
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz = clazz;
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module = module;
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$jclazz = jclazz;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+                super((scala.reflect.internal.SymbolTable)((Object)$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+                this.flags = $outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$jClassOps(jclazz).scalaFlags();
+                clazz.setFlag(this.flags() | 0x100000L);
+                Symbols.Symbol symbol = module;
+                Symbols.NoSymbol noSymbol = $outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                if (!(symbol != null ? !symbol.equals(noSymbol) : noSymbol != null)) {
+                    object = BoxedUnit.UNIT;
+                } else {
+                    module.setFlag(this.flags() & 4L | 0x100000L);
+                    object = module.moduleClass().setFlag(this.flags() & 4L | 0x100000L);
+                }
+                $outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markFlagsCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{clazz, module}), -1L);
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$parentsLevel = 0;
+                this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$pendingLoadActions = Nil$.MODULE$;
+                Symbols.Symbol symbol2 = module;
+                Symbols.NoSymbol noSymbol2 = $outer.scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().NoSymbol();
+                this.relatedSymbols = ((List)(!(symbol2 != null ? !symbol2.equals(noSymbol2) : noSymbol2 != null) ? Nil$.MODULE$ : List$.MODULE$.apply(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{module, module.moduleClass()})))).$plus$colon(clazz, List$.MODULE$.canBuildFrom());
+            }
+
+            public class LazyPolyType
+            extends Types.LazyType
+            implements Types.FlagAgnosticCompleter {
+                private final List<Symbols.Symbol> typeParams;
+                public final /* synthetic */ FromJavaClassCompleter $outer;
+
+                @Override
+                public List<Symbols.Symbol> typeParams() {
+                    return this.typeParams;
+                }
+
+                @Override
+                public void complete(Symbols.Symbol sym) {
+                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$LazyPolyType$$$outer().completeRest();
+                    this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$LazyPolyType$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer().markAllCompleted(Predef$.MODULE$.wrapRefArray((Object[])new Symbols.Symbol[]{this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$LazyPolyType$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$clazz, this.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$LazyPolyType$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$module}));
+                }
+
+                public /* synthetic */ FromJavaClassCompleter scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$LazyPolyType$$$outer() {
+                    return this.$outer;
+                }
+
+                public LazyPolyType(FromJavaClassCompleter $outer, List<Symbols.Symbol> typeParams2) {
+                    this.typeParams = typeParams2;
+                    if ($outer == null) {
+                        throw null;
+                    }
+                    this.$outer = $outer;
+                    super((scala.reflect.internal.SymbolTable)((Object)$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$FromJavaClassCompleter$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer()));
+                }
+            }
+        }
+
+        public class JavaVanillaMethodMirror
+        extends JavaMethodMirror {
+            private final Object receiver;
+
+            @Override
+            public Object receiver() {
+                return this.receiver;
+            }
+
+            @Override
+            public JavaVanillaMethodMirror bind(Object newReceiver) {
+                return new JavaVanillaMethodMirror(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror$$$outer(), newReceiver, super.symbol(), super.ret());
+            }
+
+            @Override
+            public Object apply(Seq<Object> args) {
+                return this.jinvoke(args);
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaVanillaMethodMirror(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                this.receiver = receiver;
+                super($outer, symbol, ret);
+            }
+
+            public JavaVanillaMethodMirror(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.returnType()));
+            }
+        }
+
+        public class BytecodelessMethodMirror<T>
+        implements Mirrors.MethodMirror {
+            private final T receiver;
+            private final Symbols.MethodSymbol symbol;
+            private final ClassTag<T> evidence$6;
+            public final /* synthetic */ JavaMirror $outer;
+
+            public T receiver() {
+                return this.receiver;
+            }
+
+            @Override
+            public Symbols.MethodSymbol symbol() {
+                return this.symbol;
+            }
+
+            @Override
+            public BytecodelessMethodMirror<T> bind(Object newReceiver) {
+                return new BytecodelessMethodMirror<Object>(this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer(), newReceiver, this.symbol(), this.evidence$6);
+            }
+
+            public String toString() {
+                return new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"bytecodeless method mirror for ", " (bound to ", ")"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{((Printers)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).showDecl(this.symbol()), this.receiver()}));
+            }
+
+            /*
+             * WARNING - void declaration
+             * Enabled aggressive block sorting
+             * Enabled unnecessary exception pruning
+             * Enabled aggressive exception aggregation
+             */
+            @Override
+            public Object apply(Seq<Object> args) {
+                void var17_2;
+                boolean varargMatch;
+                List params2 = (List)this.symbol().paramss().flatten((Function1)Predef$.MODULE$.$conforms());
+                boolean perfectMatch = args.length() == params2.length();
+                boolean bl = varargMatch = args.length() >= params2.length() - 1 && ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().isVarArgsList(params2);
+                if (perfectMatch || varargMatch) {
+                    boolean bl2;
+                    boolean bl22;
+                    boolean bl3;
+                    Symbols.MethodSymbol methodSymbol = this.symbol();
+                    Symbols.MethodSymbol methodSymbol2 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_$eq$eq();
+                    if (!(methodSymbol2 != null ? !methodSymbol2.equals(methodSymbol) : methodSymbol != null)) {
+                        bl3 = true;
+                    } else {
+                        Symbols.MethodSymbol methodSymbol3 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_$eq$eq();
+                        bl3 = !(methodSymbol3 != null ? !methodSymbol3.equals(methodSymbol) : methodSymbol != null);
+                    }
+                    if (bl3) {
+                        Object object2 = this.objArg0$1(args);
+                        Object object3 = this.objReceiver$1();
+                        return BoxesRunTime.boxToBoolean(object3 != object2 ? (object3 != null ? (!(object3 instanceof Number) ? (!(object3 instanceof Character) ? object3.equals(object2) : BoxesRunTime.equalsCharObject((Character)object3, object2)) : BoxesRunTime.equalsNumObject((Number)object3, object2)) : false) : true);
+                    }
+                    Symbols.MethodSymbol methodSymbol4 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_$bang$eq();
+                    if (!(methodSymbol4 != null ? !methodSymbol4.equals(methodSymbol) : methodSymbol != null)) {
+                        bl22 = true;
+                    } else {
+                        Symbols.MethodSymbol methodSymbol5 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_$bang$eq();
+                        bl22 = !(methodSymbol5 != null ? !methodSymbol5.equals(methodSymbol) : methodSymbol != null);
+                    }
+                    if (bl22) {
+                        Object object4 = this.objArg0$1(args);
+                        Object object5 = this.objReceiver$1();
+                        return BoxesRunTime.boxToBoolean(!(object5 != object4 ? (object5 != null ? (!(object5 instanceof Number) ? (!(object5 instanceof Character) ? object5.equals(object4) : BoxesRunTime.equalsCharObject((Character)object5, object4)) : BoxesRunTime.equalsNumObject((Number)object5, object4)) : false) : true));
+                    }
+                    Symbols.MethodSymbol methodSymbol6 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_$hash$hash();
+                    if (!(methodSymbol6 != null ? !methodSymbol6.equals(methodSymbol) : methodSymbol != null)) {
+                        bl2 = true;
+                    } else {
+                        Symbols.MethodSymbol methodSymbol7 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_$hash$hash();
+                        bl2 = !(methodSymbol7 != null ? !methodSymbol7.equals(methodSymbol) : methodSymbol != null);
+                    }
+                    if (bl2) {
+                        return BoxesRunTime.boxToInteger(ScalaRunTime$.MODULE$.hash(this.objReceiver$1()));
+                    }
+                    Symbols.MethodSymbol methodSymbol8 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_equals();
+                    if (methodSymbol8 == null) {
+                        if (methodSymbol == null) return BoxesRunTime.boxToBoolean(this.receiver().equals(this.objArg0$1(args)));
+                    } else if (methodSymbol8.equals(methodSymbol)) {
+                        return BoxesRunTime.boxToBoolean(this.receiver().equals(this.objArg0$1(args)));
+                    }
+                    Symbols.MethodSymbol methodSymbol9 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_hashCode();
+                    if (methodSymbol9 == null) {
+                        if (methodSymbol == null) return BoxesRunTime.boxToInteger(this.receiver().hashCode());
+                    } else if (methodSymbol9.equals(methodSymbol)) {
+                        return BoxesRunTime.boxToInteger(this.receiver().hashCode());
+                    }
+                    Symbols.MethodSymbol methodSymbol10 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_toString();
+                    if (methodSymbol10 == null) {
+                        if (methodSymbol == null) return this.receiver().toString();
+                    } else if (methodSymbol10.equals(methodSymbol)) {
+                        return this.receiver().toString();
+                    }
+                    Symbols.MethodSymbol methodSymbol11 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_eq();
+                    if (!(methodSymbol11 != null ? !methodSymbol11.equals(methodSymbol) : methodSymbol != null)) {
+                        return BoxesRunTime.boxToBoolean(this.objReceiver$1() == this.objArg0$1(args));
+                    }
+                    Symbols.MethodSymbol methodSymbol12 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_ne();
+                    if (!(methodSymbol12 != null ? !methodSymbol12.equals(methodSymbol) : methodSymbol != null)) {
+                        return BoxesRunTime.boxToBoolean(this.objReceiver$1() != this.objArg0$1(args));
+                    }
+                    Symbols.MethodSymbol methodSymbol13 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_synchronized();
+                    if (!(methodSymbol13 != null ? !methodSymbol13.equals(methodSymbol) : methodSymbol != null)) {
+                        Object object6 = this.objReceiver$1();
+                        synchronized (object6) {
+                            Object object7 = this.objArg0$1(args);
+                            return object7;
+                        }
+                    }
+                    if (this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$isGetClass(methodSymbol)) {
+                        return this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$preciseClass(this.receiver(), this.evidence$6);
+                    }
+                    Symbols.MethodSymbol methodSymbol14 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_asInstanceOf();
+                    if (methodSymbol14 == null) {
+                        if (methodSymbol == null) throw this.fail$1("Any.asInstanceOf requires a type argument");
+                    } else if (methodSymbol14.equals(methodSymbol)) {
+                        throw this.fail$1("Any.asInstanceOf requires a type argument");
+                    }
+                    Symbols.MethodSymbol methodSymbol15 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Any_isInstanceOf();
+                    if (methodSymbol15 == null) {
+                        if (methodSymbol == null) throw this.fail$1("Any.isInstanceOf requires a type argument");
+                    } else if (methodSymbol15.equals(methodSymbol)) {
+                        throw this.fail$1("Any.isInstanceOf requires a type argument");
+                    }
+                    Symbols.MethodSymbol methodSymbol16 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_asInstanceOf();
+                    if (!(methodSymbol16 != null ? !methodSymbol16.equals(methodSymbol) : methodSymbol != null)) {
+                        Predef$ predef$ = Predef$.MODULE$;
+                        throw this.fail$1(new StringOps("AnyRef.%s is an internal method").format(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol().name()})));
+                    }
+                    Symbols.MethodSymbol methodSymbol17 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Object_isInstanceOf();
+                    if (!(methodSymbol17 != null ? !methodSymbol17.equals(methodSymbol) : methodSymbol != null)) {
+                        Predef$ predef$ = Predef$.MODULE$;
+                        throw this.fail$1(new StringOps("AnyRef.%s is an internal method").format(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol().name()})));
+                    }
+                    Symbols.TermSymbol termSymbol = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Array_length();
+                    if (termSymbol == null) {
+                        if (methodSymbol == null) return BoxesRunTime.boxToInteger(ScalaRunTime$.MODULE$.array_length(this.objReceiver$1()));
+                    } else if (termSymbol.equals(methodSymbol)) {
+                        return BoxesRunTime.boxToInteger(ScalaRunTime$.MODULE$.array_length(this.objReceiver$1()));
+                    }
+                    Symbols.TermSymbol termSymbol2 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Array_apply();
+                    if (termSymbol2 == null) {
+                        if (methodSymbol == null) return ScalaRunTime$.MODULE$.array_apply(this.objReceiver$1(), BoxesRunTime.unboxToInt(args.apply(false)));
+                    } else if (termSymbol2.equals(methodSymbol)) {
+                        return ScalaRunTime$.MODULE$.array_apply(this.objReceiver$1(), BoxesRunTime.unboxToInt(args.apply(false)));
+                    }
+                    Symbols.TermSymbol termSymbol3 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Array_update();
+                    if (!(termSymbol3 != null ? !termSymbol3.equals(methodSymbol) : methodSymbol != null)) {
+                        ScalaRunTime$.MODULE$.array_update(this.objReceiver$1(), BoxesRunTime.unboxToInt(args.apply(false)), args.apply(true));
+                        return BoxedUnit.UNIT;
+                    }
+                    Symbols.TermSymbol termSymbol4 = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().Array_clone();
+                    if (termSymbol4 == null) {
+                        if (methodSymbol == null) return ScalaRunTime$.MODULE$.array_clone(this.objReceiver$1());
+                    } else if (termSymbol4.equals(methodSymbol)) {
+                        return ScalaRunTime$.MODULE$.array_clone(this.objReceiver$1());
+                    }
+                    if (this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$isStringConcat(methodSymbol)) {
+                        return new StringBuilder().append((Object)this.receiver().toString()).append(this.objArg0$1(args)).toString();
+                    }
+                    if (methodSymbol.owner().isPrimitiveValueClass()) {
+                        return this.invokePrimitiveMethod$1(args);
+                    }
+                    Symbols.MethodSymbol methodSymbol18 = methodSymbol;
+                    Symbols.TermSymbol termSymbol5 = this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().runDefinitions().Predef_classOf();
+                    if (methodSymbol18 == null) {
+                        if (termSymbol5 == null) throw this.fail$1("Predef.classOf is a compile-time function");
+                    } else if (methodSymbol18.equals(termSymbol5)) {
+                        throw this.fail$1("Predef.classOf is a compile-time function");
+                    }
+                    if (methodSymbol.isMacro()) {
+                        throw this.fail$1(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " is a macro, i.e. a compile-time function"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol().fullName()})));
+                    }
+                    throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"unsupported symbol ", " when invoking ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol(), this})));
+                }
+                String n_arguments = ((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().isVarArgsList((Seq<Symbols.Symbol>)var17_2) ? new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " or more"})).s(Predef$.MODULE$.genericWrapArray(new Object[]{BoxesRunTime.boxToInteger(var17_2.length() - 1)})) : new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{BoxesRunTime.boxToInteger(var17_2.length())}));
+                String s_arguments = var17_2.length() == 1 && !((Definitions)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).definitions().isVarArgsList((Seq<Symbols.Symbol>)var17_2) ? "argument" : "arguments";
+                throw this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", " takes ", " ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{((Printers)((Object)this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).showDecl(this.symbol()), n_arguments, s_arguments})));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer() {
+                return this.$outer;
+            }
+
+            private final Object objReceiver$1() {
+                return this.receiver();
+            }
+
+            private final Object objArg0$1(Seq args$1) {
+                return args$1.apply(false);
+            }
+
+            private final Seq objArgs$1(Seq args$1) {
+                return args$1;
+            }
+
+            private final Nothing$ fail$1(String msg) {
+                return this.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$abort(new StringBuilder().append((Object)msg).append((Object)", it cannot be invoked with mirrors").toString());
+            }
+
+            private final Object invokePrimitiveMethod$1(Seq args$1) {
+                Object[] objectArray = BoxesRunTime.class.getDeclaredMethods();
+                Predef$ predef$ = Predef$.MODULE$;
+                Method[] jmeths = (Method[])new ArrayOps.ofRef<Object>(objectArray).filter(new Serializable(this){
+                    public static final long serialVersionUID = 0L;
+                    private final /* synthetic */ BytecodelessMethodMirror $outer;
+
+                    public final boolean apply(Method x$10) {
+                        String string2 = x$10.getName();
+                        String string3 = ((StdNames)((Object)this.$outer.scala$reflect$runtime$JavaMirrors$JavaMirror$BytecodelessMethodMirror$$$outer().scala$reflect$runtime$JavaMirrors$JavaMirror$$$outer())).nme().primitiveMethodName(this.$outer.symbol().name()).toString();
+                        return !(string2 != null ? !string2.equals(string3) : string3 != null);
+                    }
+                    {
+                        if ($outer == null) {
+                            throw null;
+                        }
+                        this.$outer = $outer;
+                    }
+                });
+                boolean bl = jmeths.length == 1;
+                Predef$ predef$2 = Predef$.MODULE$;
+                if (!bl) {
+                    Object[] objectArray2 = jmeths;
+                    Predef$ predef$3 = Predef$.MODULE$;
+                    throw new AssertionError((Object)new StringBuilder().append((Object)"assertion failed: ").append(new ArrayOps.ofRef<Object>(objectArray2).toList()).toString());
+                }
+                Object[] objectArray3 = jmeths;
+                Predef$ predef$4 = Predef$.MODULE$;
+                Method jmeth = (Method)new ArrayOps.ofRef<Object>(objectArray3).head();
+                T t = this.receiver();
+                Object result2 = jmeth.invoke(null, (Object[])args$1.$plus$colon(t, Seq$.MODULE$.canBuildFrom()).toArray(ClassTag$.MODULE$.AnyRef()));
+                Class<?> clazz = jmeth.getReturnType();
+                Class<Void> clazz2 = Void.TYPE;
+                return !(clazz != null ? !clazz.equals(clazz2) : clazz2 != null) ? BoxedUnit.UNIT : result2;
+            }
+
+            public BytecodelessMethodMirror(JavaMirror $outer, T receiver, Symbols.MethodSymbol symbol, ClassTag<T> evidence$6) {
+                this.receiver = receiver;
+                this.symbol = symbol;
+                this.evidence$6 = evidence$6;
+                if ($outer == null) {
+                    throw null;
+                }
+                this.$outer = $outer;
+            }
+        }
+
+        public class JavaVanillaMethodMirror4
+        extends JavaVanillaMethodMirror {
+            @Override
+            public JavaVanillaMethodMirror4 bind(Object newReceiver) {
+                return new JavaVanillaMethodMirror4(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror4$$$outer(), newReceiver, super.symbol(), super.ret());
+            }
+
+            @Override
+            public Object jinvokeraw(Seq<Object> args) {
+                return super.symbol().isConstructor() ? (super.receiver() == null ? this.jconstr().newInstance(args.apply(false), args.apply(true), args.apply(2), args.apply(3)) : this.jconstr().newInstance(super.receiver(), args.apply(false), args.apply(true), args.apply(2), args.apply(3))) : this.jmeth().invoke(super.receiver(), args.apply(false), args.apply(true), args.apply(2), args.apply(3));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror4$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaVanillaMethodMirror4(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                super($outer, receiver, symbol, ret);
+            }
+
+            public JavaVanillaMethodMirror4(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.returnType()));
+            }
+        }
+
+        public class JavaVanillaMethodMirror3
+        extends JavaVanillaMethodMirror {
+            @Override
+            public JavaVanillaMethodMirror3 bind(Object newReceiver) {
+                return new JavaVanillaMethodMirror3(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror3$$$outer(), newReceiver, super.symbol(), super.ret());
+            }
+
+            @Override
+            public Object jinvokeraw(Seq<Object> args) {
+                return super.symbol().isConstructor() ? (super.receiver() == null ? this.jconstr().newInstance(args.apply(false), args.apply(true), args.apply(2)) : this.jconstr().newInstance(super.receiver(), args.apply(false), args.apply(true), args.apply(2))) : this.jmeth().invoke(super.receiver(), args.apply(false), args.apply(true), args.apply(2));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror3$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaVanillaMethodMirror3(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                super($outer, receiver, symbol, ret);
+            }
+
+            public JavaVanillaMethodMirror3(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.returnType()));
+            }
+        }
+
+        public class JavaVanillaMethodMirror2
+        extends JavaVanillaMethodMirror {
+            @Override
+            public JavaVanillaMethodMirror2 bind(Object newReceiver) {
+                return new JavaVanillaMethodMirror2(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror2$$$outer(), newReceiver, super.symbol(), super.ret());
+            }
+
+            @Override
+            public Object jinvokeraw(Seq<Object> args) {
+                return super.symbol().isConstructor() ? (super.receiver() == null ? this.jconstr().newInstance(args.apply(false), args.apply(true)) : this.jconstr().newInstance(super.receiver(), args.apply(false), args.apply(true))) : this.jmeth().invoke(super.receiver(), args.apply(false), args.apply(true));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror2$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaVanillaMethodMirror2(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                super($outer, receiver, symbol, ret);
+            }
+
+            public JavaVanillaMethodMirror2(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.returnType()));
+            }
+        }
+
+        public class JavaVanillaMethodMirror1
+        extends JavaVanillaMethodMirror {
+            @Override
+            public JavaVanillaMethodMirror1 bind(Object newReceiver) {
+                return new JavaVanillaMethodMirror1(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror1$$$outer(), newReceiver, super.symbol(), super.ret());
+            }
+
+            @Override
+            public Object jinvokeraw(Seq<Object> args) {
+                return super.symbol().isConstructor() ? (super.receiver() == null ? this.jconstr().newInstance(args.apply(false)) : this.jconstr().newInstance(super.receiver(), args.apply(false))) : this.jmeth().invoke(super.receiver(), args.apply(false));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror1$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaVanillaMethodMirror1(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                super($outer, receiver, symbol, ret);
+            }
+
+            public JavaVanillaMethodMirror1(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.returnType()));
+            }
+        }
+
+        public class JavaVanillaMethodMirror0
+        extends JavaVanillaMethodMirror {
+            @Override
+            public JavaVanillaMethodMirror0 bind(Object newReceiver) {
+                return new JavaVanillaMethodMirror0(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror0$$$outer(), newReceiver, super.symbol(), super.ret());
+            }
+
+            @Override
+            public Object jinvokeraw(Seq<Object> args) {
+                return super.symbol().isConstructor() ? (super.receiver() == null ? this.jconstr().newInstance(new Object[0]) : this.jconstr().newInstance(super.receiver())) : this.jmeth().invoke(super.receiver(), new Object[0]);
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaVanillaMethodMirror0$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaVanillaMethodMirror0(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, DerivedValueClassMetadata ret) {
+                super($outer, receiver, symbol, ret);
+            }
+
+            public JavaVanillaMethodMirror0(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new DerivedValueClassMetadata(symbol.returnType()));
+            }
+        }
+
+        public class DerivedValueClassMetadata {
+            private final Symbols.Symbol symbol;
+            private final boolean isDerivedValueClass;
+            private Constructor<?> boxer;
+            private Method unboxer;
+            private volatile byte bitmap$0;
+
+            private Constructor boxer$lzycompute() {
+                DerivedValueClassMetadata derivedValueClassMetadata = this;
+                synchronized (derivedValueClassMetadata) {
+                    if ((byte)(this.bitmap$0 & 1) == 0) {
+                        this.boxer = (Constructor)Predef$.MODULE$.refArrayOps((Object[])this.scala$reflect$runtime$JavaMirrors$JavaMirror$DerivedValueClassMetadata$$$outer().runtimeClass(this.symbol().toType()).getDeclaredConstructors()).head();
+                        this.bitmap$0 = (byte)(this.bitmap$0 | 1);
+                    }
+                    // ** MonitorExit[this] (shouldn't be in output)
+                    return this.boxer;
+                }
+            }
+
+            /*
+             * Enabled aggressive block sorting
+             * Enabled unnecessary exception pruning
+             * Enabled aggressive exception aggregation
+             */
+            private Method unboxer$lzycompute() {
+                DerivedValueClassMetadata derivedValueClassMetadata = this;
+                synchronized (derivedValueClassMetadata) {
+                    block6: {
+                        Object object;
+                        block8: {
+                            List list2;
+                            block7: {
+                                if ((byte)(this.bitmap$0 & 2) != 0) break block6;
+                                DerivedValueClassMetadata derivedValueClassMetadata2 = this;
+                                list2 = ((TraversableOnce)this.symbol().toType().decls().collect(new Serializable(this){
+                                    public static final long serialVersionUID = 0L;
+
+                                    public final <A1 extends Symbols.Symbol, B1> B1 applyOrElse(A1 x1, Function1<A1, B1> function1) {
+                                        Symbols.TermSymbol termSymbol;
+                                        Object object = x1 instanceof Symbols.TermSymbol && (termSymbol = (Symbols.TermSymbol)x1).isParamAccessor() && termSymbol.isMethod() ? termSymbol : function1.apply(x1);
+                                        return object;
+                                    }
+
+                                    public final boolean isDefinedAt(Symbols.Symbol x1) {
+                                        Symbols.TermSymbol termSymbol;
+                                        boolean bl = x1 instanceof Symbols.TermSymbol && (termSymbol = (Symbols.TermSymbol)x1).isParamAccessor() && termSymbol.isMethod();
+                                        return bl;
+                                    }
+                                }, Iterable$.MODULE$.canBuildFrom())).toList();
+                                if (!(list2 instanceof $colon$colon)) break block7;
+                                $colon$colon $colon$colon = ($colon$colon)list2;
+                                Tuple2 tuple2 = new Tuple2($colon$colon, $colon$colon.head());
+                                $colon$colon fields = tuple2._1();
+                                Symbols.TermSymbol field2 = (Symbols.TermSymbol)tuple2._2();
+                                boolean bl = fields.length() == 1;
+                                Predef$ predef$ = Predef$.MODULE$;
+                                if (!bl) {
+                                    AssertionError assertionError = new AssertionError((Object)new StringBuilder().append((Object)"assertion failed: ").append((Object)new StringContext(Predef$.MODULE$.wrapRefArray((Object[])new String[]{"", ": ", ""})).s(Predef$.MODULE$.genericWrapArray(new Object[]{this.symbol(), fields}))).toString());
+                                    object = assertionError;
+                                    break block8;
+                                } else {
+                                    derivedValueClassMetadata2.unboxer = this.scala$reflect$runtime$JavaMirrors$JavaMirror$DerivedValueClassMetadata$$$outer().runtimeClass((Symbols.ClassSymbol)this.symbol().asClass()).getDeclaredMethod(field2.name().toString(), new Class[0]);
+                                    this.bitmap$0 = (byte)(this.bitmap$0 | 2);
+                                    break block6;
+                                }
+                            }
+                            MatchError matchError = new MatchError(list2);
+                            object = matchError;
+                        }
+                        // ** MonitorExit[this] (shouldn't be in output)
+                        throw object;
+                    }
+                    // ** MonitorExit[this] (shouldn't be in output)
+                    return this.unboxer;
+                }
+            }
+
+            public Symbols.Symbol symbol() {
+                return this.symbol;
+            }
+
+            public boolean isDerivedValueClass() {
+                return this.isDerivedValueClass;
+            }
+
+            public Constructor<?> boxer() {
+                return (byte)(this.bitmap$0 & 1) == 0 ? this.boxer$lzycompute() : this.boxer;
+            }
+
+            public Method unboxer() {
+                return (byte)(this.bitmap$0 & 2) == 0 ? this.unboxer$lzycompute() : this.unboxer;
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$DerivedValueClassMetadata$$$outer() {
+                return JavaMirror.this;
+            }
+
+            public DerivedValueClassMetadata(Types.Type info2) {
+                if (JavaMirror.this == null) {
+                    throw null;
+                }
+                this.symbol = info2.typeSymbol();
+                this.isDerivedValueClass = this.symbol().isDerivedValueClass();
+            }
+        }
+
+        public class JavaTransformingMethodMirror
+        extends JavaMethodMirror {
+            private final Object receiver;
+            private final MethodMetadata metadata;
+
+            @Override
+            public Object receiver() {
+                return this.receiver;
+            }
+
+            @Override
+            public JavaTransformingMethodMirror bind(Object newReceiver) {
+                return new JavaTransformingMethodMirror(this.scala$reflect$runtime$JavaMirrors$JavaMirror$JavaTransformingMethodMirror$$$outer(), newReceiver, super.symbol(), this.metadata);
+            }
+
+            @Override
+            public Object apply(Seq<Object> args) {
+                Object[] args1 = new Object[args.length()];
+                for (int i = 0; i < args1.length; ++i) {
+                    Object arg = args.apply(i);
+                    args1[i] = i >= this.metadata.paramCount() ? arg : (this.metadata.isByName()[i] ? new Serializable(this, arg){
+                        public static final long serialVersionUID = 0L;
+                        private final Object arg$1;
+
+                        public final Object apply() {
+                            return this.arg$1;
+                        }
+                        {
+                            this.arg$1 = arg$1;
+                        }
+                    } : (this.metadata.isDerivedValueClass(i) ? this.metadata.paramUnboxers(i).invoke(arg, new Object[0]) : arg));
+                }
+                return this.jinvoke(Predef$.MODULE$.genericWrapArray(args1));
+            }
+
+            public /* synthetic */ JavaMirror scala$reflect$runtime$JavaMirrors$JavaMirror$JavaTransformingMethodMirror$$$outer() {
+                return this.$outer;
+            }
+
+            public JavaTransformingMethodMirror(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol, MethodMetadata metadata) {
+                this.receiver = receiver;
+                this.metadata = metadata;
+                super($outer, symbol, metadata.ret());
+            }
+
+            public JavaTransformingMethodMirror(JavaMirror $outer, Object receiver, Symbols.MethodSymbol symbol) {
+                this($outer, receiver, symbol, $outer.new MethodMetadata(symbol));
+            }
+        }
+    }
+
+    public interface JavaClassCompleter {
+    }
+}
+

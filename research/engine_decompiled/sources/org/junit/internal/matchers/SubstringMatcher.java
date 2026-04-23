@@ -1,0 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package org.junit.internal.matchers;
+
+import org.hamcrest.Description;
+import org.junit.internal.matchers.TypeSafeMatcher;
+
+/*
+ * This class specifies class file version 49.0 but uses Java 6 signatures.  Assumed Java 6.
+ */
+public abstract class SubstringMatcher
+extends TypeSafeMatcher<String> {
+    protected final String substring;
+
+    protected SubstringMatcher(String substring) {
+        this.substring = substring;
+    }
+
+    @Override
+    public boolean matchesSafely(String item) {
+        return this.evalSubstringOf(item);
+    }
+
+    @Override
+    public void describeTo(Description description) {
+        description.appendText("a string ").appendText(this.relationship()).appendText(" ").appendValue(this.substring);
+    }
+
+    protected abstract boolean evalSubstringOf(String var1);
+
+    protected abstract String relationship();
+}
+

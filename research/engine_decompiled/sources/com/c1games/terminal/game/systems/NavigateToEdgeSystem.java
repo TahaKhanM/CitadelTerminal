@@ -34,21 +34,21 @@ public class NavigateToEdgeSystem {
 
     public static void moveComponents(ArrayList<MovementComponents> toMove, Consumer<GlobalMove> addMoveEvent) {
         block0: for (int i = 0; i < toMove.size(); ++i) {
-            PositionComponent body = toMove.get((int)i).body;
+            PositionComponent body2 = toMove.get((int)i).body;
             NavigationComponent nav = toMove.get((int)i).nav;
             if (!nav.navigating) continue;
             nav.currentMoveBuildup += nav.speed;
             if (!(nav.currentMoveBuildup >= 0.9999f)) continue;
             nav.currentMoveBuildup -= 1.0f;
-            int[] nextTile = nav.pathfinder.getStep(body.position.x, body.position.y, nav.lastMove);
-            nav.lastMove = nextTile[1] == body.position.y ? 1 : 2;
-            Coords targetTileDiff = new Coords(nextTile[0] - body.position.x, nextTile[1] - body.position.y);
+            int[] nextTile = nav.pathfinder.getStep(body2.position.x, body2.position.y, nav.lastMove);
+            nav.lastMove = nextTile[1] == body2.position.y ? 1 : 2;
+            Coords targetTileDiff = new Coords(nextTile[0] - body2.position.x, nextTile[1] - body2.position.y);
             if (targetTileDiff.x == 0 && targetTileDiff.y == 0) {
                 nav.navigating = false;
                 nav.speed = 0.0f;
                 nav.finishedNavigating = true;
                 for (Coords v : nav.navigationTargetLocations) {
-                    if (v.x != body.position.x || v.y != body.position.y) continue;
+                    if (v.x != body2.position.x || v.y != body2.position.y) continue;
                     nav.reachedTarget = true;
                     continue block0;
                 }
@@ -66,23 +66,23 @@ public class NavigateToEdgeSystem {
         public NavigationComponent nav;
         public ComponentsForMoveEvent extraInfo;
 
-        public MovementComponents(PositionComponent body, ArrayList<ColliderComponent> colliders, NavigationComponent nav, ComponentsForMoveEvent extraInfo) {
-            this.body = body;
+        public MovementComponents(PositionComponent body2, ArrayList<ColliderComponent> colliders, NavigationComponent nav, ComponentsForMoveEvent extraInfo) {
+            this.body = body2;
             this.colliders = colliders;
             this.nav = nav;
             this.extraInfo = extraInfo;
         }
 
         public static MovementComponents tryCreateMovementComponents(Gameobject gameObject) {
-            PositionComponent body = gameObject.getComponent(PositionComponent.class);
+            PositionComponent body2 = gameObject.getComponent(PositionComponent.class);
             ArrayList<ColliderComponent> colliders = gameObject.getComponents(ColliderComponent.class);
             NavigationComponent nav = gameObject.getComponent(NavigationComponent.class);
             PlayerInfoComponent pInfo = gameObject.getComponent(PlayerInfoComponent.class);
             UnitInfoComponent unitInfo = gameObject.getComponent(UnitInfoComponent.class);
-            if (body == null || colliders == null || nav == null || pInfo == null || unitInfo == null) {
+            if (body2 == null || colliders == null || nav == null || pInfo == null || unitInfo == null) {
                 return null;
             }
-            return new MovementComponents(body, colliders, nav, new ComponentsForMoveEvent(pInfo, unitInfo, body.gameobject.getGid()));
+            return new MovementComponents(body2, colliders, nav, new ComponentsForMoveEvent(pInfo, unitInfo, body2.gameobject.getGid()));
         }
 
         public ArrayList<MovementComponents> getThisAndAllDescendants() {
@@ -109,3 +109,4 @@ public class NavigateToEdgeSystem {
         }
     }
 }
+

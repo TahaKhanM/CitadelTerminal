@@ -153,7 +153,7 @@ public final class PathFinder {
             while (this.startSearchAt.next()) {
                 this.currentQueue.push(this.startSearchAt.currX, this.startSearchAt.currY);
             }
-            boolean debug = false;
+            boolean debug2 = false;
             this.zero(this.explored);
             while (this.currentQueue.size() != 0) {
                 while (this.currentQueue.next()) {
@@ -343,7 +343,7 @@ public final class PathFinder {
      * WARNING - void declaration
      */
     public int[] getStep(int unitX, int unitY, int prevdirection) {
-        short s;
+        short s2;
         int stepY;
         int stepX;
         int i;
@@ -374,8 +374,8 @@ public final class PathFinder {
             this.possibleSteps.next();
             stepX = this.possibleSteps.currX;
             stepY = this.possibleSteps.currY;
-            if (this.pathlength[this.index(stepX, stepY)] > s) continue;
-            s = this.pathlength[this.index(stepX, stepY)];
+            if (this.pathlength[this.index(stepX, stepY)] > s2) continue;
+            s2 = this.pathlength[this.index(stepX, stepY)];
             this.possibleSteps.push(stepX, stepY);
         }
         numPossibleSteps = this.possibleSteps.size();
@@ -383,7 +383,7 @@ public final class PathFinder {
             this.possibleSteps.next();
             stepX = this.possibleSteps.currX;
             stepY = this.possibleSteps.currY;
-            if (this.pathlength[this.index(stepX, stepY)] != s) continue;
+            if (this.pathlength[this.index(stepX, stepY)] != s2) continue;
             this.possibleSteps.push(stepX, stepY);
         }
         if (this.possibleSteps.size() > 1) {
@@ -407,8 +407,8 @@ public final class PathFinder {
             }
         }
         this.possibleSteps.next();
-        int[] result = new int[]{this.possibleSteps.currX, this.possibleSteps.currY};
-        return result;
+        int[] result2 = new int[]{this.possibleSteps.currX, this.possibleSteps.currY};
+        return result2;
     }
 
     public String justifyFormat(int n, int width) {
@@ -489,3 +489,4 @@ public final class PathFinder {
         }
     }
 }
+

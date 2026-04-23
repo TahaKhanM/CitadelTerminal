@@ -1,2 +1,364 @@
 Summary for /Users/tahakhan/Documents/Work/Projects/CitadelTerminal/C1GamesStarterKit-master/engine.jar
 Decompiled with CFR 0.152
+
+
+com.c1games.terminal.game.Game
+----------------------------
+
+initializePathfinder(java.lang.String int[] )
+  Exception : java.lang.UnsupportedOperationException
+
+
+org.apache.commons.io.FileUtils
+----------------------------
+
+contentEquals(java.io.File java.io.File )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
+contentEqualsIgnoreEOL(java.io.File java.io.File java.lang.String )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
+
+
+io.grpc.netty.shaded.io.netty.handler.ssl.PemPrivateKey
+----------------------------
+
+toPEM(io.grpc.netty.shaded.io.netty.buffer.ByteBufAllocator boolean java.security.PrivateKey )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
+
+
+io.grpc.netty.shaded.io.netty.handler.ssl.AbstractSniHandler
+----------------------------
+
+decode(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext io.grpc.netty.shaded.io.netty.buffer.ByteBuf java.util.List<java.lang.Object> )
+  Unable to fully structure code
+
+
+io.grpc.netty.shaded.io.netty.handler.ssl.SslHandler
+----------------------------
+
+wrap(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext boolean )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Tried to end blocks [1[TRYBLOCK]], but top level block is 8[CASE]
+
+
+io.grpc.netty.shaded.io.netty.handler.codec.ByteToMessageDecoder
+----------------------------
+
+channelRead(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext java.lang.Object )
+  Loose catch block
+
+
+io.grpc.netty.shaded.io.netty.handler.codec.compression.LzfDecoder
+----------------------------
+
+decode(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext io.grpc.netty.shaded.io.netty.buffer.ByteBuf java.util.List<java.lang.Object> )
+  Unable to fully structure code
+
+
+io.grpc.netty.shaded.io.netty.handler.codec.compression.SnappyFrameDecoder
+----------------------------
+
+decode(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext io.grpc.netty.shaded.io.netty.buffer.ByteBuf java.util.List<java.lang.Object> )
+  Unable to fully structure code
+
+
+io.grpc.netty.shaded.io.netty.handler.codec.MessageToMessageEncoder
+----------------------------
+
+write(io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext java.lang.Object io.grpc.netty.shaded.io.netty.channel.ChannelPromise )
+  Loose catch block
+
+
+io.grpc.netty.shaded.io.netty.util.internal.NativeLibraryLoader
+----------------------------
+
+load(java.lang.String java.lang.ClassLoader )
+  Loose catch block
+loadLibrary(java.lang.ClassLoader java.lang.String boolean )
+  Loose catch block
+
+
+io.grpc.netty.shaded.io.netty.util.NetUtil
+----------------------------
+
+sysctlGetInt(java.lang.String )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Tried to end blocks [8[FORLOOP]], but top level block is 3[TRYBLOCK]
+
+
+io.grpc.internal.DelayedClientTransport
+----------------------------
+
+newStream(io.grpc.MethodDescriptor<?, ?> io.grpc.Metadata io.grpc.CallOptions )
+  Unable to fully structure code
+
+
+io.grpc.internal.RetriableStream
+----------------------------
+
+drain(io.grpc.internal.RetriableStream$Substream )
+  Unable to fully structure code
+
+
+net.lingala.zip4j.unzip.UnzipEngine
+----------------------------
+
+unzipFile(net.lingala.zip4j.progress.ProgressMonitor java.lang.String java.lang.String net.lingala.zip4j.model.UnzipParameters )
+  Unable to fully structure code
+
+
+net.lingala.zip4j.util.ArchiveMaintainer
+----------------------------
+
+initRemoveZipFile(net.lingala.zip4j.model.ZipModel net.lingala.zip4j.model.FileHeader net.lingala.zip4j.progress.ProgressMonitor )
+  Loose catch block
+
+
+org.java_websocket.server.WebSocketServer
+----------------------------
+
+run()
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Tried to end blocks [6[CATCHBLOCK]], but top level block is 2[TRYBLOCK]
+
+
+com.google.common.util.concurrent.AbstractFuture
+----------------------------
+
+removeWaiter(com.google.common.util.concurrent.AbstractFuture$Waiter )
+  Unable to fully structure code
+
+
+scala.reflect.internal.AnnotationInfos
+----------------------------
+
+forcedInfo$lzycompute()
+  Loose catch block
+
+
+scala.reflect.internal.Positions$class
+----------------------------
+
+scala$reflect$internal$Positions$$setChildrenPos(scala.reflect.internal.SymbolTable scala.reflect.internal.util.Position scala.collection.immutable.List )
+  Unable to fully structure code
+
+
+scala.reflect.internal.Printers
+----------------------------
+
+printTree(scala.reflect.internal.Trees$Tree )
+  Unable to fully structure code
+processTreePrinting(scala.reflect.internal.Trees$Tree )
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+scala.reflect.internal.Scopes
+----------------------------
+
+unlink(scala.reflect.internal.Scopes$ScopeEntry )
+  Unable to fully structure code
+
+
+scala.reflect.internal.SymbolTable
+----------------------------
+
+phase_$eq(scala.reflect.internal.Phase )
+  Unable to fully structure code
+arrayToRepeated(scala.reflect.internal.Types$Type )
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+scala.reflect.internal.Symbols
+----------------------------
+
+typeParams()
+  Loose catch block
+setLazyAccessor(scala.reflect.internal.Symbols$Symbol )
+  Unable to fully structure code
+
+
+scala.reflect.internal.TreeGen
+----------------------------
+
+traverse(scala.reflect.internal.Trees$Tree )
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+scala.reflect.internal.Trees
+----------------------------
+
+summaryString()
+  Unable to fully structure code
+transform(scala.reflect.internal.Trees$Tree )
+  Unable to fully structure code
+
+
+scala.reflect.internal.Types$class
+----------------------------
+
+baseTypeOfNonClassTypeRef(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$NonClassTypeRef scala.reflect.internal.Symbols$Symbol )
+  Loose catch block
+typeRef(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$Type scala.reflect.internal.Symbols$Symbol scala.collection.immutable.List )
+  Unable to fully structure code
+nestedMemberType(scala.reflect.internal.SymbolTable scala.reflect.internal.Symbols$Symbol scala.reflect.internal.Types$Type scala.reflect.internal.Symbols$Symbol )
+  Unable to fully structure code
+mergePrefixAndArgs(scala.reflect.internal.SymbolTable scala.collection.immutable.List int int )
+  Loose catch block
+maybeCreateDummyClone$1(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$Type scala.reflect.internal.Symbols$Symbol scala.reflect.internal.Symbols$Symbol )
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+scala.reflect.internal.Types
+----------------------------
+
+asSeenFrom(scala.reflect.internal.Types$Type scala.reflect.internal.Symbols$Symbol )
+  Unable to fully structure code
+originLocation()
+  Unable to fully structure code
+  Could not resolve type clashes
+scala$reflect$internal$Types$ClassInfoType$$propagate()
+  Unable to fully structure code
+
+
+scala.reflect.internal.tpe.TypeComparers$class
+----------------------------
+
+isSubType(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$Type scala.reflect.internal.Types$Type int )
+  Loose catch block
+isWeakSubType(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$Type scala.reflect.internal.Types$Type )
+  Unable to fully structure code
+firstTry$1(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$Type scala.reflect.internal.Types$Type int )
+  Unable to fully structure code
+fourthTry$1(scala.reflect.internal.SymbolTable scala.reflect.internal.Types$Type scala.reflect.internal.Types$Type int )
+  Unable to fully structure code
+
+
+scala.reflect.internal.tpe.TypeMaps
+----------------------------
+
+mapOver(scala.reflect.internal.Types$Type )
+  Loose catch block
+apply(scala.reflect.internal.Types$Type )
+  Unable to fully structure code
+
+
+scala.reflect.internal.transform.Erasure
+----------------------------
+
+apply(scala.reflect.internal.Types$Type )
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+scala.reflect.internal.util.AbstractFileClassLoader
+----------------------------
+
+protectionDomain$lzycompute()
+  Unable to fully structure code
+
+
+scala.reflect.internal.util.BatchSourceFile
+----------------------------
+
+<init>(scala.reflect.io.AbstractFile char[] )
+  Unable to fully structure code
+
+
+scala.reflect.io.AbstractFile
+----------------------------
+
+lookup(scala.Function3<scala.reflect.io.AbstractFile, java.lang.String, java.lang.Object, scala.reflect.io.AbstractFile> java.lang.String boolean )
+  Unable to fully structure code
+
+
+scala.reflect.io.Path
+----------------------------
+
+parent()
+  Unable to fully structure code
+
+
+scala.reflect.runtime.JavaMirrors
+----------------------------
+
+scala$reflect$runtime$JavaMirrors$JavaMirror$$classToScala1(java.lang.Class<?> )
+  Unable to fully structure code
+  Could not resolve type clashes
+load(scala.reflect.internal.Symbols$Symbol )
+  Unable to fully structure code
+
+
+scala.reflect.runtime.SymbolLoaders
+----------------------------
+
+complete(scala.reflect.internal.Symbols$Symbol )
+  Unable to fully structure code
+
+
+scala.collection.SeqLike
+----------------------------
+
+next()
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+scala.collection.parallel.ThreadPoolTasks$WrappedTask$class
+----------------------------
+
+release(scala.collection.parallel.ThreadPoolTasks$WrappedTask )
+  Loose catch block
+
+
+scala.collection.parallel.mutable.ParHashMapCombiner
+----------------------------
+
+scala$collection$parallel$mutable$ParHashMapCombiner$$table$1(scala.runtime.VolatileObjectRef )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+scala.concurrent.forkjoin.ForkJoinPool
+----------------------------
+
+tryHelpStealer(scala.concurrent.forkjoin.ForkJoinPool$WorkQueue scala.concurrent.forkjoin.ForkJoinTask<?> )
+  Unable to fully structure code
+tryTerminate(boolean boolean )
+  Unable to fully structure code
+
+
+scala.reflect.NameTransformer$
+----------------------------
+
+decode(java.lang.String )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Back jump on a try block [egrp 0[TRYBLOCK] [0 : 358->422)] java.lang.NumberFormatException
+
+
+scala.runtime.ScalaRunTime$
+----------------------------
+
+scala$runtime$ScalaRunTime$$inner$1(java.lang.Object int )
+  Unable to fully structure code
+
+
+scala.sys.process.ProcessImpl
+----------------------------
+
+runloop(java.io.InputStream java.io.OutputStream )
+  Unable to fully structure code
+  Could not resolve type clashes
+
+
+com.fasterxml.jackson.core.io.UTF8Writer
+----------------------------
+
+write(char[] int int )
+  Unable to fully structure code
+write(java.lang.String int int )
+  Unable to fully structure code
+
+
+com.fasterxml.jackson.core.json.ReaderBasedJsonParser
+----------------------------
+
+parseNumberText(int )
+  Unable to fully structure code
