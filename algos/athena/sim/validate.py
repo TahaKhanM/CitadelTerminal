@@ -127,7 +127,11 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
 
 def _extract_deploy_actions(action_frame: dict) -> Tuple[List[list], List[list], List[list], List[list]]:
     """Return (p1_spawns, p1_upgrades, p2_spawns, p2_upgrades) from the first
-    action-frame's spawn events. Type 7 = upgrade; types 0..5 = spawns."""
+    action-frame's spawn events. Type 7 = upgrade; types 0..5 = spawns.
+
+    Preserves the event order within each player so that game-object
+    insertion order for tie-breaking in targeting matches the engine's.
+    """
     p1_sp: List[list] = []; p2_sp: List[list] = []
     p1_up: List[list] = []; p2_up: List[list] = []
     for ev in (action_frame or {}).get("events", {}).get("spawn", []):
@@ -142,6 +146,24 @@ def _extract_deploy_actions(action_frame: dict) -> Tuple[List[list], List[list],
         elif utype in (0, 1, 2, 3, 4, 5):
             (p1_sp if player == 1 else p2_sp).append([x, y, utype])
     return p1_sp, p1_up, p2_sp, p2_up
+
+
+def _extract_deploy_events_in_order(action_frame: dict) -> List[Tuple[int, List[list]]]:
+    """Return ordered list of (player, event_payload) for every spawn event
+    in the first action frame. This preserves the exact engine-issued
+    order, so when we apply deploys the resulting insertion order into
+    state.structures / state.mobiles matches the engine's game-objects
+    list (relevant for tie-breaking targeting priority)."""
+    ordered: List[Tuple[int, List]] = []
+    for ev in (action_frame or {}).get("events", {}).get("spawn", []):
+        if not isinstance(ev, (list, tuple)) or len(ev) < 4:
+            continue
+        xy = ev[0]
+        if not isinstance(xy, (list, tuple)) or len(xy) < 2:
+            continue
+        x, y, utype, player = int(xy[0]), int(xy[1]), int(ev[1]), int(ev[3])
+        ordered.append((player, [x, y, utype]))
+    return ordered
 
 
 # --------------------------------------------------------- per-turn validate
@@ -232,6 +254,7 @@ def validate_replay(path: Path, config: SimConfig) -> List[TurnValidation]:
         if af_t is None:
             continue
         p1_sp, p1_up, p2_sp, p2_up = _extract_deploy_actions(af_t)
+        ordered = _extract_deploy_events_in_order(af_t)
 
         # Build state from deploy snapshot with persistent upgrade tracking.
         state = _build_state_from_deploy_frame(df_t, config, upgraded_pre.get(t, set()))
@@ -239,8 +262,8 @@ def validate_replay(path: Path, config: SimConfig) -> List[TurnValidation]:
         pre_p1_hp, pre_p2_hp = state.p1.hp, state.p2.hp
         pre_p1_sp, pre_p2_sp = state.p1.sp, state.p2.sp
 
-        # Apply deploy actions
-        apply_deploy_actions(state, config, p1_sp, p1_up, p2_sp, p2_up)
+        # Apply deploy actions in exact engine-issued spawn order
+        apply_deploy_actions(state, config, p1_sp, p1_up, p2_sp, p2_up, ordered_events=ordered)
         # Run action phase
         simulate_action_phase(state, config)
 

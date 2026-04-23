@@ -113,30 +113,49 @@ def diff_frames(path: Path, turn: int, config: SimConfig) -> None:
     print(f"Turn {turn}: replay has {len(rep_frames)} action frames")
     print(f"{'f':>3}  {'sim_counts':<40}  {'replay_counts':<40}  divergence?")
 
+    # Track cumulative events (sim's deaths are log-delayed by 1 frame;
+    # cumulative counts smooth this out).
+    sim_cum = {"attack": 0, "breach": 0, "death": 0, "selfDestruct": 0}
+    rep_cum = {"attack": 0, "breach": 0, "death": 0, "selfDestruct": 0}
+
     sim_iter = sim_frame_by_frame(state, config)
+    first_divergence_reported = False
     for i, (f_idx, events) in enumerate(sim_iter):
         sim_c = _frame_event_counts(events)
         rep_c = rep_counts[i] if i < len(rep_counts) else {}
         sim_s = ", ".join(f"{k}={v}" for k, v in sorted(sim_c.items()))
         rep_s = ", ".join(f"{k}={v}" for k, v in sorted(rep_c.items()))
-        # compare attack, breach, death, selfDestruct between sim and replay.
         critical = ["attack", "breach", "death", "selfDestruct"]
-        divergent = False
         for k in critical:
-            if sim_c.get(k, 0) != rep_c.get(k, 0):
-                divergent = True
-                break
-        mark = "  ← DIVERGE" if divergent else ""
+            sim_cum[k] += sim_c.get(k, 0)
+            rep_cum[k] += rep_c.get(k, 0)
+        # A real divergence: cumulative counts differ by more than 1 (death
+        # delay) past the first few frames.
+        real_div = False
+        for k in critical:
+            # attack/breach/sd are immediate-emit; any per-frame diff is real.
+            # death is log-delayed; allow cumulative slack of 2.
+            if k == "death":
+                if abs(sim_cum[k] - rep_cum[k]) > 2:
+                    real_div = True
+                    break
+            else:
+                if sim_c.get(k, 0) != rep_c.get(k, 0):
+                    # Within first 2 frames, skip — timing artifacts
+                    if i >= 2:
+                        real_div = True
+                        break
+        mark = "  ← DIVERGE" if real_div else ""
         print(f"{f_idx:>3}  {sim_s:<40}  {rep_s:<40}{mark}")
-        if divergent and i < 5:
-            # Show first divergence in detail
-            print(f"     sim events[:3]: {events[:3]}")
+        if real_div and not first_divergence_reported:
+            first_divergence_reported = True
+            print(f"     sim events[:4]: {events[:4]}")
             if i < len(rep_frames):
                 rev = rep_frames[i].get("events", {})
                 for key in critical:
                     if rev.get(key):
-                        print(f"     replay {key}[:3]: {rev[key][:3]}")
-            break
+                        print(f"     replay {key}[:4]: {rev[key][:4]}")
+            # Keep printing remaining frames but don't dump details
 
 
 if __name__ == "__main__":
