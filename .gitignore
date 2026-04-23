@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv-sim/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Compiled / build artifacts (regenerable)
+*.so                              # PyO3/mypyc compiled extensions — build via maturin/cargo
+algos/athena/build/               # mypyc build output
+algos/athena/sim/_fastsim.c       # Cython-generated C
+**/target/                        # cargo build output
+**/_build/                        # Sphinx HTML docs
+*.doctree
+
+# Upload staging snapshots at repo root (reproducible from algos/<name>/ via scripts/zipalgo_*)
+/*_upload/
+algos/*.zip
+
+# Local match artifacts — track ELO-tagged ranked downloads only
+replays/*
+!replays/.gitkeep
+!replays/ranked/
+replays/ranked/*
+!replays/ranked/*.replay
+
+# Replay corpus (reproducible via tools/bulk_download_my_replays.py)
+Ranked Replays/
+
+# Evolution run artifacts (see tools/evolve.py)
+tools/evolve_*.json
+tools/evolve_*.txt
+tools/evolve_*.pkl
+tools/cfr.jar
+
+# Engine-generated per-match crash dumps (not source)
+errorFile*.txt
+**/errorFile*.txt
+
+# Local Claude Code state
+.claude/settings.local.json
+.claude/projects/
