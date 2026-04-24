@@ -27,10 +27,12 @@ serde_json = "1"
 criterion = "0.5"
 
 [profile.release]
+opt-level = 3
 lto = "fat"
 codegen-units = 1
 panic = "abort"
 overflow-checks = false
+debug = false
 
 [[bench]]
 name = "action_phase"
