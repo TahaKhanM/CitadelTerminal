@@ -1,0 +1,11 @@
+fuzz n=10000 seed=42 wall=142.0s
+  M1_player_swap                 pass= 10000 fail=     0 PASS
+  M2_mirror_map                  pass= 10000 fail=     0 PASS
+  M3_determinism                 pass= 10000 fail=     0 PASS
+  M4_resource_independence       pass= 10000 fail=     0 PASS
+
+ranked n=23 wall=177.6s
+  M1_player_swap                 pass=  1486 fail=     0 PASS
+  M2_mirror_map                  pass=  1486 fail=     0 PASS
+  M3_determinism                 pass=  1486 fail=     0 PASS
+  M4_resource_independence       pass=  1486 fail=     0 PASS
