@@ -8,7 +8,7 @@ use serde_json::Value;
 
 use sim_rs::config::{SimConfig, IDX_SCOUT, IDX_SUPPORT, IDX_TURRET, IDX_WALL};
 use sim_rs::map::{EDGE_TOP_LEFT, EDGE_TOP_RIGHT};
-use sim_rs::sim::simulate_action_phase;
+use sim_rs::sim::{simulate_action_phase, simulate_action_phase_lite};
 use sim_rs::state::{Mobile, PlayerStats, SimState, Structure};
 
 fn snapshot_path() -> PathBuf {
@@ -147,6 +147,28 @@ fn run(name: &str, template: &SimState, cfg: &SimConfig, iters: u64) {
              name, sps_best, sps_median, per_sim_ns_best / 1000.0, per_sim_ns_median / 1000.0);
 }
 
+fn run_lite(name: &str, template: &SimState, cfg: &SimConfig, iters: u64) {
+    let mut samples: Vec<u64> = Vec::with_capacity(15);
+    for _ in 0..15 {
+        let start = Instant::now();
+        for _ in 0..iters {
+            let mut s = template.clone();
+            let r = simulate_action_phase_lite(&mut s, cfg, 200);
+            std::hint::black_box(&r);
+        }
+        samples.push(start.elapsed().as_nanos() as u64);
+    }
+    samples.sort();
+    let best_ns = samples[0];
+    let median_ns = samples[samples.len() / 2];
+    let per_sim_ns_best = best_ns as f64 / iters as f64;
+    let per_sim_ns_median = median_ns as f64 / iters as f64;
+    let sps_best = 1.0e9 / per_sim_ns_best;
+    let sps_median = 1.0e9 / per_sim_ns_median;
+    println!("{:32} best={:>7.0}/s  median={:>7.0}/s  ({:>6.2} µs/{:>6.2} µs)  [lite]",
+             name, sps_best, sps_median, per_sim_ns_best / 1000.0, per_sim_ns_median / 1000.0);
+}
+
 fn main() {
     let cfg = SimConfig::load(&snapshot_path()).expect("config load");
     let mut toy = build_state_toy();
@@ -167,4 +189,5 @@ fn main() {
     }
     run("3_mob_5_struct", &toy, &cfg, 10_000);
     run("mid_game_108_struct_5_mob", &mid, &cfg, 2_000);
+    run_lite("mid_game_108_struct_5_mob", &mid, &cfg, 2_000);
 }

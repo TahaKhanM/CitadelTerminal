@@ -16,7 +16,7 @@ use serde_json::Value;
 
 use sim_rs::config::{SimConfig, IDX_SCOUT, IDX_SUPPORT, IDX_TURRET, IDX_WALL};
 use sim_rs::map::{EDGE_TOP_LEFT, EDGE_TOP_RIGHT};
-use sim_rs::sim::simulate_action_phase;
+use sim_rs::sim::{simulate_action_phase, simulate_action_phase_lite};
 use sim_rs::state::{Mobile, PlayerStats, SimState, Structure};
 
 fn snapshot_path() -> PathBuf {
@@ -164,6 +164,16 @@ fn throughput_bench(c: &mut Criterion) {
                 let mut state = template.clone();
                 let r = simulate_action_phase(black_box(&mut state),
                                                black_box(&cfg), 200);
+                black_box(r);
+            });
+        });
+        // Lite variant: skips the final_state clone — matches the batch
+        // PyO3 API pattern where callers only need damage totals.
+        group.bench_function("mid_game_108_struct_5_mob_lite", |b| {
+            b.iter(|| {
+                let mut state = template.clone();
+                let r = simulate_action_phase_lite(black_box(&mut state),
+                                                    black_box(&cfg), 200);
                 black_box(r);
             });
         });
