@@ -123,21 +123,28 @@ fn build_state_fixture() -> SimState {
 }
 
 fn run(name: &str, template: &SimState, cfg: &SimConfig, iters: u64) {
-    // Best-of-3 to filter OS noise.
-    let mut best_ns = u64::MAX;
-    for _ in 0..3 {
+    // Take 15 micro-samples of `iters` each; report BEST (min) to reject
+    // contention from the loaded macOS box. Best == lowest contention ==
+    // closest to the deterministic single-thread cost of the loop.
+    let mut samples: Vec<u64> = Vec::with_capacity(15);
+    for _ in 0..15 {
         let start = Instant::now();
         for _ in 0..iters {
             let mut s = template.clone();
             let r = simulate_action_phase(&mut s, cfg, 200);
             std::hint::black_box(&r);
         }
-        let ns = start.elapsed().as_nanos() as u64;
-        if ns < best_ns { best_ns = ns; }
+        samples.push(start.elapsed().as_nanos() as u64);
     }
-    let per_sim_ns = best_ns as f64 / iters as f64;
-    let sims_per_sec = 1.0e9 / per_sim_ns;
-    println!("{:32} {:>10.0} sims/s  ({:>7.2} µs/sim)", name, sims_per_sec, per_sim_ns / 1000.0);
+    samples.sort();
+    let best_ns = samples[0];
+    let median_ns = samples[samples.len() / 2];
+    let per_sim_ns_best = best_ns as f64 / iters as f64;
+    let per_sim_ns_median = median_ns as f64 / iters as f64;
+    let sps_best = 1.0e9 / per_sim_ns_best;
+    let sps_median = 1.0e9 / per_sim_ns_median;
+    println!("{:32} best={:>7.0}/s  median={:>7.0}/s  ({:>6.2} µs/{:>6.2} µs)",
+             name, sps_best, sps_median, per_sim_ns_best / 1000.0, per_sim_ns_median / 1000.0);
 }
 
 fn main() {
