@@ -141,23 +141,25 @@ pub fn apply_damage(target_hp: f32, target_shield: f32, dmg: f32) -> (f32, f32, 
 /// ~2.5 µs `PathFinder::new` cost over many iterations.
 pub fn ensure_pathfinders(state: &mut SimState) {
     use crate::pathfinder::{edge_direction, PathFinder};
-    if state.pathfinders.is_some() {
+    // Fast-path: at least one slot is occupied → all needed ones were built
+    // on the first call (and none are invalidated mid-phase).
+    if state.pathfinders.iter().any(|p| p.is_some()) {
         return;
     }
-    let mut pfs: IndexMap<i32, PathFinder> = IndexMap::with_capacity(4);
+    let walls: Vec<(i32, i32)> = state.structures.keys().copied().collect();
+    // Determine which edges are needed via a single mobile scan.
     let mut needed: [bool; 4] = [false; 4];
     for m in state.mobiles.iter() {
         if m.hp <= 0.0 || m.finished_navigating { continue; }
         if (0..4).contains(&m.target_edge) { needed[m.target_edge as usize] = true; }
     }
-    // Walls snapshot — identical across all 4 PathFinders.
-    let walls: Vec<(i32, i32)> = state.structures.keys().copied().collect();
     for edge in [EDGE_TOP_RIGHT, EDGE_TOP_LEFT, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT] {
         if !needed[edge as usize] { continue; }
         let perfects = edge_tiles_slice(edge);
-        pfs.insert(edge, PathFinder::new(ARENA, edge_direction(edge), &walls, perfects));
+        state.pathfinders[edge as usize] = Some(Box::new(
+            PathFinder::new(ARENA, edge_direction(edge), &walls, perfects)
+        ));
     }
-    state.pathfinders = Some(pfs);
 }
 
 // ================================================================ system_move
@@ -187,10 +189,8 @@ pub fn system_move(state: &mut SimState, config: &SimConfig, _events: &mut Vec<E
     ];
 
     // Split-borrow: alias disjoint fields of SimState via destructuring so we
-    // can hold `&mut state.pathfinders` and `&mut state.mobiles` simultaneously
-    // without the Option::take()/restore dance. Zero field moves per frame.
+    // can hold `&mut state.pathfinders` and `&mut state.mobiles` simultaneously.
     let SimState { pathfinders, mobiles, .. } = state;
-    let pathfinders = pathfinders.as_mut().expect("pathfinders");
     for m in mobiles.iter_mut() {
         if m.hp <= 0.0 || m.finished_navigating {
             continue;
@@ -201,8 +201,9 @@ pub fn system_move(state: &mut SimState, config: &SimConfig, _events: &mut Vec<E
             continue;
         }
         m.move_buildup -= 1.0;
-        let pf = pathfinders
-            .get_mut(&m.target_edge)
+        // Array-indexed lookup: edge ∈ 0..=3 so `as usize` is safe.
+        let pf = pathfinders[m.target_edge as usize]
+            .as_mut()
             .expect("per-edge pathfinder missing");
         let (nx, ny) = pf.get_step(m.xy.0, m.xy.1, m.last_move as u8);
         // lastMove: horizontal if y unchanged, else vertical.
@@ -1020,8 +1021,8 @@ pub fn clear_destroyed(state: &mut SimState, _events: &mut Vec<EventEntry>) {
             let xy = state.scratch.dead_struct_xys[i];
             state.structures.shift_remove(&xy);
             state.pending_removal_xys.shift_remove(&xy);
-            if let Some(pfs) = state.pathfinders.as_mut() {
-                for pf in pfs.values_mut() {
+            for pf_slot in state.pathfinders.iter_mut() {
+                if let Some(pf) = pf_slot.as_mut() {
                     pf.remove(xy.0, xy.1);
                 }
             }
@@ -1115,8 +1116,8 @@ pub fn system_remove_own_unit(
         });
         state.structures.shift_remove(&pl.xy);
         state.pending_removal_xys.shift_remove(&pl.xy);
-        if let Some(pfs) = state.pathfinders.as_mut() {
-            for pf in pfs.values_mut() {
+        for pf_slot in state.pathfinders.iter_mut() {
+            if let Some(pf) = pf_slot.as_mut() {
                 pf.remove(pl.xy.0, pl.xy.1);
             }
         }
