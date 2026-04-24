@@ -285,11 +285,32 @@ to § ACHIEVED until two consecutive bench runs on
 `mid_game_108_struct_5_mob` (clean machine, no concurrent load) show
 the floor cleared.
 
-| Target | Floor | Current | Gap | Lever sequence (this session) |
+| Target | Floor | Current | Gap | Lever-of-record (next session) |
 |---|---|---|---|---|
-| Rust FAST single-core | ≥25,000 sims/s | **14.3 K** | 1.74× | (1) portable_simd f32x8 bbox filter in `system_attack`, (2) Structures SoA, (3) PGO retry |
-| Rust FAST 8-core batch | ≥150,000 sims/s | **75 K on 10-thread** | 2.0× (8c) / 1.5× (10c) | (4) `Arc<PathFinder>` + per-thread `bumpalo::Bump`; eliminates allocator contention from per-sim clones |
-| Python FAST single-core | ≥1,500 sims/s | **376 sims/s** | 4.0× | mypyc landed (commit `93d60c8`); next: portable_simd-style C extension hot loop, or full Cython rewrite of fire_one |
+| Rust FAST single-core | ≥25,000 sims/s | **14.3 K** | 1.74× | Per-frame spatial bucket index for enemy structures so `fire_one_mobile`'s 54-tile struct scan becomes O(R²) ≈ 81 cells. SoA + NEON SIMD on the outer turret bbox filter (tried this session) is NOT the lever — see § Lever-trace. |
+| Rust FAST 8-core batch | ≥150,000 sims/s | **75 K on 10-thread** | 2.0× (8c) / 1.5× (10c) | Split `PathFinder` into immutable graph (`Arc<Graph>`) + per-sim mutable cache. Naive `Arc<PathFinder>` does NOT work — `clear_destroyed` invalidates pathfinder caches on every mid-sim wall death, so `Arc::make_mut` would CoW the full 30 KB pathfinder per death (4 × per sim on this fixture). |
+| Python FAST single-core | ≥1,500 sims/s | **376 sims/s** | 4.0× | mypyc + algorithmic refactors + `_fastsim.c` extension landed in commit `93d60c8` (parallel Claude session). Remaining 4× gap likely needs `fire_one_*` ported to C entirely (current C extension covers `system_attack_c` / `system_move_c` / `clear_destroyed_c` but the inner targeting loops are still mypyc-Python). |
+
+### Lever-trace (2026-04-24)
+
+Documenting what was tried and rejected so future sessions don't
+re-attempt the same thing:
+
+* **SoA + NEON SIMD bbox filter on outer turret loop** (split
+  `turret_infos` into parallel `Vec<i32>` arrays sorted by player,
+  aarch64 NEON 4-lane intrinsics on the bbox check). Two-run bench
+  on `mid_game_108_struct_5_mob`: best 14.3 K (vs baseline best
+  14.3 K) — within noise. Hypothesis: the scalar bbox check (~10 ns
+  per iter × 3,105 iter = 31 µs/sim attributed in commit `b1ab1f7`'s
+  profile) was misattribution. Scalar code already runs at IPC
+  ceiling; the compiler was auto-vectorising the comparison chain.
+  The real `system_attack` cost lives in `fire_one_mobile`'s per-
+  frame struct scan: `attackprof` shows attack = 65 µs of 70 µs/sim
+  total, but `attack_phase_prof` (primed, non-dirty scratch) only
+  accounts for 19 µs/sim (12 µs steady fire + 7 µs dirty rebuild ×
+  4) — leaving ~46 µs/sim unattributed, which is consistent with 5
+  mobiles × 69 frames × ~54-tile struct scan with no spatial pre-
+  filter.
 
 ### FAST single-core optimization trace
 
