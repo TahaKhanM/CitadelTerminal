@@ -222,6 +222,24 @@ pub struct Scratch {
     /// forces a rebuild before the next read. See `system_attack` dirty
     /// block and `clear_destroyed` / `system_remove_own_unit` dirty flips.
     pub turret_enemy_cands_flat: Vec<u32>,
+    /// Dense structure-of-arrays mirror of `state.structures` indexed by
+    /// IndexMap insertion order. Populated at dirty-rebuild time; the fire
+    /// path reads `(hp, xy, uid)` from these contiguous vecs instead of
+    /// dereferencing `Bucket<(i32,i32), Structure>` (76 bytes, random-access)
+    /// through `IndexMap::get_index`.
+    ///
+    /// - `struct_hp_soa` MUST be kept in lockstep with `state.structures[idx].hp`:
+    ///   every in-place HP write (`fire_one_turret`, `fire_one_mobile`,
+    ///   `system_self_destruct`) updates both. Between dirty rebuilds, the
+    ///   structure *set* is immutable, so the `xy` and `uid` mirrors are
+    ///   stable and don't need per-write updates.
+    /// - After any structure add/remove (`clear_destroyed`,
+    ///   `system_remove_own_unit`, and external deploy-phase inserts),
+    ///   `structures_dirty` is set and the next `system_attack` entry rebuilds
+    ///   all three from scratch.
+    pub struct_hp_soa: Vec<f32>,
+    pub struct_xy_soa: Vec<(i32, i32)>,
+    pub struct_uid_soa: Vec<u32>,
     /// Per-frame compact cache of live enemy mobile coords. `p1_live_mobs`
     /// holds player-1-owned live mobiles (attackable by p2 turrets), and
     /// vice versa. Rebuilt once per `system_attack` entry from `state.mobiles`
