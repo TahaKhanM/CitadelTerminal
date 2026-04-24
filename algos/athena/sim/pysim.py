@@ -499,8 +499,16 @@ def system_shield_give(state: SimState, config: SimConfig, events: List[dict]) -
                 continue
             m.shield = m.shield + shield_amount  # both FP32, stays FP32
             s.shielded_already.add(m.uid)
+            # Capture src_xy + tgt_xy at shield-application time so the
+            # translator doesn't need to look them up (ShieldSystem.java:39
+            # stores shielder.position + target.position in GlobalShield
+            # at emission time). Post-Cluster-D post-clear pops dead
+            # mobiles before the frame observation runs, so lookup-by-uid
+            # would fail for a shielded-then-killed mobile.
             events.append({"type": "shield", "support_uid": s.uid,
-                           "target_uid": m.uid, "amount": shield_amount})
+                           "target_uid": m.uid, "amount": shield_amount,
+                           "src_xy": s.xy, "tgt_xy": m.xy,
+                           "src_type_idx": s.type_idx, "src_player": s.player})
 
 
 def system_breach(state: SimState, config: SimConfig, events: List[dict]) -> None:
@@ -1235,27 +1243,21 @@ def _translate_events_to_buckets(
                 _pid_persp(int(e.get("player", 0)), perspective),
             ])
         elif t == "shield":
-            # SimCore shield events carry support_uid, target_uid, amount.
-            # Resolve xy/type/pid from state.
-            s_uid = e.get("support_uid")
-            t_uid = e.get("target_uid")
-            s_tid = _unit_type_by_uid(state, s_uid)
-            s_ply = _unit_player_by_uid(state, s_uid)
-            s_xy = (0, 0); t_xy = (0, 0)
-            for s in state.structures.values():
-                if s.uid == s_uid:
-                    s_xy = s.xy; break
-            for m in state.mobiles:
-                if m.uid == t_uid:
-                    t_xy = m.xy; break
+            # xy / type_idx / player are stamped on the flat event at
+            # shield-application time (system_shield_give) so the
+            # translator doesn't need state lookups — targets that got
+            # killed this frame and popped by post-clear would otherwise
+            # return (0, 0).
+            s_xy = e.get("src_xy") or (0, 0)
+            t_xy = e.get("tgt_xy") or (0, 0)
             buckets["shield"].append([
                 [int(s_xy[0]), int(s_xy[1])],
                 [int(t_xy[0]), int(t_xy[1])],
                 float(e.get("amount") or 0.0),
-                int(s_tid),
-                str(s_uid),
-                str(t_uid),
-                _pid_persp(s_ply, perspective),
+                int(e.get("src_type_idx", -1)),
+                str(e.get("support_uid")),
+                str(e.get("target_uid")),
+                _pid_persp(int(e.get("src_player", 0)), perspective),
             ])
         elif t == "spawn":
             # Emitted by apply_deploy_actions for structure / upgrade /
