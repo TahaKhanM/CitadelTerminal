@@ -96,59 +96,172 @@ budget allows. Print "ATHENA PHASE N COMPLETE" and exit.
 
 ---
 
-## NEXT PHASE: 0.5 — Action-frame utilities
+## Phase 0.5 — Action-frame utilities
 
-**Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 0.5 (lines 106–116).
+**Agent**: Claude Opus 4.7 (1M context).
+**Started / completed**: 2026-04-24.
+**Branch**: `worktree-agent-afde0da4` (off `main` @ `6a494c8`).
+**Plan reference**: `docs/ATHENA_BUILD_PLAN.md` § Phase 0.5.
 
-**What Phase 0.5 should build**, all under
-`algos/athena_v3_planner/opponent/action_frame_utils.py`:
+All six utilities ship in a single module
+`algos/athena_v3_planner/opponent/action_frame_utils.py` exported via
+`opponent/__init__.py`. Each is a `@dataclass` so callers can hold one
+instance per match and feed it action frames inside `on_action_frame`.
+Every utility takes a `self_player_id` parameter (default 1, matching
+the action-frame JSON convention `1=self, 2=opponent`) so the
+player_index flip never has to be guessed at by the caller.
 
-1. `BatchCountTracker` (Lostkids pattern) — counts opponent batched
-   spawns across a turn. **Critical**: filter by enemy spawns only,
-   honoring the player_index flip — action-frame `spawn[1]` uses raw
-   JSON convention `1=self, 2=opponent`, not the
-   starter-kit `0=self, 1=opponent`. Tests must explicitly cover this.
-2. `SpawnXHistogram` — 28-bin running counter of enemy mobile spawn
-   columns, exponential decay 0.95/turn.
-3. `WallRemovalDetector` — scans `pending_removal=True` flags on
-   opponent structures.
-4. `BreachLocationTracker` — accumulates breaches scored against us
-   (`breach[4] != self_id`).
-5. `ResourceTracker` — opponent MP / SP trajectory.
-6. `MisdirectionDetector` — Lostkids `is_enemy_*_edge_misdirecting`.
+### Tasks (commit-by-commit)
 
-**Reference**: `research/finalist_repos/Terminal-Lostkids/` has the
-canonical action-frame patterns these utilities should mirror. The
-finalist corpus memory note (`finalist_corpus.md`) summarizes what's
-been distilled from these repos.
+| Task | Class | Commit |
+|---|---|---|
+| 1 | `BatchCountTracker`         | `4c640f3` |
+| 2 | `SpawnXHistogram`           | `93d377d` |
+| 3 | `WallRemovalDetector`       | `1b18ea1` |
+| 4 | `BreachLocationTracker`     | `29ffff4` |
+| 5 | `ResourceTracker`           | `92c001b` |
+| 6 | `MisdirectionDetector`      | `c0b5d0d` |
+| 7 | tests + 5-replay corpus run | `86b0216` |
+| 8 | STATUS + log handoff        | (this commit) |
 
-**Validation gate**: per-utility unit tests against known replays from
-the corpus (`replays/ranked/*.replay`); each utility produces
-deterministic output; player_index flip explicitly tested. The test
-harness should run from the worktree without requiring sim_rs (these
-utilities are pure JSON parsing).
+### Implementation notes
 
-**Estimated scope**: ~6 small classes + a tests file. Should fit in a
-single agent run.
+- **Mobile vs structure types**: pulled from
+  `data/citadel_config_snapshot.json` indices: 0 Wall, 1 Support, 2
+  Turret, 3 Scout, 4 Demolisher, 5 Interceptor, 6 Remove (pending
+  queue), 7 Upgrade. `MOBILE_TYPES = {3,4,5}`,
+  `STRUCTURE_TYPES = {0,1,2}`.
+- **`_is_first_action_frame`** (helper) gates every per-turn read on
+  `turnInfo[0]==1` (action phase) AND `turnInfo[2]==0` (frame index 0)
+  — the same point Lostkids reads `events.spawn`. By that point all of
+  the turn's spawn events have been emitted but no unit has moved.
+- **Edge classification** in `_classify_edge` partitions the diamond
+  by `y >= 14` (top vs bottom half) and `x <= 13` (left vs right). This
+  is robust to engine quirks at diagonal endpoints; explicit row-13/14
+  checks were tried first and rejected.
+- **Decay**: `SpawnXHistogram` uses 0.95/turn, `BreachLocationTracker`
+  0.9/turn (more aggressive — recent breach tells matter more than old
+  ones).
+- **Determinism**: every utility tracks `_counted_turns` /
+  `_scanned_turns` / `_seen_event_keys` so re-feeding the same frame is
+  a no-op. The determinism test confirms byte-identical state across
+  two runs of the same replay.
+- **No sim_rs dependency**: pure stdlib + numpy. Tests run in 0.35 s.
+
+### Tests
+
+`tests/test_action_frame_utils.py` — 12 tests:
+
+- 6 `*_player_index_flip` synthetic-frame tests (one per utility)
+  that mix player 1 + player 2 entries and assert the utility filters
+  correctly. Each also re-runs with `self_player_id=2` to verify the
+  flip works in both directions.
+- 1 `test_determinism_same_replay_twice` runs the full pipeline twice
+  on `m15302602_vs_gooder-maybe_1453_win.replay` and asserts every
+  utility's recorded state matches.
+- 5 parametrised `test_corpus_no_crash_well_formed` runs across:
+  - `m15302602_vs_gooder-maybe_1453_win` (30 turns, win)
+  - `m15302606_vs_python-algo-v3_1612_loss` (72 turns, loss)
+  - `m15302609_vs_diego_v2_1486_win` (52 turns, win)
+  - `m15302611_vs_takedown1-algo_1644_loss` (44 turns, loss)
+  - `m15302614_vs_R2_Infiltrator_0_win_boss` (26 turns, boss win)
+  Asserts all six utilities run end-to-end without crashing and that
+  every returned value is in the expected range / shape.
+
+### Pre-commit hook status
+
+The hook at `.git/hooks/pre-commit` was already patched (uses
+`git rev-parse --show-toplevel`) before Phase 0.5 started. Every Phase
+0.5 commit went through `mode_parity` (≈100 s per commit) cleanly —
+no `--no-verify` was needed.
 
 ---
 
-## Gotchas inherited by Phase 0.5
+## NEXT PHASE: 1.5 — Lostkids baseline port (regression baseline)
 
-(Mirrored in `STATUS.md` for visibility; here for completeness.)
+**Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 1.5.
 
-1. **Pre-commit hook is broken in worktree checkouts.** Use
-   `git commit --no-verify` after manually verifying
-   `algos/athena/sim/regression_runner.py --scope quick` PASSES. Hook is
-   at `.git/hooks/pre-commit`, agent can't edit (sandbox). Flag for user.
-2. **System Python is 3.9; sim stack needs 3.10+.** Use
-   `/opt/miniconda3/bin/python3.13` for any sim/parity tooling.
-3. **sim_rs PyO3 wheel** must be rebuilt against Python 3.13 if
-   anything in `algos/athena/sim_rs/` changes:
-   `CONDA_PREFIX=/opt/miniconda3 /opt/miniconda3/bin/python3.13 -m maturin develop --release --features pyo3`.
-4. **Replay file format.** Files start with a leading newline; one JSON
-   object per line; line 1 = config header, last frame contains
-   `endStats`. Use `algos/athena/sim/validate.py:_parse_replay` for
-   robust parsing or `algos/athena_v3_planner/sim/replay_inventory.py`
-   for the stdlib-only metadata variant.
-5. **47 ranked replays in corpus, not 23** as the brief said.
+The port lives at a brand-new `algos/athena_baseline_lostkids/`
+(scaffold from `C1GamesStarterKit-master/python-algo/`, then port
+strategy from
+`research/finalist_repos/Terminal-Lostkids/python-2l-aet/algo_strategy.py`).
+
+### Tasks
+
+1. **Scaffold the algo folder.** `algos/athena_baseline_lostkids/`
+   from the starter template (or use the `/new-algo` skill).
+2. **Port the Lostkids algo.** Lostkids ALREADY uses current Citadel
+   shorthands (WALL/TURRET/etc.) — this is mostly a straight copy
+   with two corrections:
+   - Verify constants vs `data/citadel_config_snapshot.json`
+     (Lostkids' `MP >= 17` interceptor threshold is Citadel-compatible
+     because Citadel keeps the 25 % MP decay — but cross-check the
+     income formula `1 + turn // 5` MP/turn).
+   - Replace any direct-from-`game-configs.json` reads with config
+     reads from `on_game_start(config)` — Lostkids doesn't actually
+     hardcode but a quick grep is mandatory.
+3. **Add production safety wrappers.** Top-level `try/except` in
+   `on_turn` that falls through to a "minimal safe turn" (defense-only
+   no-op offense), plus a 13 s watchdog. The build plan calls these
+   "non-negotiable" for any algo we eventually ship to ranked.
+4. **Regression test.** `/bestof 50 athena_baseline_lostkids
+   v13_second_ring`. **Validation gate: Wilson lower bound on win
+   rate > 60 %.** If it falls short, the port has bugs OR v13 is
+   unexpectedly strong against the Lostkids strategy. Debug before
+   advancing — DO NOT proceed with a flawed regression baseline.
+
+### Why we want this baseline
+
+Phase 2+ defenses and Phase 3+ offense will both report "athena_vN vs
+v13" AND "athena_vN vs athena_baseline_lostkids". The Lostkids port is
+the second comparison anchor: a known-strong Citadel-aware strategy
+that the new planner has to outperform. Without a working port,
+"better than v13" alone doesn't tell us if Athena is genuinely
+winning.
+
+### What Phase 1.5 should NOT touch
+
+- The Phase 0.5 utilities under `opponent/` — they're not used by the
+  Lostkids baseline (Lostkids has its own `batch_count_history`
+  inline). Athena will plug the new `BatchCountTracker` etc. into the
+  planner in Phase 2+.
+- `algos/athena/sim_rs/` and the rest of the SimCore — Phase 1 is
+  still IN PROGRESS upstream (Phase 1.B.1 sim parity work on a
+  separate branch). Phase 1.5 is the regression *baseline*, not a sim
+  validation.
+
+### Useful pointers
+
+- `research/finalist_repos/Terminal-Lostkids/python-2l-aet/`: source.
+  Skim `algo_strategy.py` end-to-end before porting. Defense order is
+  in `defense-order.json`.
+- `algos/v13_second_ring/algo_strategy.py`: the regression target.
+- `tools/bestof.py` (or the `/bestof` skill): N-game runner with Wilson
+  CI.
+- `data/citadel_config_snapshot.json`: live Citadel values; treat as
+  authoritative.
+- `docs/STRATEGY_GUIDE.md`: relevant archetypes if you need to debug
+  the port behaviour.
+
+---
+
+## Gotchas inherited by Phase 1.5
+
+1. **Python**: use `/opt/miniconda3/bin/python3.13` for any sim/parity
+   tooling. System Python 3.9 trips on `@dataclass(slots=True)`.
+2. **Pre-commit hook**: now patched. No `--no-verify` needed. The
+   `mode_parity` regression takes ≈100 s on Apple M4 — budget for it.
+3. **Replay file format**: each `.replay` starts with a blank line;
+   one JSON object per line; line 1 = config header, last frame
+   carries `endStats`. Use
+   `algos/athena/sim/validate.py:_parse_replay` for robust loading,
+   or `algos/athena_v3_planner/sim/replay_inventory.py` for stdlib
+   metadata.
+4. **47 ranked replays** in the corpus (not 23 — bigger than expected).
+   Cross-validation already shows Python ↔ Rust bit-identical on all
+   3,319 deploy turns (`d103907` log).
+5. **Don't reuse `algos/codex_v*`** — they perform poorly on the live
+   ladder.
+6. **Phase 0.5 utilities are scoped for Phase 2+**, not 1.5. Don't
+   wire them into the Lostkids baseline; they belong in the planner
+   side of Athena, not in the regression baseline.

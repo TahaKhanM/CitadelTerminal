@@ -1,9 +1,49 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 0 — DONE** (2026-04-24)
+## Current phase: **Phase 0.5 — DONE** (2026-04-24)
 
-Next phase: **Phase 0.5 — Action-frame utilities**.
+Next phase: **Phase 1.5 — Lostkids baseline port**.
 See `AUTONOMOUS_LOG.md` for the next-agent handoff brief.
+
+## Phase 0.5 task ledger
+
+| Task | Status | Commit |
+|---|---|---|
+| 1. BatchCountTracker                  | DONE | `4c640f3` |
+| 2. SpawnXHistogram                    | DONE | `93d377d` |
+| 3. WallRemovalDetector                | DONE | `1b18ea1` |
+| 4. BreachLocationTracker              | DONE | `29ffff4` |
+| 5. ResourceTracker                    | DONE | `92c001b` |
+| 6. MisdirectionDetector               | DONE | `c0b5d0d` |
+| 7. tests + 5-replay corpus validation | DONE | `86b0216` |
+| 8. STATUS + AUTONOMOUS_LOG handoff    | DONE | (this commit) |
+
+All six utilities live in
+`algos/athena_v3_planner/opponent/action_frame_utils.py` (single
+module). Pre-commit `mode_parity` regression gate ran green on every
+commit (no `--no-verify`). The pre-commit hook in
+`.git/hooks/pre-commit` was patched between Phase 0 and 0.5 to use
+`git rev-parse --show-toplevel`, so the worktree-checkout bug from
+Phase 0 is fixed.
+
+### Validation gate (per `docs/ATHENA_BUILD_PLAN.md` § Phase 0.5)
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| Per-utility unit tests | **DONE** | `tests/test_action_frame_utils.py` — 12 tests, all PASS in 0.35s. |
+| Each utility deterministic | **DONE** | `test_determinism_same_replay_twice` confirms byte-identical state across two runs of the same replay. |
+| player_index flip explicitly tested | **DONE** | One synthetic-frame test per utility (6 total) explicitly mixes player 1 + player 2 entries and asserts the utility filters by ``self_player_id``. |
+| Tests run without sim_rs | **DONE** | Pure stdlib + numpy + pytest. No engine.jar / Rust dependency. |
+| 5-replay corpus validation | **DONE** | Parametrised test runs all 6 utilities across 5 replays from `data/replay_index.json` — 2 wins, 2 losses, 1 boss, 5 distinct opponents. No crashes; outputs well-formed (range checks on all returned values). |
+
+## How to run the tests
+
+```bash
+/opt/miniconda3/bin/python3.13 -m pytest \
+    algos/athena_v3_planner/tests/test_action_frame_utils.py -v
+```
+
+12 tests, ~0.35s on Apple M4.
 
 ## Phase 0 task ledger
 
