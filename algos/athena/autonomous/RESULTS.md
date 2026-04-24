@@ -1,30 +1,72 @@
 # RESULTS — measured win rates + CIs
 
-## Baseline smoke run (n=4 × 2 sides = 8 games/opponent), 2026-04-24 cycle 1
+All evals n=4 × 2 sides = 8 games per opponent (smoke level).
 
-### v13_second_ring
-| opponent | games | W | WR | Wilson 95% CI | mean ΔHP | mean turns | crashes |
-|---|---:|---:|---:|---|---:|---:|---:|
-| v14_support_caravan | 8 | 0 | 0.0% | [0.00, 0.32] | 0.0 | 100.0 | 0 |
-| v15_adaptive | 8 | 8 | 100.0% | [0.68, 1.00] | +41.0 | 0.0 | 0 |
-| opp_scout_rush | 8 | 8 | 100.0% | [0.68, 1.00] | +46.0 | 26.0 | 0 |
-| opp_demo_line | 8 | 8 | 100.0% | [0.68, 1.00] | +48.0 | 25.0 | 0 |
-| opp_turret_castle | 8 | 8 | 100.0% | [0.68, 1.00] | +1.0 | 100.0 | 0 |
+## BASELINES
 
-**Overall: 32/40 (80%).** p50 turn time 36ms, p95 73ms, p99 111ms.
+### v13_second_ring — incumbent
+| opp | W-L-T | WR | ΔHP | turns | note |
+|---|---|---|---|---|---|
+| v14_support_caravan | 0-0-8 | 0% | +0 | 100 | **mirror tie** |
+| v15_adaptive | 8-0-0 | 100% | +41 | 0 | v15 broken |
+| opp_scout_rush | 8-0-0 | 100% | +46 | 26 | crush |
+| opp_demo_line | 8-0-0 | 100% | +48 | 25 | crush |
+| opp_turret_castle | 8-0-0 | 100% | +1 | 100 | narrow turtle win |
 
-## 🚨 CRITICAL OBSERVATION
-- **v14_support_caravan DEFEATS v13_second_ring 8-0.** Contradicts prior memory v13_mirror_ceiling.md. v14 is likely the actual current champion, not v13.
-- **v15_adaptive has turns=0.0** — likely crashing silently or collapsing on turn 0. Needs investigation but deprioritized (v14 is more interesting).
-- **v13 ties opp_turret_castle HP (+1.0 over 100 turns)** — essentially a coin flip on this matchup. Both turtle.
+### v14_support_caravan — co-champion
+Mirror of v13: 0-0-8 vs v13, 8-0 vs everything else (similar ΔHP pattern).
 
-## Next steps
-- Baseline v14 vs same pool (including v13) at n=8 to confirm strength
-- Set v14 as incumbent "champion to beat"
-- Build v20+ variants targeting v14's weaknesses (not v13's)
+## WAVE-1 VARIANTS (2026-04-24, cycle 1)
 
-## v14_support_caravan — TBD
-(pending next eval run)
+### v20_demo_train (parent=v13, tag=demo-train-offense)
+| opp | W-L-T | WR | ΔHP | turns |
+|---|---|---|---|---|
+| v13_second_ring | 0-0-8 | 0% | +0 | 100 |
+| **v14_support_caravan** | **0-8-0** | **0%** | **-40** | 99 |
+| v15_adaptive | 8-0-0 | 100% | +41 | 0 |
+| opp_scout_rush | 8-0-0 | 100% | +46 | 26 |
+| opp_demo_line | 8-0-0 | 100% | +48 | 25 |
+| opp_turret_castle | 8-0-0 | 100% | **+8** | 100 | cleaner crack than v13 (+1) |
 
-## algos/athena — TBD
-(pending next eval run)
+**Verdict:** archived. Demolishers are actively WORSE vs v14 Support Caravan (−40 HP delta). The Caravan shields too effectively. BUT: +8 HP advantage vs turret_castle shows Demolisher archetype DOES help vs turtles. Useful data; keep for hybrid.
+
+### v20_sidelane (parent=v13, tag=sidelane-adaptation)
+| opp | W-L-T | WR | ΔHP | turns |
+|---|---|---|---|---|
+| v13_second_ring | 0-0-8 | 0% | +0 | 100 |
+| v14_support_caravan | 0-0-8 | 0% | +0 | 100 |
+| v15_adaptive | 8-0-0 | 100% | +41 | 0 |
+| opp_scout_rush | 8-0-0 | 100% | +46 | 26 |
+| opp_demo_line | 8-0-0 | 100% | +45 | 25 |
+| opp_turret_castle | 8-0-0 | 100% | +1 | 100 |
+
+**Verdict:** neutral. East-west adaptation didn't break either mirror, but no regressions. Keep the `_pick_spawn_side` helper — reusable by future variants (wave-2 flank-rush can layer on top).
+
+### v21_scout_probe (parent=v13, tag=probe-recon, invention #1)
+| opp | W-L-T | WR | ΔHP | turns |
+|---|---|---|---|---|
+| v13_second_ring | 0-0-8 | 0% | +0 | 100 |
+| v14_support_caravan | 0-0-8 | 0% | +0 | 100 |
+| v15_adaptive | 8-0-0 | 100% | +41 | 0 |
+| opp_scout_rush | 8-0-0 | 100% | +46 | 26 |
+| opp_demo_line | 8-0-0 | 100% | +48 | 25 |
+| opp_turret_castle | 8-0-0 | 100% | +2 | 100 |
+
+**Verdict:** neutral-minor. Heatmap helps with turret_castle slightly (+2 vs v13's +1) but doesn't break v13/v14 mirror. Invention #1 has useful ideas but needs a stronger OFFENSIVE archetype to leverage the heatmap data.
+
+## SYNTHESIS
+
+The mirror ceiling holds. Three types of variants all tied or underperformed:
+1. Defense+offense swap (Demo train): lost 8-0 to v14
+2. Spawn adaptation: tied both
+3. Live heatmap recon: tied both
+
+**v14 Support Caravan is the true barrier**, not v13's defense. Any new champion MUST defeat v14 first.
+
+### Wave-2 anti-caravan thesis
+To beat v14:
+1. **v20_burst_scout** — spawn 15+ Scouts single frame (MP hoarded to 15+). Raw damage 15×2=30/frame outpaces Support shield regen (shield applies ONCE per pair per frame per decompiled engine, and decays by decay_per_frame, so a single burst frame has capped shield).
+2. **v20_support_kill** — Demolishers targeting the Support block [11-16, 13] directly. Supports have 40 HP upgraded → 2 Demolisher shots = 16 damage → need 3 Demolishers per Support OR coordinated multi-Demo focus.
+3. **v20_flank_edge** — spawn [0,13] or [27,13] and path along y=13 hugging the edge. Bypasses central Caravan range (shield range 7 from center). Finalist `v20_edge_block_remove` layered with flanking.
+
+These are prioritized P5 for wave-2.
