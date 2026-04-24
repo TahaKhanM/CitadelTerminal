@@ -142,6 +142,18 @@ pub struct SimState {
     pub scratch: Scratch,
 }
 
+/// Pre-extracted per-turret attack info. Populated at system_attack entry so
+/// the per-turret loop body doesn't re-do the structures.get(xy) hash lookup
+/// + spec-match for every live turret every frame.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct TurretInfo {
+    pub xy: (i32, i32),
+    pub player: u8,
+    pub dmg_walker: f32,
+    pub dmg_tower: f32,
+    pub range_sq_eps: f32,
+}
+
 /// Per-frame scratch buffers reused across frames to avoid per-frame heap
 /// allocations inside `system_attack`, `system_shield_give`, and
 /// `system_self_destruct`.
@@ -149,6 +161,9 @@ pub struct SimState {
 pub struct Scratch {
     /// `system_attack`: attacker structure tile list (turrets).
     pub attacker_struct_xys: Vec<(i32, i32)>,
+    /// `system_attack`: pre-extracted turret attack info so the hot fire
+    /// loop doesn't hash-lookup the structure each pass.
+    pub turret_infos: Vec<TurretInfo>,
     /// `system_attack`: attacker mobile index list.
     pub attacker_mobile_idxs: Vec<usize>,
     /// `fire_one`: walker target candidate records.
