@@ -1,9 +1,49 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 0.5 — DONE** (2026-04-24)
+## Current phase: **Phase 1.5 — DONE** (2026-04-25)
 
-Next phase: **Phase 1.5 — Lostkids baseline port**.
-See `AUTONOMOUS_LOG.md` for the next-agent handoff brief.
+Next phase: **Phase 2 — Defense engine** (3+ archetypes, probabilistic
+placement, refund/repair/breach-reactive logic). See
+`AUTONOMOUS_LOG.md` for the next-agent handoff brief.
+
+## Phase 1.5 task ledger
+
+| Task | Status | Commit |
+|---|---|---|
+| 1. Package structure (gamelib + algo_strategy + defense-order) | DONE | `fcb33ea` |
+| 2. Citadel-delta audit                                          | DONE | `8eaa91f` |
+| 3. Production safety wrappers (try/except + 13s watchdog)        | DONE | `5684a5a` |
+| 4. Smoke test (single match)                                     | DONE | `fd7e641` |
+| 5. /bestof 20 vs v13_second_ring                                 | DONE | `2a7f9d0` |
+| 6. STATUS + AUTONOMOUS_LOG handoff                               | DONE | (this commit) |
+
+### Validation gate (per `docs/ATHENA_BUILD_PLAN.md` § Phase 1.5)
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| Algo loads without crash         | PASS | Smoke test + 20 bestof matches, zero crashes. |
+| No `timeout_death` in bestof     | PASS | All 20 games `timeout_death=false`. |
+| Wilson 95 % LB ≥ 50 %            | **PASS** | 20-0 sweep → LB 0.8389. |
+| Citadel-delta audit documented   | PASS | `algos/athena_baseline_lostkids/CITADEL_DELTA_AUDIT.md`. |
+| Production wrappers in place     | PASS | 13 s SIGALRM watchdog + try/except + safe fallback (4 base turrets). |
+
+### Where the baseline lives
+
+```
+algos/athena_baseline_lostkids/
+├── algo.json                ← {"name": "athena_baseline_lostkids"}
+├── algo_strategy.py         ← ported Lostkids + safety wrappers
+├── defense-order.json       ← Lostkids 7-phase build_order
+├── run.sh                   ← chmod +x launcher
+├── gamelib/                 ← vendored from C1GamesStarterKit
+├── CITADEL_DELTA_AUDIT.md
+├── SMOKE_TEST.md
+└── BASELINE_RESULTS.md
+```
+
+20 archived bestof replays at:
+`replays/bestof_athena_baseline_lostkids_vs_v13_second_ring_20260425_001252/`
+(gitignored; path documented in `BASELINE_RESULTS.md`).
 
 ## Phase 0.5 task ledger
 
