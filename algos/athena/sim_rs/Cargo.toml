@@ -10,11 +10,15 @@ name = "sim_rs"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = []
+default = ["instrumented"]
 # pyo3 extension-module bindings. Opt-in so `cargo build` / `cargo test` work
 # without a matching Python version. Build the PyO3 extension with:
 #   cargo build --release --features pyo3
 pyo3 = ["dep:pyo3"]
+# Emit event-bucket entries (damage/shield/death/selfDestruct). Always on by
+# default so INSTRUMENTED = cross-validator + tests. FAST mode disables via
+# `--no-default-features` — skips the per-event string clone + vec push.
+instrumented = []
 
 [dependencies]
 indexmap = "2"
