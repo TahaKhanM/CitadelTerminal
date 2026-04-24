@@ -143,6 +143,54 @@ pub fn simulate_action_phase(
     }
 }
 
+/// Lightweight action-phase runner for batch/throughput callers that only
+/// need final player stats + mobile/structure HP summaries — skips the
+/// heavy `SimState::clone()` into `ActionResult.final_state`.
+///
+/// Returns `(p1_damage_dealt, p2_damage_dealt, frame_count)`. Callers that
+/// need the full post-action state should use `simulate_action_phase`
+/// instead.
+pub fn simulate_action_phase_lite(
+    state: &mut SimState,
+    config: &SimConfig,
+    max_frames: i32,
+) -> (f32, f32, i32) {
+    let p1_start_hp = state.p1.hp;
+    let p2_start_hp = state.p2.hp;
+
+    let mut scratch_events: Vec<EventEntry> = Vec::with_capacity(32);
+    let mut f: i32 = 0;
+
+    while f < max_frames {
+        scratch_events.clear();
+
+        system_move(state, config, &mut scratch_events);
+        system_collision(state, config, &mut scratch_events);
+        system_shield_decay(state, config, &mut scratch_events);
+        system_shield_give(state, config, &mut scratch_events);
+        system_breach(state, config, &mut scratch_events);
+        system_self_destruct(state, config, &mut scratch_events);
+        system_attack(state, config, &mut scratch_events);
+
+        clear_destroyed(state, &mut scratch_events);
+        system_remove_own_unit(state, config, &mut scratch_events);
+
+        if state.p1.hp <= 0.0 || state.p2.hp <= 0.0 {
+            f += 1;
+            break;
+        }
+        if state.mobiles.is_empty() {
+            f += 1;
+            break;
+        }
+        f += 1;
+    }
+
+    let p1_dmg = (p2_start_hp - state.p2.hp).max(0.0);
+    let p2_dmg = (p1_start_hp - state.p1.hp).max(0.0);
+    (p1_dmg, p2_dmg, f)
+}
+
 /// INSTRUMENTED action phase — yields a `FrameObservation` per frame.
 ///
 /// Engine citation: mirror of `sim/pysim.py::simulate_action_phase_iter`.
