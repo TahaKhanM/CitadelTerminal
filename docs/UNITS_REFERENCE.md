@@ -203,7 +203,7 @@ Each unit in the server-delivered `config["unitInformation"]` list has these fie
 | `selfDestructStepsRequired` | 5 |
 | `playerBreachDamage` | +1 to opponent HP on reaching edge |
 | `upgrade` | Nested dict of overrides applied on upgrade |
-| `refundPercentage` | 0.75 in older config; competition uses the 0.9 formula stated in rules — verify live |
-| `turnsRequiredToRemove` | 1 (removal effective at end of action phase) |
+| `refundPercentage` | 0.9 base / 0.8 upgraded (verified against live server config) |
+| `turnsRequiredToRemove` | 2 base / 3 upgraded (verified against live server config) |
 
 **Always read these at runtime from `self.config` inside `on_game_start`** — hardcoding them will break you if Correlation One patches values mid-season.
