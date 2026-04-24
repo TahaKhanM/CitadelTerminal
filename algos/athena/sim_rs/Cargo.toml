@@ -19,10 +19,15 @@ pyo3 = ["dep:pyo3"]
 # default so INSTRUMENTED = cross-validator + tests. FAST mode disables via
 # `--no-default-features` — skips the per-event string clone + vec push.
 instrumented = []
+# Expose pathfinder cache hit/miss/invalidation counters via public AtomicUsize
+# statics. Off by default — adds a handful of atomic adds to get_step. Enabled
+# by examples/cache_stats.rs.
+pf_counters = []
 
 [dependencies]
 indexmap = "2"
 bumpalo  = "3"
+rayon    = "1.10"
 pyo3     = { version = "0.22", features = ["extension-module", "abi3-py39"], optional = true }
 serde    = { version = "1",    features = ["derive"] }
 serde_json = "1"
