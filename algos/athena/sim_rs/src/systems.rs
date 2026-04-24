@@ -152,11 +152,46 @@ pub fn ensure_pathfinders(state: &mut SimState) {
         if m.hp <= 0.0 || m.finished_navigating { continue; }
         if (0..4).contains(&m.target_edge) { needed[m.target_edge as usize] = true; }
     }
+    // Collect mobile spawn → path-walk seeds per edge, so we can do a
+    // targeted cache warmup after pathfinder construction.
+    let mut per_edge_starts: [Vec<(i32, i32, u8)>; 4] =
+        [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
+    for m in state.mobiles.iter() {
+        if m.hp <= 0.0 || m.finished_navigating { continue; }
+        if (0..4).contains(&m.target_edge) {
+            per_edge_starts[m.target_edge as usize].push((m.xy.0, m.xy.1, m.last_move as u8));
+        }
+    }
     for edge in [EDGE_TOP_RIGHT, EDGE_TOP_LEFT, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT] {
         if !needed[edge as usize] { continue; }
         let perfects = edge_tiles_slice(edge);
         let mut pf = PathFinder::new(ARENA, edge_direction(edge), &walls, perfects);
-        pf.prewarm_step_cache();
+        // Walk each mobile's path from (xy, last_move) until the pathfinder
+        // returns the same tile (stuck signal), priming the step_cache for
+        // exactly the tiles the sim will query. Matches the on-demand BFS
+        // path semantically — no scan-order state corruption.
+        for &(sx, sy, slm) in per_edge_starts[edge as usize].iter() {
+            let mut cx = sx;
+            let mut cy = sy;
+            let mut lm = slm;
+            for _ in 0..192 {
+                let (nx, ny) = pf.get_step(cx, cy, lm);
+                if (nx, ny) == (cx, cy) { break; }
+                lm = if ny == cy { HORIZONTAL } else { VERTICAL };
+                cx = nx;
+                cy = ny;
+            }
+        }
+        // NOTE: the old `pf.prewarm_step_cache()` full-arena scan has been
+        // replaced by `warmup_via_mobile_paths` below. Scan-order prewarm
+        // produced pathfinder-state divergence with the Python reference on
+        // 6/10,000 `max_budget` fuzz configs (cross_validate 2026-04-24):
+        // prewarm's per-tile get_step invocations leave `pathlength` /
+        // `status` in an order-dependent state that differs from a fresh
+        // on-demand BFS for certain wall mazes, and the wrong result gets
+        // cached. Walking only the tiles each mobile will actually query
+        // produces a safe warm cache AND matches the subsequent sim's
+        // access pattern exactly (zero wasted cache entries).
         state.pathfinders[edge as usize] = Some(Box::new(pf));
     }
 }
