@@ -134,11 +134,28 @@ Code under `algos/athena/` (full layout in v2 plan section, unchanged).
   freezing at best-effort was rejected. See algos/athena/sim/ERROR_BANDS.md.)
 - ≥50 sims/sec on commodity laptop.
 
-**Gate status: PASS.** Final pass commit: see `git log` after the
-"Phase 1 SimCore: bit-exact parity" commit. 0 HP-damage delta on all
-1,463 turns across 23 v13 ranked replays.
+**Gate status: DONE (Phase 1.B capstone, 2026-04-24).**
 
-**Pause-and-confirm with user before advancing.**
+Authoritative parity document: [`algos/athena/sim/SIM_PARITY.md`](../algos/athena/sim/SIM_PARITY.md) —
+supersedes the old ERROR_BANDS.md (deleted).
+
+Final C-tight-coherent gate (passing):
+* 19 STRICT columns at max_err=0 across 87,677 frames / 1,486 turns / 23 ranked replays
+* 4 CASCADE columns (p{1,2}_mobiles + event_{damage,selfDestruct}) at 0.30% of corpus, all JVM-HashSet-attributable
+* Dual-mode (FAST ≡ INSTRUMENTED) byte-identical on every turn
+* 75 runtime invariants pass ranked + 10K fuzz
+* 4 metamorphic relations (player-swap, mirror-map, determinism, deploy-commutativity) pass 1200 configs
+* 100K fuzz configs all pass under same gate
+* Regression runner (`regression_runner.py`) + pre-commit hook in place
+
+Performance: best-achieved 86.2 sims/s FAST / 60.4 sims/s INSTRUMENTED.
+The 1500 sims/s Python target was missed — cProfile points at the
+pathfinder (66% of runtime), and the Rust port in § Phase 7 is the
+real lever. Plan's autonomous-run fallback applies: accept best
+achieved, document, proceed.
+
+Rust port scaffold (Cargo workspace + module skeletons) landed at
+`algos/athena/sim_rs/`; the full port is sequenced in § Phase 7.
 
 ---
 
