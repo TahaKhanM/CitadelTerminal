@@ -271,74 +271,73 @@ pub fn system_shield_give(
     config: &SimConfig,
     events: &mut Vec<EventEntry>,
 ) {
-    // Collect (structure_xy, player, shield_amount, range, uid) tuples first
-    // so we can iterate mobiles with a fresh &mut without aliasing.
-    struct SupportInfo {
-        xy: (i32, i32),
-        player: u8,
-        uid: String,
-        type_idx: i32,
-        amount: f32,
-        range: f32,
-    }
-    let mut supports: Vec<SupportInfo> = Vec::new();
-    for s in state.structures.values() {
-        if s.type_idx != IDX_SUPPORT || s.hp <= 0.0 {
-            continue;
+    // Seed the support-xy scratch list (reuses buffer capacity).
+    state.scratch.support_xys.clear();
+    for (xy, s) in state.structures.iter() {
+        if s.type_idx == IDX_SUPPORT && s.hp > 0.0 {
+            state.scratch.support_xys.push(*xy);
         }
-        let spec = config.structure_spec(IDX_SUPPORT, s.upgraded);
-        if spec.shield_per_unit <= 0.0 {
-            continue;
-        }
-        // y is integer; expression stays in f32 end-to-end so that mixing
-        // with spec.shield_per_unit / shield_bonus_per_y doesn't upcast.
-        let y = s.xy.1 as f32;
-        let y_factor: f32 = 13.5_f32 - (13.5_f32 - y).abs();
-        let amount: f32 = spec.shield_per_unit + y_factor * spec.shield_bonus_per_y;
-        supports.push(SupportInfo {
-            xy: s.xy,
-            player: s.player,
-            uid: s.uid.clone(),
-            type_idx: s.type_idx,
-            amount,
-            range: spec.shield_range,
-        });
     }
 
-    for sup in supports.iter() {
-        // Iterate mobiles; shield them and mark support.shielded_already via
-        // a secondary structure_mut pass afterwards (avoids simultaneous
-        // borrow of state.structures + state.mobiles).
-        let mut newly_shielded: Vec<String> = Vec::new();
-        for m in state.mobiles.iter_mut() {
-            if m.hp <= 0.0 || m.player != sup.player {
+    let n = state.scratch.support_xys.len();
+    for i in 0..n {
+        let sup_xy = state.scratch.support_xys[i];
+        // Fetch support info fresh each pass (may have died to SD this frame).
+        let (sup_player, sup_type_idx, sup_amount, sup_range) = {
+            let s = match state.structures.get(&sup_xy) {
+                Some(s) => s,
+                None => continue,
+            };
+            if s.hp <= 0.0 {
                 continue;
             }
-            // Check if support already shielded this mobile.
+            let spec = config.structure_spec(IDX_SUPPORT, s.upgraded);
+            if spec.shield_per_unit <= 0.0 {
+                continue;
+            }
+            let y = s.xy.1 as f32;
+            let y_factor: f32 = 13.5_f32 - (13.5_f32 - y).abs();
+            let amount = spec.shield_per_unit + y_factor * spec.shield_bonus_per_y;
+            (s.player, s.type_idx, amount, spec.shield_range)
+        };
+        state.scratch.newly_shielded.clear();
+        for m in state.mobiles.iter_mut() {
+            if m.hp <= 0.0 || m.player != sup_player {
+                continue;
+            }
             if {
-                let s = state.structures.get(&sup.xy).expect("support disappeared");
+                let s = state.structures.get(&sup_xy).expect("support disappeared");
                 s.shielded_already.iter().any(|u| u == &m.uid)
             } {
                 continue;
             }
-            if distance(sup.xy, m.xy) > sup.range + 1e-9 {
+            if distance(sup_xy, m.xy) > sup_range + 1e-9 {
                 continue;
             }
-            m.shield += sup.amount;
-            newly_shielded.push(m.uid.clone());
-            push_event!(events, EventEntry::Shield {
-                src_xy: sup.xy,
-                tgt_xy: m.xy,
-                amount: sup.amount,
-                type_id: sup.type_idx,
-                src_uid: sup.uid.clone(),
-                tgt_uid: m.uid.clone(),
-                pid: sup.player as i32,
-            });
+            m.shield += sup_amount;
+            state.scratch.newly_shielded.push(m.uid.clone());
+            #[cfg(feature = "instrumented")]
+            {
+                let sup_uid = state.structures.get(&sup_xy).unwrap().uid.clone();
+                push_event!(events, EventEntry::Shield {
+                    src_xy: sup_xy,
+                    tgt_xy: m.xy,
+                    amount: sup_amount,
+                    type_id: sup_type_idx,
+                    src_uid: sup_uid,
+                    tgt_uid: m.uid.clone(),
+                    pid: sup_player as i32,
+                });
+            }
+            #[cfg(not(feature = "instrumented"))]
+            {
+                let _ = events;
+                let _ = sup_type_idx;
+            }
         }
-        if !newly_shielded.is_empty() {
-            if let Some(s) = state.structures.get_mut(&sup.xy) {
-                for uid in newly_shielded {
+        if !state.scratch.newly_shielded.is_empty() {
+            if let Some(s) = state.structures.get_mut(&sup_xy) {
+                for uid in state.scratch.newly_shielded.drain(..) {
                     s.shielded_already.push(uid);
                 }
             }

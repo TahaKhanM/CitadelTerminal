@@ -141,7 +141,8 @@ pub struct SimState {
 }
 
 /// Per-frame scratch buffers reused across frames to avoid per-frame heap
-/// allocations inside `system_attack` and `system_self_destruct`.
+/// allocations inside `system_attack`, `system_shield_give`, and
+/// `system_self_destruct`.
 #[derive(Debug, Clone, Default)]
 pub struct Scratch {
     /// `system_attack`: attacker structure tile list (turrets).
@@ -152,6 +153,13 @@ pub struct Scratch {
     pub walker_cands: Vec<WalkerCand>,
     /// `fire_one`: structure target candidate tiles.
     pub struct_cand_xys: Vec<(i32, i32)>,
+    /// `system_shield_give`: live Support xy list (one entry per support).
+    pub support_xys: Vec<(i32, i32)>,
+    /// `system_shield_give`: uids newly shielded by the current support;
+    /// dumped onto `Structure.shielded_already` at the end of each support's
+    /// inner loop to avoid simultaneous borrow of `state.structures` +
+    /// `state.mobiles`.
+    pub newly_shielded: Vec<String>,
 }
 
 /// Walker target candidate — indices + copyable data only, no String clone.
