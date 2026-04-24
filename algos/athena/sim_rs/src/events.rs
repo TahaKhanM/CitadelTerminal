@@ -56,8 +56,8 @@
 /// after source death, etc.).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ShieldKey {
-    pub src_uid: String,
-    pub tgt_uid: String,
+    pub src_uid: u32,
+    pub tgt_uid: u32,
     pub amount_bits: u32, // f32::to_bits() — see module doc re: ordering
     pub type_id: i32,
 }
@@ -73,7 +73,7 @@ pub struct ShieldKey {
 /// collisions between two equal-amount events on the same frame.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct DamageKey {
-    pub victim_uid: String,
+    pub victim_uid: u32,
     pub amount_bits: u32,
     pub type_id: i32,
     pub xy: (i32, i32),
@@ -89,7 +89,7 @@ pub struct DamageKey {
 /// (e.g. self-destruct + direct-damage both reducing HP to 0 in one frame).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct DeathKey {
-    pub uid: String,
+    pub uid: u32,
     pub type_id: i32,
     pub pid: i32,
     pub removed: bool,
@@ -106,7 +106,7 @@ pub struct DeathKey {
 /// internal — sorting normalises that sub-ordering.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct SelfDestructKey {
-    pub src_uid: String,
+    pub src_uid: u32,
     pub src_xy: (i32, i32),
     pub damage_bits: u32,
     pub type_id: i32,
@@ -130,8 +130,8 @@ pub enum EventEntry {
         tgt_xy: (i32, i32),
         amount: f32,
         type_id: i32,
-        src_uid: String,
-        tgt_uid: String,
+        src_uid: u32,
+        tgt_uid: u32,
         pid: i32,
     },
     /// Engine wire: `[[xy], dmg, typeID, uid, pid]`
@@ -139,14 +139,14 @@ pub enum EventEntry {
         xy: (i32, i32),
         amount: f32,
         type_id: i32,
-        victim_uid: String,
+        victim_uid: u32,
         pid: i32,
     },
     /// Engine wire: `[[xy], typeID, uid, pid, removed]`
     Death {
         xy: (i32, i32),
         type_id: i32,
-        uid: String,
+        uid: u32,
         pid: i32,
         removed: bool,
     },
@@ -156,7 +156,7 @@ pub enum EventEntry {
         target_xys: Vec<(i32, i32)>,
         damage: f32,
         type_id: i32,
-        src_uid: String,
+        src_uid: u32,
         pid: i32,
     },
 }
@@ -170,8 +170,8 @@ impl EventEntry {
     fn shield_key(&self) -> Option<ShieldKey> {
         if let EventEntry::Shield { src_uid, tgt_uid, amount, type_id, .. } = self {
             Some(ShieldKey {
-                src_uid: src_uid.clone(),
-                tgt_uid: tgt_uid.clone(),
+                src_uid: *src_uid,
+                tgt_uid: *tgt_uid,
                 amount_bits: amount.to_bits(),
                 type_id: *type_id,
             })
@@ -183,7 +183,7 @@ impl EventEntry {
     fn damage_key(&self) -> Option<DamageKey> {
         if let EventEntry::Damage { xy, amount, type_id, victim_uid, pid } = self {
             Some(DamageKey {
-                victim_uid: victim_uid.clone(),
+                victim_uid: *victim_uid,
                 amount_bits: amount.to_bits(),
                 type_id: *type_id,
                 xy: *xy,
@@ -197,7 +197,7 @@ impl EventEntry {
     fn death_key(&self) -> Option<DeathKey> {
         if let EventEntry::Death { xy, type_id, uid, pid, removed } = self {
             Some(DeathKey {
-                uid: uid.clone(),
+                uid: *uid,
                 type_id: *type_id,
                 pid: *pid,
                 removed: *removed,
@@ -214,7 +214,7 @@ impl EventEntry {
             let mut sorted_targets = target_xys.clone();
             sorted_targets.sort();
             Some(SelfDestructKey {
-                src_uid: src_uid.clone(),
+                src_uid: *src_uid,
                 src_xy: *src_xy,
                 damage_bits: damage.to_bits(),
                 type_id: *type_id,

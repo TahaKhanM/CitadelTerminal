@@ -54,7 +54,7 @@ fn two_scouts_breach_p2_edge() {
             type_idx: IDX_TURRET,
             upgraded: true,
             hp: 100.0,
-            uid: "100".into(),
+            uid: 100,
             player: 2,
             turn_start_removal: None,
             shielded_already: Vec::new(),
@@ -67,7 +67,7 @@ fn two_scouts_breach_p2_edge() {
             type_idx: IDX_TURRET,
             upgraded: true,
             hp: 100.0,
-            uid: "101".into(),
+            uid: 101,
             player: 2,
             turn_start_removal: None,
             shielded_already: Vec::new(),
@@ -80,7 +80,7 @@ fn two_scouts_breach_p2_edge() {
             type_idx: IDX_SUPPORT,
             upgraded: true,
             hp: 40.0,
-            uid: "102".into(),
+            uid: 102,
             player: 2,
             turn_start_removal: None,
             shielded_already: Vec::new(),
@@ -93,7 +93,7 @@ fn two_scouts_breach_p2_edge() {
         type_idx: IDX_SCOUT,
         hp: 15.0,
         shield: 0.0,
-        uid: "200".into(),
+        uid: 200,
         player: 1,
         spawn_xy: (13, 0),
         target_edge: EDGE_TOP_RIGHT,
@@ -102,14 +102,14 @@ fn two_scouts_breach_p2_edge() {
         last_move: 0,
         finished_navigating: false,
         reached_target: false,
-        breached: false,
+        breached: false
     });
     state.mobiles.push(Mobile {
         xy: (14, 0),
         type_idx: IDX_SCOUT,
         hp: 15.0,
         shield: 0.0,
-        uid: "201".into(),
+        uid: 201,
         player: 1,
         spawn_xy: (14, 0),
         target_edge: EDGE_TOP_LEFT,
@@ -118,7 +118,7 @@ fn two_scouts_breach_p2_edge() {
         last_move: 0,
         finished_navigating: false,
         reached_target: false,
-        breached: false,
+        breached: false
     });
 
     let result = simulate_action_phase(&mut state, &cfg, 200);

@@ -277,7 +277,10 @@ pub fn simulate_batch_parallel(
     (0..n)
         .into_par_iter()
         .map(|_| {
-            let mut state = template.clone();
+            // `clone_no_scratch` drops the 10 scratch-Vec allocs per sim —
+            // in the parallel hot path the allocator serializes those cross-
+            // thread and caps throughput well below the per-core ceiling.
+            let mut state = template.clone_no_scratch();
             simulate_action_phase_lite(&mut state, cfg, max_frames)
         })
         .collect()

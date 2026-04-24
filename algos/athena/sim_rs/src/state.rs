@@ -35,8 +35,11 @@ pub struct Structure {
     pub upgraded: bool,
     pub hp: f32,
     /// UID from the replay's spawn event (`ev[2]` in raw JSON). Never re-used.
-    /// See `Game.java:132 getNewID` for the engine counter this corresponds to.
-    pub uid: String,
+    /// Stored as `u32` — the engine's Game.java:132 getNewID counter is a
+    /// monotone int that never reaches the 2^32 ceiling in a single game.
+    /// Callers with string-form UIDs (replay ingestion, tests) parse to u32
+    /// at the boundary.
+    pub uid: u32,
     /// 1 = first/bottom player, 2 = second/top player. Raw-JSON convention,
     /// flipped from the `game_state.GameUnit` API's 0/1 (see CLAUDE.md Note 6).
     pub player: u8,
@@ -46,7 +49,7 @@ pub struct Structure {
     /// Supports-only: uids already shielded by THIS structure this action phase.
     /// Mirrors `ShieldingSystem.java`'s per-support "already shielded" tracking;
     /// Supports cannot re-shield a mobile they already touched in the same phase.
-    pub shielded_already: Vec<String>,
+    pub shielded_already: Vec<u32>,
 }
 
 /// Live mobile unit mid-action-phase (Scout / Demolisher / Interceptor).
@@ -61,7 +64,8 @@ pub struct Mobile {
     pub type_idx: i32,
     pub hp: f32,
     pub shield: f32,
-    pub uid: String,
+    /// See `Structure.uid` — same u32 interning story.
+    pub uid: u32,
     pub player: u8,
     /// Original spawn tile. Used by `PathFinder.java` to compute the route.
     pub spawn_xy: (i32, i32),
@@ -145,6 +149,13 @@ pub struct SimState {
 /// Pre-extracted per-turret attack info. Populated at system_attack entry so
 /// the per-turret loop body doesn't re-do the structures.get(xy) hash lookup
 /// + spec-match for every live turret every frame.
+///
+/// `enemy_cand_{start,end}` indices into `Scratch.turret_enemy_cands_flat`.
+/// Contains every enemy structure tile within this turret's `attack_range`
+/// at dirty-rebuild time; `fire_one`'s struct-targeting fallback iterates
+/// this sub-list (≈5 entries) instead of the full enemy-player roster (~54
+/// entries on mid-game), which dominates runtime when walkers aren't in
+/// range of a turret.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct TurretInfo {
     pub xy: (i32, i32),
@@ -152,6 +163,12 @@ pub struct TurretInfo {
     pub dmg_walker: f32,
     pub dmg_tower: f32,
     pub range_sq_eps: f32,
+    /// Precomputed `ceil(sqrt(range_sq_eps))` for the per-frame bbox
+    /// pre-filter in `system_attack`. Saved here so the hot turret loop
+    /// doesn't re-do a sqrt + ceil + cast per turret per frame.
+    pub range_bound: i32,
+    pub enemy_cand_start: u32,
+    pub enemy_cand_end: u32,
 }
 
 /// Per-frame scratch buffers reused across frames to avoid per-frame heap
@@ -176,7 +193,7 @@ pub struct Scratch {
     /// dumped onto `Structure.shielded_already` at the end of each support's
     /// inner loop to avoid simultaneous borrow of `state.structures` +
     /// `state.mobiles`.
-    pub newly_shielded: Vec<String>,
+    pub newly_shielded: Vec<u32>,
     /// `clear_destroyed`: dead structure xys discovered this frame.
     pub dead_struct_xys: Vec<(i32, i32)>,
     /// `system_attack`: player-1 owned structure xys (refreshed at system
@@ -185,6 +202,31 @@ pub struct Scratch {
     pub p1_struct_xys: Vec<(i32, i32)>,
     /// `system_attack`: player-2 owned structure xys.
     pub p2_struct_xys: Vec<(i32, i32)>,
+    /// `system_attack`: flat concatenated per-turret enemy-structure
+    /// candidates within range. Indexed by `TurretInfo.enemy_cand_{start,end}`.
+    /// Pre-filtered by Euclidean distance at rebuild time so `fire_one`'s
+    /// struct-targeting fallback skips the 54-tile distance scan.
+    pub turret_enemy_cands_flat: Vec<(i32, i32)>,
+    /// Per-frame compact cache of live enemy mobile coords. `p1_live_mobs`
+    /// holds player-1-owned live mobiles (attackable by p2 turrets), and
+    /// vice versa. Rebuilt once per `system_attack` entry from `state.mobiles`
+    /// (mobiles move every frame so this can't be dirty-cached like
+    /// structures — but iterating a flat `Vec<MobileCand>` is cheaper than
+    /// dereferencing the full `Mobile` struct 5 times per turret fire).
+    pub p1_live_mobs: Vec<WalkerCand>,
+    pub p2_live_mobs: Vec<WalkerCand>,
+    /// Bounding-box over the enemy-mobile positions, per player.
+    /// `(x_lo, x_hi, y_lo, y_hi)`; turrets outside this bbox + range skip
+    /// the walker_cands build entirely and jump straight to struct fallback.
+    pub p1_mob_bbox: (i32, i32, i32, i32),
+    pub p2_mob_bbox: (i32, i32, i32, i32),
+    /// Dirty bit for the three scratch lists above (plus `support_xys`).
+    /// True on template build and whenever any structure dies; cleared after
+    /// the scratch is rebuilt in `system_attack` / `system_shield_give`.
+    /// Without this flag we'd rescan all 108 structures 2-3 times per frame
+    /// — in the mid-game fixture that dominates the simulator's runtime
+    /// (measured 77 µs of 90 µs/sim via `examples/simprof`).
+    pub structures_dirty: bool,
 }
 
 /// Walker target candidate — indices + copyable data only, no String clone.
@@ -213,7 +255,14 @@ impl SimState {
             p2: PlayerStats { hp: 40.0, sp: 8.0, mp: 1.0 },
             pending_removal_xys: IndexMap::new(),
             pathfinders: [None, None, None, None],
-            scratch: Scratch::default(),
+            scratch: Scratch {
+                // Force initial scratch rebuild on first `system_attack` /
+                // `system_shield_give` — the freshly-constructed scratch is
+                // empty and callers may insert structures before the first
+                // system runs.
+                structures_dirty: true,
+                ..Default::default()
+            },
         }
     }
 
@@ -251,6 +300,35 @@ impl SimState {
     /// pathfinder's `blocked` grid.
     pub fn is_occupied(&self, xy: (i32, i32)) -> bool {
         self.structures.contains_key(&xy)
+    }
+
+    /// Clone the state into a fresh sim-ready snapshot WITHOUT cloning
+    /// `scratch`. Each scratch Vec carries capacity but no live data
+    /// (systems rebuild from `structures` + `mobiles` on dirty), so
+    /// cloning them costs 10 heap allocs per sim that serve no purpose —
+    /// in the `simulate_batch_parallel` path, 10 threads × 10 allocs ×
+    /// 80 K sims/s ≈ 8 M allocs/s, past the macOS allocator's serialization
+    /// threshold. Use this in hot batch paths where you intend to run
+    /// `simulate_action_phase` on the result.
+    pub fn clone_no_scratch(&self) -> Self {
+        Self {
+            turn: self.turn,
+            structures: self.structures.clone(),
+            mobiles: self.mobiles.clone(),
+            p1: self.p1.clone(),
+            p2: self.p2.clone(),
+            pending_removal_xys: self.pending_removal_xys.clone(),
+            pathfinders: [
+                self.pathfinders[0].clone(),
+                self.pathfinders[1].clone(),
+                self.pathfinders[2].clone(),
+                self.pathfinders[3].clone(),
+            ],
+            scratch: Scratch {
+                structures_dirty: true,
+                ..Default::default()
+            },
+        }
     }
 
     /// Player-indexed scoreboard accessor. Engine citation:

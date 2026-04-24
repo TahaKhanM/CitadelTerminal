@@ -45,11 +45,11 @@ pub struct ProximityArena {
     /// `Game.gameObjects` ArrayList — we mirror its insertion-order semantics
     /// here so that `mobiles_in_range` iteration matches the engine's
     /// gameObjects scan used in strict-ordered buckets.
-    mobiles: IndexMap<String, (i32, i32)>,
+    mobiles: IndexMap<u32, (i32, i32)>,
     /// `(x, y) -> uid`; one structure per tile (engine's placement rule —
     /// `StructureSystem.java` rejects overlap). Insertion-order iteration for
     /// the structure-scan order.
-    structures: IndexMap<(i32, i32), String>,
+    structures: IndexMap<(i32, i32), u32>,
 }
 
 impl Default for ProximityArena {
@@ -78,7 +78,7 @@ impl ProximityArena {
     /// Engine citation: `ProximityArena.java:24-31 addSensor` — we skip the
     /// GridMask rasterisation because range queries do the radius check at
     /// query time (O(n) scan) rather than at insert time.
-    pub fn insert_mobile(&mut self, uid: String, xy: (i32, i32)) {
+    pub fn insert_mobile(&mut self, uid: u32, xy: (i32, i32)) {
         self.mobiles.insert(uid, xy);
     }
 
@@ -86,7 +86,7 @@ impl ProximityArena {
     /// overwrites (engine citation: `StructureSystem.java` placement check).
     ///
     /// Engine citation: `ProximityArena.java:24-31 addSensor`.
-    pub fn insert_structure(&mut self, xy: (i32, i32), uid: String) {
+    pub fn insert_structure(&mut self, xy: (i32, i32), uid: u32) {
         self.structures.insert(xy, uid);
     }
 
@@ -95,8 +95,8 @@ impl ProximityArena {
     /// `IndexMap::swap_remove` would corrupt the iteration contract).
     ///
     /// Engine citation: `ProximityArena.java:33-40 removeSensor`.
-    pub fn remove_mobile(&mut self, uid: &str) {
-        self.mobiles.shift_remove(uid);
+    pub fn remove_mobile(&mut self, uid: u32) {
+        self.mobiles.shift_remove(&uid);
     }
 
     /// Remove a structure by coordinate. Shift-remove preserves surviving
@@ -116,14 +116,14 @@ impl ProximityArena {
     /// test operates directly on the float range_sq supplied by the caller
     /// (the caller is responsible for matching the engine's radius² +
     /// tolerance convention — see `sim/pysim.py` SD / attack callsites).
-    pub fn mobiles_in_range(&self, xy: (i32, i32), range_sq: f32) -> Vec<String> {
+    pub fn mobiles_in_range(&self, xy: (i32, i32), range_sq: f32) -> Vec<u32> {
         let mut out = Vec::new();
         let (cx, cy) = (xy.0 as f32, xy.1 as f32);
         for (uid, &(mx, my)) in self.mobiles.iter() {
             let dx = mx as f32 - cx;
             let dy = my as f32 - cy;
             if dx * dx + dy * dy <= range_sq {
-                out.push(uid.clone());
+                out.push(*uid);
             }
         }
         out
@@ -159,12 +159,12 @@ impl ProximityArena {
     }
 
     /// Test-only: look up a mobile's position.
-    pub fn mobile_position(&self, uid: &str) -> Option<(i32, i32)> {
-        self.mobiles.get(uid).copied()
+    pub fn mobile_position(&self, uid: u32) -> Option<(i32, i32)> {
+        self.mobiles.get(&uid).copied()
     }
 
     /// Test-only: look up a structure's uid at `xy`.
-    pub fn structure_uid(&self, xy: (i32, i32)) -> Option<&str> {
-        self.structures.get(&xy).map(String::as_str)
+    pub fn structure_uid(&self, xy: (i32, i32)) -> Option<u32> {
+        self.structures.get(&xy).copied()
     }
 }
