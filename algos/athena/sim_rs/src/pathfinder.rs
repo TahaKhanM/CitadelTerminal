@@ -58,14 +58,14 @@ pub struct CoordQueue {
 }
 
 impl CoordQueue {
-    /// CoordQueue.java:6-12 — engine uses cap=200; we use 256 (power of two)
-    /// so index arithmetic compiles to AND-with-mask instead of modulo. The
-    /// capacity threshold `(size+1)*2 >= cap` matches the engine, just with
-    /// a different numeric cap. Growth is still doubling, so all later caps
-    /// stay powers of two as well.
+    /// CoordQueue.java:6-12 — engine uses cap=200; we use 64 ints (32 coords,
+    /// power of two) so index arithmetic compiles to AND-with-mask instead of
+    /// modulo. possible_steps never exceeds 5 entries, requires_validation is
+    /// bounded by 4 neighbors + 1 self, and the BFS queues peak under 50 for
+    /// a 28×28 diamond — 64 covers the common case with doubling on overflow.
     pub fn new() -> Self {
         Self {
-            data: vec![0i32; 256],
+            data: vec![0i32; 64],
             start: 0,
             end: 0,
             size: 0,
