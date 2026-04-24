@@ -37,7 +37,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Deque, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Deque, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -586,3 +586,129 @@ class ResourceTracker:
         if r == "hp":
             return self.hp_history
         raise ValueError(f"Unknown resource: {resource!r}")
+
+
+# ---------------------------------------------------------------------------
+# Task 6 — MisdirectionDetector
+# ---------------------------------------------------------------------------
+
+@dataclass
+class MisdirectionDetector:
+    """Detects feint-then-commit patterns on opponent edges.
+
+    Lostkids' check: opponent is ``left_edge_misdirecting`` when the
+    left edge looks open (mobile units could pass) AND there's a
+    structure at ``[0, 14]`` — the canonical "decoy wall" tile that
+    silently funnels mobile units the OTHER way once you commit your
+    interceptors. Symmetric for the right edge with tile ``[27, 14]``.
+
+    This detector lifts the same idea but reports a *confidence* in
+    ``[0, 1]`` rather than a hard boolean, weighted recency-style: the
+    most recent observation gets full weight, older ones halve. A
+    single-turn feint won't lock us in; a sustained pattern over the
+    window will.
+
+    Caller responsibilities:
+      - Each turn, call ``observe(...)`` once with the opponent's
+        current structure tiles AND two booleans for whether each
+        edge is currently open. The "open" check is normally a
+        ``find_path_to_edge`` from the planner — we don't redo
+        pathfinding here so the detector stays cheap.
+      - Alternatively, ``consume_action_frame(frame, left_open,
+        right_open)`` will pull the opponent structures out of the
+        frame for you (reads p2Units when self_player_id=1).
+
+    Player_index flip: ``self_player_id`` defaults to 1 (action-frame
+    convention). Reading the opponent's structures uses
+    p2Units / p1Units accordingly.
+    """
+
+    self_player_id: int = 1
+    window_size: int = 5
+    # Decoy tiles (x, y) — both at y=14 (opponent's row directly above
+    # midline). Lostkids: [0, 14] for left, [27, 14] for right.
+    LEFT_DECOY: Tuple[int, int] = (0, 14)
+    RIGHT_DECOY: Tuple[int, int] = (27, 14)
+
+    # Sliding window of (turn, left_misdirect_bool, right_misdirect_bool)
+    _window: Deque[Tuple[int, bool, bool]] = field(default_factory=deque)
+    _scanned_turns: Set[int] = field(default_factory=set)
+
+    def observe(
+        self,
+        turn_number: int,
+        opp_structure_tiles: Iterable[Tuple[int, int]],
+        left_edge_open: bool,
+        right_edge_open: bool,
+    ) -> None:
+        """Record a single turn's observation.
+
+        Per Lostkids: misdirect = ``edge_open AND decoy_present``. A
+        wall on the decoy tile combined with a clear path to the edge
+        is the signal that the opponent expects you to commit to that
+        edge while they actually attack the other one.
+        """
+        if turn_number in self._scanned_turns:
+            return
+        self._scanned_turns.add(turn_number)
+
+        tile_set = set(opp_structure_tiles)
+        left_misdirect = bool(left_edge_open and self.LEFT_DECOY in tile_set)
+        right_misdirect = bool(right_edge_open and self.RIGHT_DECOY in tile_set)
+
+        self._window.append((turn_number, left_misdirect, right_misdirect))
+        while len(self._window) > self.window_size:
+            self._window.popleft()
+
+    def consume_action_frame(
+        self,
+        frame: Dict[str, Any],
+        left_edge_open: bool,
+        right_edge_open: bool,
+    ) -> None:
+        """Action-frame variant: pulls opponent structure tiles from frame."""
+        turn_info = frame.get("turnInfo")
+        if turn_info is None or not _is_first_action_frame(turn_info):
+            return
+        turn_number = int(turn_info[1])
+        opp_units_key = "p2Units" if self.self_player_id == 1 else "p1Units"
+        opp_units = frame.get(opp_units_key)
+        tiles: List[Tuple[int, int]] = []
+        if isinstance(opp_units, list):
+            for type_idx in STRUCTURE_TYPES:
+                if type_idx >= len(opp_units):
+                    continue
+                group = opp_units[type_idx] or []
+                for entry in group:
+                    try:
+                        tiles.append((int(entry[0]), int(entry[1])))
+                    except (IndexError, TypeError, ValueError):
+                        continue
+        self.observe(turn_number, tiles, left_edge_open, right_edge_open)
+
+    # -- queries --------------------------------------------------------
+
+    def left_confidence(self) -> float:
+        return self._confidence(side="left")
+
+    def right_confidence(self) -> float:
+        return self._confidence(side="right")
+
+    def _confidence(self, side: str) -> float:
+        if not self._window:
+            return 0.0
+        idx = 1 if side == "left" else 2
+        # Most recent observation gets full weight, older halve.
+        n = len(self._window)
+        weights = [0.5 ** (n - 1 - i) for i in range(n)]
+        total_w = sum(weights)
+        if total_w == 0.0:
+            return 0.0
+        score = sum(
+            w * (1.0 if obs[idx] else 0.0)
+            for w, obs in zip(weights, self._window)
+        )
+        return score / total_w
+
+    def n_turns_observed(self) -> int:
+        return len(self._window)
