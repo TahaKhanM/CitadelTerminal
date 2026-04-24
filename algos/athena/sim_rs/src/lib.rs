@@ -103,7 +103,7 @@ mod py_api {
         let structs = structs.downcast::<PyList>()?;
         for item in structs.iter() {
             let s = item.downcast::<PyDict>()?;
-            let xy: (i32, i32) = s.get_item("xy")?.unwrap().extract::<(i32, i32)>()?;
+            let xy: (i32, i32) = s.get_item("xy")?.unwrap().extract::<Vec<i32>>().map(|v| (v[0], v[1]))?;
             let tsr_raw = s.get_item("turn_start_removal")?.unwrap();
             let tsr: Option<i32> = if tsr_raw.is_none() {
                 None
@@ -127,8 +127,8 @@ mod py_api {
         let mobs = mobs.downcast::<PyList>()?;
         for item in mobs.iter() {
             let m = item.downcast::<PyDict>()?;
-            let xy: (i32, i32) = m.get_item("xy")?.unwrap().extract::<(i32, i32)>()?;
-            let spawn_xy: (i32, i32) = m.get_item("spawn_xy")?.unwrap().extract::<(i32, i32)>()?;
+            let xy: (i32, i32) = m.get_item("xy")?.unwrap().extract::<Vec<i32>>().map(|v| (v[0], v[1]))?;
+            let spawn_xy: (i32, i32) = m.get_item("spawn_xy")?.unwrap().extract::<Vec<i32>>().map(|v| (v[0], v[1]))?;
             let uid_s: String = m.get_item("uid")?.unwrap().extract()?;
             state.mobiles.push(Mobile {
                 xy,
@@ -222,10 +222,76 @@ mod py_api {
         sim_state_to_dict(py, &state)
     }
 
+    /// Debug helper: run N frames of the action phase and return the
+    /// final `(mobile_xy, steps_taken, last_move, finished_navigating,
+    /// reached_target)` of the first mobile plus final sp/hp.
+    #[pyfunction]
+    fn debug_trace_py<'py>(
+        py: Python<'py>,
+        state_dict: Bound<'py, PyDict>,
+        config_path: String,
+        max_frames: i32,
+    ) -> PyResult<Bound<'py, PyDict>> {
+        use crate::events::EventEntry;
+        use crate::systems::{
+            clear_destroyed, ensure_pathfinders, system_attack, system_breach,
+            system_collision, system_move, system_remove_own_unit, system_self_destruct,
+            system_shield_decay, system_shield_give,
+        };
+        let cfg = SimConfig::load(std::path::Path::new(&config_path))
+            .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(
+                format!("config load failed: {e}")))?;
+        let mut state = build_state_from_dict(&state_dict)?;
+        ensure_pathfinders(&mut state);
+        let mut evs: Vec<EventEntry> = Vec::with_capacity(32);
+        let trace = PyList::empty_bound(py);
+        let mut f = 0;
+        while f < max_frames {
+            evs.clear();
+            system_move(&mut state, &cfg, &mut evs);
+            system_collision(&mut state, &cfg, &mut evs);
+            system_shield_decay(&mut state, &cfg, &mut evs);
+            system_shield_give(&mut state, &cfg, &mut evs);
+            system_breach(&mut state, &cfg, &mut evs);
+            system_self_destruct(&mut state, &cfg, &mut evs);
+            system_attack(&mut state, &cfg, &mut evs);
+            clear_destroyed(&mut state, &mut evs);
+            system_remove_own_unit(&mut state, &cfg, &mut evs);
+            // Snapshot per-frame: mobile xy + flags (first mobile only).
+            let entry = PyDict::new_bound(py);
+            entry.set_item("frame", f)?;
+            entry.set_item("mob_count", state.mobiles.len())?;
+            if let Some(m) = state.mobiles.first() {
+                entry.set_item("xy", m.xy)?;
+                entry.set_item("steps_taken", m.steps_taken)?;
+                entry.set_item("last_move", m.last_move)?;
+                entry.set_item("move_buildup", m.move_buildup as f64)?;
+                entry.set_item("finished_navigating", m.finished_navigating)?;
+                entry.set_item("reached_target", m.reached_target)?;
+                entry.set_item("breached", m.breached)?;
+                entry.set_item("hp", m.hp as f64)?;
+            }
+            entry.set_item("p1_sp", state.p1.sp as f64)?;
+            entry.set_item("p2_hp", state.p2.hp as f64)?;
+            trace.append(entry)?;
+            if state.p1.hp <= 0.0 || state.p2.hp <= 0.0 { f += 1; break; }
+            if state.mobiles.is_empty() { f += 1; break; }
+            f += 1;
+        }
+        let out = PyDict::new_bound(py);
+        out.set_item("trace", trace)?;
+        out.set_item("final_mob_count", state.mobiles.len())?;
+        out.set_item("p1_sp", state.p1.sp as f64)?;
+        out.set_item("p2_hp", state.p2.hp as f64)?;
+        out.set_item("frames", f)?;
+        Ok(out)
+    }
+
     #[pymodule]
     fn sim_rs(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add("__version__", env!("CARGO_PKG_VERSION"))?;
         m.add_function(wrap_pyfunction!(simulate_action_phase_py, m)?)?;
+        m.add_function(wrap_pyfunction!(debug_trace_py, m)?)?;
         Ok(())
     }
 }
