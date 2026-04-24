@@ -156,9 +156,14 @@ pub fn ensure_pathfinders(state: &mut SimState) {
     for edge in [EDGE_TOP_RIGHT, EDGE_TOP_LEFT, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT] {
         if !needed[edge as usize] { continue; }
         let perfects = edge_tiles_slice(edge);
-        state.pathfinders[edge as usize] = Some(Box::new(
-            PathFinder::new(ARENA, edge_direction(edge), &walls, perfects)
-        ));
+        let mut pf = PathFinder::new(ARENA, edge_direction(edge), &walls, perfects);
+        // Pre-warm the step cache so every cloned sim inherits hot paths.
+        // One-time ~2 ms per edge at template build; amortised across every
+        // cloned sim thereafter. Converts cold get_step (~900 ns BFS) into
+        // a cached lookup (~4 ns array index). See PathFinder::prewarm_step_cache
+        // for the wall-safety reasoning.
+        pf.prewarm_step_cache();
+        state.pathfinders[edge as usize] = Some(Box::new(pf));
     }
 }
 
