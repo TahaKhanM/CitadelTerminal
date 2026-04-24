@@ -236,6 +236,8 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 # MUST reset it here, otherwise the pre-upgrade flag
                 # leaks through and type-6's `turn_start_removal is
                 # None` gate skips the new removal.
+                if s.turn_start_removal is not None:
+                    state.pending_removal_xys.discard(xy)
                 s.turn_start_removal = None
                 # Re-insert at end of dict to match gameObjects order
                 # (engine destroys old Gameobject, appends new one to
@@ -294,6 +296,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                         and s.player == player
                         and s.turn_start_removal is None):
                     s.turn_start_removal = state.turn
+                    state.pending_removal_xys.add(xy)
                 if events is not None:
                     events.append({
                         "type": "spawn", "xy": xy, "type_idx": 6,
@@ -864,12 +867,19 @@ def system_remove_own_unit(state: SimState, config: SimConfig,
 
     Citadel note: every structure's turns_required_to_remove >= 2, so
     within a single turn's action phase this gate is always `>`
-    (pending structure survives this turn). The function is a no-op on
-    ranked replays. Ported for fuzz/future-config parity anyway."""
+    (pending structure survives this turn). The function is called every
+    action frame regardless, mirroring engine's GameMain.runLoop:316.
+    Fast-path: iterate the small pending-removal set, not all structures."""
+    pending = state.pending_removal_xys
+    if not pending:
+        return
     to_refund = []
-    for xy in list(state.structures.keys()):
+    for xy in list(pending):
         s = state.structures.get(xy)
         if s is None or s.turn_start_removal is None or s.hp <= 0.0:
+            # Stale entry (structure died from combat this frame or
+            # earlier); scrub.
+            pending.discard(xy)
             continue
         spec = config.structure_spec(s.type_idx, upgraded=s.upgraded)
         if s.turn_start_removal + spec.turns_required_to_remove > current_turn:
@@ -895,6 +905,7 @@ def system_remove_own_unit(state: SimState, config: SimConfig,
         # engine's next clearDestroyed at start-of-gameEngineLoop would
         # have done this anyway).
         state.structures.pop(xy, None)
+        pending.discard(xy)
         if state.pathfinders is not None:
             for pf in state.pathfinders.values():
                 pf.remove(xy[0], xy[1])
@@ -939,10 +950,11 @@ def simulate_action_phase(
 
     frame_events: List[dict] = []
     f = 0
+    # Action-iteration shape matches engine's GameMain.runLoop:268-318:
+    # systems run, snapshot (implicit in this non-iter path), walkersAlive
+    # gate at BOTTOM of iteration. Turns with zero mobile spawns still
+    # produce one frame so frame_count matches engine.
     while f < max_frames:
-        if not state.mobiles:
-            break
-
         system_move(state, config, frame_events)
         system_collision(state)
         system_shield_decay(state, config)
@@ -956,6 +968,8 @@ def simulate_action_phase(
         clear_destroyed(state)
 
         f += 1
+        if not state.mobiles:
+            break
 
     p1_dmg = max(0.0, p2_start_hp - state.p2.hp)
     p2_dmg = max(0.0, p1_start_hp - state.p1.hp)
@@ -1346,10 +1360,25 @@ def simulate_action_phase_iter(
     f = 0
     total_frame = total_frame_start
     pending_seed = list(seed_events) if seed_events else []
-    while f < max_frames:
-        if not state.mobiles:
-            return
 
+    # Engine's action-iteration shape (GameMain.runLoop:268-318) is:
+    #   ++totalActionFrames; ++totalFrameNumber;
+    #   emit frame;
+    #   clearEvents;
+    #   if (!walkersAlive) end action;
+    #   else { gameEngineLoop; runRemoveOwnUnitSystem; ++actionFrame; }
+    #
+    # Key subtlety: the walkersAlive check is at the BOTTOM of the
+    # iteration, so the emit happens before it — a turn where no mobiles
+    # ever spawn still emits one action frame (empty walker buckets,
+    # full structure snapshot) before the loop terminates. Previous
+    # SimCore shape checked `not state.mobiles` at the top and skipped
+    # that frame entirely — cause of the ~10-per-replay frame_count
+    # residuals. This loop now mirrors engine: systems run (engine's
+    # pre-emit gameEngineLoop), then emit, then walkersAlive gate at
+    # bottom. The systems are no-ops on empty state.mobiles so the
+    # "no mobiles ever" case emits exactly one frame.
+    while f < max_frames:
         # Deploy-phase spawn events seed frame 0 (engine's processInputBuild
         # + processInputDeploy emit into the same event buckets before the
         # first action frame's clearEvents runs).
@@ -1364,36 +1393,25 @@ def simulate_action_phase_iter(
         system_self_destruct(state, config, flat_events)
         system_attack(state, config, flat_events)
 
-        # Deaths now fire inline at each kill site. Harvest type/player
-        # from those flat events so the translator can resolve event
-        # references whose target has been popped by post-clear below.
-        # Use get(k, default) to tolerate type_idx==0 (walls).
+        # Engine's end-of-gameEngineLoop clearDestroyedGameObjects
+        # (Game.java:181) removes dead units before visibles are captured.
+        clear_destroyed(state)
+
+        # RemoveOwnUnitSystem runs AFTER gameEngineLoop in engine's
+        # ACTION-phase iteration (GameMain.runLoop:316). Events and pops
+        # land in this frame's bucket / snapshot.
+        system_remove_own_unit(state, config, flat_events, turn)
+
+        # Harvest dead-unit info from ALL death events in this frame's
+        # bucket (system_attack/SD/breach inline + RemoveOwnUnitSystem's
+        # refund deaths) so the translator can resolve event references
+        # whose target has been popped. Single pass.
+        # Use get(k, default) NOT get(k) or default — walls have type_idx=0.
         for e in flat_events:
             if isinstance(e, dict) and e.get("type") == "death":
                 uid = str(e.get("uid"))
                 dead_lookup[uid] = (int(e.get("type_idx", -1)),
                                     int(e.get("player", 0)))
-
-        # Engine's end-of-gameEngineLoop clearDestroyedGameObjects
-        # (Game.java:181) removes dead units before visibles are captured.
-        # Mirror that: post-clear BEFORE build_frame_observation so the
-        # emitted p{1,2}Units reflect the survivor set.
-        clear_destroyed(state)
-
-        # RemoveOwnUnitSystem runs AFTER gameEngineLoop in engine's
-        # ACTION-phase iteration (GameMain.runLoop:316). Its refund-death
-        # events accumulate into this frame's bucket and its structure
-        # pops propagate into this frame's p{1,2}Units snapshot. For
-        # Citadel configs this is always a no-op (turns_required >= 2
-        # and this turn's removal was set this turn); ported for fuzz /
-        # future-config parity.
-        system_remove_own_unit(state, config, flat_events, turn)
-        for e in flat_events:
-            if isinstance(e, dict) and e.get("type") == "death":
-                uid = str(e.get("uid"))
-                if uid not in dead_lookup:
-                    dead_lookup[uid] = (int(e.get("type_idx", -1)),
-                                        int(e.get("player", 0)))
 
         obs = build_frame_observation(
             state, flat_events, frame_idx=f, turn=turn,
@@ -1402,5 +1420,30 @@ def simulate_action_phase_iter(
             config=config,
         )
         yield obs
+
+        # Termination gates — engine applies BOTH, after emit:
+        #
+        #   1. processEndGame(false) — GameMain.runLoop:301, called
+        #      between clearEvents and the walkersAlive if/else.
+        #      Sets this.exitGame=true if p1.totalHP<=0 or p2.totalHP<=0.
+        #      The outer `while (!this.exitGame)` then breaks at the top
+        #      of the next iteration. Net effect: when either player's
+        #      HP drops to 0-or-below, the action phase emits its current
+        #      frame and then ends — even if walkers are still alive.
+        #
+        #   2. walkersAlive gate — GameMain.runLoop:296-300. Scans all
+        #      UnitInfoComponents for WALKER category; SimCore's
+        #      state.mobiles is exactly that set post-clear_destroyed.
+        #
+        # Example where gate 1 is load-bearing: T30 of a ranked replay
+        # where p2.hp hits -6 at F28 with 3 walkers still on the board.
+        # Replay emits F28 and stops; without the HP gate SimCore
+        # iterates until state.mobiles empties, producing up to 86
+        # excess frames.
+        if state.p1.hp <= 0.0 or state.p2.hp <= 0.0:
+            return
+        if not state.mobiles:
+            return
+
         f += 1
         total_frame += 1

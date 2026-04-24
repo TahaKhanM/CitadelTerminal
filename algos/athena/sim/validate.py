@@ -186,6 +186,7 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
                 continue
             spec = config.structure_spec(s.type_idx, upgraded=s.upgraded)
             s.turn_start_removal = current_turn - (spec.turns_required_to_remove - hp_slot)
+            state.pending_removal_xys.add((x, y))
     return state
 
 

@@ -125,6 +125,13 @@ class SimState:
     # kept in sync thereafter via put()/remove() calls from
     # apply_deploy_actions + clear_destroyed.
     pathfinders: Optional[dict] = None
+    # Fast-path set for system_remove_own_unit: xy tiles whose structure has
+    # turn_start_removal set. Kept in sync wherever turn_start_removal is
+    # mutated (type-6 in apply_deploy_actions, upgrade reset, deploy-frame
+    # reconstruction, and the refund destroy). Empty set → system_remove_own
+    # _unit is a no-op immediately; avoids O(structures) scan per frame for
+    # the common case of zero pending removals.
+    pending_removal_xys: Set[Tuple[int, int]] = field(default_factory=set)
 
     # --- helpers ---
 
