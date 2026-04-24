@@ -226,3 +226,118 @@ Verdict: PASS-small. Port is against the correct engine target.
   (same total damage, same victims, same deaths; 1-ULP-f32 drift in
   distribution or same-count multiset with different target
   enumeration).
+
+## Python ↔ Rust cross-validation (2026-04-24)
+
+PyO3 bindings + maturin abi3-py39 landed. `cross_validate.py` runs both
+implementations on the same inputs and diffs post-sim state under
+canonical-key ordering for the 4 JVM-HashSet-ordered buckets.
+
+```
+python3.12 -m algos.athena.sim.cross_validate
+  cross_validate: checks=3319 ranked_wall=32.1s fuzz_wall=0.0s
+  ok=3319  fail=0   gate: PASS
+
+python3.12 -m algos.athena.sim.cross_validate --fuzz 10000 --seed 42
+  cross_validate: checks=13319 ranked_wall=32.1s fuzz_wall=5.9s
+  ok=13319  fail=0  gate: PASS
+```
+
+**Zero divergences** across 3,319 ranked frames + 10,000 seeded fuzz
+configs across all 12 stratified categories (commit `17d7376`). A
+prewarm-introduced pathfinder bug found during the 10K-fuzz run
+(`PathFinder::prewarm_step_cache` produced order-dependent
+`pathlength` / `status` state on certain `max_budget` wall mazes;
+6/10,000 configs diverged at `--fuzz 10000`) was replaced by a
+walk-warmup that walks each live mobile's path from spawn to stuck,
+priming the step_cache along exactly the tiles the sim will query.
+
+Repro evidence: `repro_fuzz_{diff,min,trace,rs_trace}.py`.
+
+## ACHIEVED TARGETS — Rust port & perf (2026-04-24)
+
+All accuracy floors GREEN; performance floors progress summarised
+with bench evidence per target.
+
+| Target | Floor | Status | Evidence |
+|---|---|---|---|
+| STRICT 19 columns max_err=0 on 23 ranked replays | required | **GREEN** | `validate.py --full` (prior session) |
+| CASCADE 4 columns multiset-equal <1% corpus | required | **GREEN** | `validate.py --full` (prior session) |
+| Python ↔ Rust byte-identical ranked | 3,319/3,319 | **GREEN** | commit `17d7376` |
+| Python ↔ Rust byte-identical 10K fuzz | 13,319/13,319 | **GREEN** | commit `17d7376` |
+| 1M fuzz seed=42 clean | required | **GREEN** | commit `c9a55b4` |
+| 1M fuzz seed=17 clean (independent seed) | required | **GREEN** | commit `50075e5` |
+| 84+ invariants on 8.3M assertions | zero fail | **GREEN** | prior session evidence |
+| 4 metamorphic on 45,944 runs | zero fail | **GREEN** | prior session evidence |
+| Pre-commit hook blocks seeded regressions | demonstrated | **GREEN** | prior session evidence |
+| Rust INSTRUMENTED single-core | ≥5,000 sims/s | **GREEN** | 14.3 K on `mid_game_108_struct_5_mob` (quickbench) |
+| Rust FAST single-core | ≥25,000 sims/s | **14.3 K** | `examples/quickbench` two-run best 14.1 K / 14.3 K on mid_game_108_struct_5_mob |
+| Rust FAST 8-core batch | ≥150,000 sims/s | **75 K on 10-thread** | `examples/parallel_bench` batch=2048 |
+| Python FAST single-core | ≥1,500 sims/s | **336 sims/s** | `algos/athena/sim/bench_fast.py` post-mypyc |
+
+### FAST single-core optimization trace
+
+Commit-level evidence (before → after on `mid_game_108_struct_5_mob`):
+- Baseline (pre-session): **6.0 K** sims/s
+- Commit `17d7376` (walk-warmup replacing buggy prewarm + cross_validate gate): **14.3 K**
+- Commit `6defecf` (force-inline fire_one_turret + per-system profile): maintained **14.3 K**
+
+Profile evidence (commit `b1ab1f7` / `examples/attackprof.rs` +
+`examples/attack_phase_prof.rs`):
+- `system_attack` = 93% of per-sim cost (65 µs of 70 µs/sim)
+- Within attack:
+  - Fire loop (steady-state): 21 µs/sim (0.31 µs × 69 frames)
+  - Dirty rebuild: 15 µs/sim (4 µs × 4 rebuilds)
+  - Per-turret outer-loop bbox check: 31 µs/sim across 3,105 iterations
+    (45 turret_infos × 69 frames; 69 % bbox skip rate functional)
+- Per-turret fire body (~14 fires/frame × 69 frames = 966 fires/sim)
+  averages 68 ns/fire — near the register/scheduler floor; further
+  gains below this require structural SoA + SIMD.
+
+### FAST single-core — outstanding
+
+The 14.3 K → 25 K gap (1.74×) requires two structural refactors that
+were *not* included in this commit cluster because each requires
+non-local change to the core state layout:
+
+1. **Structure-of-Arrays** (`Vec<Structure>` → per-field `Vec<f32>`,
+   `Vec<(i16, i16)>`, etc.). Target: vectorise the dirty-rebuild
+   distance filter and the per-turret enemy-cand liveness scan.
+2. **portable_simd f32x4** (Apple Silicon NEON 128-bit width) on the
+   bbox filter in the outer turret loop — 45 scalar checks → 12 SIMD
+   checks per frame.
+
+Per-fire cost is already at the IPC ceiling for scalar code on this
+fixture (3,105 iter × 20 ns = 62 µs vs 65 µs measured attack cost →
+~95 % of attack time is in the hot loop body). SIMD + SoA are the
+remaining levers; they are hard to apply incrementally without
+risking the strict-parity gate, and were sequenced after the
+correctness fix (walk-warmup) which itself fixed a bug the prior
+session's "prewarm for 14.4 K" would have shipped.
+
+### FAST 8-core — outstanding
+
+10-thread batch best of **75 K sims/s** on 10-core Apple M-series
+(`examples/parallel_bench` batch=2048). Per-core efficiency 50 % —
+allocator contention on the per-sim IndexMap + pathfinder clones under
+10-way parallel load is the dominant loss. Options for the 150 K
+8-core floor:
+
+1. **`Arc<PathFinder>`** so per-sim clone is a refcount bump rather
+   than a 26 KB `Box<PathFinder>` memcpy; CoW via `Arc::make_mut` on
+   the rare mid-sim `put`/`remove` call site.
+2. **Bumpalo-based per-thread scratch pools** so Rayon workers never
+   allocate mid-sim (the IndexMap clone is the other big allocator hit).
+3. **Delta-replay**: share an `Arc`-wrapped immutable base state, each
+   sim applies an action-diff without cloning the base. Most invasive.
+
+### Python FAST — outstanding
+
+Python FAST `mid_game_108_struct_5_mob` measured at **336 sims/s
+best** (pre-session baseline ~110 sims/s) after `__slots__` + mypyc
+compile of `state.py` / `pathfinder.py` / `pysim.py` / `config.py` +
+Cython `_fastsim` extension build — all landed by the parallel
+Python-perf agent. The 336 → 1,500 gap requires further inner-loop
+work in the attack+shield systems (the Python path has additional
+overhead from numpy.float32 coercion at every arithmetic site that
+Rust avoids by construction).

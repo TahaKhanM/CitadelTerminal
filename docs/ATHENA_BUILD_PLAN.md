@@ -256,11 +256,42 @@ Five scripts:
 
 ---
 
-## Phase 7: Rust hot-path port (PyO3)
+## Phase 7: Rust hot-path port (PyO3) — LANDED in § Phase 1.B.5
 
-(Unchanged from v2: validate Rust DIRECTLY against `engine.jar`. Python sim is debug aid only.)
+Full Rust port of `sim/` (`state`, `config`, `map`, `pathfinder`,
+`proximity`, `events`, `systems`, top-level driver) landed at
+`algos/athena/sim_rs/` with PyO3 bindings + maturin abi3-py39 wheels.
 
-**Validation gate:** Rust passes engine.jar validation independently. ≥10× sims/sec speedup. Per-turn compute ≤2s at beam width 100 with depth-2 enabled.
+### Evidence
+- 42/42 Rust tests pass across 7 test binaries (frame_loop_parity,
+  events_parity, pathfinder_parity, proximity_parity, state_tests +
+  library unit tests).
+- `cross_validate.py ranked`: 3,319 / 3,319 Python↔Rust byte-identical
+  (commit `17d7376`).
+- `cross_validate.py --fuzz 10000 --seed 42`: 13,319 / 13,319 PASS.
+- Throughput single-core (`examples/quickbench`): 14.3 K FAST sims/s
+  on `mid_game_108_struct_5_mob` (≈2.4× the pre-port Python baseline
+  of 6 K; INSTRUMENTED same fixture equal to FAST due to few events
+  per frame).
+- Throughput 10-thread (`examples/parallel_bench` batch=2048): 75 K
+  sims/s aggregate; allocator contention dominates the sub-linear
+  scaling.
+
+### Outstanding perf work (tracked separately)
+- Single-core 14.3 K → 25 K requires SoA for structures + SIMD-ified
+  distance filter in the attack hot path (`system_attack` is 93 % of
+  per-sim cost; profile at
+  `sim/PARITY_REPORTS/attack_profile_2026-04-24.md`).
+- 8-core 75 K → 150 K requires `Arc<PathFinder>` sharing +
+  bumpalo-based per-thread scratch pools to eliminate allocator
+  contention in the Rayon batch path.
+
+**Validation gate (original):** Rust passes engine.jar validation
+independently. ≥10× sims/sec speedup. Per-turn compute ≤2s at beam
+width 100 with depth-2 enabled. → Rust passes engine.jar validation
+independently (both directly via strict validator and indirectly via
+Python↔Rust byte-identity); 2.4× speedup recorded — remaining gap
+addressed by the SoA/SIMD work above.
 
 ---
 
