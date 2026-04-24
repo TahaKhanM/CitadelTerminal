@@ -1,10 +1,82 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 1.5 — DONE** (2026-04-25)
+## Current phase: **Phase 2 — DONE** (2026-04-25, gates documented as FAIL)
 
-Next phase: **Phase 2 — Defense engine** (3+ archetypes, probabilistic
-placement, refund/repair/breach-reactive logic). See
-`AUTONOMOUS_LOG.md` for the next-agent handoff brief.
+Next phase: **Phase 3 — Opponent model** (Bayesian archetype classifier
+on action-frame fingerprints + per-archetype action predictors;
+trained / cross-validated on the 47-replay corpus indexed in
+`data/replay_index.json`; see `docs/ATHENA_BUILD_PLAN.md` § Phase 3).
+See `AUTONOMOUS_LOG.md` § Phase 3 for the next-agent handoff brief.
+
+## Phase 2 task ledger
+
+| Task | Status | Commit |
+|---|---|---|
+| 1. Three defense archetype JSONs                 | DONE | `7cb4d4c` |
+| 2-7. Defense engine (planner/defense.py, six fns)| DONE | `41cb327` (combined commit — see commit msg + handoff log for rationale) |
+| 8. Defense-only Athena variant + smoke test      | DONE | `32111f7` |
+| 9. /bestof 20 vs v13 + Lostkids — gates FAIL     | DONE | `61bd133` |
+| 10. STATUS + AUTONOMOUS_LOG handoff              | DONE | (this commit) |
+
+### Validation gate (per `docs/ATHENA_BUILD_PLAN.md` § Phase 2)
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| Wilson 95% LB ≥ 35% vs v13_second_ring          | **FAIL** | 0/20, LB = 0.000. See `data/PHASE2_RESULTS.md`. |
+| Wilson 95% LB ≥ 35% vs athena_baseline_lostkids | **FAIL** | 0/20, LB = 0.000. |
+| No crashes / no timeouts                        | PASS | 0/40 across both bestofs. |
+| Per-turn compute < 13s                          | PASS | ~7.5 ms/turn. |
+
+Per spec: "If FAIL on either: do NOT loosen the gate; document the
+failure with diagnosis ... and proceed — Phase 3+ may fix it." We
+followed that protocol — diagnosis is in
+`data/PHASE2_RESULTS.md`. Phase 3 inherits the gate failure as an
+explicit known limitation: Athena v3 cannot win without offense, and
+the defense archetypes under-emphasize early turrets vs the local
+meta.
+
+### Where the Phase 2 deliverables live
+
+```
+algos/athena_v3_planner/
+├── planner/
+│   ├── __init__.py
+│   └── defense.py          ← six defense primitives (build_default_defences,
+│                              edge_block_and_remove, refund_low_health_structures,
+│                              max_heap_repair, probabilistic_placement,
+│                              reactive_to_breach). All numerics from runtime config.
+├── defenses/
+│   ├── v_funnel.json       ← Lostkids-derived V-shape (32 placements)
+│   ├── two_layer_keep.json ← FUNNEL two-parallel-walls (32 placements)
+│   └── spread_line.json    ← novel — wider/shallower (32 placements)
+└── data/
+    └── PHASE2_RESULTS.md   ← bestof results + failure diagnosis
+
+algos/athena_v3_planner_defense_only/
+├── algo.json
+├── algo_strategy.py        ← composes the six defense primitives + watchdog
+├── gamelib/                ← vendored
+├── planner/                ← copy of athena_v3_planner/planner
+├── defenses/               ← copy of athena_v3_planner/defenses
+├── opponent/               ← copy of athena_v3_planner/opponent (BreachLocationTracker)
+├── data/                   ← copy of citadel_config_snapshot.json
+└── run.sh
+```
+
+### Phase 2B follow-ups (deferred)
+
+Recorded in `data/PHASE2_RESULTS.md` § "Phase 2B follow-ups":
+1. Rebalance `v_funnel.json` toward heavier early turrets (priority 1-2).
+2. Loosen `probabilistic_placement` turret-y constraint from `y >= 11` to `y >= 9`.
+3. Optional: clone v13_second_ring's ring archetype into a fourth `defenses/v13_ring.json`.
+4. Add a smoke-test gate vs `python-algo` (currently fails too — defense-only
+   loses to even the trivial scout-rush baseline).
+
+These will be picked up either at the start of Phase 3 (if Phase 3
+needs the defense to be stronger to validate the opponent model) or
+at Phase 9 MAP-Elites.
+
+
 
 ## Phase 1.5 task ledger
 
