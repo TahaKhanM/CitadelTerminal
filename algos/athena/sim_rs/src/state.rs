@@ -133,6 +133,34 @@ pub struct SimState {
     /// each is invalidated/revalidated as walls are placed/removed. See
     /// `sim/pysim.py::_ensure_pathfinders` for the Python reference.
     pub pathfinders: Option<IndexMap<i32, PathFinder>>,
+    /// Per-frame scratch buffers — cleared (not freed) between frames so
+    /// hot systems do zero-alloc work after capacity is seeded. See
+    /// `Scratch` for the per-field docs.
+    #[doc(hidden)]
+    pub scratch: Scratch,
+}
+
+/// Per-frame scratch buffers reused across frames to avoid per-frame heap
+/// allocations inside `system_attack` and `system_self_destruct`.
+#[derive(Debug, Clone, Default)]
+pub struct Scratch {
+    /// `system_attack`: attacker structure tile list (turrets).
+    pub attacker_struct_xys: Vec<(i32, i32)>,
+    /// `system_attack`: attacker mobile index list.
+    pub attacker_mobile_idxs: Vec<usize>,
+    /// `fire_one`: walker target candidate records.
+    pub walker_cands: Vec<WalkerCand>,
+    /// `fire_one`: structure target candidate tiles.
+    pub struct_cand_xys: Vec<(i32, i32)>,
+}
+
+/// Walker target candidate — indices + copyable data only, no String clone.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct WalkerCand {
+    pub idx: usize,
+    pub hp: f32,
+    pub shield: f32,
+    pub xy: (i32, i32),
 }
 
 impl SimState {
@@ -152,6 +180,7 @@ impl SimState {
             p2: PlayerStats { hp: 40.0, sp: 8.0, mp: 1.0 },
             pending_removal_xys: IndexMap::new(),
             pathfinders: None,
+            scratch: Scratch::default(),
         }
     }
 
