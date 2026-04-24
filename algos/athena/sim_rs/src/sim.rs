@@ -123,8 +123,18 @@ pub fn simulate_action_phase(
     let p1_dmg = (p2_start_hp - state.p2.hp).max(0.0);
     let p2_dmg = (p1_start_hp - state.p1.hp).max(0.0);
 
+    // Drop pathfinders + scratch buffers from the cloned final_state — they
+    // are 4x ~30 KB vec arrays and a handful of scratch Vecs that tests +
+    // downstream consumers never read. Callers that need the final state
+    // post-action only look at HP/SP/MP, structures, and mobiles.
+    let saved_pf = state.pathfinders.take();
+    let saved_scratch = std::mem::take(&mut state.scratch);
+    let final_state = state.clone();
+    state.pathfinders = saved_pf;
+    state.scratch = saved_scratch;
+
     ActionResult {
-        final_state: state.clone(),
+        final_state,
         p1_damage_dealt: p1_dmg,
         p2_damage_dealt: p2_dmg,
         structure_damage_by_player: IndexMap::new(),
