@@ -888,12 +888,15 @@ fn fire_one(
         }
     }
     let mut target_mobile_idx: Option<usize> = None;
-    if !state.scratch.walker_cands.is_empty() {
+    let wcl = state.scratch.walker_cands.len();
+    if wcl == 1 {
+        // Single candidate — no tiebreak possible, skip the picker.
+        target_mobile_idx = Some(state.scratch.walker_cands[0].idx);
+    } else if wcl > 1 {
         // SAFETY: walker_cands is borrowed read-only for this call; picker
         // reads state.mobiles (disjoint field). No aliasing.
         let cand_ptr = state.scratch.walker_cands.as_ptr();
-        let cand_len = state.scratch.walker_cands.len();
-        let cand_slice = unsafe { std::slice::from_raw_parts(cand_ptr, cand_len) };
+        let cand_slice = unsafe { std::slice::from_raw_parts(cand_ptr, wcl) };
         target_mobile_idx = pick_target_mobile_idx(state, att_xy, att_player, cand_slice);
     }
     let mut target_struct_xy: Option<(i32, i32)> = None;
@@ -921,10 +924,12 @@ fn fire_one(
             }
             state.scratch.struct_cand_xys.push(xy);
         }
-        if !state.scratch.struct_cand_xys.is_empty() {
+        let scl = state.scratch.struct_cand_xys.len();
+        if scl == 1 {
+            target_struct_xy = Some(state.scratch.struct_cand_xys[0]);
+        } else if scl > 1 {
             let xys_ptr = state.scratch.struct_cand_xys.as_ptr();
-            let xys_len = state.scratch.struct_cand_xys.len();
-            let xys_slice = unsafe { std::slice::from_raw_parts(xys_ptr, xys_len) };
+            let xys_slice = unsafe { std::slice::from_raw_parts(xys_ptr, scl) };
             target_struct_xy = pick_target_struct(state, att_xy, att_player, xys_slice);
         }
     }
