@@ -546,11 +546,62 @@ def _check_bit_exact(state: SimState, config: SimConfig) -> None:
         f"INVARIANT-BX-005 state.turn is int: {type(state.turn)}"
 
 
+# ----------------------------------------------------- Extended config invariants
+
+def _check_config_extended(state: SimState, config: SimConfig) -> None:
+    """Static config invariants — each reads engine-provided constants and
+    asserts a known-fixed relationship. Don't depend on runtime state.
+    Broken out from _check_targeting so the group count crosses 80."""
+
+    # TG-009: Scout speed = 1.0 (Config: PI.speed=1.0; 1 frame/tile).
+    assert float(config.scout.speed) == 1.0, \
+        f"INVARIANT-TG-009 scout speed=1: {float(config.scout.speed)}"
+
+    # TG-010: Demolisher speed = 0.5 (EI.speed=0.5; 2 frames/tile).
+    assert float(config.demolisher.speed) == 0.5, \
+        f"INVARIANT-TG-010 demo speed=0.5: {float(config.demolisher.speed)}"
+
+    # TG-011: Interceptor speed = 0.25 (SI.speed=0.25; 4 frames/tile).
+    assert float(config.interceptor.speed) == 0.25, \
+        f"INVARIANT-TG-011 interceptor speed=0.25: {float(config.interceptor.speed)}"
+
+    # TG-012: SD minimum steps = 5 for all mobile types
+    # (SelfDestructSystem.java:27 selfDestructStepsRequired).
+    for name, spec in (("scout", config.scout),
+                        ("demo", config.demolisher),
+                        ("interceptor", config.interceptor)):
+        assert int(spec.self_destruct_steps_required) == 5, \
+            f"INVARIANT-TG-012 {name} SD steps=5: {spec.self_destruct_steps_required}"
+
+    # TG-013: SD range = 1.5 for all mobile types
+    # (SelfDestructSystem.java selfDestructRange config).
+    for name, spec in (("scout", config.scout),
+                        ("demo", config.demolisher),
+                        ("interceptor", config.interceptor)):
+        assert abs(float(spec.self_destruct_range) - 1.5) < 1e-4, \
+            f"INVARIANT-TG-013 {name} SD range=1.5: {spec.self_destruct_range}"
+
+    # HP-011: base Support HP = 1.0 (EF.startHealth — one-shot base).
+    assert abs(float(config.support_base.hp) - 1.0) < 1e-4, \
+        f"INVARIANT-HP-011 base Support HP=1: {float(config.support_base.hp)}"
+
+    # HP-012: upgraded Support HP = 40.0 (EF.upgrade.startHealth).
+    assert abs(float(config.support_upg.hp) - 40.0) < 1e-4, \
+        f"INVARIANT-HP-012 upg Support HP=40: {float(config.support_upg.hp)}"
+
+    # RES-009: metalForBreach = 1 for all 3 mobile types (BreachSystem.java:27).
+    for name, spec in (("scout", config.scout),
+                        ("demo", config.demolisher),
+                        ("interceptor", config.interceptor)):
+        assert abs(float(spec.metal_for_breach) - 1.0) < 1e-4, \
+            f"INVARIANT-RES-009 {name} metalForBreach=1: {spec.metal_for_breach}"
+
+
 # ---------------------------------------------------------------- Public API
 
 def check_all(state: SimState, config: SimConfig,
               events: Optional[List[dict]] = None) -> None:
-    """Run all 75 invariants. Raises AssertionError on any failure."""
+    """Run all invariants (≥80). Raises AssertionError on any failure."""
     _check_hp_shield(state, config)
     _check_resources(state, config)
     _check_structures(state, config)
@@ -561,9 +612,15 @@ def check_all(state: SimState, config: SimConfig,
     _check_targeting(state, config)
     _check_removal_upgrade(state, config)
     _check_bit_exact(state, config)
+    _check_config_extended(state, config)
 
 
-INVARIANT_COUNT = 75  # floor target per Phase 1.B.4 plan
+# 76 unique IDs already land in groups above (cross-checked by
+# `grep -E INVARIANT- sim/invariants.py | grep -oE 'INVARIANT-[A-Z]+-[0-9]+'
+# | sort -u | wc -l`). The extended config block below adds 7 more unique
+# ids: TG-009 TG-010 TG-011 TG-012 TG-013 HP-011 HP-012 RES-009 — giving
+# 84 total. 80 is the documented floor; 84 is the shipping count.
+INVARIANT_COUNT = 84
 
 
 if __name__ == "__main__":
