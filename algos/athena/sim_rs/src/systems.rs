@@ -35,7 +35,9 @@
 
 use crate::config::{SimConfig, IDX_SUPPORT, IDX_TURRET};
 use crate::events::EventEntry;
-use crate::map::{edge_tiles, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT, EDGE_TOP_LEFT, EDGE_TOP_RIGHT};
+use crate::map::{
+    edge_tiles_slice, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT, EDGE_TOP_LEFT, EDGE_TOP_RIGHT,
+};
 use crate::pathfinder::{make_pathfinders, HORIZONTAL, VERTICAL};
 use crate::state::{SimState, Structure};
 use indexmap::IndexMap;
@@ -73,8 +75,9 @@ fn distance(a: (i32, i32), b: (i32, i32)) -> f32 {
 }
 
 /// Lookup the precomputed edge-tile set (for reached_target check).
-fn edge_set(edge: i32) -> Vec<(i32, i32)> {
-    edge_tiles(edge)
+#[inline]
+fn edge_set(edge: i32) -> &'static [(i32, i32)] {
+    edge_tiles_slice(edge)
 }
 
 // -------------------------------------------- shared damage helper (HealthComponent)
@@ -111,10 +114,10 @@ fn ensure_pathfinders(state: &mut SimState) {
     }
     let walls: Vec<(i32, i32)> = state.structures.keys().copied().collect();
     let mut edge_lists: IndexMap<i32, Vec<(i32, i32)>> = IndexMap::with_capacity(4);
-    edge_lists.insert(EDGE_TOP_RIGHT, edge_tiles(EDGE_TOP_RIGHT));
-    edge_lists.insert(EDGE_TOP_LEFT, edge_tiles(EDGE_TOP_LEFT));
-    edge_lists.insert(EDGE_BOTTOM_LEFT, edge_tiles(EDGE_BOTTOM_LEFT));
-    edge_lists.insert(EDGE_BOTTOM_RIGHT, edge_tiles(EDGE_BOTTOM_RIGHT));
+    edge_lists.insert(EDGE_TOP_RIGHT, edge_tiles_slice(EDGE_TOP_RIGHT).to_vec());
+    edge_lists.insert(EDGE_TOP_LEFT, edge_tiles_slice(EDGE_TOP_LEFT).to_vec());
+    edge_lists.insert(EDGE_BOTTOM_LEFT, edge_tiles_slice(EDGE_BOTTOM_LEFT).to_vec());
+    edge_lists.insert(EDGE_BOTTOM_RIGHT, edge_tiles_slice(EDGE_BOTTOM_RIGHT).to_vec());
     state.pathfinders = Some(make_pathfinders(ARENA, &walls, &edge_lists));
 }
 
@@ -136,8 +139,8 @@ fn ensure_pathfinders(state: &mut SimState) {
 ///      NOT canonicalized).
 pub fn system_move(state: &mut SimState, config: &SimConfig, _events: &mut Vec<EventEntry>) {
     ensure_pathfinders(state);
-    // Cache the 4 edge sets for reached_target checks.
-    let edge_sets: [(i32, Vec<(i32, i32)>); 4] = [
+    // Borrow the static per-edge tables. Zero alloc, 'static slices.
+    let edge_sets: [(i32, &'static [(i32, i32)]); 4] = [
         (EDGE_TOP_RIGHT, edge_set(EDGE_TOP_RIGHT)),
         (EDGE_TOP_LEFT, edge_set(EDGE_TOP_LEFT)),
         (EDGE_BOTTOM_LEFT, edge_set(EDGE_BOTTOM_LEFT)),
@@ -169,7 +172,7 @@ pub fn system_move(state: &mut SimState, config: &SimConfig, _events: &mut Vec<E
             m.finished_navigating = true;
             // reached_target iff current xy is in this mobile's specific
             // target-edge list — matches NavigateToEdgeSystem.java:50-54.
-            let targets = &edge_sets
+            let targets: &[(i32, i32)] = edge_sets
                 .iter()
                 .find(|(e, _)| *e == m.target_edge)
                 .expect("edge_sets missing target edge")
