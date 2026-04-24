@@ -241,3 +241,44 @@ pub fn simulate_action_phase_iter(
 
     out
 }
+
+// ------------------------------------------------------------------- batch API
+//
+// `simulate_batch_parallel` runs N sims in parallel via rayon's work-stealing
+// thread pool. Each sim starts from a clone of `template`; the caller is
+// responsible for warming pathfinders on `template` (via
+// `systems::ensure_pathfinders`) BEFORE calling this function so the pathfinder
+// state is shared via clone across threads (matches the sequential
+// benchmark path).
+//
+// Engine citation: no engine analogue. Citadel's engine runs one match per
+// JVM; batch parallelism is a SimCore feature for beam-search planners that
+// evaluate many hypothetical turns in parallel.
+//
+// Determinism: each sim is independent (no shared mutable state — rayon
+// schedules templates.clone()s into per-thread workers). Because SimCore
+// itself is deterministic (see metamorphic M3), identical inputs produce
+// identical outputs regardless of thread scheduling.
+
+/// Run `n` sims in parallel from `template` via rayon. Returns a vector of
+/// `(p1_damage, p2_damage, frame_count)` tuples matching
+/// `simulate_action_phase_lite`'s output, in index order.
+///
+/// `template` should have `pathfinders.is_some()` (call
+/// `systems::ensure_pathfinders(&mut template)` beforehand) so the cloned
+/// state starts with pre-validated path state.
+pub fn simulate_batch_parallel(
+    template: &SimState,
+    cfg: &SimConfig,
+    n: usize,
+    max_frames: i32,
+) -> Vec<(f32, f32, i32)> {
+    use rayon::prelude::*;
+    (0..n)
+        .into_par_iter()
+        .map(|_| {
+            let mut state = template.clone();
+            simulate_action_phase_lite(&mut state, cfg, max_frames)
+        })
+        .collect()
+}
