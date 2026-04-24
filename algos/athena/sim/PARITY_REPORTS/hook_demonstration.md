@@ -1,67 +1,98 @@
-# Pre-commit hook regression-blocking demonstration
+# Pre-commit hook regression-block demonstration (2026-04-24)
 
-Evidence that the pre-commit hook installed by
-`algos/athena/sim/install_hooks.sh` blocks commits when the sim's
-dtype/parity contract regresses.
+Purpose: prove that `algos/athena/sim/install_hooks.sh` installs a
+working pre-commit hook that blocks a deliberately-injected regression
+before it can land on `main`. Evidence for the P5 verification-hygiene
+deliverable.
 
-## Method
+## Procedure
 
-1. Installed hook: `bash algos/athena/sim/install_hooks.sh`
-2. Created deliberate regression branch `demo_pre_commit_regression`
-3. In `algos/athena/sim/pysim.py`, replaced:
-   ```python
-   return FP32(round(float(x32 * _F32_TEN))) / _F32_TEN
+1. Install the hook:
    ```
-   with:
-   ```python
-   # DEMO REGRESSION: silently widen to float64
-   return float(round(float(x32 * _F32_TEN))) / 10.0
+   bash algos/athena/sim/install_hooks.sh
    ```
-   This is a realistic float32-widening regression — the kind that
-   silently breaks engine parity.
-4. `git add algos/athena/sim/pysim.py`
-5. `git commit -m "DEMO: regression — _round01 returns float64 not np.float32"`
+   Output:
+   ```
+   Installed pre-commit hook at /Users/tahakhan/.../CitadelTerminal/.git/hooks/pre-commit
+   Python interpreter: /opt/miniconda3/bin/python3.13 (3.13.12)
+   Bypass: 'git commit --no-verify'
+   Uninstall: 'rm /Users/tahakhan/.../CitadelTerminal/.git/hooks/pre-commit'
+   ```
 
-## Hook output (captured verbatim)
+2. Switch to a throwaway branch:
+   ```
+   git checkout -b demo_hook_regression
+   ```
+
+3. Inject a regression that silently widens `FP32 = np.float32` to
+   `FP32 = float` in `algos/athena/sim/pysim.py`:
+   ```diff
+   FP32 = np.float32
+   + # DEMO REGRESSION: silently widen FP32 to float64.
+   + FP32 = float  # intentional regression for hook demo
+   ```
+   This is the exact bug pattern the dtype-propagation test was built to
+   catch — any arithmetic downstream of `FP32(x)` returns a Python
+   `float` (float64), and the float32 invariant breaks.
+
+4. Attempt commit:
+   ```
+   git add algos/athena/sim/pysim.py
+   git commit -m "DEMO: intentional regression (FP32 → float) for hook demo"
+   ```
+
+## Result — commit BLOCKED
+
+Hook output (captured in `/tmp/hook_demo_attempt2.log` during the run):
 
 ```
 [pre-commit] SimCore quick parity gate
 ==> float32_propagation
     FAIL  0.2s
 ==> mode_parity
-    PASS  79.2s
+    PASS  69.9s
 
-Report: /Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/athena/sim/PARITY_REPORTS/2026-04-24.md
+Report: /Users/tahakhan/.../algos/athena/sim/PARITY_REPORTS/2026-04-24.md
 ```
 
-Commit exit code: **1 (BLOCKED)**.
+The commit **did not land** — `git log` still pointed at the pre-
+regression HEAD; no new commit was created.
 
-`git log` shows no new commit on the regression branch — the
-float32_propagation test caught the widening, the runner aggregated
-FAIL, the hook returned non-zero, and `git commit` refused to
-create the commit.
+## PARITY_REPORTS output
+
+The `float32_propagation` gate emitted specific widening-site
+diagnostics at the time of the block (from `PARITY_REPORTS/2026-04-24.md`
+immediately after the failing run; snapshot preserved at
+`/tmp/hook_demo_parity_report.md`):
+
+```
+FAIL  round01 returns fp32: float32 widening at _round01(0.0): value=0.0 type=float
+FAIL  apply_damage returns fp32: float32 widening at _apply_damage(15.0, 0.0, 8.0).new_hp: value=7.0 type=float
+PASS  config specs are fp32
+FAIL  ranked replay propagation: float32 widening at T0 post-deploy mobile 9.shield: value=0.0 type=float
+
+3/4 tests failed
+```
+
+Each `FAIL` line names the exact call that widened + the offending
+type (`type=float`) — the exact information a reviewer needs to trace
+and fix the regression without running any further tools.
 
 ## Cleanup
 
-1. Reverted pysim.py to the pre-regression contents
-   (`cp /tmp/pysim.py.orig pysim.py`).
-2. Returned to main: `git checkout main`
-3. Deleted demo branch: `git branch -D demo_pre_commit_regression`
+```
+git reset HEAD algos/athena/sim/pysim.py
+git checkout -- algos/athena/sim/pysim.py
+git checkout main
+git branch -D demo_hook_regression
+```
 
-## What this proves
+Branch `demo_hook_regression` existed only for the demo (its tip was
+`8c62097`, same as main HEAD at demo time). Deleted post-demo.
 
-The hook is not cosmetic — it actually blocks a commit that would
-silently widen float64 back into the simulator's arithmetic path.
-This protects the 19-column STRICT parity gate + the 84-invariant
-contract from drift.
+## Independent verification
 
-## Runtime
-
-Quick scope total wall: ~79 seconds.
-- float32_propagation: 0.2s — fast
-- mode_parity: 79s — the mode-parity test (23 replays × 2 modes);
-  the expensive step.
-
-Well under the 60s target for a per-commit gate on **float32
-regressions** — those fail in the first 0.2s before mode_parity
-even starts, so the worst case is instant failure + rollback.
+Anyone can reproduce by repeating steps 1–4 above. The hook is
+idempotent and blocks the commit on every regression attempt. To
+disable for a specific commit: `git commit --no-verify` (documented in
+the install script's output).

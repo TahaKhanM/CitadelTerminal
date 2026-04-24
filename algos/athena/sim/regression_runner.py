@@ -40,6 +40,12 @@ import time
 from pathlib import Path
 from typing import List, Tuple
 
+# Use the SAME python that invoked this runner, so children inherit the
+# correct interpreter (avoids Python 3.9 vs 3.13 mismatch when the hook
+# fires via /usr/bin/env python3 but the repo targets a newer Python via
+# dataclass slots=True etc.).
+PY = sys.executable
+
 ROOT = Path(__file__).resolve().parent.parent.parent.parent  # repo root
 SIM = Path(__file__).resolve().parent
 REPORTS_DIR = SIM / "PARITY_REPORTS"
@@ -72,24 +78,24 @@ def main() -> int:
     # Always: dtype propagation + dual-mode parity
     steps.append((
         "float32_propagation",
-        ["python3", "-m", "algos.athena.sim.tests.test_float32_propagation"],
+        [PY, "-m", "algos.athena.sim.tests.test_float32_propagation"],
         60,
     ))
     steps.append((
         "mode_parity",
-        ["python3", "-m", "algos.athena.sim.tests.test_mode_parity"],
+        [PY, "-m", "algos.athena.sim.tests.test_mode_parity"],
         300,
     ))
 
     if args.scope in ("short", "full", "heavy"):
         steps.append((
             "validator",
-            ["python3", "algos/athena/sim/validate.py", "--full"],
+            [PY, "algos/athena/sim/validate.py", "--full"],
             300,
         ))
         steps.append((
             "metamorphic_120",
-            ["python3", "-m", "algos.athena.sim.metamorphic",
+            [PY, "-m", "algos.athena.sim.metamorphic",
              "--fuzz-n", "120", "--seed", str(args.seed)],
             120,
         ))
@@ -97,13 +103,13 @@ def main() -> int:
     if args.scope in ("full", "heavy"):
         steps.append((
             "fuzz_10k",
-            ["python3", "-m", "algos.athena.sim.fuzz",
+            [PY, "-m", "algos.athena.sim.fuzz",
              "--n", "10000", "--seed", str(args.seed)],
             300,
         ))
         steps.append((
             "metamorphic_1200",
-            ["python3", "-m", "algos.athena.sim.metamorphic",
+            [PY, "-m", "algos.athena.sim.metamorphic",
              "--fuzz-n", "1200", "--seed", str(args.seed)],
             300,
         ))
@@ -111,7 +117,7 @@ def main() -> int:
     if args.scope == "heavy":
         steps.append((
             "fuzz_100k",
-            ["python3", "-m", "algos.athena.sim.fuzz",
+            [PY, "-m", "algos.athena.sim.fuzz",
              "--n", "100000", "--seed", str(args.seed)],
             1200,
         ))
