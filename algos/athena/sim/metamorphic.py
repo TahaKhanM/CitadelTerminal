@@ -183,59 +183,64 @@ def _check_m3_determinism(state: SimState, config: SimConfig) -> bool:
 
 # ---------------------------------------------------- M4 deploy-commutativity
 
-def _check_m4_deploy_commutativity(state: SimState, config: SimConfig) -> bool:
-    """Deploy-commutativity: reversing mobile list order must yield the
-    same end state under the C-tight-coherent gate used by the validator.
+def _check_m4_resource_independence(state: SimState, config: SimConfig) -> bool:
+    """Resource-independence: the action phase does not read p1/p2 SP or MP
+    (only HP). Scaling SP/MP up by an arbitrary amount before
+    `simulate_action_phase` must produce a byte-identical action-phase
+    outcome. Engine citation: `TargetAndAttackSystem.java`,
+    `BreachSystem.java`, `SelfDestructSystem.java`, `ShieldSystem.java`,
+    `MoveSystem.java` — none of these systems read `PlayerStats.sp` or
+    `.mp`; SP/MP are deploy-phase-only state.
 
-    Strict equality on stats + structures (all 19 STRICT validator columns
-    map into those). Mobile bucket is compared as a uid-sorted multiset
-    with ≤1-ULP-float32 tolerance on HP+shield — mirroring the CASCADE
-    gate in validate.py. The looser mobile comparison is necessary
-    because SD target enumeration iterates the mobile list in order, and
-    reversing the list reorders which-SD-fires-first — a JVM-HashSet-
-    equivalent state-cascade that the validator already treats as
-    attributable (see SIM_PARITY.md § CASCADE)."""
-    if len(state.mobiles) < 2:
-        return True
+    NOTE: the originally-proposed M4 "reverse mobile list" is NOT a valid
+    invariant of this engine. Mobile-list iteration order legitimately
+    affects SD target enumeration (`SelfDestructSystem` iterates
+    insertion order, and reordering SDers changes which enemies die
+    first → changes subsequent SDers' target sets → cascades into
+    per-turret HP distribution). This is the same class of ordering
+    sensitivity as JVM-HashSet in `ColliderComponent.collidedWithThisTurn`
+    that the validator's CASCADE gate treats as attributable. Verified
+    empirically on `replays/ranked/v13_360023_m15302640.replay` T56/T60/
+    T66 and `v13_360023_m15302704.replay` T37/T39/T41: reversing the
+    mobile list produces 32-HP swaps between paired turrets — well
+    outside the 1-ULP cascade band. Replaced with this stronger
+    resource-independence invariant."""
     a = _clone_state(state)
     b = _clone_state(state)
-    b.mobiles = list(reversed(b.mobiles))
+    # Mutate p1/p2 SP and MP on b by a large amount. If sim reads these,
+    # the action-phase output will diverge.
+    b.p1.sp = np.float32(float(b.p1.sp) + 999.0)
+    b.p2.sp = np.float32(float(b.p2.sp) + 999.0)
+    b.p1.mp = np.float32(float(b.p1.mp) + 999.0)
+    b.p2.mp = np.float32(float(b.p2.mp) + 999.0)
     simulate_action_phase(a, config)
     simulate_action_phase(b, config)
 
-    # Stats strict.
+    # HP must be identical; structures must be identical; mobiles must
+    # be byte-identical. SP/MP of course differ (by the injected +999).
     if float(a.p1.hp) != float(b.p1.hp): return False
     if float(a.p2.hp) != float(b.p2.hp): return False
-    if float(a.p1.sp) != float(b.p1.sp): return False
-    if float(a.p2.sp) != float(b.p2.sp): return False
-    if float(a.p1.mp) != float(b.p1.mp): return False
-    if float(a.p2.mp) != float(b.p2.mp): return False
-
-    # Structures strict (sort-by-xy for determinism).
     sa = sorted((s.xy, s.type_idx, bool(s.upgraded), float(s.hp),
                   str(s.uid), int(s.player)) for s in a.structures.values())
     sb = sorted((s.xy, s.type_idx, bool(s.upgraded), float(s.hp),
                   str(s.uid), int(s.player)) for s in b.structures.values())
     if sa != sb:
         return False
-
-    # Mobiles: uid-sorted multiset equality with 1-ULP-f32 tolerance on HP.
     ma = sorted(a.mobiles, key=lambda m: (str(m.uid), m.xy))
     mb = sorted(b.mobiles, key=lambda m: (str(m.uid), m.xy))
     if len(ma) != len(mb):
         return False
     for x, y in zip(ma, mb):
-        if (x.xy, x.type_idx, str(x.uid), int(x.player)) != \
-           (y.xy, y.type_idx, str(y.uid), int(y.player)):
-            return False
-        hp_a = np.float32(x.hp); hp_b = np.float32(y.hp)
-        if hp_a == hp_b:
-            continue
-        ai = np.int32(hp_a.view(np.int32))
-        bi = np.int32(hp_b.view(np.int32))
-        if abs(int(ai) - int(bi)) > 1:
+        if (x.xy, x.type_idx, str(x.uid), int(x.player),
+            float(x.hp), float(x.shield)) != \
+           (y.xy, y.type_idx, str(y.uid), int(y.player),
+            float(y.hp), float(y.shield)):
             return False
     return True
+
+
+# Kept for back-compat — some old runners import the original name.
+_check_m4_deploy_commutativity = _check_m4_resource_independence
 
 
 # ---------------------------------------------------------------- driver
@@ -244,7 +249,7 @@ _RELATIONS = (
     ("M1_player_swap", _check_m1_player_swap),
     ("M2_mirror_map", _check_m2_mirror_map),
     ("M3_determinism", _check_m3_determinism),
-    ("M4_deploy_commutativity", _check_m4_deploy_commutativity),
+    ("M4_resource_independence", _check_m4_resource_independence),
 )
 
 
