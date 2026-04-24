@@ -20,12 +20,16 @@ from .action_frame_utils import (
     SpawnXHistogram,
     WallRemovalDetector,
 )
+from .archetypes import ARCHETYPES, DEFAULT_ARCHETYPE, archetype_index
 
 __all__ = [
+    "ARCHETYPES",
     "BatchCountTracker",
     "BreachLocationTracker",
+    "DEFAULT_ARCHETYPE",
     "MisdirectionDetector",
     "ResourceTracker",
     "SpawnXHistogram",
     "WallRemovalDetector",
+    "archetype_index",
 ]
