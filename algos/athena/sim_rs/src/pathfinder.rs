@@ -166,11 +166,13 @@ pub struct PathFinder {
 
     /// Memoization table — built lazily. For each (x, y, last_move) ∈
     /// [0..28) × [0..28) × {SPAWNED, HORIZONTAL, VERTICAL}, the
-    /// deterministic next step. `(-1, -1)` = uncached. Once `get_step` runs
-    /// for a particular key and the pathfinder state is stable (no put/remove
-    /// since last validate), subsequent calls on the same key hit this table
-    /// and avoid the filter pipeline entirely.
+    /// deterministic next step plus the generation at which it was recorded.
+    /// A cache entry is valid iff `gen == current_gen`. On wall put/remove
+    /// we just bump `current_gen` instead of clearing all 2352 entries — so
+    /// invalidation is O(1) regardless of cache size.
     step_cache: Box<[[(i8, i8); 3]; 784]>,
+    step_cache_gen: Box<[[u32; 3]; 784]>,
+    current_gen: u32,
 
     // Idealness-search scalars (PathFinder.java:37-38, 248-249).
     searched_best_idealness: i32,
@@ -217,6 +219,9 @@ impl PathFinder {
             searched_curr_pathlength: 0,
             board_invalid: true,
             step_cache: Box::new([[(-128_i8, -128_i8); 3]; 784]),
+            step_cache_gen: Box::new([[0u32; 3]; 784]),
+            current_gen: 1, // 0 is the "never written" sentinel
+
         };
 
         // Triangular corners (PathFinder.java:62-70).
@@ -669,14 +674,22 @@ impl PathFinder {
     #[inline]
     pub fn get_step(&mut self, unit_x: i32, unit_y: i32, prev_direction: u8) -> (i32, i32) {
         // Cache check — hot path. `unit_x/unit_y` are always in [0, 28) for
-        // in-game units; prev_direction ∈ {0, 1, 2}.
-        if (0..self.dimension).contains(&unit_x)
-            && (0..self.dimension).contains(&unit_y)
+        // in-game units; prev_direction ∈ {0, 1, 2}. Short-circuit range check
+        // as a u32 unsigned comparison (branch-free) to keep the hot path tight.
+        let dim = self.dimension;
+        if (unit_x as u32) < (dim as u32)
+            && (unit_y as u32) < (dim as u32)
             && (prev_direction as usize) < 3
         {
-            let idx = (unit_y * self.dimension + unit_x) as usize;
-            let (cx, cy) = self.step_cache[idx][prev_direction as usize];
-            if cx != -128 {
+            let idx = (unit_y * dim + unit_x) as usize;
+            // SAFETY: idx < dim*dim = step_cache.len(); prev_direction < 3.
+            let gen = unsafe {
+                *self.step_cache_gen.get_unchecked(idx).get_unchecked(prev_direction as usize)
+            };
+            if gen == self.current_gen {
+                let (cx, cy) = unsafe {
+                    *self.step_cache.get_unchecked(idx).get_unchecked(prev_direction as usize)
+                };
                 return (cx as i32, cy as i32);
             }
         }
@@ -767,28 +780,43 @@ impl PathFinder {
         } else {
             ps[0]
         };
-        // Populate cache.
-        if (0..self.dimension).contains(&unit_x)
-            && (0..self.dimension).contains(&unit_y)
+        // Populate cache. u32 unsigned comparison keeps the branch tight;
+        // (-127..=127) bounds already covered by arena geometry (28×28). In
+        // practice every `result` is a legal on-arena tile or the same tile.
+        let dim = self.dimension;
+        if (unit_x as u32) < (dim as u32)
+            && (unit_y as u32) < (dim as u32)
             && (prev_direction as usize) < 3
-            && result.0 >= -127 && result.0 <= 127
-            && result.1 >= -127 && result.1 <= 127
         {
-            let idx = (unit_y * self.dimension + unit_x) as usize;
-            self.step_cache[idx][prev_direction as usize] =
-                (result.0 as i8, result.1 as i8);
+            debug_assert!(result.0 >= -127 && result.0 <= 127);
+            debug_assert!(result.1 >= -127 && result.1 <= 127);
+            let idx = (unit_y * dim + unit_x) as usize;
+            unsafe {
+                *self.step_cache.get_unchecked_mut(idx)
+                    .get_unchecked_mut(prev_direction as usize) =
+                    (result.0 as i8, result.1 as i8);
+                *self.step_cache_gen.get_unchecked_mut(idx)
+                    .get_unchecked_mut(prev_direction as usize) =
+                    self.current_gen;
+            }
         }
         result
     }
 
-    /// Invalidate the memoization cache (all entries). Called when the
-    /// underlying pathfinder state changes (put/remove).
+    /// Invalidate the memoization cache (all entries). O(1) — bumps a
+    /// generation counter so all existing entries become `gen != current_gen`
+    /// on next lookup. In the astronomically-unlikely case of u32 wrap-around
+    /// we hard-reset the entire gen array back to 0.
     #[inline]
     fn invalidate_step_cache(&mut self) {
-        for row in self.step_cache.iter_mut() {
-            for entry in row.iter_mut() {
-                *entry = (-128, -128);
+        self.current_gen = self.current_gen.wrapping_add(1);
+        if self.current_gen == 0 {
+            // Wrap-around: hard-reset gens to 0 and bump to 1 so no stale
+            // entry can appear valid under the new counter value.
+            for row in self.step_cache_gen.iter_mut() {
+                for g in row.iter_mut() { *g = 0; }
             }
+            self.current_gen = 1;
         }
     }
 }
