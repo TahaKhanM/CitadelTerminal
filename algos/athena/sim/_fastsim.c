@@ -518,6 +518,7 @@ system_attack_c(PyObject *self, PyObject *args) {
         PyObject *turret_list = (side == 0) ? turrets_p1 : turrets_p2;
         PyObject *enemy_mobiles = (side == 0) ? mobiles_p2 : mobiles_p1;
         PyObject *enemy_structs = (side == 0) ? structs_p2 : structs_p1;
+        int att_player = (side == 0) ? 1 : 2;
         Py_ssize_t nt = PyList_GET_SIZE(turret_list);
         for (Py_ssize_t ti = 0; ti < nt; ti++) {
             PyObject *s = PyList_GET_ITEM(turret_list, ti);
@@ -525,6 +526,7 @@ system_attack_c(PyObject *self, PyObject *args) {
             int upg = PyObject_IsTrue(upg_obj);
             Py_DECREF(upg_obj);
             PyObject *spec = upg ? turret_upg_spec : turret_base_spec;
+            (void)spec;
             double dmg_walker = upg ? tu_dw : tb_dw;
             double dmg_tower = upg ? tu_dt : tb_dt;
             double r = upg ? tu_r : tb_r;
@@ -537,9 +539,7 @@ system_attack_c(PyObject *self, PyObject *args) {
             Py_DECREF(xy_obj);
             PyObject *att_uid = PyObject_GetAttr(s, PY_UID);
             double r_sq = r * r + 1e-9;
-            PyObject *att_player_obj = PyObject_GetAttr(s, PY_PLAYER);
-            int att_player = (int)PyLong_AsLong(att_player_obj);
-            Py_DECREF(att_player_obj);
+            /* att_player derived from side — no need to read s.player */
 
             /* Walker candidates */
             PyObject *walker_candidates = PyList_New(0);
