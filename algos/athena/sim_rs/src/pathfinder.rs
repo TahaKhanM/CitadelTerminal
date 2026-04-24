@@ -58,10 +58,14 @@ pub struct CoordQueue {
 }
 
 impl CoordQueue {
-    /// CoordQueue.java:6-12 — fixed initial capacity of 200 ints (100 coords).
+    /// CoordQueue.java:6-12 — engine uses cap=200; we use 256 (power of two)
+    /// so index arithmetic compiles to AND-with-mask instead of modulo. The
+    /// capacity threshold `(size+1)*2 >= cap` matches the engine, just with
+    /// a different numeric cap. Growth is still doubling, so all later caps
+    /// stay powers of two as well.
     pub fn new() -> Self {
         Self {
-            data: vec![0i32; 200],
+            data: vec![0i32; 256],
             start: 0,
             end: 0,
             size: 0,
@@ -71,32 +75,41 @@ impl CoordQueue {
     }
 
     /// CoordQueue.java:14-28 — doubling ring buffer; grow when (size+1)*2 >= cap.
+    #[inline]
     pub fn push(&mut self, x: i32, y: i32) {
         let cap = self.data.len();
         if (self.size + 1) * 2 >= cap {
             let new_cap = cap * 2;
             let mut new_data = vec![0i32; new_cap];
             for i in 0..(self.size * 2) {
-                new_data[i] = self.data[(i + self.start) % cap];
+                new_data[i] = self.data[(i + self.start) & (cap - 1)];
             }
             self.data = new_data;
             self.start = 0;
             self.end = self.size * 2;
+            let cap = self.data.len();
+            // Same as below — power-of-two mask.
+            self.data[self.end] = x;
+            self.data[self.end + 1] = y;
+            self.end = (self.end + 2) & (cap - 1);
+            self.size += 1;
+            return;
         }
-        let cap = self.data.len();
+        let mask = cap - 1;
         self.data[self.end] = x;
         self.data[self.end + 1] = y;
-        self.end = (self.end + 2) % cap;
+        self.end = (self.end + 2) & mask;
         self.size += 1;
     }
 
     /// CoordQueue.java:30-39 — FIFO pop; `true` iff something was popped.
+    #[inline]
     pub fn next(&mut self) -> bool {
         if self.start != self.end {
             self.curr_x = self.data[self.start];
             self.curr_y = self.data[self.start + 1];
-            let cap = self.data.len();
-            self.start = (self.start + 2) % cap;
+            let mask = self.data.len() - 1;
+            self.start = (self.start + 2) & mask;
             self.size -= 1;
             true
         } else {

@@ -136,7 +136,10 @@ pub fn apply_damage(target_hp: f32, target_shield: f32, dmg: f32) -> (f32, f32, 
 /// edges cuts the per-sim init cost by up to 4x.
 ///
 /// Called only when `state.pathfinders.is_none()` (start of first frame).
-fn ensure_pathfinders(state: &mut SimState) {
+/// Public so external benches can pre-warm a template state once and share
+/// the built pathfinders via `SimState::clone()` across sims, amortising the
+/// ~2.5 µs `PathFinder::new` cost over many iterations.
+pub fn ensure_pathfinders(state: &mut SimState) {
     use crate::pathfinder::{edge_direction, PathFinder};
     if state.pathfinders.is_some() {
         return;

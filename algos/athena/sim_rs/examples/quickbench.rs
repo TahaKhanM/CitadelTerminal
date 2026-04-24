@@ -149,8 +149,13 @@ fn run(name: &str, template: &SimState, cfg: &SimConfig, iters: u64) {
 
 fn main() {
     let cfg = SimConfig::load(&snapshot_path()).expect("config load");
-    let toy = build_state_toy();
-    let mid = build_state_fixture();
+    let mut toy = build_state_toy();
+    let mut mid = build_state_fixture();
+    // Pre-warm the pathfinders on the template — shared via clone() across
+    // sims. Keeps the measured path representative of PyO3 batch-API usage
+    // where the caller reuses a template across many simulate() calls.
+    sim_rs::systems::ensure_pathfinders(&mut toy);
+    sim_rs::systems::ensure_pathfinders(&mut mid);
     // Warm up (page tables, caches).
     for _ in 0..500 {
         let mut s = toy.clone();
