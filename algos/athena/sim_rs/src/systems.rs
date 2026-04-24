@@ -147,10 +147,12 @@ pub fn system_move(state: &mut SimState, config: &SimConfig, _events: &mut Vec<E
         (EDGE_BOTTOM_RIGHT, edge_set(EDGE_BOTTOM_RIGHT)),
     ];
 
-    // Index-based loop because we need &mut self.pathfinders + &mut m
-    // disjointly. Take pathfinders out, iterate mobiles, put back.
-    let mut pathfinders = state.pathfinders.take().expect("pathfinders");
-    for m in state.mobiles.iter_mut() {
+    // Split-borrow: alias disjoint fields of SimState via destructuring so we
+    // can hold `&mut state.pathfinders` and `&mut state.mobiles` simultaneously
+    // without the Option::take()/restore dance. Zero field moves per frame.
+    let SimState { pathfinders, mobiles, .. } = state;
+    let pathfinders = pathfinders.as_mut().expect("pathfinders");
+    for m in mobiles.iter_mut() {
         if m.hp <= 0.0 || m.finished_navigating {
             continue;
         }
@@ -187,7 +189,6 @@ pub fn system_move(state: &mut SimState, config: &SimConfig, _events: &mut Vec<E
         // translator layer when comparing against replay wire format. See
         // pysim.py's flat-event list for the Python reference.
     }
-    state.pathfinders = Some(pathfinders);
 }
 
 // ============================================================ system_collision
