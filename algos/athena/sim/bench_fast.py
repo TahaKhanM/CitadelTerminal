@@ -180,10 +180,12 @@ def bench_sim_only(n_runs: int = 500, n_samples: int = 15) -> dict:
         clones = [fast_clone(base) for _ in range(n_runs)]
         gc.collect()
         gc.collect()
+        gc.disable()  # steady-state throughput measurement: GC off inside the window
         t0 = time.perf_counter_ns()
         for s in clones:
             simulate_action_phase(s, config)
         t1 = time.perf_counter_ns()
+        gc.enable()
         # Release clones before GC to prevent gen-2 thrashing across samples.
         del clones
         gc.collect()
