@@ -14,6 +14,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple
 
+import numpy as np
+
 from .config import (
     IDX_SUPPORT,
     IDX_TURRET,
@@ -25,6 +27,19 @@ from .config import (
     StructureSpec,
     MobileSpec,
 )
+
+# Every HP/shield/SP/MP field below is a numpy.float32, matching engine's
+# Java-float 32-bit representation. Python's default `float` type is a
+# 64-bit double; storing these as Python floats silently widens across
+# arithmetic and breaks bit-exact parity with engine.jar on accumulated
+# values (scout HP after N damage ticks, support shield at Y=13, etc.).
+# Dataclass type hints stay `float` because numpy.float32 isn't a
+# generic-friendly type; the invariant is enforced by config.py (spec
+# constants) + pysim.py (arithmetic sites) + validate.py
+# (_build_state_from_deploy_frame casts at load), and guarded by
+# tests/test_float32_propagation.py. Any site that reassigns one of
+# these fields MUST route through numpy.float32.
+FP32 = np.float32
 
 
 # ---------------------------------------------------------------- units
