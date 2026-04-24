@@ -783,11 +783,23 @@ fn pick_target_mobile_idx(
 /// engine gate is `isEnabled() || attackWhenDestroyed`. Breached mobiles are
 /// explicitly excluded (they were `disableGameObject`'d in BreachSystem).
 pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<EventEntry>) {
-    // Snapshot attacker identifiers into scratch (reused across frames).
+    // Snapshot attacker identifiers + per-player enemy lists into scratch
+    // (reused across frames, capacity preserved).
     state.scratch.attacker_struct_xys.clear();
+    state.scratch.p1_struct_xys.clear();
+    state.scratch.p2_struct_xys.clear();
     for (xy, s) in state.structures.iter() {
         if s.type_idx == IDX_TURRET {
             state.scratch.attacker_struct_xys.push(*xy);
+        }
+        // Only live structures count as targets. Matches the fire_one filter
+        // `s.hp > 0.0` so we can drop the per-candidate HP check later.
+        if s.hp > 0.0 {
+            match s.player {
+                1 => state.scratch.p1_struct_xys.push(*xy),
+                2 => state.scratch.p2_struct_xys.push(*xy),
+                _ => {}
+            }
         }
     }
     state.scratch.attacker_mobile_idxs.clear();
@@ -885,21 +897,30 @@ fn fire_one(
     }
     let mut target_struct_xy: Option<(i32, i32)> = None;
     if target_mobile_idx.is_none() && dmg_tower > 0.0 {
-        // Structure candidates — scratch-reused.
+        // Iterate only the enemy player's structure list (pre-partitioned).
+        // Avoids the O(all_structures) scan per turret when the full map is
+        // densely walled — 45 turrets × 108 structures scan → 45 turrets ×
+        // ~50 enemy structures (and only ones actually in range survive).
         state.scratch.struct_cand_xys.clear();
-        for (xy, s) in state.structures.iter() {
-            if s.hp <= 0.0 || s.player == att_player {
-                continue;
-            }
+        let enemy_list = if att_player == 1 {
+            &state.scratch.p2_struct_xys
+        } else {
+            &state.scratch.p1_struct_xys
+        };
+        // SAFETY: enemy_list lives inside state.scratch; we don't mutate
+        // struct_cand_xys here through a separate borrow path, only push.
+        let list_ptr = enemy_list.as_ptr();
+        let list_len = enemy_list.len();
+        let list_slice = unsafe { std::slice::from_raw_parts(list_ptr, list_len) };
+        for &xy in list_slice {
             let dx = (xy.0 - att_xy.0) as f32;
             let dy = (xy.1 - att_xy.1) as f32;
             if dx * dx + dy * dy > r_sq {
                 continue;
             }
-            state.scratch.struct_cand_xys.push(*xy);
+            state.scratch.struct_cand_xys.push(xy);
         }
         if !state.scratch.struct_cand_xys.is_empty() {
-            // SAFETY: same disjoint-field argument as walker path above.
             let xys_ptr = state.scratch.struct_cand_xys.as_ptr();
             let xys_len = state.scratch.struct_cand_xys.len();
             let xys_slice = unsafe { std::slice::from_raw_parts(xys_ptr, xys_len) };

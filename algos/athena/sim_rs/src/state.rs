@@ -162,6 +162,12 @@ pub struct Scratch {
     pub newly_shielded: Vec<String>,
     /// `clear_destroyed`: dead structure xys discovered this frame.
     pub dead_struct_xys: Vec<(i32, i32)>,
+    /// `system_attack`: player-1 owned structure xys (refreshed at system
+    /// start). Enables O(p1_struct_count) iteration for p2 turrets instead of
+    /// O(all_structures).
+    pub p1_struct_xys: Vec<(i32, i32)>,
+    /// `system_attack`: player-2 owned structure xys.
+    pub p2_struct_xys: Vec<(i32, i32)>,
 }
 
 /// Walker target candidate — indices + copyable data only, no String clone.
