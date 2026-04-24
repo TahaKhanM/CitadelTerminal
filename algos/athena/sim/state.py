@@ -12,7 +12,7 @@ sim.map.on_diamond(x, y).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
@@ -51,7 +51,11 @@ class Structure:
     xy: Tuple[int, int]
     type_idx: int
     upgraded: bool
-    hp: float
+    # hp: np.float32 at runtime (parity with engine.jar Java-float 32-bit).
+    # Annotated Any so mypyc will compile modules that mutate this without
+    # rejecting the float32 ⇄ Python-float type mixing. Runtime precision
+    # is enforced by tests/test_float32_propagation.py.
+    hp: Any
     uid: str               # unit_id from the replay (never re-used)
     player: int            # 1 or 2
     # Engine's RefundComponent.turnStartRemoval (see RefundComponent.java).
@@ -77,8 +81,8 @@ class Mobile:
     """Live mobile unit mid-action-phase."""
     xy: Tuple[int, int]    # CURRENT tile
     type_idx: int
-    hp: float
-    shield: float
+    hp: Any        # np.float32 at runtime; see Structure.hp note.
+    shield: Any    # np.float32 at runtime.
     uid: str
     player: int            # 1 or 2
     # Movement bookkeeping
@@ -88,7 +92,7 @@ class Mobile:
     steps_taken: int = 0
     # Engine uses a float accumulator: `buildup += speed` per frame; move
     # fires and `buildup -= 1.0` when buildup >= 0.9999.
-    move_buildup: float = 0.0
+    move_buildup: Any = 0.0  # np.float32 at runtime.
     # `lastMove` hint passed into PathFinder.get_step() — 0=SPAWNED, 1=HORIZONTAL,
     # 2=VERTICAL. Updated after every successful move per engine semantics.
     last_move: int = 0
@@ -109,9 +113,9 @@ class Mobile:
 
 @dataclass(slots=True)
 class PlayerStats:
-    hp: float
-    sp: float
-    mp: float
+    hp: Any  # np.float32 at runtime.
+    sp: Any  # np.float32 at runtime.
+    mp: Any  # np.float32 at runtime.
 
 
 @dataclass
@@ -147,6 +151,32 @@ class SimState:
     # _unit is a no-op immediately; avoids O(structures) scan per frame for
     # the common case of zero pending removals.
     pending_removal_xys: Set[Tuple[int, int]] = field(default_factory=set)
+    # Perf: count of structural mutations (add/remove) since construction.
+    # `system_attack` hot path caches a per-turret list of in-range enemy
+    # structures keyed by this generation. When the generation changes,
+    # the cache is invalidated and rebuilt. Saves ~70 frames × 20 turrets
+    # × 54 enemy-struct iterations per sim on mid_game_108_struct_5_mob.
+    _structure_gen: int = 0
+    # Cache of (turret, enemy_structs_in_range) populated lazily by
+    # system_attack. Rebuilt when _structure_gen changes.
+    _attack_struct_cache: Any = None
+    # Cache of (target_edge, xy, last_move) → next-step-tile populated
+    # lazily by system_move. Pathfinder.get_step output is a pure
+    # function of those keys PLUS the pathfinder's wall set, which
+    # changes ONLY when structures are added/removed (tracked by
+    # _structure_gen). Invalidated on gen change. Saves ~8us/call
+    # over ~70 frames × ~2 moving mobiles per frame.
+    _move_step_cache: Any = None
+    # Cache of per-player turret & structure lists keyed on
+    # _structure_gen. System_attack rebuilds these lists every frame
+    # by scanning all 108 structures; the split result is invariant
+    # while structures don't change. Cached here as a 5-tuple
+    # (turrets_p1, turrets_p2, structs_p1, structs_p2, gen) with gen
+    # being the _structure_gen at build time. Invalidation = gen
+    # mismatch. Mobiles per-player still rebuild every frame (they
+    # move, not just die). Saves ~200 PyObject_GetAttr calls per
+    # frame on mid_game_108_struct_5_mob.
+    _attack_split_cache: Any = None
 
     # --- helpers ---
 
@@ -159,6 +189,7 @@ class SimState:
     def remove_structure(self, s: Structure) -> None:
         if self.structures.get(s.xy) is s:
             del self.structures[s.xy]
+            self._structure_gen += 1
             if self.pathfinders is not None:
                 for pf in self.pathfinders.values():
                     pf.remove(s.xy[0], s.xy[1])

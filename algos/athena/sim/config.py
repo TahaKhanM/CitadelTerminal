@@ -133,33 +133,37 @@ def _patch_upgrade(base_cfg: Dict[str, Any],
 
 @dataclass(frozen=True)
 class StructureSpec:
-    hp: float
-    cost_sp: float
-    refund_pct: float
+    # Every numeric field below is np.float32 at runtime (engine-parity).
+    # Annotated Any so mypy/mypyc won't reject assignments from float32
+    # factories. Strongly-typed callers hold np.float32 values throughout.
+    hp: Any
+    cost_sp: Any
+    refund_pct: Any
     turns_required_to_remove: int
-    attack_range: float = 0.0
-    attack_damage_walker: float = 0.0
-    attack_damage_tower: float = 0.0
-    shield_range: float = 0.0
-    shield_per_unit: float = 0.0
-    shield_bonus_per_y: float = 0.0
-    shield_decay: float = 0.0
+    attack_range: Any = 0.0
+    attack_damage_walker: Any = 0.0
+    attack_damage_tower: Any = 0.0
+    shield_range: Any = 0.0
+    shield_per_unit: Any = 0.0
+    shield_bonus_per_y: Any = 0.0
+    shield_decay: Any = 0.0
 
 
 @dataclass(frozen=True)
 class MobileSpec:
-    hp: float
-    cost_mp: float
-    attack_range: float
-    attack_damage_walker: float
-    attack_damage_tower: float
-    speed: float
-    self_destruct_range: float
-    self_destruct_damage_walker: float
-    self_destruct_damage_tower: float
+    # Same dtype discipline as StructureSpec.
+    hp: Any
+    cost_mp: Any
+    attack_range: Any
+    attack_damage_walker: Any
+    attack_damage_tower: Any
+    speed: Any
+    self_destruct_range: Any
+    self_destruct_damage_walker: Any
+    self_destruct_damage_tower: Any
     self_destruct_steps_required: int
-    breach_damage: float
-    metal_for_breach: float
+    breach_damage: Any
+    metal_for_breach: Any
 
 
 @dataclass(frozen=True)
@@ -252,6 +256,22 @@ class SimConfig:
         self.scout = _mobile_spec_from(by_sh["PI"]["base"])
         self.demolisher = _mobile_spec_from(by_sh["EI"]["base"])
         self.interceptor = _mobile_spec_from(by_sh["SI"]["base"])
+
+        # Perf: direct-index spec tables. `_struct_specs[type_idx][upgraded]`
+        # and `_mobile_specs[type_idx]` let hot-path callers skip the
+        # branch tower in structure_spec() / mobile_spec(). None for
+        # indices that don't correspond to the given category.
+        self._struct_specs: list = [
+            (self.wall_base, self.wall_upg),
+            (self.support_base, self.support_upg),
+            (self.turret_base, self.turret_upg),
+            None, None, None, None, None,
+        ]
+        self._mobile_specs: list = [
+            None, None, None,
+            self.scout, self.demolisher, self.interceptor,
+            None, None,
+        ]
 
         # Resources block — verbatim from engine
         resources = raw.get("_resources_block_verbatim", {})
