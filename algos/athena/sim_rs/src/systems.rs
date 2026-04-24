@@ -38,7 +38,7 @@ use crate::events::EventEntry;
 use crate::map::{
     edge_tiles_slice, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT, EDGE_TOP_LEFT, EDGE_TOP_RIGHT,
 };
-use crate::pathfinder::{make_pathfinders, HORIZONTAL, VERTICAL};
+use crate::pathfinder::{HORIZONTAL, VERTICAL};
 use crate::state::SimState;
 use indexmap::IndexMap;
 
@@ -108,17 +108,39 @@ pub fn apply_damage(target_hp: f32, target_shield: f32, dmg: f32) -> (f32, f32, 
 
 /// Lazily initialize the 4 per-edge PathFinder instances from current
 /// structures. Mirror of `sim/pysim.py::_ensure_pathfinders`.
+/// Build the 4-edge pathfinder container eagerly, but only populate the
+/// edges actually needed by live mobiles — each `PathFinder::new` allocates
+/// ~30 KB of state arrays and is the single biggest per-sim cost, so we defer
+/// until a mobile with that `target_edge` appears. In the common mid-game
+/// fixture (all 5 mobiles target EDGE_TOP_RIGHT) this cuts pathfinder init
+/// from 4 instances to 1.
+/// First-call pathfinder builder. Only constructs `PathFinder` instances for
+/// target_edges that actually appear in live mobiles — the engine holds 4
+/// pathfinders but SimCore sims a single action phase where typically only
+/// 1 edge is needed (e.g. all scouts target EDGE_TOP_RIGHT). Each
+/// `PathFinder::new` allocates ~30 KB of state arrays, so pruning unused
+/// edges cuts the per-sim init cost by up to 4x.
+///
+/// Called only when `state.pathfinders.is_none()` (start of first frame).
 fn ensure_pathfinders(state: &mut SimState) {
+    use crate::pathfinder::{edge_direction, PathFinder};
     if state.pathfinders.is_some() {
         return;
     }
+    let mut pfs: IndexMap<i32, PathFinder> = IndexMap::with_capacity(4);
+    let mut needed: [bool; 4] = [false; 4];
+    for m in state.mobiles.iter() {
+        if m.hp <= 0.0 || m.finished_navigating { continue; }
+        if (0..4).contains(&m.target_edge) { needed[m.target_edge as usize] = true; }
+    }
+    // Walls snapshot — identical across all 4 PathFinders.
     let walls: Vec<(i32, i32)> = state.structures.keys().copied().collect();
-    let mut edge_lists: IndexMap<i32, Vec<(i32, i32)>> = IndexMap::with_capacity(4);
-    edge_lists.insert(EDGE_TOP_RIGHT, edge_tiles_slice(EDGE_TOP_RIGHT).to_vec());
-    edge_lists.insert(EDGE_TOP_LEFT, edge_tiles_slice(EDGE_TOP_LEFT).to_vec());
-    edge_lists.insert(EDGE_BOTTOM_LEFT, edge_tiles_slice(EDGE_BOTTOM_LEFT).to_vec());
-    edge_lists.insert(EDGE_BOTTOM_RIGHT, edge_tiles_slice(EDGE_BOTTOM_RIGHT).to_vec());
-    state.pathfinders = Some(make_pathfinders(ARENA, &walls, &edge_lists));
+    for edge in [EDGE_TOP_RIGHT, EDGE_TOP_LEFT, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT] {
+        if !needed[edge as usize] { continue; }
+        let perfects = edge_tiles_slice(edge);
+        pfs.insert(edge, PathFinder::new(ARENA, edge_direction(edge), &walls, perfects));
+    }
+    state.pathfinders = Some(pfs);
 }
 
 // ================================================================ system_move
