@@ -44,7 +44,7 @@ FP32 = np.float32
 
 # ---------------------------------------------------------------- units
 
-@dataclass
+@dataclass(slots=True)
 class Structure:
     """Live structure in the simulation. Snapshot from a replay's deploy frame
     OR one created via `attempt_spawn` during SimCore deploy-replay."""
@@ -72,7 +72,7 @@ class Structure:
         raise NotImplementedError("read max_hp via SimState.spec_for(struct).hp")
 
 
-@dataclass
+@dataclass(slots=True)
 class Mobile:
     """Live mobile unit mid-action-phase."""
     xy: Tuple[int, int]    # CURRENT tile
@@ -107,7 +107,7 @@ class Mobile:
 
 # ------------------------------------------------------------ sim state
 
-@dataclass
+@dataclass(slots=True)
 class PlayerStats:
     hp: float
     sp: float
