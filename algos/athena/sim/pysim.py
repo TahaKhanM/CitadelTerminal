@@ -107,8 +107,7 @@ def _round01(x) -> np.float32:
     # values. (Half-way: Java rounds half-up; Python rounds half-to-even.
     # SP/MP deductions are whole numbers × 10 ∈ integers, so no halfway
     # inputs land on the rounding boundary in practice.)
-    # DEMO REGRESSION: silently widen to float64 (was FP32(round(...)) / _F32_TEN)
-    return float(round(float(x32 * _F32_TEN))) / 10.0
+    return FP32(round(float(x32 * _F32_TEN))) / _F32_TEN
 
 
 def _is_structure(type_idx: int) -> bool:
