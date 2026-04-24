@@ -37,7 +37,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Deque, Dict, List, Sequence, Set, Tuple
+from typing import Any, Deque, Dict, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -59,6 +59,29 @@ MOBILE_TYPES: Tuple[int, ...] = (SCOUT_IDX, DEMOLISHER_IDX, INTERCEPTOR_IDX)
 STRUCTURE_TYPES: Tuple[int, ...] = (WALL_IDX, SUPPORT_IDX, TURRET_IDX)
 
 ARENA_SIZE: int = 28
+
+# Edge labels (top-down, "self at bottom" frame of reference)
+EDGE_BL: str = "BL"  # bottom-left  — self spawn edge
+EDGE_BR: str = "BR"  # bottom-right — self spawn edge
+EDGE_TL: str = "TL"  # top-left     — opponent spawn edge
+EDGE_TR: str = "TR"  # top-right    — opponent spawn edge
+
+
+def _classify_edge(x: int, y: int) -> Optional[str]:
+    """Return ``BL/BR/TL/TR`` for arena-edge coordinates.
+
+    Breach events report a tile coordinate at the moment the unit
+    crosses an opponent edge. The Citadel diamond's four edges are the
+    diagonals ``y = x`` and ``y = 27 - x`` for both halves; the actual
+    tiles a mobile unit can step onto are the corner-adjacent rows.
+    Rather than hard-encode every (x,y) on each diagonal, classify by
+    the half of the board (top vs bottom = y>=14 vs y<14) and the side
+    (left vs right = x<=13 vs x>=14). This is robust to engine quirks
+    around diagonal endpoints.
+    """
+    if y >= 14:
+        return EDGE_TL if x <= 13 else EDGE_TR
+    return EDGE_BL if x <= 13 else EDGE_BR
 
 
 def _is_first_action_frame(turn_info: Sequence[int]) -> bool:
@@ -328,3 +351,111 @@ class WallRemovalDetector:
 
     def n_turns_observed(self) -> int:
         return len(self._window)
+
+
+# ---------------------------------------------------------------------------
+# Task 4 — BreachLocationTracker
+# ---------------------------------------------------------------------------
+
+@dataclass
+class BreachLocationTracker:
+    """Accumulates breach events scored AGAINST us, with decay.
+
+    A breach event has shape::
+
+        [[x, y], damage_dealt, unit_type, unit_id, breaching_player_id]
+
+    ``breaching_player_id != self_player_id`` means an opponent mobile
+    unit reached our edge and dealt HP damage to us — exactly the
+    events we want to learn from. We score per-tile counts and per-edge
+    totals (BL/BR/TL/TR) so the planner can see where the opponent is
+    actually scoring vs. just threatening.
+
+    Decay: ``decay_per_turn`` (default 0.9) is applied at the start of
+    every new turn before that turn's events are added. Per-frame
+    dedupe via (turn, frame_index, event_idx) keeps re-feeding the same
+    frame from being double-counted.
+
+    Player_index flip: ``self_player_id`` defaults to 1 (action-frame
+    convention, ``1 = you, 2 = opponent``). Breaches where
+    ``breaching_id == self_player_id`` are OUR scoring runs and are
+    deliberately ignored — this tracker is "what's hurting us".
+    """
+
+    self_player_id: int = 1
+    decay_per_turn: float = 0.9
+    per_tile: Dict[Tuple[int, int], float] = field(default_factory=dict)
+    per_edge: Dict[str, float] = field(
+        default_factory=lambda: {EDGE_BL: 0.0, EDGE_BR: 0.0, EDGE_TL: 0.0, EDGE_TR: 0.0}
+    )
+    total_damage: float = 0.0
+    _last_turn_decayed: int = -1
+    _seen_event_keys: Set[Tuple[Tuple[int, int], int]] = field(default_factory=set)
+
+    def consume_action_frame(self, frame: Dict[str, Any]) -> None:
+        turn_info = frame.get("turnInfo")
+        if turn_info is None or len(turn_info) < 3:
+            return
+        # Decay once per turn at the first action frame of that turn.
+        if _is_first_action_frame(turn_info):
+            turn_number = int(turn_info[1])
+            if turn_number != self._last_turn_decayed:
+                self._apply_decay()
+                self._last_turn_decayed = turn_number
+
+        breaches = frame.get("events", {}).get("breach", [])
+        if not breaches:
+            return
+        # Frame-key part of the dedupe key — a re-fed frame won't
+        # double-count, but distinct events within a single frame
+        # remain separate via the trailing index.
+        try:
+            frame_key = (int(turn_info[1]), int(turn_info[2]))
+        except (TypeError, ValueError):
+            frame_key = (-1, -1)
+
+        for idx, ev in enumerate(breaches):
+            try:
+                loc = ev[0]
+                damage = float(ev[1])
+                breaching_id = int(ev[4])
+                x = int(loc[0])
+                y = int(loc[1])
+            except (IndexError, TypeError, ValueError):
+                continue
+            if breaching_id == self.self_player_id:
+                continue  # this is OUR breach, not against us
+            ev_key = (frame_key, idx)
+            if ev_key in self._seen_event_keys:
+                continue
+            self._seen_event_keys.add(ev_key)
+            tile = (x, y)
+            self.per_tile[tile] = self.per_tile.get(tile, 0.0) + damage
+            edge = _classify_edge(x, y)
+            if edge is not None:
+                self.per_edge[edge] += damage
+            self.total_damage += damage
+
+    # -- queries --------------------------------------------------------
+
+    def _apply_decay(self) -> None:
+        if self.decay_per_turn == 1.0:
+            return
+        d = self.decay_per_turn
+        for k in list(self.per_tile.keys()):
+            self.per_tile[k] *= d
+        for k in self.per_edge:
+            self.per_edge[k] *= d
+        self.total_damage *= d
+
+    def edge_pressure(self) -> Dict[str, float]:
+        """Snapshot of per-edge accumulated breach damage."""
+        return dict(self.per_edge)
+
+    def hot_tiles(self, top_k: int = 5) -> List[Tuple[Tuple[int, int], float]]:
+        """Top breach tiles by current weighted damage, descending."""
+        ranked = sorted(self.per_tile.items(), key=lambda kv: (-kv[1], kv[0]))
+        return [(tile, weight) for tile, weight in ranked[:top_k] if weight > 0.0]
+
+    def n_breaches_seen(self) -> int:
+        return len(self._seen_event_keys)
