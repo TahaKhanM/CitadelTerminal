@@ -137,9 +137,11 @@ def _gen_single_mobile(rng):
     edge = int(rng.choice([EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT]))
     xy = _random_spawn_xy(rng, edge)
     type_idx = int(rng.choice([IDX_SCOUT, IDX_DEMOLISHER, IDX_INTERCEPTOR]))
+    # Use the correct starting HP per mobile type (Scout 15, Demo 5, Interceptor 40).
+    hp_by_type = {IDX_SCOUT: 15.0, IDX_DEMOLISHER: 5.0, IDX_INTERCEPTOR: 40.0}
     target_edge = 0 if edge == EDGE_BOTTOM_LEFT else 1  # TR / TL respectively
     state.mobiles.append(Mobile(
-        xy=xy, type_idx=type_idx, hp=FP32(15.0), shield=FP32(0.0),
+        xy=xy, type_idx=type_idx, hp=FP32(hp_by_type[type_idx]), shield=FP32(0.0),
         uid=_next_uid(), player=1, spawn_xy=xy, target_edge=target_edge,
     ))
     return state
