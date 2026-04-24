@@ -10,6 +10,11 @@ import warnings
 from sys import maxsize
 import json
 import os
+import sys
+import time
+import traceback
+import signal
+import threading
 
 
 """
@@ -24,6 +29,57 @@ Advanced strategy tips:
   board states. Though, we recommended making a copy of the map to preserve
   the actual current map state.
 """
+
+# --- Production safety: turn-time watchdog --------------------------------
+# The engine grants ~15 s per turn before applying 1 dmg/sec penalty. We
+# cap the planner at 13 s so we always have headroom to play a safe turn.
+TURN_WATCHDOG_SECONDS = 13
+
+
+class _TurnTimeout(Exception):
+    """Raised inside on_turn when the watchdog fires."""
+
+
+def _sigalrm_handler(_signum, _frame):
+    raise _TurnTimeout("on_turn exceeded TURN_WATCHDOG_SECONDS")
+
+
+def _arm_watchdog(seconds):
+    """Arm a SIGALRM watchdog. Returns a callable that disarms it.
+
+    Falls back to a thread-based interrupt-flag if SIGALRM is unavailable
+    (e.g. non-main thread, Windows). The fallback can't preempt CPython
+    bytecode so the planner has to cooperatively check `_watchdog_fired`,
+    but the outer try/except still catches any exception the planner
+    raises after the timer trips.
+    """
+    if hasattr(signal, "SIGALRM"):
+        try:
+            old_handler = signal.signal(signal.SIGALRM, _sigalrm_handler)
+            signal.alarm(seconds)
+
+            def disarm_sigalrm():
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
+
+            return disarm_sigalrm, lambda: False
+        except (ValueError, OSError):
+            pass  # not main thread / not supported
+    # Thread-timer fallback — cannot preempt; the planner must check.
+    fired = {"v": False}
+
+    def fire():
+        fired["v"] = True
+
+    timer = threading.Timer(seconds, fire)
+    timer.daemon = True
+    timer.start()
+
+    def disarm_thread():
+        timer.cancel()
+
+    return disarm_thread, lambda: fired["v"]
+
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
@@ -97,15 +153,96 @@ class AlgoStrategy(gamelib.AlgoCore):
     def on_turn(self, turn_state):
         """
         This function is called every turn with the game state wrapper as
-        an argument. The wrapper stores the state of the arena and has methods
-        for querying its state, allocating your current resources as planned
-        unit deployments, and transmitting your intended deployments to the
-        game engine.
+        an argument. Wrapped in a top-level try/except + 13s watchdog
+        (production safety): on any failure we fall through to
+        `_safe_fallback_turn` which plays a minimal defense and submits.
         """
-        game_state = gamelib.GameState(self.config, turn_state)
-        self.starter_strategy(game_state)
+        start = time.time()
+        disarm, fired = _arm_watchdog(TURN_WATCHDOG_SECONDS)
+        game_state = None
+        used_fallback = False
+        try:
+            game_state = gamelib.GameState(self.config, turn_state)
+            self.starter_strategy(game_state)
+            game_state.submit_turn()
+        except _TurnTimeout:
+            gamelib.debug_write(
+                "[lostkids-baseline] on_turn watchdog fired after "
+                "{}s — playing safe fallback".format(TURN_WATCHDOG_SECONDS)
+            )
+            used_fallback = True
+        except Exception as exc:  # noqa: BLE001 — production catch-all by design
+            gamelib.debug_write(
+                "[lostkids-baseline] on_turn exception: {!r}\n{}".format(
+                    exc, traceback.format_exc()
+                )
+            )
+            used_fallback = True
+        finally:
+            disarm()
 
-        game_state.submit_turn()
+        if used_fallback:
+            try:
+                if game_state is None:
+                    game_state = gamelib.GameState(self.config, turn_state)
+                self._safe_fallback_turn(game_state)
+                game_state.submit_turn()
+            except Exception as exc2:  # noqa: BLE001 — last-resort
+                gamelib.debug_write(
+                    "[lostkids-baseline] safe-fallback also failed: {!r}\n{}".format(
+                        exc2, traceback.format_exc()
+                    )
+                )
+                # As a final safety net submit an empty turn so the engine doesn't
+                # stall waiting for our message.
+                try:
+                    if game_state is not None:
+                        game_state.submit_turn()
+                except Exception:  # noqa: BLE001
+                    pass
+
+        if fired() and not used_fallback:
+            # Thread-timer fallback fired but the planner exited cleanly anyway
+            # — log for telemetry; nothing to do.
+            gamelib.debug_write(
+                "[lostkids-baseline] watchdog flag set but turn finished in "
+                "{:.2f}s".format(time.time() - start)
+            )
+
+    # --- Safe-fallback minimal defense ------------------------------------
+
+    # Four cheap base turrets at canonical safe positions. 8 SP if all
+    # spawnable. We intentionally pick the same anchor positions Lostkids'
+    # default build_order uses early so they don't conflict with whatever
+    # state Lostkids has already committed.
+    _SAFE_FALLBACK_TURRETS = ((2, 13), (25, 13), (3, 13), (24, 13))
+
+    def _safe_fallback_turn(self, game_state):
+        """Minimal "do no harm" turn used after a planner failure.
+
+        - Spawns up to 4 base turrets at canonical edge positions if SP
+          allows (skips silently if a position is occupied or we're broke).
+        - No mobile-unit offense — yielding the turn is preferable to
+          a half-baked attack that gets countered.
+        - Does NOT call `submit_turn`; the caller does that.
+        """
+        try:
+            sp = game_state.get_resource(SP, 0)
+        except Exception:  # noqa: BLE001
+            sp = 0.0
+        for loc in self._SAFE_FALLBACK_TURRETS:
+            try:
+                cost = game_state.type_cost(TURRET)[SP]
+            except Exception:  # noqa: BLE001
+                cost = 2  # Citadel base turret SP cost as a fallback constant
+            if sp < cost:
+                break
+            try:
+                spawned = game_state.attempt_spawn(TURRET, list(loc))
+            except Exception:  # noqa: BLE001
+                spawned = 0
+            if spawned:
+                sp -= cost
 
 
     def starter_strategy(self, game_state):
@@ -397,16 +534,24 @@ class AlgoStrategy(gamelib.AlgoCore):
                     game_state.attempt_remove(location)
 
     def on_action_frame(self, turn_string):
-        state = json.loads(turn_string)
-        if state["turnInfo"][0] == 1 and state["turnInfo"][2] == 0:
-            spawns = state["events"]["spawn"]
-            locations = set()
-            for spawn in spawns:
-                if spawn[1] == 3:
-                    locations.add(tuple(spawn[0]))
-            batch_count = min(3, len(locations))
-            if batch_count >= 1:
-                self.batch_count_history[batch_count - 1] += 1
+        """Frame-level callback. Production-wrapped: any exception is logged
+        but never raised back to the engine — losing a frame's telemetry is
+        far better than crashing mid-turn."""
+        try:
+            state = json.loads(turn_string)
+            if state["turnInfo"][0] == 1 and state["turnInfo"][2] == 0:
+                spawns = state["events"]["spawn"]
+                locations = set()
+                for spawn in spawns:
+                    if spawn[1] == 3:
+                        locations.add(tuple(spawn[0]))
+                batch_count = min(3, len(locations))
+                if batch_count >= 1:
+                    self.batch_count_history[batch_count - 1] += 1
+        except Exception as exc:  # noqa: BLE001 — telemetry must never crash
+            gamelib.debug_write(
+                "[lostkids-baseline] on_action_frame exception: {!r}".format(exc)
+            )
 
 
 if __name__ == "__main__":
