@@ -997,11 +997,20 @@ def simulate_action_phase(
     config: SimConfig,
     max_frames: int = 200,
 ) -> ActionResult:
-    """Run frames until no mobile units remain or max_frames hit.
+    """FAST-mode action phase: run frames to completion without
+    materializing per-frame observation dicts. Shares the exact same
+    system-call sequence, termination gates, and mutations as
+    `simulate_action_phase_iter`; the only difference is no observation
+    is built, so per-frame event buckets are flushed into a single
+    aggregated `frame_events` list for post-phase consumers.
 
-    Pre-condition: state already reflects deploy-phase (structures + mobile
-    spawns). Use apply_deploy_actions to build this from replay records.
-    """
+    Dual-mode invariant (enforced by tests/test_mode_parity.py): the
+    final SimState produced here is byte-identical to the final state
+    left behind after draining `simulate_action_phase_iter`.
+
+    Pre-condition: state already reflects deploy-phase (structures +
+    mobile spawns). Use apply_deploy_actions to build this from replay
+    records."""
     p1_start_hp = state.p1.hp
     p2_start_hp = state.p2.hp
     p1_start_sp = state.p1.sp
@@ -1009,10 +1018,13 @@ def simulate_action_phase(
 
     frame_events: List[dict] = []
     f = 0
+    turn = state.turn
     # Action-iteration shape matches engine's GameMain.runLoop:268-318:
-    # systems run, snapshot (implicit in this non-iter path), walkersAlive
-    # gate at BOTTOM of iteration. Turns with zero mobile spawns still
-    # produce one frame so frame_count matches engine.
+    # systems run → clear_destroyed → system_remove_own_unit → emit
+    # (in INSTRUMENTED; skipped here) → {HP-<=-0 gate, walkersAlive
+    # gate} at bottom. See simulate_action_phase_iter for the full
+    # engine-citation block; this path keeps the same two-gate exit so
+    # the two modes agree on final state.
     while f < max_frames:
         system_move(state, config, frame_events)
         system_collision(state)
@@ -1021,14 +1033,20 @@ def simulate_action_phase(
         system_breach(state, config, frame_events)
         system_self_destruct(state, config, frame_events)
         system_attack(state, config, frame_events)
-
-        # Post-clear per frame — dead units pop before the next frame's
-        # systems run (engine: Game.java:181 end-of-engineLoop clear).
         clear_destroyed(state)
+        system_remove_own_unit(state, config, frame_events, turn)
 
-        f += 1
-        if not state.mobiles:
+        # Termination gates (mirror simulate_action_phase_iter):
+        #   1. processEndGame(false) — GameMain.runLoop:301: either
+        #      player at 0 HP ends the action phase after the emit.
+        #   2. walkersAlive — GameMain.runLoop:296-300.
+        if state.p1.hp <= 0.0 or state.p2.hp <= 0.0:
+            f += 1
             break
+        if not state.mobiles:
+            f += 1
+            break
+        f += 1
 
     p1_dmg = max(0.0, p2_start_hp - state.p2.hp)
     p2_dmg = max(0.0, p1_start_hp - state.p1.hp)
