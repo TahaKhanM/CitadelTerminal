@@ -275,12 +275,16 @@ pub fn system_shield_give(
     config: &SimConfig,
     events: &mut Vec<EventEntry>,
 ) {
-    // Seed the support-xy scratch list (reuses buffer capacity).
+    // Seed the support-xy scratch list (reuses buffer capacity). Early-out
+    // if no supports exist so we skip the outer loop entirely.
     state.scratch.support_xys.clear();
     for (xy, s) in state.structures.iter() {
         if s.type_idx == IDX_SUPPORT && s.hp > 0.0 {
             state.scratch.support_xys.push(*xy);
         }
+    }
+    if state.scratch.support_xys.is_empty() {
+        return;
     }
 
     let n = state.scratch.support_xys.len();
