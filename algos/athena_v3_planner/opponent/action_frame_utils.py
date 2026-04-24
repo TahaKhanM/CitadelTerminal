@@ -36,7 +36,9 @@ beyond a few small ints / tuples. Designed to run inside
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
+
+import numpy as np
 
 # ---------------------------------------------------------------------------
 # Shared constants — keep in sync with citadel_config_snapshot.json
@@ -150,3 +152,91 @@ class BatchCountTracker:
 
     def n_turns_observed(self) -> int:
         return len(self.per_turn_counts)
+
+
+# ---------------------------------------------------------------------------
+# Task 2 — SpawnXHistogram
+# ---------------------------------------------------------------------------
+
+@dataclass
+class SpawnXHistogram:
+    """28-bin running histogram of enemy mobile spawn x-columns.
+
+    Decays by ``decay_per_turn`` (default 0.95) every turn. A column
+    that hasn't seen a spawn for many turns slowly fades out, letting
+    the planner respond to recent behavior without forgetting old
+    patterns entirely.
+
+    The histogram counts only *mobile* enemy spawns (Scout, Demolisher,
+    Interceptor). Structures don't tell us anything about attack
+    direction.
+    """
+
+    self_player_id: int = 1
+    decay_per_turn: float = 0.95
+    counts: np.ndarray = field(
+        default_factory=lambda: np.zeros(ARENA_SIZE, dtype=np.float64)
+    )
+    _last_turn_decayed: int = -1
+    _counted_turns: set = field(default_factory=set)
+
+    def consume_action_frame(self, frame: Dict[str, Any]) -> None:
+        turn_info = frame.get("turnInfo")
+        if turn_info is None or not _is_first_action_frame(turn_info):
+            return
+        turn_number = int(turn_info[1])
+
+        # Apply decay once per turn boundary, even if we've already
+        # counted this turn (idempotent re-entry safe).
+        if turn_number != self._last_turn_decayed:
+            self._apply_decay()
+            self._last_turn_decayed = turn_number
+
+        if turn_number in self._counted_turns:
+            return
+        self._counted_turns.add(turn_number)
+
+        opp_id = 2 if self.self_player_id == 1 else 1
+        for ev in frame.get("events", {}).get("spawn", []):
+            try:
+                loc = ev[0]
+                unit_type = int(ev[1])
+                player_id = int(ev[3])
+                x = int(loc[0])
+            except (IndexError, TypeError, ValueError):
+                continue
+            if player_id != opp_id:
+                continue
+            if unit_type not in MOBILE_TYPES:
+                continue
+            if 0 <= x < ARENA_SIZE:
+                self.counts[x] += 1.0
+
+    # -- queries --------------------------------------------------------
+
+    def _apply_decay(self) -> None:
+        if self.decay_per_turn != 1.0:
+            self.counts *= self.decay_per_turn
+
+    def spawn_x_distribution(self) -> np.ndarray:
+        """Return a copy of the 28-bin histogram (raw counts)."""
+        return self.counts.copy()
+
+    def normalized_distribution(self) -> np.ndarray:
+        s = float(self.counts.sum())
+        if s <= 0.0:
+            return np.zeros(ARENA_SIZE, dtype=np.float64)
+        return self.counts / s
+
+    def peak_spawn_columns(self, top_k: int = 3) -> List[int]:
+        """Return the ``top_k`` x-columns by current weight, descending.
+
+        Ties broken by lower x (deterministic).
+        """
+        if top_k <= 0:
+            return []
+        # argsort ascending; stable so ties favor lower x
+        order = np.argsort(-self.counts, kind="stable")
+        # Drop columns with zero weight — those aren't peaks
+        result = [int(x) for x in order[:top_k] if self.counts[int(x)] > 0.0]
+        return result

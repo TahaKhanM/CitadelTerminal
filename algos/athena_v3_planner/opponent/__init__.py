@@ -12,8 +12,9 @@ the action-frame convention; callers pass ``self_player_id`` (default
 1) explicitly.
 """
 
-from .action_frame_utils import BatchCountTracker
+from .action_frame_utils import BatchCountTracker, SpawnXHistogram
 
 __all__ = [
     "BatchCountTracker",
+    "SpawnXHistogram",
 ]
