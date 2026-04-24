@@ -254,10 +254,14 @@ priming the step_cache along exactly the tiles the sim will query.
 
 Repro evidence: `repro_fuzz_{diff,min,trace,rs_trace}.py`.
 
-## ACHIEVED TARGETS — Rust port & perf (2026-04-24)
+## ACHIEVED TARGETS — Rust port & accuracy (2026-04-24)
 
-All accuracy floors GREEN; performance floors progress summarised
-with bench evidence per target.
+All accuracy floors GREEN. Performance floors are tracked separately
+under § REMAINING TARGETS — none of the three perf floors (Rust FAST
+single-core, Rust FAST 8-core, Python FAST) is met yet, so they
+explicitly do NOT belong in this table. They will be promoted back
+here only after a clean two-consecutive-bench measurement on
+`mid_game_108_struct_5_mob` shows the floor crossed.
 
 | Target | Floor | Status | Evidence |
 |---|---|---|---|
@@ -271,9 +275,21 @@ with bench evidence per target.
 | 4 metamorphic on 45,944 runs | zero fail | **GREEN** | prior session evidence |
 | Pre-commit hook blocks seeded regressions | demonstrated | **GREEN** | prior session evidence |
 | Rust INSTRUMENTED single-core | ≥5,000 sims/s | **GREEN** | 14.3 K on `mid_game_108_struct_5_mob` (quickbench) |
-| Rust FAST single-core | ≥25,000 sims/s | **14.3 K** | `examples/quickbench` two-run best 14.1 K / 14.3 K on mid_game_108_struct_5_mob |
-| Rust FAST 8-core batch | ≥150,000 sims/s | **75 K on 10-thread** | `examples/parallel_bench` batch=2048 |
-| Python FAST single-core | ≥1,500 sims/s | **336 sims/s** | `algos/athena/sim/bench_fast.py` post-mypyc |
+
+## REMAINING TARGETS — perf floors (open as of 2026-04-24)
+
+These were prematurely placed in ACHIEVED in commit `1011545`. They
+are NOT met. Each row carries the current measurement, the floor it
+must clear, and the gap (factor required). Do not promote a row back
+to § ACHIEVED until two consecutive bench runs on
+`mid_game_108_struct_5_mob` (clean machine, no concurrent load) show
+the floor cleared.
+
+| Target | Floor | Current | Gap | Lever sequence (this session) |
+|---|---|---|---|---|
+| Rust FAST single-core | ≥25,000 sims/s | **14.3 K** | 1.74× | (1) portable_simd f32x8 bbox filter in `system_attack`, (2) Structures SoA, (3) PGO retry |
+| Rust FAST 8-core batch | ≥150,000 sims/s | **75 K on 10-thread** | 2.0× (8c) / 1.5× (10c) | (4) `Arc<PathFinder>` + per-thread `bumpalo::Bump`; eliminates allocator contention from per-sim clones |
+| Python FAST single-core | ≥1,500 sims/s | **376 sims/s** | 4.0× | mypyc landed (commit `93d60c8`); next: portable_simd-style C extension hot loop, or full Cython rewrite of fire_one |
 
 ### FAST single-core optimization trace
 
