@@ -26,20 +26,65 @@ pub fn on_diamond(x: i32, y: i32) -> bool {
     }
 }
 
-/// Enumerate tiles on the given edge in canonical insertion order —
-/// `MapBounds.java:30-43` (BL iterates `(13-i, i)` for i ∈ [0,13]).
-pub fn edge_tiles(edge: i32) -> Vec<(i32, i32)> {
-    let mut out = Vec::with_capacity(14);
-    for i in 0..HALF {
-        out.push(match edge {
-            EDGE_BOTTOM_LEFT  => (13 - i, i),
-            EDGE_BOTTOM_RIGHT => (14 + i, i),
-            EDGE_TOP_LEFT     => (i,           14 + i),
-            EDGE_TOP_RIGHT    => (27 - i,      14 + i),
-            _ => unreachable!(),
-        });
+/// Static per-edge tile tables. `MapBounds.java:30-43` order — BL iterates
+/// `(13-i, i)` for i ∈ [0,13]; TR / TL / BR are the three mirrors. Computed
+/// once at const-eval time so per-frame callers can borrow `&'static [...]`
+/// instead of allocating a fresh `Vec`.
+pub const EDGE_TILES_BOTTOM_LEFT: [(i32, i32); 14] = {
+    let mut out = [(0, 0); 14];
+    let mut i = 0;
+    while i < 14 {
+        out[i as usize] = (13 - i, i);
+        i += 1;
     }
     out
+};
+pub const EDGE_TILES_BOTTOM_RIGHT: [(i32, i32); 14] = {
+    let mut out = [(0, 0); 14];
+    let mut i = 0;
+    while i < 14 {
+        out[i as usize] = (14 + i, i);
+        i += 1;
+    }
+    out
+};
+pub const EDGE_TILES_TOP_LEFT: [(i32, i32); 14] = {
+    let mut out = [(0, 0); 14];
+    let mut i = 0;
+    while i < 14 {
+        out[i as usize] = (i, 14 + i);
+        i += 1;
+    }
+    out
+};
+pub const EDGE_TILES_TOP_RIGHT: [(i32, i32); 14] = {
+    let mut out = [(0, 0); 14];
+    let mut i = 0;
+    while i < 14 {
+        out[i as usize] = (27 - i, 14 + i);
+        i += 1;
+    }
+    out
+};
+
+/// Borrow the precomputed edge-tile table. Zero-alloc, returns a `'static`
+/// slice. Semantics match the original `edge_tiles()` signature but without
+/// the per-call `Vec` allocation.
+#[inline]
+pub fn edge_tiles_slice(edge: i32) -> &'static [(i32, i32)] {
+    match edge {
+        EDGE_BOTTOM_LEFT => &EDGE_TILES_BOTTOM_LEFT,
+        EDGE_BOTTOM_RIGHT => &EDGE_TILES_BOTTOM_RIGHT,
+        EDGE_TOP_LEFT => &EDGE_TILES_TOP_LEFT,
+        EDGE_TOP_RIGHT => &EDGE_TILES_TOP_RIGHT,
+        _ => unreachable!(),
+    }
+}
+
+/// Legacy `Vec`-returning shim — kept for any external callers that expected
+/// an owned Vec (tests, benches). Prefer `edge_tiles_slice` in hot paths.
+pub fn edge_tiles(edge: i32) -> Vec<(i32, i32)> {
+    edge_tiles_slice(edge).to_vec()
 }
 
 #[cfg(test)]
