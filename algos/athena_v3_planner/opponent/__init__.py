@@ -15,6 +15,7 @@ the action-frame convention; callers pass ``self_player_id`` (default
 from .action_frame_utils import (
     BatchCountTracker,
     BreachLocationTracker,
+    ResourceTracker,
     SpawnXHistogram,
     WallRemovalDetector,
 )
@@ -22,6 +23,7 @@ from .action_frame_utils import (
 __all__ = [
     "BatchCountTracker",
     "BreachLocationTracker",
+    "ResourceTracker",
     "SpawnXHistogram",
     "WallRemovalDetector",
 ]
