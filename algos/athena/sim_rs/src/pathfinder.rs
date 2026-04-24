@@ -645,25 +645,16 @@ impl PathFinder {
 
     /// PathFinder.java:345-412.
     ///
-    /// 6-step filter pipeline per `PATHFINDER_SPEC.md` §6.
-    ///
-    /// 1. Populate candidate list with `[self, +x, -x, +y, -y]` neighbors
-    ///    (order matters for final tiebreak).
-    /// 2. Validate INVALID tiles via `validate(requires_validation)`.
-    /// 3. Filter #1: two-pass compact by running min pathlength — `s` starts
-    ///    at `i32::MAX` (PATHFINDER_SPEC.md §6.7; CFR decompiled ambiguously
-    ///    but bytecode offset 139-141 confirms `ldc MAX_VALUE; istore 7`).
-    /// 4. Filter #2: keep cells whose pathlength equals the final `s`.
-    /// 5. Filter #3 (size > 1): drop zigzag — same-axis as previous move.
-    /// 6. Filter #4 (size > 1): drop cells whose x AND y increments both
-    ///    fail to match the target-edge direction vector.
-    ///
-    /// Returns `(curr_x, curr_y)` of the surviving head of the queue.
+    /// 6-step filter pipeline per `PATHFINDER_SPEC.md` §6. Uses a stack-
+    /// allocated 5-slot `InlineStepList` instead of the CoordQueue because
+    /// possible_steps has at most 5 entries (self + 4 neighbors) — the ring
+    /// buffer has modulo and bounds-check overhead we pay for no reason.
     pub fn get_step(&mut self, unit_x: i32, unit_y: i32, prev_direction: u8) -> (i32, i32) {
+        // Build possible_steps inline — at most 5 entries (self + 4 neighbors).
+        let mut ps: [(i32, i32); 5] = [(unit_x, unit_y); 5];
+        let mut ps_len: usize = 1;
         self.requires_validation.drain();
-        self.possible_steps.drain();
         self.requires_validation.push(unit_x, unit_y);
-        self.possible_steps.push(unit_x, unit_y);
 
         // Enumerate the 4 neighbors in (+x, -x, +y, -y) order.
         for i in 0..4 {
@@ -674,77 +665,77 @@ impl PathFinder {
                 self.requires_validation.push(nx, ny);
             }
             if self.status[n_idx] != STATUS_WALL {
-                self.possible_steps.push(nx, ny);
+                ps[ps_len] = (nx, ny);
+                ps_len += 1;
             }
         }
-        // Drain `self.requires_validation` in-place via `validate_rv` —
-        // no per-call CoordQueue::new() allocation (previously ~200 bytes
-        // of Vec capacity per get_step; profile shows get_step is called
-        // ~250 times per sim).
+        // Drain `self.requires_validation` in-place via `validate_rv`.
         self.validate_rv();
 
         // Filter #1: compact by running min pathlength (front-to-back).
         // `s` MUST be initialized to i32::MAX (PATHFINDER_SPEC.md §6.7).
         let mut s: i32 = I32_MAX;
-        let num = self.possible_steps.size();
-        for _ in 0..num {
-            self.possible_steps.next();
-            let step_x = self.possible_steps.curr_x;
-            let step_y = self.possible_steps.curr_y;
-            let pl = self.pathlength[self.index(step_x, step_y)] as i32;
+        let mut w: usize = 0;
+        for i in 0..ps_len {
+            let (sx, sy) = ps[i];
+            let pl = self.pathlength[self.index(sx, sy)] as i32;
             if pl > s {
                 continue;
             }
             s = pl;
-            self.possible_steps.push(step_x, step_y);
+            ps[w] = (sx, sy);
+            w += 1;
         }
+        ps_len = w;
 
         // Filter #2: strict equality to final `s`.
-        let num = self.possible_steps.size();
-        for _ in 0..num {
-            self.possible_steps.next();
-            let step_x = self.possible_steps.curr_x;
-            let step_y = self.possible_steps.curr_y;
-            if self.pathlength[self.index(step_x, step_y)] as i32 != s {
+        let mut w: usize = 0;
+        for i in 0..ps_len {
+            let (sx, sy) = ps[i];
+            if self.pathlength[self.index(sx, sy)] as i32 != s {
                 continue;
             }
-            self.possible_steps.push(step_x, step_y);
+            ps[w] = (sx, sy);
+            w += 1;
         }
+        ps_len = w;
 
         // Filter #3: zigzag (only if size > 1).
-        if self.possible_steps.size() > 1 {
-            let num = self.possible_steps.size();
-            for _ in 0..num {
-                self.possible_steps.next();
-                let step_x = self.possible_steps.curr_x;
-                let step_y = self.possible_steps.curr_y;
-                // Drop if on the same axis as previous move.
-                if (prev_direction == VERTICAL && step_x == unit_x)
-                    || (prev_direction == HORIZONTAL && step_y == unit_y)
-                    || (prev_direction == SPAWNED && step_y == unit_y)
+        if ps_len > 1 {
+            let mut w: usize = 0;
+            for i in 0..ps_len {
+                let (sx, sy) = ps[i];
+                if (prev_direction == VERTICAL && sx == unit_x)
+                    || (prev_direction == HORIZONTAL && sy == unit_y)
+                    || (prev_direction == SPAWNED && sy == unit_y)
                 {
                     continue;
                 }
-                self.possible_steps.push(step_x, step_y);
+                ps[w] = (sx, sy);
+                w += 1;
             }
+            ps_len = w;
         }
 
         // Filter #4: target-direction preference (only if size > 1).
-        if self.possible_steps.size() > 1 {
-            let num = self.possible_steps.size();
-            for _ in 0..num {
-                self.possible_steps.next();
-                let step_x = self.possible_steps.curr_x;
-                let step_y = self.possible_steps.curr_y;
-                if self.direction.0 + unit_x != step_x && self.direction.1 + unit_y != step_y {
+        if ps_len > 1 {
+            let mut w: usize = 0;
+            for i in 0..ps_len {
+                let (sx, sy) = ps[i];
+                if self.direction.0 + unit_x != sx && self.direction.1 + unit_y != sy {
                     continue;
                 }
-                self.possible_steps.push(step_x, step_y);
+                ps[w] = (sx, sy);
+                w += 1;
             }
+            ps_len = w;
         }
 
-        self.possible_steps.next();
-        (self.possible_steps.curr_x, self.possible_steps.curr_y)
+        if ps_len == 0 {
+            // Per engine behaviour if every candidate was filtered out, stay.
+            return (unit_x, unit_y);
+        }
+        ps[0]
     }
 }
 
