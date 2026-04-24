@@ -160,6 +160,8 @@ pub struct Scratch {
     /// inner loop to avoid simultaneous borrow of `state.structures` +
     /// `state.mobiles`.
     pub newly_shielded: Vec<String>,
+    /// `clear_destroyed`: dead structure xys discovered this frame.
+    pub dead_struct_xys: Vec<(i32, i32)>,
 }
 
 /// Walker target candidate — indices + copyable data only, no String clone.

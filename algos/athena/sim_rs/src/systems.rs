@@ -983,19 +983,23 @@ fn fire_one(
 /// Engine citation: `Game.clearDestroyedGameObjects` (Game.java:184-193).
 /// Pure list-cleanup; no events.
 pub fn clear_destroyed(state: &mut SimState, _events: &mut Vec<EventEntry>) {
-    // Collect dead structure xys first.
-    let dead_xys: Vec<(i32, i32)> = state
-        .structures
-        .iter()
-        .filter(|(_, s)| s.hp <= 0.0)
-        .map(|(xy, _)| *xy)
-        .collect();
-    for xy in dead_xys {
-        state.structures.shift_remove(&xy);
-        state.pending_removal_xys.shift_remove(&xy);
-        if let Some(pfs) = state.pathfinders.as_mut() {
-            for pf in pfs.values_mut() {
-                pf.remove(xy.0, xy.1);
+    // Collect dead structure xys into scratch (reused across frames).
+    state.scratch.dead_struct_xys.clear();
+    for (xy, s) in state.structures.iter() {
+        if s.hp <= 0.0 {
+            state.scratch.dead_struct_xys.push(*xy);
+        }
+    }
+    if !state.scratch.dead_struct_xys.is_empty() {
+        let n = state.scratch.dead_struct_xys.len();
+        for i in 0..n {
+            let xy = state.scratch.dead_struct_xys[i];
+            state.structures.shift_remove(&xy);
+            state.pending_removal_xys.shift_remove(&xy);
+            if let Some(pfs) = state.pathfinders.as_mut() {
+                for pf in pfs.values_mut() {
+                    pf.remove(xy.0, xy.1);
+                }
             }
         }
     }
