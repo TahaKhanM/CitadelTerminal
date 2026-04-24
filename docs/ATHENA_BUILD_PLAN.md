@@ -134,7 +134,15 @@ Code under `algos/athena/` (full layout in v2 plan section, unchanged).
   freezing at best-effort was rejected. See algos/athena/sim/ERROR_BANDS.md.)
 - ≥50 sims/sec on commodity laptop.
 
-**Gate status: DONE (Phase 1.B capstone, 2026-04-24).**
+**Gate status: IN PROGRESS — perf floors pending (2026-04-24).**
+
+Accuracy gates are GREEN (see SIM_PARITY § ACHIEVED). Three perf
+floors remain open and explicitly block this phase from DONE: Rust
+FAST single-core ≥25 K (current 14.3 K), Rust FAST 8-core ≥150 K
+(current 75 K on 10-thread), and Python FAST ≥1,500 sims/s (current
+376 post commit `93d60c8`). Tracked in SIM_PARITY § REMAINING
+TARGETS. Promote back to DONE only when all three floors are crossed
+on two consecutive bench runs on `mid_game_108_struct_5_mob`.
 
 Authoritative parity document: [`algos/athena/sim/SIM_PARITY.md`](../algos/athena/sim/SIM_PARITY.md) —
 supersedes the old ERROR_BANDS.md (deleted).
