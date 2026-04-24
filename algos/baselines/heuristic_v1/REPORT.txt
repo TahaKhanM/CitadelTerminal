@@ -1,0 +1,68 @@
+heuristic_v1 — Report
+=====================
+
+REPLAY-CORPUS DATA (309 replays from Ranked Replays/)
+-----------------------------------------------------
+Aggregated over v13_second_ring (103), baseline (150),
+v21_temporal_phase_gate (65), v21_quadrant_adaptive_support (39).
+Coordinates mirrored so we are always the bottom player.
+
+TOP BREACH TILES IN OUR TERRITORY (where opps score on us):
+  (4,9)=872  (2,11)=810  (5,8)=776  (6,7)=692  (0,13)=687
+  (8,5)=441  (23,9)=412  (3,10)=401 (22,8)=350 (20,6)=310
+LATERAL DIAGONAL exits LEFT ((2,11)->(8,5)->(10,3)) and RIGHT
+((20,6)->(22,8)->(23,9)) dominate. v13's [11,5]/[16,5] second-ring
+covers the centre-low cluster but NOT this diagonal cluster.
+
+TOP OPP SIGNATURES:
+  python-algo    (64 enc; v13 38W/26L) (14,27) scout rush, ~57% right
+  oleh-v2        (19 enc; v13 4W/15L)  (14,27)+(16,25) scouts/demos, 82% right
+  funnel-rush-v8 (10 enc; v13 4W/6L)   (14,27) centre rush
+  terminator     (6 enc; v13 0W/6L)    centre scouts/interceptors
+  python-algo-tnb (5 enc; v13 0W/5L)   (13,27) centre, 87% left routing
+  switch2        (10 enc; v13 3W/7L)   ALWAYS spawns at (3,17)
+
+CITADEL SUPPORT UNDERVALUED:
+Upgraded Support at y=11 = 1 + 0.7*11 = 8.7 shield/scout, range 7.
+4 back-row supports = +35 shield/scout — doubles offensive scout HP.
+v13 has zero Supports.
+
+HOW THIS INFORMS STRATEGY
+-------------------------
+1. Diagonal-reinforcement turrets at [4,11]/[23,11] upgraded by T6 —
+   directly cover (4,9)/(23,9)/(5,8)/(22,8) cluster.
+2. Back-row upgraded Supports at [12,11],[15,11],[13,10],[14,10]
+   from T7 — amplify scout-rush survivability.
+3. Lower pressure-response threshold (9x scout cost vs v13's 6x) and
+   side-aware interceptor placement based on observed opp spawn side
+   (opp_spawn_left/right from on_action_frame).
+4. Adaptive scout-rush side: count opp structure density per side
+   live; bias to the lighter-defended side via _best_spawn options.
+5. Side-aware reactive turret prioritisation: when more breaches on
+   one side, place [6,10]/[23,10] reinforcement on that side first.
+
+VALIDATION: 10/10 vs v13_second_ring
+------------------------------------
+pair  heuristic_v1 P1 vs v13 P2  |  v13 P1 vs heuristic_v1 P2
+1-5   WIN                        |  WIN
+
+Sample: heuristic_v1 wins 40 HP - 0 HP by turn 91. Self-play runs to
+completion. Max turn time 13 ms (well under 15 s budget).
+Bonus: 2/2 wins vs C1 starter python-algo (both sides).
+
+CONCERNS
+--------
+- Local engine has shieldRange=0 for Support (per docs/UNITS_REFERENCE.md
+  Local-vs-competition gotcha); our Supports do NOT shield in local
+  matches but WILL on the competition server. Wins achieved DESPITE
+  Supports being dead locally — actual server perf should be strictly
+  better.
+- Local matches deterministic — 10/10 represents 1 unique result per
+  pair, not 10 independent samples. The heuristic is grounded in
+  309-replay aggregates, not v13-specific overfitting, so it should
+  generalize.
+- Not tested against oracle (per task constraint), or against
+  funnel-rush-v6/v7/v8/oleh-v2 (no local binaries).
+- Late-game SP starvation: reactive turret + supports + adaptive
+  reinforcement may compete for scarce SP at T20+. Mitigated by
+  bounded scored_on[-8:] window and gated thresholds.
