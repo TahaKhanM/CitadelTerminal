@@ -459,3 +459,130 @@ class BreachLocationTracker:
 
     def n_breaches_seen(self) -> int:
         return len(self._seen_event_keys)
+
+
+# ---------------------------------------------------------------------------
+# Task 5 — ResourceTracker
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ResourceTracker:
+    """Opponent MP / SP / HP trajectory across turns + derived signals.
+
+    Reads ``pStats = [hp, sp, mp, time_used]`` once per turn (first
+    action frame). The order matches the live engine's
+    ``EXPECTED_KEYS = ['integrity','cores','bits','time']`` mapping —
+    cores=SP at index 1, bits=MP at index 2.
+
+    Derived signals:
+      - ``per_turn_delta`` for SP and MP (this_turn - last_turn)
+      - rolling-window mean and peak (default window 5 turns)
+      - expected income vs observed (Citadel formula:
+        +4 SP, +(1 + turn//5) MP per turn, with 25% MP decay before
+        income). If ``observed - carry`` clears the saving threshold,
+        we treat the opponent as saving up — a signal that a big push
+        is coming.
+    """
+
+    self_player_id: int = 1
+    window_size: int = 5
+    saving_threshold: float = 4.0
+    sp_history: Dict[int, float] = field(default_factory=dict)
+    mp_history: Dict[int, float] = field(default_factory=dict)
+    hp_history: Dict[int, float] = field(default_factory=dict)
+    _scanned_turns: Set[int] = field(default_factory=set)
+
+    # Constants from citadel_config_snapshot.json (resources block)
+    SP_PER_TURN: float = 4.0
+    MP_DECAY: float = 0.25  # 25% decay before income
+
+    def consume_action_frame(self, frame: Dict[str, Any]) -> None:
+        turn_info = frame.get("turnInfo")
+        if turn_info is None or not _is_first_action_frame(turn_info):
+            return
+        turn_number = int(turn_info[1])
+        if turn_number in self._scanned_turns:
+            return
+        self._scanned_turns.add(turn_number)
+
+        stats_key = "p2Stats" if self.self_player_id == 1 else "p1Stats"
+        stats = frame.get(stats_key)
+        if not isinstance(stats, list) or len(stats) < 3:
+            return
+        try:
+            hp = float(stats[0])
+            sp = float(stats[1])
+            mp = float(stats[2])
+        except (TypeError, ValueError):
+            return
+        self.sp_history[turn_number] = sp
+        self.mp_history[turn_number] = mp
+        self.hp_history[turn_number] = hp
+
+    # -- queries --------------------------------------------------------
+
+    def latest(self) -> Optional[Tuple[int, float, float, float]]:
+        """Return ``(turn, sp, mp, hp)`` of the most recently observed turn."""
+        if not self.sp_history:
+            return None
+        t = max(self.sp_history.keys())
+        return t, self.sp_history[t], self.mp_history[t], self.hp_history[t]
+
+    def per_turn_delta(self, resource: str) -> Dict[int, float]:
+        """``resource`` in {'sp','mp','hp'}. Returns ``{t: res_t - res_{t-1}}``."""
+        hist = self._history(resource)
+        out: Dict[int, float] = {}
+        prev: Optional[float] = None
+        for t in sorted(hist.keys()):
+            if prev is not None:
+                out[t] = hist[t] - prev
+            prev = hist[t]
+        return out
+
+    def rolling_mean(self, resource: str) -> float:
+        hist = self._history(resource)
+        if not hist:
+            return 0.0
+        recent = [hist[t] for t in sorted(hist.keys())[-self.window_size :]]
+        return sum(recent) / len(recent)
+
+    def rolling_peak(self, resource: str) -> float:
+        hist = self._history(resource)
+        if not hist:
+            return 0.0
+        recent = [hist[t] for t in sorted(hist.keys())[-self.window_size :]]
+        return max(recent)
+
+    def expected_mp_income(self, turn_number: int) -> float:
+        """Naive expected MP income for ``turn_number`` (per-turn additive)."""
+        return 1.0 + turn_number // 5
+
+    def saving_signal(self) -> bool:
+        """True when the most recent MP delta exceeds expected no-spend carry.
+
+        Citadel income model: at turn boundary T, MP becomes
+        ``MP_{T-1} * (1 - MP_DECAY) + expected_mp_income(T)`` if the
+        opponent spends nothing. If the OBSERVED MP_T is at or above
+        that carry AND the raw delta exceeds ``saving_threshold``, the
+        opponent is hoarding rather than spending — strong tell that a
+        big push is incoming.
+        """
+        if len(self.mp_history) < 2:
+            return False
+        ts = sorted(self.mp_history.keys())[-2:]
+        prev_t, cur_t = ts[0], ts[1]
+        prev_mp = self.mp_history[prev_t]
+        cur_mp = self.mp_history[cur_t]
+        carry = prev_mp * (1.0 - self.MP_DECAY) + self.expected_mp_income(cur_t)
+        # Allow tiny float slack on the carry comparison
+        return (cur_mp + 1e-9) >= carry and (cur_mp - prev_mp) >= self.saving_threshold
+
+    def _history(self, resource: str) -> Dict[int, float]:
+        r = resource.lower()
+        if r == "sp":
+            return self.sp_history
+        if r == "mp":
+            return self.mp_history
+        if r == "hp":
+            return self.hp_history
+        raise ValueError(f"Unknown resource: {resource!r}")
