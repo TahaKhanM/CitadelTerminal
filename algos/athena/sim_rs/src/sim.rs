@@ -127,7 +127,7 @@ pub fn simulate_action_phase(
     // are 4x ~30 KB vec arrays and a handful of scratch Vecs that tests +
     // downstream consumers never read. Callers that need the final state
     // post-action only look at HP/SP/MP, structures, and mobiles.
-    let saved_pf = state.pathfinders.take();
+    let saved_pf = std::mem::replace(&mut state.pathfinders, [None, None, None, None]);
     let saved_scratch = std::mem::take(&mut state.scratch);
     let final_state = state.clone();
     state.pathfinders = saved_pf;

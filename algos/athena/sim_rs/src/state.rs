@@ -126,13 +126,15 @@ pub struct SimState {
     /// is a no-op immediately (avoids O(structures) scan per frame).
     /// Rust uses `IndexMap<K, ()>` for set-with-insertion-order semantics.
     pub pending_removal_xys: IndexMap<(i32, i32), ()>,
-    /// Per-edge `PathFinder` instances (keyed by edge id 0..=3). Lazily
-    /// initialized in `system_move` from current structures.
+    /// Per-edge `PathFinder` instances, indexed by edge id (0..=3).
+    /// `pathfinders[edge_id]` is `None` until needed (built lazily by
+    /// `ensure_pathfinders`). Fixed-size array avoids the IndexMap hash
+    /// lookup cost in the hot `system_move` path.
     ///
     /// Engine citation: `Game.java` holds 4 `PathFinder` instances per game;
     /// each is invalidated/revalidated as walls are placed/removed. See
     /// `sim/pysim.py::_ensure_pathfinders` for the Python reference.
-    pub pathfinders: Option<IndexMap<i32, PathFinder>>,
+    pub pathfinders: [Option<Box<PathFinder>>; 4],
     /// Per-frame scratch buffers — cleared (not freed) between frames so
     /// hot systems do zero-alloc work after capacity is seeded. See
     /// `Scratch` for the per-field docs.
@@ -195,7 +197,7 @@ impl SimState {
             p1: PlayerStats { hp: 40.0, sp: 8.0, mp: 1.0 },
             p2: PlayerStats { hp: 40.0, sp: 8.0, mp: 1.0 },
             pending_removal_xys: IndexMap::new(),
-            pathfinders: None,
+            pathfinders: [None, None, None, None],
             scratch: Scratch::default(),
         }
     }
