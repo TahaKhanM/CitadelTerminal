@@ -560,8 +560,15 @@ pub fn system_self_destruct(
                 };
                 // Structures have no shield — pass 0.0.
                 let (new_hp, _sh, died) = apply_damage(s_hp, 0.0, dmg_tower);
-                if let Some(s) = state.structures.get_mut(&sxy) {
+                // Mirror into the SoA hp scratch so the subsequent
+                // system_attack hot path stays coherent. self-destruct is
+                // rare (only when a mobile reaches its own edge), so the
+                // extra `get_full_mut` hash lookup is not on a hot path.
+                if let Some((idx, _, s)) = state.structures.get_full_mut(&sxy) {
                     s.hp = new_hp;
+                    if idx < state.scratch.struct_hp_soa.len() {
+                        state.scratch.struct_hp_soa[idx] = new_hp;
+                    }
                 }
                 tower_locs.push(sxy);
                 push_event!(events, EventEntry::Damage {
@@ -713,14 +720,17 @@ fn pick_target_struct(
     best_xy
 }
 
-/// Pick target structure given an opaque slice of IndexMap indices. Identical
-/// tiebreak cascade to `pick_target_struct` but uses `IndexMap::get_index(i)`
-/// instead of `structures.get(&xy)` — O(1) array access vs a hash probe.
-/// Indices MUST be valid for the current `state.structures` snapshot (i.e.
-/// the scratch dirty bit has been cleared since the last insertion/removal).
+/// Pick target structure given an opaque slice of IndexMap indices. Reads
+/// `(hp, xy, uid)` from the dense SoA scratch mirrors (`struct_hp_soa`,
+/// `struct_xy_soa`, `struct_uid_soa`) instead of walking `IndexMap`'s
+/// `Bucket<K,V>` array — contiguous `Vec<f32>` / `Vec<(i32,i32)>` access
+/// instead of a 76-byte struct pointer-chase per candidate.
+/// Indices MUST be valid for the current SoA snapshot (scratch dirty bit
+/// cleared since last insertion/removal).
 ///
 /// Returns the index of the chosen structure so the caller can reuse it for
-/// the damage-apply hit (one more `get_index_mut(i)` avoids a third hash probe).
+/// the damage-apply hit (one more SoA + IndexMap write to keep the mirror
+/// in sync).
 #[inline]
 fn pick_target_struct_by_idx(
     state: &SimState,
@@ -739,20 +749,27 @@ fn pick_target_struct_by_idx(
     let mut best_uid: Option<u32> = None;
     let mut best_idx: Option<u32> = None;
 
+    // Raw pointer access to skip the Vec bounds check on the hot per-cand
+    // reads. cand_idxs was produced from the same SoA-backed structure_* vecs
+    // at dirty-rebuild time, so idx < soa.len() is an invariant.
+    let hp_ptr = state.scratch.struct_hp_soa.as_ptr();
+    let xy_ptr = state.scratch.struct_xy_soa.as_ptr();
+    let uid_ptr = state.scratch.struct_uid_soa.as_ptr();
+
     for &idx in cand_idxs {
-        let (_, cand) = match state.structures.get_index(idx as usize) {
-            Some(pair) => pair,
-            None => continue,
-        };
-        if cand.hp <= 0.0 {
+        let i = idx as usize;
+        let hp = unsafe { *hp_ptr.add(i) };
+        if hp <= 0.0 {
             continue;
         }
-        let dx = (cand.xy.0 - attacker_xy.0) as f32;
-        let dy = (cand.xy.1 - attacker_xy.1) as f32;
+        let xy = unsafe { *xy_ptr.add(i) };
+        let uid = unsafe { *uid_ptr.add(i) };
+        let dx = (xy.0 - attacker_xy.0) as f32;
+        let dy = (xy.1 - attacker_xy.1) as f32;
         let new_dist = (dx * dx + dy * dy).sqrt();
-        let new_hp = cand.hp;
-        let new_dist_start = (cand.xy.1 as f32 - start_pos).abs();
-        let new_dist_center = (cand.xy.0 as f32 - 13.5_f32).abs();
+        let new_hp = hp;
+        let new_dist_start = (xy.1 as f32 - start_pos).abs();
+        let new_dist_center = (xy.0 as f32 - 13.5_f32).abs();
         let closer = new_dist < closest_distance;
         let equal_distance = new_dist == closest_distance;
         let less_hp = new_hp < closest_health;
@@ -771,7 +788,7 @@ fn pick_target_struct_by_idx(
             && equal_from_center
             && !first_cond;
         let game_object_id_larger = uid_tiebreak_needed
-            && best_uid.map_or(true, |b| cand.uid > b);
+            && best_uid.map_or(true, |b| uid > b);
         let second_cond = uid_tiebreak_needed && game_object_id_larger;
         if !first_cond && !second_cond {
             continue;
@@ -781,7 +798,7 @@ fn pick_target_struct_by_idx(
         closest_health = new_hp;
         distance_to_player_start = new_dist_start;
         distance_to_center = new_dist_center;
-        best_uid = Some(cand.uid);
+        best_uid = Some(uid);
     }
     best_idx
 }
@@ -880,7 +897,23 @@ pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<
         state.scratch.p1_struct_idxs.clear();
         state.scratch.p2_struct_idxs.clear();
         state.scratch.turret_enemy_cands_flat.clear();
+        // Step 2 SoA: rebuild dense (hp, xy, uid) mirrors over ALL structures
+        // (live + dead — slot count matches IndexMap len so `idx` stays valid
+        // for both the cand-flat rebuild below and the damage-write hot path).
+        // Between rebuilds, only HP may mutate; callers updating HP must also
+        // update `struct_hp_soa[idx]` to keep the mirror coherent.
+        state.scratch.struct_hp_soa.clear();
+        state.scratch.struct_xy_soa.clear();
+        state.scratch.struct_uid_soa.clear();
+        state.scratch.struct_hp_soa.reserve(state.structures.len());
+        state.scratch.struct_xy_soa.reserve(state.structures.len());
+        state.scratch.struct_uid_soa.reserve(state.structures.len());
         for (idx, (xy, s)) in state.structures.iter().enumerate() {
+            // Mirror every slot including dead ones — index must stay
+            // synchronized with IndexMap insertion order.
+            state.scratch.struct_hp_soa.push(s.hp);
+            state.scratch.struct_xy_soa.push(*xy);
+            state.scratch.struct_uid_soa.push(s.uid);
             if s.hp <= 0.0 {
                 continue;
             }
@@ -1139,8 +1172,16 @@ fn fire_one_mobile(
     } else if let Some(sxy) = target_struct_xy {
         let hp_before = state.structures[&sxy].hp;
         let (new_hp, _sh, died) = apply_damage(hp_before, 0.0, dmg_tower);
-        if let Some(s) = state.structures.get_mut(&sxy) {
+        // Mirror the HP update into the SoA scratch so the turret hot path
+        // (which reads from struct_hp_soa) stays coherent. Uses
+        // `get_index_of` to resolve xy -> idx — only the mobile-attacker
+        // fallback hits this branch (rare vs. turret count), so the extra
+        // hash lookup is not on the turret hot path.
+        if let Some((idx, _, s)) = state.structures.get_full_mut(&sxy) {
             s.hp = new_hp;
+            if idx < state.scratch.struct_hp_soa.len() {
+                state.scratch.struct_hp_soa[idx] = new_hp;
+            }
         }
         #[cfg(feature = "instrumented")]
         {
@@ -1227,10 +1268,11 @@ fn fire_one_turret(
         let scl = enemy_cand_end - enemy_cand_start;
         if scl == 1 {
             let idx = state.scratch.turret_enemy_cands_flat[enemy_cand_start];
-            if let Some((_, s)) = state.structures.get_index(idx as usize) {
-                if s.hp > 0.0 {
-                    target_struct_idx = Some(idx);
-                }
+            // Read HP from the SoA mirror (contiguous Vec<f32>) — avoids the
+            // IndexMap get_index pointer-chase through Bucket<K,V>.
+            let hp = unsafe { *state.scratch.struct_hp_soa.as_ptr().add(idx as usize) };
+            if hp > 0.0 {
+                target_struct_idx = Some(idx);
             }
         } else if scl > 1 {
             let flat_ptr = state.scratch.turret_enemy_cands_flat.as_ptr();
@@ -1277,13 +1319,18 @@ fn fire_one_turret(
             let _ = died;
         }
     } else if let Some(sidx) = target_struct_idx {
-        // Single get_index_mut: fetch the live Structure row via O(1) array
-        // access (no hash probe), compute new hp + snapshot instrumentation
-        // fields, and write new_hp back — all inside one &mut borrow.
+        // SoA mirror is authoritative for HP reads inside this hot block.
+        // We still have to update the IndexMap's Structure.hp for other
+        // systems (self_destruct, shield_give, clear_destroyed) that read
+        // through state.structures, so both copies advance together.
         let (_sxy, _victim_uid, _victim_type_idx, _victim_player, died);
         {
-            let (_, s) = state.structures.get_index_mut(sidx as usize).expect("valid idx");
-            let (new_hp, _sh, d) = apply_damage(s.hp, 0.0, dmg_tower);
+            let i = sidx as usize;
+            let hp_before = unsafe { *state.scratch.struct_hp_soa.as_ptr().add(i) };
+            let (new_hp, _sh, d) = apply_damage(hp_before, 0.0, dmg_tower);
+            // SoA write first (contiguous Vec<f32>).
+            unsafe { *state.scratch.struct_hp_soa.as_mut_ptr().add(i) = new_hp; }
+            let (_, s) = state.structures.get_index_mut(i).expect("valid idx");
             _sxy = s.xy;
             _victim_uid = s.uid;
             _victim_type_idx = s.type_idx;
