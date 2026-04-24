@@ -42,6 +42,20 @@ use crate::pathfinder::{HORIZONTAL, VERTICAL};
 use crate::state::SimState;
 use indexmap::IndexMap;
 
+/// Push an event into the per-frame buffer — completely elided when the
+/// `instrumented` feature is disabled. FAST builds don't even CONSTRUCT
+/// the EventEntry (no String clones, no alloc). INSTRUMENTED builds (the
+/// default, used by tests + cross-validator) behave exactly like a direct
+/// `events.push(...)`.
+#[cfg(feature = "instrumented")]
+macro_rules! push_event {
+    ($events:expr, $entry:expr) => { $events.push($entry) };
+}
+#[cfg(not(feature = "instrumented"))]
+macro_rules! push_event {
+    ($events:expr, $entry:expr) => { {} };
+}
+
 // ---------------------------------------------------------------- constants
 
 /// Engine's MovementComponent accumulator threshold
@@ -312,7 +326,7 @@ pub fn system_shield_give(
             }
             m.shield += sup.amount;
             newly_shielded.push(m.uid.clone());
-            events.push(EventEntry::Shield {
+            push_event!(events, EventEntry::Shield {
                 src_xy: sup.xy,
                 tgt_xy: m.xy,
                 amount: sup.amount,
@@ -373,7 +387,7 @@ pub fn system_breach(state: &mut SimState, config: &SimConfig, events: &mut Vec<
         let os = state.player_stats_mut(player);
         os.sp = round01(os.sp + metal_refund);
         // Death event (engine: BreachSystem.java:32-35 emits Death then Breach).
-        events.push(EventEntry::Death {
+        push_event!(events, EventEntry::Death {
             xy,
             type_id: type_idx,
             uid: uid.clone(),
@@ -471,7 +485,7 @@ pub fn system_self_destruct(
                     o.shield = new_sh;
                 }
                 walker_locs.push(other_xy);
-                events.push(EventEntry::Damage {
+                push_event!(events, EventEntry::Damage {
                     xy: other_xy,
                     amount: dmg_walker,
                     type_id: other_type_idx,
@@ -479,7 +493,7 @@ pub fn system_self_destruct(
                     pid: other_player as i32,
                 });
                 if died {
-                    events.push(EventEntry::Death {
+                    push_event!(events, EventEntry::Death {
                         xy: other_xy,
                         type_id: other_type_idx,
                         uid: other_uid,
@@ -511,7 +525,7 @@ pub fn system_self_destruct(
                     s.hp = new_hp;
                 }
                 tower_locs.push(sxy);
-                events.push(EventEntry::Damage {
+                push_event!(events, EventEntry::Damage {
                     xy: sxy,
                     amount: dmg_tower,
                     type_id: s_type_idx,
@@ -519,7 +533,7 @@ pub fn system_self_destruct(
                     pid: s_player as i32,
                 });
                 if died {
-                    events.push(EventEntry::Death {
+                    push_event!(events, EventEntry::Death {
                         xy: sxy,
                         type_id: s_type_idx,
                         uid: s_uid,
@@ -535,7 +549,7 @@ pub fn system_self_destruct(
             if dmg_walker == dmg_tower {
                 let mut all_locs = walker_locs.clone();
                 all_locs.extend(tower_locs.iter().copied());
-                events.push(EventEntry::SelfDestruct {
+                push_event!(events, EventEntry::SelfDestruct {
                     src_xy: p.xy,
                     target_xys: all_locs,
                     damage: dmg_walker,
@@ -544,7 +558,7 @@ pub fn system_self_destruct(
                     pid: p.player as i32,
                 });
             } else {
-                events.push(EventEntry::SelfDestruct {
+                push_event!(events, EventEntry::SelfDestruct {
                     src_xy: p.xy,
                     target_xys: walker_locs,
                     damage: dmg_walker,
@@ -552,7 +566,7 @@ pub fn system_self_destruct(
                     src_uid: p.uid.clone(),
                     pid: p.player as i32,
                 });
-                events.push(EventEntry::SelfDestruct {
+                push_event!(events, EventEntry::SelfDestruct {
                     src_xy: p.xy,
                     target_xys: tower_locs,
                     damage: dmg_tower,
@@ -564,7 +578,7 @@ pub fn system_self_destruct(
         }
         // SDer always destroyed, even if under-ranged
         // (SelfDestructSystem.java:58-60).
-        events.push(EventEntry::Death {
+        push_event!(events, EventEntry::Death {
             xy: p.xy,
             type_id: p.type_idx,
             uid: p.uid.clone(),
@@ -893,56 +907,71 @@ fn fire_one(
 
     // Apply damage + emit events.
     if let Some(mi) = target_mobile_idx {
-        let (hp_before, shield_before, victim_uid, victim_xy, victim_type_idx, victim_player) = {
-            let m = &state.mobiles[mi];
-            (m.hp, m.shield, m.uid.clone(), m.xy, m.type_idx, m.player)
-        };
+        let hp_before = state.mobiles[mi].hp;
+        let shield_before = state.mobiles[mi].shield;
         let (new_hp, new_sh, died) = apply_damage(hp_before, shield_before, dmg_walker);
+        state.mobiles[mi].hp = new_hp;
+        state.mobiles[mi].shield = new_sh;
+        #[cfg(feature = "instrumented")]
         {
-            let m = &mut state.mobiles[mi];
-            m.hp = new_hp;
-            m.shield = new_sh;
-        }
-        events.push(EventEntry::Damage {
-            xy: victim_xy,
-            amount: dmg_walker,
-            type_id: victim_type_idx,
-            victim_uid: victim_uid.clone(),
-            pid: victim_player as i32,
-        });
-        if died {
-            events.push(EventEntry::Death {
+            let m = &state.mobiles[mi];
+            let victim_uid = m.uid.clone();
+            let victim_xy = m.xy;
+            let victim_type_idx = m.type_idx;
+            let victim_player = m.player;
+            push_event!(events, EventEntry::Damage {
                 xy: victim_xy,
+                amount: dmg_walker,
                 type_id: victim_type_idx,
-                uid: victim_uid,
+                victim_uid: victim_uid.clone(),
                 pid: victim_player as i32,
-                removed: false,
             });
+            if died {
+                push_event!(events, EventEntry::Death {
+                    xy: victim_xy,
+                    type_id: victim_type_idx,
+                    uid: victim_uid,
+                    pid: victim_player as i32,
+                    removed: false,
+                });
+            }
+        }
+        #[cfg(not(feature = "instrumented"))]
+        {
+            let _ = died;
         }
     } else if let Some(sxy) = target_struct_xy {
-        let (hp_before, victim_uid, victim_type_idx, victim_player) = {
-            let s = &state.structures[&sxy];
-            (s.hp, s.uid.clone(), s.type_idx, s.player)
-        };
+        let hp_before = state.structures[&sxy].hp;
         let (new_hp, _sh, died) = apply_damage(hp_before, 0.0, dmg_tower);
         if let Some(s) = state.structures.get_mut(&sxy) {
             s.hp = new_hp;
         }
-        events.push(EventEntry::Damage {
-            xy: sxy,
-            amount: dmg_tower,
-            type_id: victim_type_idx,
-            victim_uid: victim_uid.clone(),
-            pid: victim_player as i32,
-        });
-        if died {
-            events.push(EventEntry::Death {
+        #[cfg(feature = "instrumented")]
+        {
+            let s = &state.structures[&sxy];
+            let victim_uid = s.uid.clone();
+            let victim_type_idx = s.type_idx;
+            let victim_player = s.player;
+            push_event!(events, EventEntry::Damage {
                 xy: sxy,
+                amount: dmg_tower,
                 type_id: victim_type_idx,
-                uid: victim_uid,
+                victim_uid: victim_uid.clone(),
                 pid: victim_player as i32,
-                removed: false,
             });
+            if died {
+                push_event!(events, EventEntry::Death {
+                    xy: sxy,
+                    type_id: victim_type_idx,
+                    uid: victim_uid,
+                    pid: victim_player as i32,
+                    removed: false,
+                });
+            }
+        }
+        #[cfg(not(feature = "instrumented"))]
+        {
+            let _ = died;
         }
     }
 }
@@ -1050,7 +1079,7 @@ pub fn system_remove_own_unit(
     for pl in plans {
         let p_stats = state.player_stats_mut(pl.player);
         p_stats.sp = round01(p_stats.sp + pl.refund_metal);
-        events.push(EventEntry::Death {
+        push_event!(events, EventEntry::Death {
             xy: pl.xy,
             type_id: pl.type_idx,
             uid: pl.uid,
