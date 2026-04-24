@@ -32,7 +32,7 @@ fn build_state_fixture() -> SimState {
         state.structures.insert(xy, Structure {
             xy, type_idx: s["type_idx"].as_i64().unwrap() as i32,
             upgraded: s["upgraded"].as_bool().unwrap(), hp: s["hp"].as_f64().unwrap() as f32,
-            uid: s["uid"].as_str().unwrap().to_string(), player: s["player"].as_i64().unwrap() as u8,
+            uid: s["uid"].as_str().unwrap().parse::<u32>().expect("numeric uid"), player: s["player"].as_i64().unwrap() as u8,
             turn_start_removal: tsr, shielded_already: Vec::new(),
         });
     }
@@ -44,14 +44,14 @@ fn build_state_fixture() -> SimState {
         state.mobiles.push(Mobile {
             xy, type_idx: m["type_idx"].as_i64().unwrap() as i32,
             hp: m["hp"].as_f64().unwrap() as f32, shield: m["shield"].as_f64().unwrap() as f32,
-            uid: m["uid"].as_str().unwrap().to_string(), player: m["player"].as_i64().unwrap() as u8,
+            uid: m["uid"].as_str().unwrap().parse::<u32>().expect("numeric uid"), player: m["player"].as_i64().unwrap() as u8,
             spawn_xy, target_edge: m["target_edge"].as_i64().unwrap() as i32,
             steps_taken: m["steps_taken"].as_i64().unwrap() as i32,
             move_buildup: m["move_buildup"].as_f64().unwrap() as f32,
             last_move: m["last_move"].as_i64().unwrap() as i32,
             finished_navigating: m["finished_navigating"].as_bool().unwrap(),
             reached_target: m["reached_target"].as_bool().unwrap(),
-            breached: m["breached"].as_bool().unwrap(),
+            breached: m["breached"].as_bool().unwrap()
         });
     }
     state

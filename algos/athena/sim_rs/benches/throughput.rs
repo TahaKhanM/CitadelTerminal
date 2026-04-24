@@ -39,32 +39,32 @@ fn build_state_toy() -> SimState {
     state.p1 = PlayerStats { hp: 40.0, sp: 8.0, mp: 1.0 };
     state.p2 = PlayerStats { hp: 40.0, sp: 8.0, mp: 1.0 };
 
-    let structs: [((i32, i32), i32, bool, f32, &str); 5] = [
-        ((13, 14), IDX_TURRET,  false, 75.0,  "100"),
-        ((14, 14), IDX_TURRET,  true,  100.0, "101"),
-        ((13, 17), IDX_SUPPORT, true,  40.0,  "102"),
-        ((12, 14), IDX_WALL,    false, 60.0,  "103"),
-        ((15, 14), IDX_WALL,    true,  200.0, "104"),
+    let structs: [((i32, i32), i32, bool, f32, u32); 5] = [
+        ((13, 14), IDX_TURRET,  false, 75.0,  100),
+        ((14, 14), IDX_TURRET,  true,  100.0, 101),
+        ((13, 17), IDX_SUPPORT, true,  40.0,  102),
+        ((12, 14), IDX_WALL,    false, 60.0,  103),
+        ((15, 14), IDX_WALL,    true,  200.0, 104),
     ];
     for (xy, type_idx, upgraded, hp, uid) in structs.iter() {
         state.structures.insert(*xy, Structure {
             xy: *xy, type_idx: *type_idx, upgraded: *upgraded,
-            hp: *hp, uid: uid.to_string(), player: 2,
+            hp: *hp, uid: *uid, player: 2,
             turn_start_removal: None, shielded_already: Vec::new(),
         });
     }
-    let scouts: [((i32, i32), i32, &str); 3] = [
-        ((13, 0), EDGE_TOP_RIGHT, "200"),
-        ((14, 0), EDGE_TOP_LEFT,  "201"),
-        ((12, 1), EDGE_TOP_RIGHT, "202"),
+    let scouts: [((i32, i32), i32, u32); 3] = [
+        ((13, 0), EDGE_TOP_RIGHT, 200),
+        ((14, 0), EDGE_TOP_LEFT,  201),
+        ((12, 1), EDGE_TOP_RIGHT, 202),
     ];
     for (xy, target_edge, uid) in scouts.iter() {
         state.mobiles.push(Mobile {
             xy: *xy, type_idx: IDX_SCOUT, hp: 15.0, shield: 0.0,
-            uid: uid.to_string(), player: 1, spawn_xy: *xy,
+            uid: *uid, player: 1, spawn_xy: *xy,
             target_edge: *target_edge, steps_taken: 0, move_buildup: 0.0,
             last_move: 0, finished_navigating: false,
-            reached_target: false, breached: false,
+            reached_target: false, breached: false
         });
     }
     state
@@ -100,7 +100,8 @@ fn build_state_fixture() -> SimState {
             type_idx: s["type_idx"].as_i64().unwrap() as i32,
             upgraded: s["upgraded"].as_bool().unwrap(),
             hp: s["hp"].as_f64().unwrap() as f32,
-            uid: s["uid"].as_str().unwrap().to_string(),
+            uid: s["uid"].as_str().unwrap().parse::<u32>()
+                .expect("numeric-string UID"),
             player: s["player"].as_i64().unwrap() as u8,
             turn_start_removal: tsr,
             shielded_already: Vec::new(),
@@ -116,7 +117,8 @@ fn build_state_fixture() -> SimState {
             type_idx: m["type_idx"].as_i64().unwrap() as i32,
             hp: m["hp"].as_f64().unwrap() as f32,
             shield: m["shield"].as_f64().unwrap() as f32,
-            uid: m["uid"].as_str().unwrap().to_string(),
+            uid: m["uid"].as_str().unwrap().parse::<u32>()
+                .expect("numeric-string UID"),
             player: m["player"].as_i64().unwrap() as u8,
             spawn_xy,
             target_edge: m["target_edge"].as_i64().unwrap() as i32,
@@ -125,7 +127,7 @@ fn build_state_fixture() -> SimState {
             last_move: m["last_move"].as_i64().unwrap() as i32,
             finished_navigating: m["finished_navigating"].as_bool().unwrap(),
             reached_target: m["reached_target"].as_bool().unwrap(),
-            breached: m["breached"].as_bool().unwrap(),
+            breached: m["breached"].as_bool().unwrap()
         });
     }
     state

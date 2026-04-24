@@ -39,10 +39,10 @@ fn structure_roundtrip_debug_and_clone() {
         type_idx: IDX_TURRET,
         upgraded: true,
         hp: 99.5,
-        uid: "u-42".to_string(),
+        uid: 42,
         player: 1,
         turn_start_removal: Some(17),
-        shielded_already: vec!["s-1".to_string(), "s-2".to_string()],
+        shielded_already: vec![1, 2],
     };
     let c = s.clone();
     assert_eq!(s.xy, c.xy);
@@ -53,9 +53,9 @@ fn structure_roundtrip_debug_and_clone() {
     assert_eq!(s.player, c.player);
     assert_eq!(s.turn_start_removal, c.turn_start_removal);
     assert_eq!(s.shielded_already, c.shielded_already);
-    // Debug formatter must not panic and must include the UID string.
+    // Debug formatter must not panic and must include the UID.
     let dbg = format!("{:?}", s);
-    assert!(dbg.contains("u-42"));
+    assert!(dbg.contains("42"));
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn mobile_roundtrip_debug_and_clone() {
         type_idx: IDX_SCOUT,
         hp: 12.5,
         shield: 3.25,
-        uid: "m-7".to_string(),
+        uid: 7,
         player: 2,
         spawn_xy: (0, 13),
         target_edge: 3,
@@ -74,7 +74,7 @@ fn mobile_roundtrip_debug_and_clone() {
         last_move: 1,
         finished_navigating: true,
         reached_target: false,
-        breached: true,
+        breached: true
     };
     let c = m.clone();
     assert_eq!(m.xy, c.xy);
@@ -92,7 +92,7 @@ fn mobile_roundtrip_debug_and_clone() {
     assert_eq!(m.reached_target, c.reached_target);
     assert_eq!(m.breached, c.breached);
     let dbg = format!("{:?}", m);
-    assert!(dbg.contains("m-7"));
+    assert!(dbg.contains("uid: 7"));
 }
 
 #[test]
@@ -129,7 +129,7 @@ fn sim_state_helpers_and_cloning() {
         type_idx: IDX_TURRET,
         upgraded: false,
         hp: 60.0,
-        uid: "t-1".to_string(),
+        uid: 1,
         player: 1,
         turn_start_removal: None,
         shielded_already: Vec::new(),
@@ -141,7 +141,7 @@ fn sim_state_helpers_and_cloning() {
         type_idx: IDX_SCOUT,
         hp: 15.0,
         shield: 0.0,
-        uid: "m-a".to_string(),
+        uid: 100,
         player: 1,
         spawn_xy: (0, 13),
         target_edge: 3,
@@ -150,14 +150,14 @@ fn sim_state_helpers_and_cloning() {
         last_move: 0,
         finished_navigating: false,
         reached_target: false,
-        breached: false,
+        breached: false
     });
     s.mobiles.push(Mobile {
         xy: (4, 4),
         type_idx: IDX_SCOUT,
         hp: 15.0,
         shield: 0.0,
-        uid: "m-b".to_string(),
+        uid: 101,
         player: 1,
         spawn_xy: (0, 13),
         target_edge: 3,
@@ -166,18 +166,18 @@ fn sim_state_helpers_and_cloning() {
         last_move: 0,
         finished_navigating: false,
         reached_target: false,
-        breached: false,
+        breached: false
     });
 
     assert!(s.is_occupied((13, 5)));
     assert!(!s.is_occupied((0, 0)));
-    assert_eq!(s.struct_at((13, 5)).unwrap().uid, "t-1");
+    assert_eq!(s.struct_at((13, 5)).unwrap().uid, 1);
     assert!(s.struct_at((0, 0)).is_none());
 
     let colocated = s.mobiles_at((4, 4));
     assert_eq!(colocated.len(), 2);
-    assert_eq!(colocated[0].uid, "m-a");
-    assert_eq!(colocated[1].uid, "m-b");
+    assert_eq!(colocated[0].uid, 100);
+    assert_eq!(colocated[1].uid, 101);
 
     assert_eq!(s.player_stats(1).hp, 40.0);
     assert_eq!(s.player_stats(2).hp, 40.0);
