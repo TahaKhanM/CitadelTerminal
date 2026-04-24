@@ -646,6 +646,7 @@ pub fn system_self_destruct(
 /// `state.structures` so the caller doesn't have to materialise
 /// `Vec<&Structure>` per attacker. UID tiebreak is computed lazily — the
 /// parse + compare only fire if distance+HP+start+center all tied (rare).
+#[inline]
 fn pick_target_struct(
     state: &SimState,
     attacker_xy: (i32, i32),
@@ -715,6 +716,7 @@ fn pick_target_struct(
 /// Pick target mobile by index. UID tiebreak is computed lazily via index
 /// lookup into `state.mobiles` so candidate records don't need an owned
 /// `String` per entry.
+#[inline]
 fn pick_target_mobile_idx(
     state: &SimState,
     attacker_xy: (i32, i32),
@@ -1074,6 +1076,7 @@ fn fire_one_mobile(
 /// candidate slice from `Scratch.turret_enemy_cands_flat[start..end]`
 /// (populated at dirty-rebuild time). Skips the per-frame 54-tile distance
 /// scan for struct candidates.
+#[inline(always)]
 fn fire_one_turret(
     state: &mut SimState,
     events: &mut Vec<EventEntry>,
