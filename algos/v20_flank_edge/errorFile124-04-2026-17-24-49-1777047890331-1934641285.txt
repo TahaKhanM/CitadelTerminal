@@ -1,0 +1,13 @@
+---------------- Starting Your Algo --------------------
+Traceback (most recent call last):
+  File "/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/v20_flank_edge/algo_strategy.py", line 319, in <module>
+    AlgoStrategy().start()
+  File "/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/v20_flank_edge/gamelib/algocore.py", line 74, in start
+    self.on_turn(game_state_string)
+  File "/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/v20_flank_edge/algo_strategy.py", line 44, in on_turn
+    gs.submit_turn()
+  File "/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/v20_flank_edge/gamelib/game_state.py", line 180, in submit_turn
+    send_command(build_string)
+  File "/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/v20_flank_edge/gamelib/util.py", line 29, in send_command
+    sys.stdout.write(cmd.strip() + "\n")
+BrokenPipeError: [Errno 32] Broken pipe
