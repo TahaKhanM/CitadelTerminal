@@ -1,38 +1,40 @@
 # HEARTBEAT — user-visible progress log
 
 ### Cycle 0 @ 2026-04-24 — Agent online
-**Status:** bootstrapping autonomous run
-**Champion:** v13_second_ring
-**Next:** spawn RA-1..RA-5 research briefs concurrently + build tools/evaluate.py
+Bootstrapping; spawn RA briefs + build evaluate.py.
 
----
-
-### Cycle 1 @ 2026-04-24 — Bootstrap complete, first variants built
-**Status:** tools/evaluate.py standardized benchmarking live; RA-1..RA-5 integrated into LESSONS.md and IDEAS.md; 3 wave-1 variants created + crash-checked
-**Baselines measured:**
-- v13_second_ring: 32/40 (80%), crashes 0, turn-time p50=36ms/p95=73ms
-- v14_support_caravan: 32/40 (80%), mirrors v13 (all 8 ties)
-- v15_adaptive: **broken** (turns=0; crashes silently)
-**Wave-1 variants built:** v20_demo_train, v20_sidelane, v21_scout_probe
-**Adversaries:** 3/20 (existing)
-**Inventions:** 1/3 (v21_scout_probe probe-recon heatmap)
-**Termination status:** A ☐ B ☐ C ☐ D ☐ E ☐ F ☐ G ☐
-**Next:** evaluate wave-1, plan wave-2
-
----
+### Cycle 1 @ 2026-04-24 — Bootstrap done, wave-1 built
+RA-1..5 integrated. Baselines: v13 and v14 TIE each other 8-0-8 (mirror ceiling confirmed). Wave-1 variants built.
 
 ### Cycle 2 @ 2026-04-24 — Wave-1 evaluated, v14 identified as barrier
-**Status:** three wave-1 variants evaluated vs full pool
-**Results:**
-- **v20_demo_train:** 32W/8L/8T of 48 games. **LOSES 0-8 vs v14** (ΔHP −40). Beats turret_castle +8 HP (vs v13's +1) — Demolishers crack turtles.
-- **v20_sidelane:** 32W/0L/16T. Ties both v13 AND v14 (as expected — defensive tweak).
-- **v21_scout_probe:** 32W/0L/16T. Ties both mirrors; +2 HP vs turret_castle (marginal heatmap benefit).
-**Core finding:** v14's Support Caravan is the true barrier. Anti-caravan tactics required: mass-Scout burst, Support-kill Demo, flank edge-rush.
-**Wave-2 queued:** v20_burst_scout, v20_support_kill, v20_flank_edge, v20_hybrid_turtle_cracker, v21_temporal_phase_gate (invention #2).
-**Adversaries:** 3/20 — need 5+ new stress-testers (opp_caravan_max, opp_anti_burst, opp_flank_block, etc.).
-**Inventions:** 1/3. Need 2 more (temporal_phase_gate, quadrant_adaptive_support).
-**Termination status:** A ☐ B ☐ C ☐ D ☐ E ☐ F ☐ G ☐
-**Upload status:** not-yet-ready (no variant clears local dominance floor A).
-**Next:** commit wave-1 artifacts; spawn wave-2 builders.
+v20_demo_train loses 0-8 vs v14 (ΔHP-40). v20_sidelane + v21_scout_probe tie both mirrors. Pivot to anti-caravan.
 
-**No user action required.** Will emit UPLOAD_READY_vXX.md heartbeat when a variant clears criterion A (≥90% vs v13 Wilson-LB ≥0.85 n=100 + ≥95% vs opp pool + ≥85% vs finalist adapters).
+---
+
+### 🎯 Cycle 3 @ 2026-04-24 — **CHAMPION CANDIDATE: v21_temporal_phase_gate**
+**Status:** wave-2 evaluated; ranked-loss analysis complete; v21 sequentially re-validated.
+**Results:**
+- **v21_temporal_phase_gate 40/40 @ n=8:** beats v13 ΔHP+7 (T100), v14 ΔHP+42 (T58), plus 8-0 vs every adversary. INVENTION #2 breaks the mirror ceiling.
+- v20_burst_scout: 3 real ties vs v14 (5 games crashed in parallel-eval race); archive.
+- v20_support_kill: 0-0-8 vs v14; archive.
+- **v20_flank_edge: regression** — lost 0-8 vs v14 AND opp_scout_rush (edge-paths are death traps).
+- v20_hybrid_turtle_cracker: 0-6 vs v14 (classifier false-positives); needs iteration.
+
+**Ranked replay analysis (47 games, 22W/25L):**
+- 12 losses to scout_rush, 7 to oleh-v2 alone (22% WR vs oleh-v2)
+- 7 losses to turret_castle (all T100 timeouts — we survive but can't breach)
+- 3 losses to demo_line at 1800+ ELO (coin flip)
+- 0 losses to support_caravan, flank, sd_bomb (archetypes not encountered)
+
+**Adversary pool:** 3/20. **Inventions:** **2/3** (v21_scout_probe, v21_temporal_phase_gate). **Variants:** 8 built.
+**Termination status:** A ☐ B ☐ C ☐ D ☐ E ☐ F ☐ G ☐ — Wilson CI still wide (n=8). Validating at n=15.
+
+**📦 UPLOAD-READY trigger pending:** v21 n=15 validation completes next cycle. If Wilson LB ≥0.85 holds → emit `UPLOAD_READY_v21.md`. v21 offers a real mirror-break + novel tactical case (temporal opponent-MP tracking — no public finalist does this).
+
+**Next cycle priorities:**
+1. v22_oleh_counter (anti-scout_rush / anti-oleh-v2) — biggest ranked-ELO gain
+2. v22_siege_breaker (anti-turret_castle) — 7 free wins in ranked
+3. v22_phase_gate_hybrid (v21 + oleh_counter + siege_breaker)
+4. v21_quadrant_adaptive_support (INVENTION #3, last required)
+
+**Concurrency bug:** parallel evaluate.py crashes v13 runs. Working around by running sequentially until a fix lands.

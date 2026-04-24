@@ -62,7 +62,7 @@ except ImportError as e:
 DEFAULT_OPPONENTS = [
     "algos/v13_second_ring",
     "algos/v14_support_caravan",
-    "algos/v15_adaptive",
+    # v15_adaptive excluded: crashes silently (turns=0 in cycle-1 baseline), skews results.
     "algos/opp_scout_rush",
     "algos/opp_demo_line",
     "algos/opp_turret_castle",
