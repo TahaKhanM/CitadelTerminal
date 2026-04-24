@@ -46,6 +46,7 @@ from sim.config import (  # noqa: E402
     IDX_WALL,
     SimConfig,
 )
+from sim.event_canonical import CANONICAL_KEYS, bucket_keys  # noqa: E402
 from sim.pysim import (  # noqa: E402
     apply_deploy_actions,
     simulate_action_phase,
@@ -512,9 +513,37 @@ def _cmp_unit_lists(sv: list, rv: list) -> bool:
 
 
 def _cmp_event_lists(sv: list, rv: list, bucket: str) -> bool:
+    """Event-list equality with two layers of refinement:
+
+      1. Float32 normalization on damage/amount slots (Cluster I) — both
+         sides route through np.float32 so sim's np.float32 bit pattern
+         aligns with replay's JSON-double-parsed values.
+
+      2. Canonical-key sort for buckets whose emission order is JVM-
+         `HashSet`-internal (Cluster H, Option C). The four affected
+         buckets — shield, damage, death, selfDestruct — are sorted to
+         a stable canonical key before compare, so multiset-equality
+         gates the column (content exact, order JVM-internal). All
+         other event buckets (attack, breach, move, spawn, melee)
+         remain strict-ordered.
+
+    Fast path: raw == first. If raw fails, try float32-normalized; if
+    that still fails AND the bucket is canonical-keyed, try canonical
+    sort."""
     if sv == rv:
         return True
-    return _normalize_events(sv, bucket) == _normalize_events(rv, bucket)
+    sv_n = _normalize_events(sv, bucket)
+    rv_n = _normalize_events(rv, bucket)
+    if sv_n == rv_n:
+        return True
+    if bucket in CANONICAL_KEYS:
+        # Multiset-equality via sorted canonical keys. Compares the keys
+        # themselves, not the entry bodies — robust against event-body
+        # substructure ordering (e.g. target_xys list within a
+        # selfDestruct entry) where the entry key has already normalized
+        # those substructures (see event_canonical._key_self_destruct).
+        return bucket_keys(bucket, sv_n) == bucket_keys(bucket, rv_n)
+    return False
 
 
 def _cmp_stat(sv, rv) -> bool:
