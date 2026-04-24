@@ -184,11 +184,17 @@ def _check_m3_determinism(state: SimState, config: SimConfig) -> bool:
 # ---------------------------------------------------- M4 deploy-commutativity
 
 def _check_m4_deploy_commutativity(state: SimState, config: SimConfig) -> bool:
-    # Build two variants: state_a has [m0, m1] spawn order; state_b has
-    # the list reversed. If these mobiles' uids/xys/types match after
-    # reversing, we verify the action phase produces the same aggregate
-    # outcome (modulo mobile ordering in the list — we compare as
-    # multisets).
+    """Deploy-commutativity: reversing mobile list order must yield the
+    same end state under the C-tight-coherent gate used by the validator.
+
+    Strict equality on stats + structures (all 19 STRICT validator columns
+    map into those). Mobile bucket is compared as a uid-sorted multiset
+    with ≤1-ULP-float32 tolerance on HP+shield — mirroring the CASCADE
+    gate in validate.py. The looser mobile comparison is necessary
+    because SD target enumeration iterates the mobile list in order, and
+    reversing the list reorders which-SD-fires-first — a JVM-HashSet-
+    equivalent state-cascade that the validator already treats as
+    attributable (see SIM_PARITY.md § CASCADE)."""
     if len(state.mobiles) < 2:
         return True
     a = _clone_state(state)
@@ -196,11 +202,40 @@ def _check_m4_deploy_commutativity(state: SimState, config: SimConfig) -> bool:
     b.mobiles = list(reversed(b.mobiles))
     simulate_action_phase(a, config)
     simulate_action_phase(b, config)
-    snap_a = _state_snapshot(a)
-    snap_b = _state_snapshot(b)
-    # Stats + structures must match exactly; mobiles as multiset
-    # (same HP distribution after sort-by-uid).
-    return snap_a == snap_b
+
+    # Stats strict.
+    if float(a.p1.hp) != float(b.p1.hp): return False
+    if float(a.p2.hp) != float(b.p2.hp): return False
+    if float(a.p1.sp) != float(b.p1.sp): return False
+    if float(a.p2.sp) != float(b.p2.sp): return False
+    if float(a.p1.mp) != float(b.p1.mp): return False
+    if float(a.p2.mp) != float(b.p2.mp): return False
+
+    # Structures strict (sort-by-xy for determinism).
+    sa = sorted((s.xy, s.type_idx, bool(s.upgraded), float(s.hp),
+                  str(s.uid), int(s.player)) for s in a.structures.values())
+    sb = sorted((s.xy, s.type_idx, bool(s.upgraded), float(s.hp),
+                  str(s.uid), int(s.player)) for s in b.structures.values())
+    if sa != sb:
+        return False
+
+    # Mobiles: uid-sorted multiset equality with 1-ULP-f32 tolerance on HP.
+    ma = sorted(a.mobiles, key=lambda m: (str(m.uid), m.xy))
+    mb = sorted(b.mobiles, key=lambda m: (str(m.uid), m.xy))
+    if len(ma) != len(mb):
+        return False
+    for x, y in zip(ma, mb):
+        if (x.xy, x.type_idx, str(x.uid), int(x.player)) != \
+           (y.xy, y.type_idx, str(y.uid), int(y.player)):
+            return False
+        hp_a = np.float32(x.hp); hp_b = np.float32(y.hp)
+        if hp_a == hp_b:
+            continue
+        ai = np.int32(hp_a.view(np.int32))
+        bi = np.int32(hp_b.view(np.int32))
+        if abs(int(ai) - int(bi)) > 1:
+            return False
+    return True
 
 
 # ---------------------------------------------------------------- driver
@@ -241,16 +276,65 @@ def run_metamorphic_over_fuzz(n: int, seed: int, config: SimConfig) -> dict:
     }
 
 
+def run_metamorphic_over_ranked(config: SimConfig) -> dict:
+    """Run M1-M4 on the turn-start state of every turn of every ranked
+    replay. This is the full-corpus coverage gate from P4."""
+    from pathlib import Path
+    from sim.validate import (
+        _parse_replay, _index_deploy_frames, _index_first_action_frames,
+        _extract_deploy_actions, _extract_deploy_events_in_order,
+        _build_state_from_deploy_frame, _collect_upgraded_uids,
+    )
+    from sim.pysim import apply_deploy_actions
+    stats = {name: {"pass": 0, "fail": 0} for name, _ in _RELATIONS}
+    failing_examples: List[Tuple[str, str, int]] = []
+    t0 = time.perf_counter()
+    corpus = sorted((Path(__file__).resolve().parent.parent.parent.parent
+                       / "replays" / "ranked").glob("*.replay"))
+    for path in corpus:
+        frames, _ = _parse_replay(path)
+        deploys = _index_deploy_frames(frames)
+        actions_first = _index_first_action_frames(frames)
+        upgraded_pre = _collect_upgraded_uids(frames)
+        for t in sorted(deploys.keys()):
+            if t not in actions_first:
+                continue
+            state = _build_state_from_deploy_frame(deploys[t], config,
+                                                     upgraded_pre.get(t, set()))
+            p1s, p1u, p2s, p2u = _extract_deploy_actions(actions_first[t])
+            ordered = _extract_deploy_events_in_order(actions_first[t])
+            apply_deploy_actions(state, config, p1s, p1u, p2s, p2u,
+                                   ordered_events=ordered)
+            for name, check in _RELATIONS:
+                try:
+                    ok = check(state, config)
+                except Exception:
+                    ok = False
+                if ok:
+                    stats[name]["pass"] += 1
+                else:
+                    stats[name]["fail"] += 1
+                    if len(failing_examples) < 10:
+                        failing_examples.append((name, path.name, t))
+    dt = time.perf_counter() - t0
+    return {"n_replays": len(corpus), "wall_s": dt,
+             "per_relation": stats, "first_failures": failing_examples}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fuzz-n", type=int, default=120)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--ranked", action="store_true",
+                     help="also run on turn-start state of every ranked replay")
     args = ap.parse_args()
     config = SimConfig.load()
-    summary = run_metamorphic_over_fuzz(args.fuzz_n, args.seed, config)
-    print(f"metamorphic n={summary['n_configs']} seed={summary['seed']} "
-          f"wall={summary['wall_s']:.1f}s")
+
     any_fail = False
+
+    summary = run_metamorphic_over_fuzz(args.fuzz_n, args.seed, config)
+    print(f"fuzz n={summary['n_configs']} seed={summary['seed']} "
+          f"wall={summary['wall_s']:.1f}s")
     for name, counts in summary["per_relation"].items():
         ok = counts["fail"] == 0
         if not ok:
@@ -258,10 +342,25 @@ def main():
         print(f"  {name:<30} pass={counts['pass']:6d} fail={counts['fail']:6d} "
               f"{'PASS' if ok else 'FAIL'}")
     if summary["first_failures"]:
-        print()
         print("  first failures:")
         for name, cat, i in summary["first_failures"]:
             print(f"    {name} on {cat} @ i={i}")
+
+    if args.ranked:
+        print()
+        rr = run_metamorphic_over_ranked(config)
+        print(f"ranked n={rr['n_replays']} wall={rr['wall_s']:.1f}s")
+        for name, counts in rr["per_relation"].items():
+            ok = counts["fail"] == 0
+            if not ok:
+                any_fail = True
+            print(f"  {name:<30} pass={counts['pass']:6d} fail={counts['fail']:6d} "
+                  f"{'PASS' if ok else 'FAIL'}")
+        if rr["first_failures"]:
+            print("  first failures:")
+            for name, rp, t in rr["first_failures"]:
+                print(f"    {name} on {rp} T{t}")
+
     return 0 if not any_fail else 1
 
 
