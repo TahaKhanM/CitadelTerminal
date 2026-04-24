@@ -39,7 +39,7 @@ use crate::map::{
     edge_tiles_slice, EDGE_BOTTOM_LEFT, EDGE_BOTTOM_RIGHT, EDGE_TOP_LEFT, EDGE_TOP_RIGHT,
 };
 use crate::pathfinder::{make_pathfinders, HORIZONTAL, VERTICAL};
-use crate::state::{SimState, Structure};
+use crate::state::SimState;
 use indexmap::IndexMap;
 
 // ---------------------------------------------------------------- constants
@@ -567,12 +567,17 @@ pub fn system_self_destruct(
 ///      (|x - 13.5| LARGER)
 ///   5. equal-distance AND equal HP AND equal-to-start AND equal-from-center
 ///      AND larger uid (as integer)
-fn pick_target_struct<'a>(
+/// Pick target structure by tile. Structures are looked up on demand from
+/// `state.structures` so the caller doesn't have to materialise
+/// `Vec<&Structure>` per attacker. UID tiebreak is computed lazily — the
+/// parse + compare only fire if distance+HP+start+center all tied (rare).
+fn pick_target_struct(
+    state: &SimState,
     attacker_xy: (i32, i32),
     attacker_player: u8,
-    candidates: &'a [&'a Structure],
-) -> Option<&'a Structure> {
-    if candidates.is_empty() {
+    cand_xys: &[(i32, i32)],
+) -> Option<(i32, i32)> {
+    if cand_xys.is_empty() {
         return None;
     }
     let start_pos: f32 = if attacker_player == 1 { 0.0 } else { 28.0 };
@@ -580,10 +585,14 @@ fn pick_target_struct<'a>(
     let mut closest_health: f32 = 1.0e10;
     let mut distance_to_player_start: f32 = 1.0e10;
     let mut distance_to_center: f32 = 0.0;
-    let mut target_gid: String = String::new();
-    let mut best: Option<&Structure> = None;
+    let mut best_uid_cached: Option<i64> = None;
+    let mut best_xy: Option<(i32, i32)> = None;
 
-    for cand in candidates {
+    for &xy in cand_xys {
+        let cand = match state.structures.get(&xy) {
+            Some(c) => c,
+            None => continue,
+        };
         if cand.hp <= 0.0 {
             continue;
         }
@@ -601,44 +610,58 @@ fn pick_target_struct<'a>(
         let equal_to_start = new_dist_start == distance_to_player_start;
         let farther_from_center = new_dist_center > distance_to_center;
         let equal_from_center = new_dist_center == distance_to_center;
-        let game_object_id_larger = if target_gid.is_empty() {
-            true
-        } else {
-            // Every uid originates from engine.jar's monotonic getNewID
-            // counter — plumbed through apply_deploy_actions as decimal.
-            let new_int: Result<i64, _> = cand.uid.parse();
-            let old_int: Result<i64, _> = target_gid.parse();
-            match (new_int, old_int) {
-                (Ok(a), Ok(b)) => a > b,
-                _ => cand.uid.as_str() > target_gid.as_str(),
-            }
-        };
         let first_cond = closer
             || (equal_distance && less_hp)
             || (equal_distance && equal_hp && closer_to_start)
             || (equal_distance && equal_hp && equal_to_start && farther_from_center);
-        let second_cond = equal_distance
+        let uid_tiebreak_needed = equal_distance
             && equal_hp
             && equal_to_start
             && equal_from_center
-            && game_object_id_larger;
+            && !first_cond;
+        let game_object_id_larger = if !uid_tiebreak_needed {
+            false
+        } else {
+            let new_uid = cand.uid.as_str();
+            let new_int: Result<i64, _> = new_uid.parse();
+            match (new_int, best_uid_cached) {
+                (Ok(a), Some(b)) => a > b,
+                (Ok(_), None) => true,
+                _ => {
+                    if let Some(best_xy) = best_xy {
+                        if let Some(best) = state.structures.get(&best_xy) {
+                            new_uid > best.uid.as_str()
+                        } else {
+                            true
+                        }
+                    } else {
+                        true
+                    }
+                }
+            }
+        };
+        let second_cond = uid_tiebreak_needed && game_object_id_larger;
         if !first_cond && !second_cond {
             continue;
         }
-        best = Some(cand);
+        best_xy = Some(cand.xy);
         closest_distance = new_dist;
         closest_health = new_hp;
         distance_to_player_start = new_dist_start;
         distance_to_center = new_dist_center;
-        target_gid = cand.uid.clone();
+        best_uid_cached = cand.uid.parse().ok();
     }
-    best
+    best_xy
 }
 
+/// Pick target mobile by index. UID tiebreak is computed lazily via index
+/// lookup into `state.mobiles` so candidate records don't need an owned
+/// `String` per entry.
 fn pick_target_mobile_idx(
+    state: &SimState,
     attacker_xy: (i32, i32),
     attacker_player: u8,
-    candidates: &[(usize, f32, f32, (i32, i32), String)], // (idx, hp, shield, xy, uid)
+    candidates: &[crate::state::WalkerCand],
 ) -> Option<usize> {
     if candidates.is_empty() {
         return None;
@@ -648,19 +671,19 @@ fn pick_target_mobile_idx(
     let mut closest_health: f32 = 1.0e10;
     let mut distance_to_player_start: f32 = 1.0e10;
     let mut distance_to_center: f32 = 0.0;
-    let mut target_gid: String = String::new();
     let mut best_idx: Option<usize> = None;
+    let mut best_uid_cached: Option<i64> = None;
 
-    for (idx, hp, shield, xy, uid) in candidates {
-        if *hp <= 0.0 {
+    for cand in candidates {
+        if cand.hp <= 0.0 {
             continue;
         }
-        let dx = (xy.0 - attacker_xy.0) as f32;
-        let dy = (xy.1 - attacker_xy.1) as f32;
+        let dx = (cand.xy.0 - attacker_xy.0) as f32;
+        let dy = (cand.xy.1 - attacker_xy.1) as f32;
         let new_dist = (dx * dx + dy * dy).sqrt();
-        let new_hp = *hp + *shield;
-        let new_dist_start = (xy.1 as f32 - start_pos).abs();
-        let new_dist_center = (xy.0 as f32 - 13.5_f32).abs();
+        let new_hp = cand.hp + cand.shield;
+        let new_dist_start = (cand.xy.1 as f32 - start_pos).abs();
+        let new_dist_center = (cand.xy.0 as f32 - 13.5_f32).abs();
         let closer = new_dist < closest_distance;
         let equal_distance = new_dist == closest_distance;
         let less_hp = new_hp < closest_health;
@@ -669,35 +692,42 @@ fn pick_target_mobile_idx(
         let equal_to_start = new_dist_start == distance_to_player_start;
         let farther_from_center = new_dist_center > distance_to_center;
         let equal_from_center = new_dist_center == distance_to_center;
-        let game_object_id_larger = if target_gid.is_empty() {
-            true
-        } else {
-            let new_int: Result<i64, _> = uid.parse();
-            let old_int: Result<i64, _> = target_gid.parse();
-            match (new_int, old_int) {
-                (Ok(a), Ok(b)) => a > b,
-                _ => uid.as_str() > target_gid.as_str(),
-            }
-        };
         let first_cond = closer
             || (equal_distance && less_hp)
             || (equal_distance && equal_hp && closer_to_start)
             || (equal_distance && equal_hp && equal_to_start && farther_from_center);
-        let second_cond = equal_distance
+        let uid_tiebreak_needed = equal_distance
             && equal_hp
             && equal_to_start
             && equal_from_center
-            && game_object_id_larger;
+            && !first_cond;
+        let game_object_id_larger = if !uid_tiebreak_needed {
+            false
+        } else {
+            let new_uid = state.mobiles[cand.idx].uid.as_str();
+            let new_int: Result<i64, _> = new_uid.parse();
+            match (new_int, best_uid_cached) {
+                (Ok(a), Some(b)) => a > b,
+                (Ok(_), None) => true,
+                _ => {
+                    if let Some(bi) = best_idx {
+                        new_uid > state.mobiles[bi].uid.as_str()
+                    } else {
+                        true
+                    }
+                }
+            }
+        };
+        let second_cond = uid_tiebreak_needed && game_object_id_larger;
         if !first_cond && !second_cond {
             continue;
         }
-        best_idx = Some(*idx);
+        best_idx = Some(cand.idx);
         closest_distance = new_dist;
         closest_health = new_hp;
         distance_to_player_start = new_dist_start;
         distance_to_center = new_dist_center;
-        target_gid = uid.clone();
-        let _ = attacker_player; // silence unused if optimized away
+        best_uid_cached = state.mobiles[cand.idx].uid.parse().ok();
     }
     best_idx
 }
@@ -715,25 +745,27 @@ fn pick_target_mobile_idx(
 /// engine gate is `isEnabled() || attackWhenDestroyed`. Breached mobiles are
 /// explicitly excluded (they were `disableGameObject`'d in BreachSystem).
 pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<EventEntry>) {
-    // Snapshot attacker identifiers. We re-query hp/state per attacker because
-    // a fired attack may kill another attacker in the same pass.
-    let attacker_struct_xys: Vec<(i32, i32)> = state
-        .structures
-        .iter()
-        .filter(|(_, s)| s.type_idx == IDX_TURRET)
-        .map(|(xy, _)| *xy)
-        .collect();
-    let attacker_mobile_idxs: Vec<usize> = state
-        .mobiles
-        .iter()
-        .enumerate()
-        .filter(|(_, m)| !m.breached)
-        .map(|(i, _)| i)
-        .collect();
+    // Snapshot attacker identifiers into scratch (reused across frames).
+    state.scratch.attacker_struct_xys.clear();
+    for (xy, s) in state.structures.iter() {
+        if s.type_idx == IDX_TURRET {
+            state.scratch.attacker_struct_xys.push(*xy);
+        }
+    }
+    state.scratch.attacker_mobile_idxs.clear();
+    for (i, m) in state.mobiles.iter().enumerate() {
+        if !m.breached {
+            state.scratch.attacker_mobile_idxs.push(i);
+        }
+    }
 
-    // Turrets first.
-    for sxy in attacker_struct_xys {
-        let (att_xy, att_player, att_uid, dmg_w, dmg_t, att_range) = {
+    // Turrets first. Iterate by index — the scratch Vec is stable across
+    // the loop body because fire_one only touches state.scratch.walker_cands
+    // + state.scratch.struct_cand_xys (disjoint buffers).
+    let n_turrets = state.scratch.attacker_struct_xys.len();
+    for i in 0..n_turrets {
+        let sxy = state.scratch.attacker_struct_xys[i];
+        let (att_xy, att_player, dmg_w, dmg_t, att_range) = {
             let s = match state.structures.get(&sxy) {
                 Some(s) => s,
                 None => continue,
@@ -742,22 +774,18 @@ pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<
             if spec.attack_damage_walker <= 0.0 && spec.attack_damage_tower <= 0.0 {
                 continue;
             }
-            (
-                s.xy,
-                s.player,
-                s.uid.clone(),
-                spec.attack_damage_walker,
-                spec.attack_damage_tower,
-                spec.attack_range,
-            )
+            (s.xy, s.player, spec.attack_damage_walker,
+             spec.attack_damage_tower, spec.attack_range)
         };
-        fire_one(state, events, att_xy, att_player, att_uid, dmg_w, dmg_t, att_range);
+        fire_one(state, events, att_xy, att_player, dmg_w, dmg_t, att_range);
     }
 
     // Mobile attackers.
-    for i in attacker_mobile_idxs {
-        let (att_xy, att_player, att_uid, dmg_w, dmg_t, att_range) = {
-            let m = match state.mobiles.get(i) {
+    let n_mobs = state.scratch.attacker_mobile_idxs.len();
+    for i in 0..n_mobs {
+        let mi = state.scratch.attacker_mobile_idxs[i];
+        let (att_xy, att_player, dmg_w, dmg_t, att_range) = {
+            let m = match state.mobiles.get(mi) {
                 Some(m) => m,
                 None => continue,
             };
@@ -768,16 +796,10 @@ pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<
             if spec.attack_damage_walker <= 0.0 && spec.attack_damage_tower <= 0.0 {
                 continue;
             }
-            (
-                m.xy,
-                m.player,
-                m.uid.clone(),
-                spec.attack_damage_walker,
-                spec.attack_damage_tower,
-                spec.attack_range,
-            )
+            (m.xy, m.player, spec.attack_damage_walker,
+             spec.attack_damage_tower, spec.attack_range)
         };
-        fire_one(state, events, att_xy, att_player, att_uid, dmg_w, dmg_t, att_range);
+        fire_one(state, events, att_xy, att_player, dmg_w, dmg_t, att_range);
     }
 }
 
@@ -788,15 +810,14 @@ fn fire_one(
     events: &mut Vec<EventEntry>,
     att_xy: (i32, i32),
     att_player: u8,
-    att_uid: String,
     dmg_walker: f32,
     dmg_tower: f32,
     att_range: f32,
 ) {
     let r_sq = att_range * att_range + 1e-9;
 
-    // Walker candidate list (mobiles in range, alive, enemy).
-    let mut walker_cands: Vec<(usize, f32, f32, (i32, i32), String)> = Vec::new();
+    // Walker candidate list (mobiles in range, alive, enemy) — scratch-reused.
+    state.scratch.walker_cands.clear();
     if dmg_walker > 0.0 {
         for (i, m) in state.mobiles.iter().enumerate() {
             if m.hp <= 0.0 || m.player == att_player {
@@ -807,17 +828,27 @@ fn fire_one(
             if dx * dx + dy * dy > r_sq {
                 continue;
             }
-            walker_cands.push((i, m.hp, m.shield, m.xy, m.uid.clone()));
+            state.scratch.walker_cands.push(crate::state::WalkerCand {
+                idx: i,
+                hp: m.hp,
+                shield: m.shield,
+                xy: m.xy,
+            });
         }
     }
     let mut target_mobile_idx: Option<usize> = None;
-    if !walker_cands.is_empty() {
-        target_mobile_idx = pick_target_mobile_idx(att_xy, att_player, &walker_cands);
+    if !state.scratch.walker_cands.is_empty() {
+        // SAFETY: walker_cands is borrowed read-only for this call; picker
+        // reads state.mobiles (disjoint field). No aliasing.
+        let cand_ptr = state.scratch.walker_cands.as_ptr();
+        let cand_len = state.scratch.walker_cands.len();
+        let cand_slice = unsafe { std::slice::from_raw_parts(cand_ptr, cand_len) };
+        target_mobile_idx = pick_target_mobile_idx(state, att_xy, att_player, cand_slice);
     }
     let mut target_struct_xy: Option<(i32, i32)> = None;
     if target_mobile_idx.is_none() && dmg_tower > 0.0 {
-        // Structure candidates.
-        let mut struct_cands_xys: Vec<(i32, i32)> = Vec::new();
+        // Structure candidates — scratch-reused.
+        state.scratch.struct_cand_xys.clear();
         for (xy, s) in state.structures.iter() {
             if s.hp <= 0.0 || s.player == att_player {
                 continue;
@@ -827,14 +858,14 @@ fn fire_one(
             if dx * dx + dy * dy > r_sq {
                 continue;
             }
-            struct_cands_xys.push(*xy);
+            state.scratch.struct_cand_xys.push(*xy);
         }
-        let struct_refs: Vec<&Structure> = struct_cands_xys
-            .iter()
-            .filter_map(|xy| state.structures.get(xy))
-            .collect();
-        if let Some(st) = pick_target_struct(att_xy, att_player, &struct_refs) {
-            target_struct_xy = Some(st.xy);
+        if !state.scratch.struct_cand_xys.is_empty() {
+            // SAFETY: same disjoint-field argument as walker path above.
+            let xys_ptr = state.scratch.struct_cand_xys.as_ptr();
+            let xys_len = state.scratch.struct_cand_xys.len();
+            let xys_slice = unsafe { std::slice::from_raw_parts(xys_ptr, xys_len) };
+            target_struct_xy = pick_target_struct(state, att_xy, att_player, xys_slice);
         }
     }
 
@@ -850,8 +881,6 @@ fn fire_one(
             m.hp = new_hp;
             m.shield = new_sh;
         }
-        // (attack event is a strict-order bucket; no EventEntry variant for it.)
-        // Engine also emits a matching Damage event per attack.
         events.push(EventEntry::Damage {
             xy: victim_xy,
             amount: dmg_walker,
@@ -868,7 +897,6 @@ fn fire_one(
                 removed: false,
             });
         }
-        let _ = att_uid;
     } else if let Some(sxy) = target_struct_xy {
         let (hp_before, victim_uid, victim_type_idx, victim_player) = {
             let s = &state.structures[&sxy];
@@ -894,7 +922,6 @@ fn fire_one(
                 removed: false,
             });
         }
-        let _ = att_uid;
     }
 }
 
