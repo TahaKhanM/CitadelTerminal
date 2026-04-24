@@ -164,6 +164,14 @@ pub struct PathFinder {
     requires_validation: CoordQueue,
     possible_steps: CoordQueue,
 
+    /// Memoization table — built lazily. For each (x, y, last_move) ∈
+    /// [0..28) × [0..28) × {SPAWNED, HORIZONTAL, VERTICAL}, the
+    /// deterministic next step. `(-1, -1)` = uncached. Once `get_step` runs
+    /// for a particular key and the pathfinder state is stable (no put/remove
+    /// since last validate), subsequent calls on the same key hit this table
+    /// and avoid the filter pipeline entirely.
+    step_cache: Box<[[(i8, i8); 3]; 784]>,
+
     // Idealness-search scalars (PathFinder.java:37-38, 248-249).
     searched_best_idealness: i32,
     searched_curr_pathlength: i32,
@@ -208,6 +216,7 @@ impl PathFinder {
             searched_best_idealness: 0,
             searched_curr_pathlength: 0,
             board_invalid: true,
+            step_cache: Box::new([[(-128_i8, -128_i8); 3]; 784]),
         };
 
         // Triangular corners (PathFinder.java:62-70).
@@ -369,6 +378,7 @@ impl PathFinder {
         if self.status[idx] == STATUS_WALL {
             return;
         }
+        self.invalidate_step_cache();
         self.status[idx] = STATUS_WALL;
         for i in 0..4 {
             let nx = NEIGHBOR_X[i] + target_x;
@@ -425,6 +435,7 @@ impl PathFinder {
         if self.status[idx] != STATUS_WALL {
             return;
         }
+        self.invalidate_step_cache();
         if self.idealness(target_x, target_y) == I32_MAX {
             self.status[idx] = STATUS_OPEN;
             self.pathlength[idx] = 0;
@@ -650,8 +661,26 @@ impl PathFinder {
     /// allocated 5-slot `InlineStepList` instead of the CoordQueue because
     /// possible_steps has at most 5 entries (self + 4 neighbors) — the ring
     /// buffer has modulo and bounds-check overhead we pay for no reason.
+    ///
+    /// Memoization: after the first call on any (x, y, last_move) key, the
+    /// result is cached in `step_cache`. Subsequent calls with the same key
+    /// return immediately. The cache is invalidated (cleared) by `put()` and
+    /// `remove()` since a wall change can alter path results.
     #[inline]
     pub fn get_step(&mut self, unit_x: i32, unit_y: i32, prev_direction: u8) -> (i32, i32) {
+        // Cache check — hot path. `unit_x/unit_y` are always in [0, 28) for
+        // in-game units; prev_direction ∈ {0, 1, 2}.
+        if (0..self.dimension).contains(&unit_x)
+            && (0..self.dimension).contains(&unit_y)
+            && (prev_direction as usize) < 3
+        {
+            let idx = (unit_y * self.dimension + unit_x) as usize;
+            let (cx, cy) = self.step_cache[idx][prev_direction as usize];
+            if cx != -128 {
+                return (cx as i32, cy as i32);
+            }
+        }
+
         // Build possible_steps inline — at most 5 entries (self + 4 neighbors).
         let mut ps: [(i32, i32); 5] = [(unit_x, unit_y); 5];
         let mut ps_len: usize = 1;
@@ -733,11 +762,34 @@ impl PathFinder {
             ps_len = w;
         }
 
-        if ps_len == 0 {
-            // Per engine behaviour if every candidate was filtered out, stay.
-            return (unit_x, unit_y);
+        let result = if ps_len == 0 {
+            (unit_x, unit_y)
+        } else {
+            ps[0]
+        };
+        // Populate cache.
+        if (0..self.dimension).contains(&unit_x)
+            && (0..self.dimension).contains(&unit_y)
+            && (prev_direction as usize) < 3
+            && result.0 >= -127 && result.0 <= 127
+            && result.1 >= -127 && result.1 <= 127
+        {
+            let idx = (unit_y * self.dimension + unit_x) as usize;
+            self.step_cache[idx][prev_direction as usize] =
+                (result.0 as i8, result.1 as i8);
         }
-        ps[0]
+        result
+    }
+
+    /// Invalidate the memoization cache (all entries). Called when the
+    /// underlying pathfinder state changes (put/remove).
+    #[inline]
+    fn invalidate_step_cache(&mut self) {
+        for row in self.step_cache.iter_mut() {
+            for entry in row.iter_mut() {
+                *entry = (-128, -128);
+            }
+        }
     }
 }
 
