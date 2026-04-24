@@ -664,7 +664,8 @@ fn pick_target_struct(
         return None;
     }
     let start_pos: f32 = if attacker_player == 1 { 0.0 } else { 28.0 };
-    let mut closest_distance: f32 = 1.0e10;
+    // See `pick_target_struct_by_idx` for the squared-distance parity proof.
+    let mut closest_distance_sq: i32 = i32::MAX;
     let mut closest_health: f32 = 1.0e10;
     let mut distance_to_player_start: f32 = 1.0e10;
     let mut distance_to_center: f32 = 0.0;
@@ -679,14 +680,14 @@ fn pick_target_struct(
         if cand.hp <= 0.0 {
             continue;
         }
-        let dx = (cand.xy.0 - attacker_xy.0) as f32;
-        let dy = (cand.xy.1 - attacker_xy.1) as f32;
-        let new_dist = (dx * dx + dy * dy).sqrt();
+        let dx = cand.xy.0 - attacker_xy.0;
+        let dy = cand.xy.1 - attacker_xy.1;
+        let new_dist_sq: i32 = dx * dx + dy * dy;
         let new_hp = cand.hp;
         let new_dist_start = (cand.xy.1 as f32 - start_pos).abs();
         let new_dist_center = (cand.xy.0 as f32 - 13.5_f32).abs();
-        let closer = new_dist < closest_distance;
-        let equal_distance = new_dist == closest_distance;
+        let closer = new_dist_sq < closest_distance_sq;
+        let equal_distance = new_dist_sq == closest_distance_sq;
         let less_hp = new_hp < closest_health;
         let equal_hp = new_hp == closest_health;
         let closer_to_start = new_dist_start < distance_to_player_start;
@@ -711,7 +712,7 @@ fn pick_target_struct(
             continue;
         }
         best_xy = Some(cand.xy);
-        closest_distance = new_dist;
+        closest_distance_sq = new_dist_sq;
         closest_health = new_hp;
         distance_to_player_start = new_dist_start;
         distance_to_center = new_dist_center;
@@ -731,6 +732,17 @@ fn pick_target_struct(
 /// Returns the index of the chosen structure so the caller can reuse it for
 /// the damage-apply hit (one more SoA + IndexMap write to keep the mirror
 /// in sync).
+///
+/// # Distance metric
+///
+/// We compare squared distances `(dx² + dy²)` instead of `sqrt(dx² + dy²)`.
+/// For our integer-tile coordinates (`x, y ∈ [0, 27]`), the squared sum is
+/// exactly representable as `f32` (max 28² + 28² = 1568 ≪ 2²⁴), so:
+///   - `<` is preserved by removing sqrt (sqrt is strictly monotone on R≥0)
+///   - `==` is preserved (sqrt is bijective; equal squares ⇔ equal sqrts)
+/// The Java engine applies `(float)Math.sqrt(distSqrd)` to integer inputs,
+/// so the squared comparison is byte-equivalent to the engine's float
+/// comparison cascade. Verified by full STRICT-19 + CASCADE parity tests.
 #[inline]
 fn pick_target_struct_by_idx(
     state: &SimState,
@@ -742,7 +754,9 @@ fn pick_target_struct_by_idx(
         return None;
     }
     let start_pos: f32 = if attacker_player == 1 { 0.0 } else { 28.0 };
-    let mut closest_distance: f32 = 1.0e10;
+    // Squared-distance accumulators (no sqrt). Uses i32 for the squared
+    // distance because integer coords keep the sum as a small integer.
+    let mut closest_distance_sq: i32 = i32::MAX;
     let mut closest_health: f32 = 1.0e10;
     let mut distance_to_player_start: f32 = 1.0e10;
     let mut distance_to_center: f32 = 0.0;
@@ -764,14 +778,14 @@ fn pick_target_struct_by_idx(
         }
         let xy = unsafe { *xy_ptr.add(i) };
         let uid = unsafe { *uid_ptr.add(i) };
-        let dx = (xy.0 - attacker_xy.0) as f32;
-        let dy = (xy.1 - attacker_xy.1) as f32;
-        let new_dist = (dx * dx + dy * dy).sqrt();
+        let dx = xy.0 - attacker_xy.0;
+        let dy = xy.1 - attacker_xy.1;
+        let new_dist_sq: i32 = dx * dx + dy * dy;
         let new_hp = hp;
         let new_dist_start = (xy.1 as f32 - start_pos).abs();
         let new_dist_center = (xy.0 as f32 - 13.5_f32).abs();
-        let closer = new_dist < closest_distance;
-        let equal_distance = new_dist == closest_distance;
+        let closer = new_dist_sq < closest_distance_sq;
+        let equal_distance = new_dist_sq == closest_distance_sq;
         let less_hp = new_hp < closest_health;
         let equal_hp = new_hp == closest_health;
         let closer_to_start = new_dist_start < distance_to_player_start;
@@ -794,7 +808,7 @@ fn pick_target_struct_by_idx(
             continue;
         }
         best_idx = Some(idx);
-        closest_distance = new_dist;
+        closest_distance_sq = new_dist_sq;
         closest_health = new_hp;
         distance_to_player_start = new_dist_start;
         distance_to_center = new_dist_center;
@@ -817,7 +831,9 @@ fn pick_target_mobile_idx(
         return None;
     }
     let start_pos: f32 = if attacker_player == 1 { 0.0 } else { 28.0 };
-    let mut closest_distance: f32 = 1.0e10;
+    // See `pick_target_struct_by_idx` for the squared-distance parity proof
+    // — same argument applies for mobiles since mobile xy is always int-tile.
+    let mut closest_distance_sq: i32 = i32::MAX;
     let mut closest_health: f32 = 1.0e10;
     let mut distance_to_player_start: f32 = 1.0e10;
     let mut distance_to_center: f32 = 0.0;
@@ -828,14 +844,14 @@ fn pick_target_mobile_idx(
         if cand.hp <= 0.0 {
             continue;
         }
-        let dx = (cand.xy.0 - attacker_xy.0) as f32;
-        let dy = (cand.xy.1 - attacker_xy.1) as f32;
-        let new_dist = (dx * dx + dy * dy).sqrt();
+        let dx = cand.xy.0 - attacker_xy.0;
+        let dy = cand.xy.1 - attacker_xy.1;
+        let new_dist_sq: i32 = dx * dx + dy * dy;
         let new_hp = cand.hp + cand.shield;
         let new_dist_start = (cand.xy.1 as f32 - start_pos).abs();
         let new_dist_center = (cand.xy.0 as f32 - 13.5_f32).abs();
-        let closer = new_dist < closest_distance;
-        let equal_distance = new_dist == closest_distance;
+        let closer = new_dist_sq < closest_distance_sq;
+        let equal_distance = new_dist_sq == closest_distance_sq;
         let less_hp = new_hp < closest_health;
         let equal_hp = new_hp == closest_health;
         let closer_to_start = new_dist_start < distance_to_player_start;
@@ -861,7 +877,7 @@ fn pick_target_mobile_idx(
             continue;
         }
         best_idx = Some(cand.idx);
-        closest_distance = new_dist;
+        closest_distance_sq = new_dist_sq;
         closest_health = new_hp;
         distance_to_player_start = new_dist_start;
         distance_to_center = new_dist_center;
@@ -1047,10 +1063,14 @@ pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<
         if !mob_near && !has_struct_cands {
             continue;
         }
+        // Pass `mob_near` so fire_one_turret can skip the walker_cands
+        // build entirely when no walker is in bbox+range. This is the
+        // common case for fires triggered by has_struct_cands alone.
         fire_one_turret(
             state, events, ti.xy, ti.player,
             ti.dmg_walker, ti.dmg_tower, ti.range_sq_eps,
             ti.enemy_cand_start as usize, ti.enemy_cand_end as usize,
+            mob_near,
         );
     }
 
@@ -1221,6 +1241,7 @@ fn fire_one_turret(
     r_sq_eps: f32,
     enemy_cand_start: usize,
     enemy_cand_end: usize,
+    mob_near: bool,
 ) {
     let r_sq = r_sq_eps;
 
@@ -1233,7 +1254,7 @@ fn fire_one_turret(
     };
 
     state.scratch.walker_cands.clear();
-    if dmg_walker > 0.0 && !enemy_mobs_list.is_empty() {
+    if mob_near && dmg_walker > 0.0 && !enemy_mobs_list.is_empty() {
         // Iterate the pre-partitioned enemy live mob cache (flat WalkerCand
         // list instead of the full `Mobile` struct). No hp/player re-check
         // — dead mobiles are filtered out at cache build time.
