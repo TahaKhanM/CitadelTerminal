@@ -558,12 +558,17 @@ impl PathFinder {
         }
     }
 
-    /// PathFinder.java:143-189. Drains `targets`, re-validating any INVALID
-    /// tiles along with the seed cells produced by `idealness_search`.
-    fn validate(&mut self, mut targets: CoordQueue) {
-        while targets.next() {
-            let target_x = targets.curr_x;
-            let target_y = targets.curr_y;
+    /// PathFinder.java:143-189. Drains the `requires_validation` queue
+    /// in-place, re-validating any INVALID tiles along with the seed cells
+    /// produced by `idealness_search`. Takes the queue by swap (not move)
+    /// so `get_step` can reuse the single scratch allocation.
+    fn validate_rv(&mut self) {
+        // Pop one target at a time; `requires_validation` is the queue
+        // populated by `get_step`. Invariant: caller has already populated
+        // `requires_validation` with the tiles that might be STATUS_INVALID.
+        while self.requires_validation.next() {
+            let target_x = self.requires_validation.curr_x;
+            let target_y = self.requires_validation.curr_y;
             let t_idx = self.index(target_x, target_y);
             if self.status[t_idx] == STATUS_OPEN {
                 continue;
@@ -659,10 +664,11 @@ impl PathFinder {
                 self.possible_steps.push(nx, ny);
             }
         }
-        // Move requires_validation into validate() — the queue is drained.
-        let mut rv = CoordQueue::new();
-        std::mem::swap(&mut rv, &mut self.requires_validation);
-        self.validate(rv);
+        // Drain `self.requires_validation` in-place via `validate_rv` —
+        // no per-call CoordQueue::new() allocation (previously ~200 bytes
+        // of Vec capacity per get_step; profile shows get_step is called
+        // ~250 times per sim).
+        self.validate_rv();
 
         // Filter #1: compact by running min pathlength (front-to-back).
         // `s` MUST be initialized to i32::MAX (PATHFINDER_SPEC.md §6.7).
