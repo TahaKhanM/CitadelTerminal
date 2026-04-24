@@ -784,17 +784,25 @@ fn pick_target_mobile_idx(
 /// engine gate is `isEnabled() || attackWhenDestroyed`. Breached mobiles are
 /// explicitly excluded (they were `disableGameObject`'d in BreachSystem).
 pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<EventEntry>) {
-    // Snapshot attacker identifiers + per-player enemy lists into scratch
-    // (reused across frames, capacity preserved).
-    state.scratch.attacker_struct_xys.clear();
+    // Snapshot attacker identifiers + per-player enemy lists + pre-extracted
+    // turret info into scratch (reused across frames, capacity preserved).
+    state.scratch.turret_infos.clear();
     state.scratch.p1_struct_xys.clear();
     state.scratch.p2_struct_xys.clear();
     for (xy, s) in state.structures.iter() {
-        if s.type_idx == IDX_TURRET {
-            state.scratch.attacker_struct_xys.push(*xy);
+        if s.type_idx == IDX_TURRET && s.hp > 0.0 {
+            let spec = config.structure_spec(IDX_TURRET, s.upgraded);
+            if spec.attack_damage_walker > 0.0 || spec.attack_damage_tower > 0.0 {
+                state.scratch.turret_infos.push(crate::state::TurretInfo {
+                    xy: *xy,
+                    player: s.player,
+                    dmg_walker: spec.attack_damage_walker,
+                    dmg_tower: spec.attack_damage_tower,
+                    range_sq_eps: spec.attack_range * spec.attack_range + 1e-9,
+                });
+            }
         }
-        // Only live structures count as targets. Matches the fire_one filter
-        // `s.hp > 0.0` so we can drop the per-candidate HP check later.
+        // Only live structures count as targets.
         if s.hp > 0.0 {
             match s.player {
                 1 => state.scratch.p1_struct_xys.push(*xy),
@@ -810,25 +818,11 @@ pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<
         }
     }
 
-    // Turrets first. Iterate by index — the scratch Vec is stable across
-    // the loop body because fire_one only touches state.scratch.walker_cands
-    // + state.scratch.struct_cand_xys (disjoint buffers).
-    let n_turrets = state.scratch.attacker_struct_xys.len();
+    // Turrets first — iterate the pre-extracted info array.
+    let n_turrets = state.scratch.turret_infos.len();
     for i in 0..n_turrets {
-        let sxy = state.scratch.attacker_struct_xys[i];
-        let (att_xy, att_player, dmg_w, dmg_t, att_range) = {
-            let s = match state.structures.get(&sxy) {
-                Some(s) => s,
-                None => continue,
-            };
-            let spec = config.structure_spec(IDX_TURRET, s.upgraded);
-            if spec.attack_damage_walker <= 0.0 && spec.attack_damage_tower <= 0.0 {
-                continue;
-            }
-            (s.xy, s.player, spec.attack_damage_walker,
-             spec.attack_damage_tower, spec.attack_range)
-        };
-        fire_one(state, events, att_xy, att_player, dmg_w, dmg_t, att_range);
+        let ti = state.scratch.turret_infos[i];
+        fire_one(state, events, ti.xy, ti.player, ti.dmg_walker, ti.dmg_tower, ti.range_sq_eps);
     }
 
     // Mobile attackers.
@@ -850,12 +844,14 @@ pub fn system_attack(state: &mut SimState, config: &SimConfig, events: &mut Vec<
             (m.xy, m.player, spec.attack_damage_walker,
              spec.attack_damage_tower, spec.attack_range)
         };
-        fire_one(state, events, att_xy, att_player, dmg_w, dmg_t, att_range);
+        let r_sq_eps = att_range * att_range + 1e-9;
+        fire_one(state, events, att_xy, att_player, dmg_w, dmg_t, r_sq_eps);
     }
 }
 
 /// Pick target + apply damage + emit events. Separated from `system_attack`
-/// to share the call between turret and mobile attackers.
+/// to share the call between turret and mobile attackers. `r_sq_eps` is the
+/// squared range plus the 1e-9 epsilon used by the engine's distance gate.
 fn fire_one(
     state: &mut SimState,
     events: &mut Vec<EventEntry>,
@@ -863,9 +859,9 @@ fn fire_one(
     att_player: u8,
     dmg_walker: f32,
     dmg_tower: f32,
-    att_range: f32,
+    r_sq_eps: f32,
 ) {
-    let r_sq = att_range * att_range + 1e-9;
+    let r_sq = r_sq_eps;
 
     // Walker candidate list (mobiles in range, alive, enemy) — scratch-reused.
     state.scratch.walker_cands.clear();
