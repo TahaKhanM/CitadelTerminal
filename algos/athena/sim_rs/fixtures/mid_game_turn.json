@@ -1,0 +1,1424 @@
+{
+  "source_replay": "v13_360023_m15302618_vs_python-algo-turtle-v4_1609_win.replay",
+  "turn": 38,
+  "p1": {
+    "hp": 40.0,
+    "sp": 0.0,
+    "mp": 0.6000000238418579
+  },
+  "p2": {
+    "hp": 40.0,
+    "sp": 4.0,
+    "mp": 8.800000190734863
+  },
+  "structures": [
+    {
+      "xy": [
+        27,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "15",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        26,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "16",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        25,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "17",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        2,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "18",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        1,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "21",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        0,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "22",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        8,
+        15
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "24",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "29",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        10,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "30",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        2,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "31",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        3,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "32",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        25,
+        15
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "35",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        6,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "36",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        7,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "37",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        8,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "38",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        9,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "39",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        2,
+        15
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "40",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        17,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 12.0,
+      "uid": "47",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        18,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "48",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        19,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "49",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        8,
+        16
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "50",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        20,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "52",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        21,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "53",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        15
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "56",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        5,
+        15
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "57",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        24,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "59",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        25,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "60",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        2,
+        13
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "61",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        25,
+        13
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "62",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        14,
+        18
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "63",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        13,
+        18
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "64",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        13,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "66",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "67",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        5,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "68",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        13,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 12.0,
+      "uid": "70",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        14,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "72",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        18
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "73",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "75",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        18
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "76",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "78",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        18,
+        20
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "79",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        9,
+        20
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "80",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        7,
+        9
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "82",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        21
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "83",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        21
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "84",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        18,
+        19
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 58.0,
+      "uid": "93",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        9,
+        19
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "94",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        20
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "95",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        20
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "96",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        20,
+        9
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "107",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        8,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "116",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        4,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "117",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        6,
+        15
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "118",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        19,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "122",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        15,
+        25
+      ],
+      "type_idx": 1,
+      "upgraded": false,
+      "hp": 1.0,
+      "uid": "123",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        5,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "125",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        12,
+        25
+      ],
+      "type_idx": 1,
+      "upgraded": false,
+      "hp": 1.0,
+      "uid": "126",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        11
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "128",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        4,
+        15
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "150",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        23,
+        14
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "152",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        1,
+        13
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "155",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        6,
+        16
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "156",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        26,
+        13
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "162",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        21,
+        15
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "178",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        23,
+        15
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "179",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        21,
+        19
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "180",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        0,
+        13
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "184",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        21,
+        16
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 90.0,
+      "uid": "185",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        27,
+        13
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "189",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        4,
+        13
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "209",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        19,
+        15
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 22.0,
+      "uid": "211",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        19,
+        16
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 84.0,
+      "uid": "212",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        20,
+        19
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "213",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        5
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "222",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        7,
+        17
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "235",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        9,
+        18
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "236",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        7,
+        16
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "237",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        9,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "238",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        5,
+        16
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "239",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        5
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "241",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        10,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 12.0,
+      "uid": "258",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        5,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": true,
+      "hp": 200.0,
+      "uid": "261",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        17
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "263",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        21,
+        17
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "264",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        18
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "265",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        21,
+        18
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "266",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        19,
+        18
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "267",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        23,
+        10
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "271",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        6,
+        10
+      ],
+      "type_idx": 2,
+      "upgraded": true,
+      "hp": 100.0,
+      "uid": "285",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        17,
+        20
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "287",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        18,
+        21
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "288",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        17,
+        21
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "289",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        17,
+        19
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "290",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        11,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "298",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        13,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "299",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": true,
+      "hp": 200.0,
+      "uid": "300",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        4,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": true,
+      "hp": 200.0,
+      "uid": "308",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        23,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": true,
+      "hp": 200.0,
+      "uid": "309",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        17,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "310",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "311",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        14,
+        17
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "312",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        22,
+        16
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "313",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        20,
+        17
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "314",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        18,
+        18
+      ],
+      "type_idx": 2,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "315",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        20,
+        16
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "316",
+      "player": 2,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        14,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "322",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        16,
+        12
+      ],
+      "type_idx": 0,
+      "upgraded": false,
+      "hp": 60.0,
+      "uid": "323",
+      "player": 1,
+      "turn_start_removal": null
+    },
+    {
+      "xy": [
+        23,
+        13
+      ],
+      "type_idx": 0,
+      "upgraded": true,
+      "hp": 200.0,
+      "uid": "324",
+      "player": 1,
+      "turn_start_removal": null
+    }
+  ],
+  "mobiles": [
+    {
+      "xy": [
+        13,
+        0
+      ],
+      "type_idx": 5,
+      "hp": 40.0,
+      "shield": 0.0,
+      "uid": "325",
+      "player": 1,
+      "spawn_xy": [
+        13,
+        0
+      ],
+      "target_edge": 0,
+      "steps_taken": 0,
+      "move_buildup": 0.0,
+      "last_move": 0,
+      "finished_navigating": false,
+      "reached_target": false,
+      "breached": false
+    },
+    {
+      "xy": [
+        13,
+        0
+      ],
+      "type_idx": 4,
+      "hp": 5.0,
+      "shield": 0.0,
+      "uid": "326",
+      "player": 1,
+      "spawn_xy": [
+        13,
+        0
+      ],
+      "target_edge": 0,
+      "steps_taken": 0,
+      "move_buildup": 0.0,
+      "last_move": 0,
+      "finished_navigating": false,
+      "reached_target": false,
+      "breached": false
+    },
+    {
+      "xy": [
+        13,
+        0
+      ],
+      "type_idx": 4,
+      "hp": 5.0,
+      "shield": 0.0,
+      "uid": "327",
+      "player": 1,
+      "spawn_xy": [
+        13,
+        0
+      ],
+      "target_edge": 0,
+      "steps_taken": 0,
+      "move_buildup": 0.0,
+      "last_move": 0,
+      "finished_navigating": false,
+      "reached_target": false,
+      "breached": false
+    },
+    {
+      "xy": [
+        13,
+        0
+      ],
+      "type_idx": 4,
+      "hp": 5.0,
+      "shield": 0.0,
+      "uid": "328",
+      "player": 1,
+      "spawn_xy": [
+        13,
+        0
+      ],
+      "target_edge": 0,
+      "steps_taken": 0,
+      "move_buildup": 0.0,
+      "last_move": 0,
+      "finished_navigating": false,
+      "reached_target": false,
+      "breached": false
+    },
+    {
+      "xy": [
+        13,
+        0
+      ],
+      "type_idx": 4,
+      "hp": 5.0,
+      "shield": 0.0,
+      "uid": "329",
+      "player": 1,
+      "spawn_xy": [
+        13,
+        0
+      ],
+      "target_edge": 0,
+      "steps_taken": 0,
+      "move_buildup": 0.0,
+      "last_move": 0,
+      "finished_navigating": false,
+      "reached_target": false,
+      "breached": false
+    }
+  ]
+}
