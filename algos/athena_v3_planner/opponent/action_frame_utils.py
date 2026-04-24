@@ -35,8 +35,9 @@ beyond a few small ints / tuples. Designed to run inside
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Deque, Dict, List, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -240,3 +241,90 @@ class SpawnXHistogram:
         # Drop columns with zero weight — those aren't peaks
         result = [int(x) for x in order[:top_k] if self.counts[int(x)] > 0.0]
         return result
+
+
+# ---------------------------------------------------------------------------
+# Task 3 — WallRemovalDetector
+# ---------------------------------------------------------------------------
+
+@dataclass
+class WallRemovalDetector:
+    """Tracks per-tile pending_removal flags on opponent structures.
+
+    The engine surfaces ``attempt_remove`` queue entries in the
+    ``pUnits[REMOVE_IDX]`` slot (index 6) of every action frame: each
+    list entry is ``[x, y, count_or_hp, unit_id]``. By scanning that
+    slot once per turn we can see which tiles the opponent intends to
+    vacate and therefore where they're likely to rebuild — useful for
+    predicting the next-turn defense layout.
+
+    Default sliding window: 5 turns. ``frequency(x, y)`` returns the
+    number of distinct turns within the window where that tile was
+    flagged for removal. ``hot_tiles(min_freq)`` returns tiles flagged
+    in at least N window turns, ordered by frequency.
+
+    Player_index flip: takes ``self_player_id`` (default 1, action-frame
+    convention) and reads the OPPONENT's units (p2Units when
+    self_player_id=1, p1Units when self_player_id=2).
+    """
+
+    self_player_id: int = 1
+    window_size: int = 5
+    # Deque of (turn_number, set_of_tiles_flagged_this_turn).
+    _window: Deque[Tuple[int, Set[Tuple[int, int]]]] = field(default_factory=deque)
+    _scanned_turns: Set[int] = field(default_factory=set)
+
+    def consume_action_frame(self, frame: Dict[str, Any]) -> None:
+        turn_info = frame.get("turnInfo")
+        if turn_info is None or not _is_first_action_frame(turn_info):
+            return
+        turn_number = int(turn_info[1])
+        if turn_number in self._scanned_turns:
+            return
+        self._scanned_turns.add(turn_number)
+
+        opp_units_key = "p2Units" if self.self_player_id == 1 else "p1Units"
+        opp_units = frame.get(opp_units_key)
+        flagged: Set[Tuple[int, int]] = set()
+        if isinstance(opp_units, list) and len(opp_units) > REMOVE_IDX:
+            removal_queue = opp_units[REMOVE_IDX] or []
+            for entry in removal_queue:
+                try:
+                    x = int(entry[0])
+                    y = int(entry[1])
+                except (IndexError, TypeError, ValueError):
+                    continue
+                flagged.add((x, y))
+
+        self._window.append((turn_number, flagged))
+        # Trim window
+        while len(self._window) > self.window_size:
+            self._window.popleft()
+
+    # -- queries --------------------------------------------------------
+
+    def frequency(self, x: int, y: int) -> int:
+        """Number of distinct turns within the window where (x, y) was flagged."""
+        return sum(1 for _, tiles in self._window if (x, y) in tiles)
+
+    def hot_tiles(self, min_freq: int = 2) -> List[Tuple[int, int]]:
+        """Tiles flagged in at least ``min_freq`` window turns, hottest first."""
+        accum: Dict[Tuple[int, int], int] = {}
+        for _, tiles in self._window:
+            for t in tiles:
+                accum[t] = accum.get(t, 0) + 1
+        # sort: highest freq first, then ascending x, ascending y
+        ranked = sorted(
+            (t for t, n in accum.items() if n >= min_freq),
+            key=lambda t: (-accum[t], t[0], t[1]),
+        )
+        return ranked
+
+    def latest_flagged(self) -> List[Tuple[int, int]]:
+        """Tiles flagged in the most recent observed turn (sorted)."""
+        if not self._window:
+            return []
+        return sorted(self._window[-1][1])
+
+    def n_turns_observed(self) -> int:
+        return len(self._window)
