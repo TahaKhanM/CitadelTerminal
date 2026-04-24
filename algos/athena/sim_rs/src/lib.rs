@@ -38,11 +38,9 @@ pub mod events;
 pub mod map;
 pub mod pathfinder;
 pub mod proximity;
+pub mod sim;
 pub mod state;
-
-// Systems + fast-mode frame loop are not yet ported; the scaffold keeps them
-// empty but already allocated so git history reveals the port's landing points.
-// See ATHENA_BUILD_PLAN.md § Phase 5 for the sequencing notes.
+pub mod systems;
 
 #[cfg(feature = "pyo3")]
 mod py_api {

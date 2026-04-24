@@ -101,6 +101,9 @@ class PathFinder:
         "_current_queue", "_frontier_queue", "_start_search_at",
         "_searched_best_idealness", "_searched_curr_pathlength",
         "board_invalid", "_requires_validation", "_possible_steps",
+        "_min_distance_scratch",  # P1 perf: pre-alloc scratch reused by
+                                  # _get_min_distance_from_idealness (135k
+                                  # calls/run — was 27M int allocs).
     )
 
     def __init__(
@@ -129,6 +132,10 @@ class PathFinder:
         self.board_invalid = True
         self._requires_validation = _CoordQueue()
         self._possible_steps = _CoordQueue()
+        # P1 perf: single scratch queue reused per _get_min_distance_from_idealness
+        # call. Was allocating a new _CoordQueue (200-int list) on every one of
+        # ~135k calls / run.
+        self._min_distance_scratch = _CoordQueue()
 
         # Pre-mark the 4 triangular corners as WALL (PathFinder.java:62-70)
         half = dimension // 2
@@ -202,8 +209,16 @@ class PathFinder:
             into.push(x, y)
 
     def _get_min_distance_from_idealness(self, idealness: int, x: int, y: int) -> int:
-        """PathFinder.java:223-241."""
-        targets = _CoordQueue()
+        """PathFinder.java:223-241.
+
+        Hot path: ~135k calls / full ranked run. Reuses the pre-allocated
+        `_min_distance_scratch` queue (drained up-front) rather than
+        allocating a new `_CoordQueue` (200-int list) per call — saves
+        ~27M int allocations per run. Semantically identical to the
+        Java source: the queue is re-pushed within the loop so the
+        post-loop state matches CoordQueue.java's FIFO-rotate behaviour."""
+        targets = self._min_distance_scratch
+        targets.drain()
         self._extract_idealness_coords(idealness, targets)
         best_distance = _INT_MAX
         num_targets = targets.size()
