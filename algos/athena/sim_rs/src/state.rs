@@ -202,11 +202,26 @@ pub struct Scratch {
     pub p1_struct_xys: Vec<(i32, i32)>,
     /// `system_attack`: player-2 owned structure xys.
     pub p2_struct_xys: Vec<(i32, i32)>,
+    /// `system_attack`: parallel IndexMap indices for `p1_struct_xys`
+    /// (`structures.get_index(p1_struct_idxs[k]) == structures.get(p1_struct_xys[k])`).
+    /// Populated at dirty-rebuild time and consumed to build
+    /// `turret_enemy_cands_flat` (which stores indices) — avoids the need
+    /// to re-hash `(x, y)` in the inner rebuild loop.
+    pub p1_struct_idxs: Vec<u32>,
+    /// `system_attack`: parallel IndexMap indices for `p2_struct_xys`.
+    pub p2_struct_idxs: Vec<u32>,
     /// `system_attack`: flat concatenated per-turret enemy-structure
-    /// candidates within range. Indexed by `TurretInfo.enemy_cand_{start,end}`.
+    /// candidate *IndexMap indices* (not xy) within range. Indexed by
+    /// `TurretInfo.enemy_cand_{start,end}`.
     /// Pre-filtered by Euclidean distance at rebuild time so `fire_one`'s
-    /// struct-targeting fallback skips the 54-tile distance scan.
-    pub turret_enemy_cands_flat: Vec<(i32, i32)>,
+    /// struct-targeting fallback skips the 54-tile distance scan AND the
+    /// per-candidate hash lookup.
+    ///
+    /// Invariant: the IndexMap indices here are ONLY valid between
+    /// dirty-rebuilds. Any structure add/remove sets `structures_dirty` and
+    /// forces a rebuild before the next read. See `system_attack` dirty
+    /// block and `clear_destroyed` / `system_remove_own_unit` dirty flips.
+    pub turret_enemy_cands_flat: Vec<u32>,
     /// Per-frame compact cache of live enemy mobile coords. `p1_live_mobs`
     /// holds player-1-owned live mobiles (attackable by p2 turrets), and
     /// vice versa. Rebuilt once per `system_attack` entry from `state.mobiles`
