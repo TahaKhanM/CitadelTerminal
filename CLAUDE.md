@@ -71,7 +71,7 @@ CitadelTerminal/
 | Starting resources | 8 SP, 1 MP, 40 HP |
 | Per-turn MP decay | 25 % (rounds to nearest 0.1) |
 | Per-turn base income | 4 SP + (1 + turn//5) MP |
-| Bonus SP | +1 per point of damage dealt to opponent HP last turn |
+| Bonus SP | +1 per mobile unit that breaches an opponent edge (engine: `metalForBreach=1` per Scout/Demolisher/Interceptor; `coresForPlayerDamage` is a legacy key absent from the live server config) |
 | Turn limit | 100 rounds, then highest HP wins |
 | Deploy time budget | 15 s before 1 dmg/sec penalty |
 

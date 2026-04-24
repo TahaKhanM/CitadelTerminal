@@ -27,11 +27,12 @@ Every turn has three phases in order: **Restore → Deploy → Action**.
 Happens at the start of every turn (except turn 0). Order of operations:
 
 1. **MP decay**: your stored MP from last turn is reduced by **25 %** (rounded to the nearest 0.1).
-2. **Base income**: you gain **+4 SP** and **+(1 + turn_number // 5) MP**.
-   - Turns 0-4: +1 MP/turn
-   - Turns 5-9: +2 MP/turn
-   - Turns 10-14: +3 MP/turn … and so on.
-3. **Damage bonus**: +1 SP per point of HP damage you dealt to your opponent last turn. (Strong snowball — scoring once is worth more than just the HP lead.)
+2. **Base income**: you gain **+4 SP** and a turn-indexed MP amount. Engine formula (`GameMain.calculateFoodGivenForTurn`): if `turn + 1 < roundStartBitRamp` (=5) then `MP = bitsPerRound` (=1); otherwise `MP = bitsPerRound + ((turn + 1 − roundStartBitRamp) / turnIntervalForBitSchedule + 1) × bitGrowthRate`. With live values `bitsPerRound=1`, `roundStartBitRamp=5`, `turnIntervalForBitSchedule=5`, `bitGrowthRate=1`:
+   - Turns 0–3: +1 MP/turn
+   - Turns 4–8: +2 MP/turn
+   - Turns 9–13: +3 MP/turn
+   - Turns 14–18: +4 MP/turn … and so on. (Buckets shift one turn earlier than the old "1 + turn//5" approximation — don't use that.)
+3. **Breach bonus** (`metalForBreach`): +1 SP **per mobile unit that breached the opponent's edge this past action phase** — NOT per HP dealt. There is no `coresForPlayerDamage` rule in the live server config; `BreachSystem.java:27` adds `metalForBreach` (=1) per breacher immediately at breach time. Numerically the same as "+1 SP per HP" today (because `playerBreachDamage=1` for all three mobiles), but the mechanism is breach-based.
 4. **Resource-generating structures**: any Supports with resource-generation upgrade would produce here. *In the current competition config, Supports do not generate resources — they only shield.* The starter-kit config shows a `generatesResource2: 2` for upgraded Support, which is **stale/old-season** metadata, ignore it.
 
 ### 3.2 Deploy phase
@@ -56,30 +57,34 @@ During Deploy you can:
 
 ### 3.3 Action phase
 
-The engine resolves the turn in **discrete frames** until every mobile unit has either reached the opposite edge or been destroyed. Each frame, in order:
+The engine resolves the turn in **discrete frames** until every mobile unit has either reached the opposite edge or been destroyed. Each frame runs eight systems in this exact order (`Game.java:167-182` `gameEngineLoop`):
 
-1. **Shielding**: every Support grants shield to any friendly mobile unit that just entered its range AND has not already been shielded by that specific Support.
-2. **Movement**: every mobile unit whose frame count matches its speed threshold attempts to step. A unit with no legal move (path totally blocked) self-destructs (rules in §5).
-3. **Attack**: every unit with damage rolls targeting logic (§4) and deals damage to exactly one target.
-4. **Cleanup**: units whose HP ≤ 0 are removed.
+1. **Movement** (`NavigateToEdgeSystem`): every mobile unit whose frame count matches its speed threshold attempts to step.
+2. **Collision** (`CollisionSystem`): mobiles colocated on the same tile register collision pairs.
+3. **Shield decay** (`ShieldSystem.processShieldDecay`): any per-turn shield decay applied.
+4. **Shield give** (`ShieldSystem.processShieldGiveSystem`): every Support grants shield to any friendly mobile unit that just entered its range AND has not already been shielded by that specific Support.
+5. **Breach** (`BreachSystem`): every mobile with `finished_navigating && reached_target` scores `-1` on opponent HP and `+metalForBreach` for the breacher's owner.
+6. **Self-destruct** (`SelfDestructSystem`): every mobile with `finished_navigating && !reached_target && stepsTaken >= minimumSteps` detonates (§5.2).
+7. **Attack** (`TargetAndAttackSystem`): every damaging unit picks one target via the targeting cascade (§4) and deals one attack.
+8. **Cleanup**: units whose HP ≤ the float32 death threshold (0.001 f) are removed from `gameObjects`.
 
 **Mobile-unit speed** is *frames per tile*: Scout moves once every 1 frame, Demolisher once every 2 frames, Interceptor once every 4 frames. (The `unit.speed` field in `game-configs.json` is the *inverse* — `1/framesPerTile` — so Scout speed=1, Demolisher=0.5, Interceptor=0.25.)
 
 **Scoring**: when a mobile unit reaches the opposite edge it:
-- Reduces opponent HP by **1**.
-- Grants you **+1 SP** in your next Restore phase (this stacks with the damage-bonus SP).
+- Reduces opponent HP by `playerBreachDamage` (=1).
+- Grants the breacher's owner **+1 SP** immediately via `BreachSystem.addToMetal(metalForBreach)` — this is the same "bonus SP" mechanic referenced in §3.1 step 3, NOT a separate next-turn payout.
 - Disappears from the arena.
 
 ## 4. Targeting logic
 
 All units (structures AND mobiles) that deal damage share the same target-selection rules. Each frame, a unit's list of candidate targets starts as *every enemy unit in range*, then is filtered in priority order until one remains:
 
-1. **Prefer mobile units over structures.** A Turret with any mobile enemy in range never targets a structure; a mobile unit that can also hit structures prefers the mobile ones too. (Scouts/Demolishers can hit both; Interceptors CANNOT damage structures at all.)
-2. **Nearest target.** Euclidean distance.
-3. **Lowest remaining HP.**
-4. **Furthest into your own half** (deepest Y toward your side; attackers pick defenders that have advanced the most).
-5. **Closest to an edge** (larger `|x − 13.5|`).
-6. **Fallback**: most recently created unit.
+1. **Prefer mobile units over structures** (walker priority). An attacker only considers structures if no walker is in range or the walker set yielded no damageable target. (Scouts/Demolishers can hit both; Interceptors pick *any* target but deal 0 damage to structures.)
+2. **Nearest target.** Minimum Euclidean distance.
+3. **Lowest (current HP + shield HP).** (Engine: `getCurrentHP() + getShieldHP()` — not raw HP.)
+4. **Closest to the attacker's own edge.** The engine minimizes `|target.y − attackerStartY|` where `attackerStartY = 0` for player-0 attackers and `28` for player-1. A player-0 turret therefore keeps candidates with the SMALLEST `y` — opposite of "deepest into your half" framing.
+5. **Farthest from the centerline** (larger `|x − 13.5|`).
+6. **Largest integer-parsed gid** (`Integer.parseInt(uid)`): usually, but not strictly, the most recently created unit — gids monotonically increase across the match so the later spawn almost always wins, but the comparison is strictly on the uid value.
 
 Each unit deals damage **at most once per frame**. "Overkill" damage is discarded — a 5-HP unit taking 8 damage does not let the 3 extra damage carry over to another unit.
 

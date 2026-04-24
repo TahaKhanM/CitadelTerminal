@@ -49,8 +49,7 @@ Fast-lookup skill for competition rules, unit stats, API signatures, and formula
 
 - Start: 8 SP, 1 MP, 40 HP
 - Per-turn income: +4 SP, +(1 + turn//5) MP
-- Damage bonus: +1 SP per HP damage dealt last turn
-- Scoring bonus: +1 SP per unit that breached enemy edge
+- Breach bonus: +1 SP per mobile unit that breaches enemy edge (`metalForBreach=1`). There is NO separate "damage dealt" SP bonus — `coresForPlayerDamage` is a legacy key absent from the live server config.
 - MP decay: 25 %/turn, rounded to 0.1
 - Turn limit: 100 rounds
 - Deploy time: 15 s, then 1 dmg/sec penalty
