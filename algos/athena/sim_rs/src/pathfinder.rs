@@ -658,6 +658,38 @@ impl PathFinder {
         }
     }
 
+    /// Eagerly populate `step_cache` for every on-arena non-wall (x, y, d)
+    /// triple. One-time O(n² × 3 × BFS) cost amortised across every bench iter
+    /// that clones this pathfinder. A clone inherits the populated cache, so
+    /// subsequent sims spend ~4 ns per get_step (cache hit) instead of ~900 ns
+    /// (full BFS).
+    ///
+    /// WARNING: MUST skip cells where `status == STATUS_WALL`. Calling
+    /// `get_step` on a wall cell corrupts pathfinder state: `validate_rv`
+    /// invokes `idealness_search` on the wall target, which treats it as a
+    /// tiebreak candidate (`start_search_at.push(x, y)` with idealness=0) and
+    /// the outer BFS then overwrites the wall cell's `status` to OPEN and its
+    /// `pathlength` to 0. Because `self.index(oob, oob) == 0` clamps off-arena
+    /// queries to the (0, 0) corner, a downstream query on an OOB neighbor
+    /// sees the just-corrupted (0, 0) = OPEN with pathlength 0, and filter #4
+    /// gleefully picks it — resulting in paths that step off the arena.
+    /// Observed empirically: scouts at (13, 0) would receive `(13, -1)` as
+    /// their next tile and walk off-board. See examples/cache_stats.rs for
+    /// the minimal repro that drove this safeguard.
+    pub fn prewarm_step_cache(&mut self) {
+        for y in 0..self.dimension {
+            for x in 0..self.dimension {
+                let idx = (y * self.dimension + x) as usize;
+                if self.status[idx] == STATUS_WALL {
+                    continue;
+                }
+                for d in 0..3u8 {
+                    let _ = self.get_step(x, y, d);
+                }
+            }
+        }
+    }
+
     // ----------------------------------------------------- public: query + step
 
     /// PathFinder.java:345-412.
