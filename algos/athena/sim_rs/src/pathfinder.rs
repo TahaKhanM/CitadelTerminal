@@ -575,6 +575,7 @@ impl PathFinder {
     /// in-place, re-validating any INVALID tiles along with the seed cells
     /// produced by `idealness_search`. Takes the queue by swap (not move)
     /// so `get_step` can reuse the single scratch allocation.
+    #[inline]
     fn validate_rv(&mut self) {
         // Pop one target at a time; `requires_validation` is the queue
         // populated by `get_step`. Invariant: caller has already populated
@@ -649,6 +650,7 @@ impl PathFinder {
     /// allocated 5-slot `InlineStepList` instead of the CoordQueue because
     /// possible_steps has at most 5 entries (self + 4 neighbors) — the ring
     /// buffer has modulo and bounds-check overhead we pay for no reason.
+    #[inline]
     pub fn get_step(&mut self, unit_x: i32, unit_y: i32, prev_direction: u8) -> (i32, i32) {
         // Build possible_steps inline — at most 5 entries (self + 4 neighbors).
         let mut ps: [(i32, i32); 5] = [(unit_x, unit_y); 5];
