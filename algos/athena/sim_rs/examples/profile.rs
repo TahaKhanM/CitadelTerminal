@@ -92,7 +92,8 @@ fn build_state_fixture() -> SimState {
 
 fn main() {
     let cfg = SimConfig::load(&snapshot_path()).expect("config load");
-    let template = build_state_fixture();
+    let mut template = build_state_fixture();
+    sim_rs::systems::ensure_pathfinders(&mut template);
 
     const N: u32 = 1000;
     let mut acc = [0u128; 9];

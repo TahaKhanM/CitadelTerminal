@@ -136,7 +136,10 @@ fn throughput_bench(c: &mut Criterion) {
 
     // Toy fixture — retained for baseline comparability.
     {
-        let template = build_state_toy();
+        let mut template = build_state_toy();
+        // Pre-warm pathfinders once — shared via clone() across bench iters,
+        // matching the PyO3 batch-API usage pattern.
+        sim_rs::systems::ensure_pathfinders(&mut template);
         let mut group = c.benchmark_group("simulate_action_phase");
         group.throughput(Throughput::Elements(1));
         group.bench_function("3_mob_5_struct", |b| {
@@ -152,7 +155,8 @@ fn throughput_bench(c: &mut Criterion) {
 
     // Realistic mid-game fixture — primary metric for the 25K target.
     {
-        let template = build_state_fixture();
+        let mut template = build_state_fixture();
+        sim_rs::systems::ensure_pathfinders(&mut template);
         let mut group = c.benchmark_group("simulate_action_phase");
         group.throughput(Throughput::Elements(1));
         group.bench_function("mid_game_108_struct_5_mob", |b| {
