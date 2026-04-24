@@ -36,6 +36,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sim.config import (  # noqa: E402
@@ -50,6 +52,27 @@ from sim.pysim import (  # noqa: E402
     simulate_action_phase_iter,
 )
 from sim.state import PlayerStats, SimState, Structure  # noqa: E402
+
+
+# Replay HP/shield/damage/SP/MP values parse from JSON as Python doubles,
+# but engine emits them as Java 32-bit floats — the string "10.799999" in
+# the replay wire format represents a float32 bit pattern whose exact
+# double is 10.799999237060547, not 10.799999 (which is a different
+# double). SimCore stores everything as np.float32 (see config.FP32 and
+# state.py notes); to compare, the validator quantizes replay float
+# slots through np.float32 so both sides align on the float32 bit
+# pattern. UIDs are Java long (cast to string here) and coordinates are
+# int — those bypass this coercion entirely.
+def _fp32_slots(entry: list, positions: Tuple[int, ...]) -> list:
+    """Return a copy of `entry` with the given positions re-quantized
+    through numpy.float32. No-op on positions outside the entry length."""
+    if not isinstance(entry, (list, tuple)):
+        return entry
+    out = list(entry)
+    for i in positions:
+        if 0 <= i < len(out) and out[i] is not None:
+            out[i] = np.float32(out[i])
+    return out
 
 
 # ---------------------------------------------------------------- loaders
@@ -133,11 +156,13 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
     _snapshot_units iteration → per-type bucket emission order."""
     p1 = df.get("p1Stats") or [40, 8, 1, 0]
     p2 = df.get("p2Stats") or [40, 8, 1, 0]
+    # PlayerStats fields are np.float32 throughout the action phase; cast
+    # at load so subsequent arithmetic stays in float32 (Cluster I).
     state = SimState(
         turn=int(df.get("turnInfo", [0, 0])[1] if df.get("turnInfo") else 0),
         structures={}, mobiles=[],
-        p1=PlayerStats(hp=float(p1[0]), sp=float(p1[1]), mp=float(p1[2])),
-        p2=PlayerStats(hp=float(p2[0]), sp=float(p2[1]), mp=float(p2[2])),
+        p1=PlayerStats(hp=np.float32(p1[0]), sp=np.float32(p1[1]), mp=np.float32(p1[2])),
+        p2=PlayerStats(hp=np.float32(p2[0]), sp=np.float32(p2[1]), mp=np.float32(p2[2])),
     )
     all_structures: List[Structure] = []
     for player, key in ((1, "p1Units"), (2, "p2Units")):
@@ -149,7 +174,7 @@ def _build_state_from_deploy_frame(df: dict, config: SimConfig,
                 if not isinstance(u, (list, tuple)) or len(u) < 4:
                     continue
                 x, y = int(u[0]), int(u[1])
-                hp = float(u[2])
+                hp = np.float32(u[2])  # Structure.hp stored as np.float32 (Cluster I)
                 uid = str(u[3])
                 base_spec = config.structure_spec(type_idx, upgraded=False)
                 if upgraded_uids is not None:
@@ -445,52 +470,115 @@ class FrameDiff:
     mismatches: Dict[str, Tuple[Any, Any]] = field(default_factory=dict)
 
 
+# Per-bucket float-slot positions for float32-aware comparison.
+# Cluster I: engine stores HP/damage/shield-amount as Java 32-bit floats;
+# replay JSON round-trips them as Python doubles whose bit patterns don't
+# exactly match sim's np.float32. Quantizing both sides through np.float32
+# at compare time aligns the bit representation. Positions NOT listed are
+# integer (uid, typeID, srcPID, coords) or boolean (removed flag) — those
+# bypass coercion.
+_EVENT_FLOAT_SLOTS: Dict[str, Tuple[int, ...]] = {
+    "attack": (2,),        # [[src], [tgt], DMG, typeID, src_uid, tgt_uid, pid]
+    "breach": (1,),        # [[xy], DMG, typeID, uid, pid]
+    "damage": (1,),        # [[xy], DMG, typeID, uid, pid]
+    "selfDestruct": (2,),  # [[src], [targets], DMG, typeID, uid, pid]
+    "shield": (2,),        # [[src], [tgt], AMOUNT, typeID, src_uid, tgt_uid, pid]
+    # death/move/spawn/melee have no float slots.
+}
+_UNIT_FLOAT_SLOTS = (2,)   # [x, y, HP(+shield), uid]
+
+
+def _normalize_units(entries: list) -> list:
+    return [_fp32_slots(e, _UNIT_FLOAT_SLOTS) for e in entries]
+
+
+def _normalize_events(entries: list, bucket: str) -> list:
+    slots = _EVENT_FLOAT_SLOTS.get(bucket)
+    if not slots:
+        return list(entries)
+    return [_fp32_slots(e, slots) for e in entries]
+
+
+def _cmp_unit_lists(sv: list, rv: list) -> bool:
+    """True iff lists of unit entries match. Fast-path: raw == first;
+    if that fails, re-compare after quantizing HP slots through np.float32.
+    For integer-valued HPs the raw compare succeeds (exact representation
+    in both dtypes); for fractional HPs sim np.float32 and rep Python-float
+    differ at double precision but agree at float32 — the normalized pass
+    catches those."""
+    if sv == rv:
+        return True
+    return _normalize_units(sv) == _normalize_units(rv)
+
+
+def _cmp_event_lists(sv: list, rv: list, bucket: str) -> bool:
+    if sv == rv:
+        return True
+    return _normalize_events(sv, bucket) == _normalize_events(rv, bucket)
+
+
+def _cmp_stat(sv, rv) -> bool:
+    """Stat scalar equality with float32 fallback."""
+    if sv == rv:
+        return True
+    if sv is None or rv is None:
+        return False
+    return np.float32(sv) == np.float32(rv)
+
+
 def _diff_frame(sim_frame: dict, rep_frame: dict) -> Dict[str, Tuple[Any, Any]]:
     """Return {col: (sim_val, replay_val)} for every non-matching column.
 
-    Raw list equality — both sim and replay use the same list-of-list shapes
-    for units/events, so no normalization is needed. Float precision isn't a
-    concern for whole-number stats; noise in dmg/shield would be a genuine
-    divergence worth surfacing."""
+    Two-pass comparison: raw == first (common case — integer-valued HPs
+    and matching ordered events pass without allocation), then float32-
+    normalized compare on raw-fail (quantizes HP/shield/damage slots on
+    both sides so sim's np.float32 bit pattern aligns with replay's JSON-
+    double decoding). Engine's Java-float 32-bit arithmetic is ground
+    truth; replay JSON decimals ("10.799999") round-trip to Python
+    doubles whose bit patterns drift from the underlying float32 by
+    ~1e-7.
+
+    Float-slot positions per bucket in _EVENT_FLOAT_SLOTS /
+    _UNIT_FLOAT_SLOTS; non-float slots (uids, coords, PIDs, removed flag)
+    bypass coercion."""
     out: Dict[str, Tuple[Any, Any]] = {}
 
     # --- stats (6) ---
     s1 = sim_frame["p1Stats"]; r1 = rep_frame["p1Stats"]
     s2 = sim_frame["p2Stats"]; r2 = rep_frame["p2Stats"]
-    if s1[0] != r1[0]: out["p1_hp"] = (s1[0], r1[0])
-    if s2[0] != r2[0]: out["p2_hp"] = (s2[0], r2[0])
-    if s1[1] != r1[1]: out["p1_sp"] = (s1[1], r1[1])
-    if s2[1] != r2[1]: out["p2_sp"] = (s2[1], r2[1])
-    if s1[2] != r1[2]: out["p1_mp"] = (s1[2], r1[2])
-    if s2[2] != r2[2]: out["p2_mp"] = (s2[2], r2[2])
+    for col, ply_pair, idx in (
+        ("p1_hp", (s1, r1), 0), ("p2_hp", (s2, r2), 0),
+        ("p1_sp", (s1, r1), 1), ("p2_sp", (s2, r2), 1),
+        ("p1_mp", (s1, r1), 2), ("p2_mp", (s2, r2), 2),
+    ):
+        sv_raw = ply_pair[0][idx]
+        rv_raw = ply_pair[1][idx]
+        if not _cmp_stat(sv_raw, rv_raw):
+            out[col] = (sv_raw, rv_raw)
 
     # --- unit buckets (8) ---
     for ply in (1, 2):
-        sv = _structures_raw(sim_frame, ply)
-        rv = _structures_raw(rep_frame, ply)
-        if sv != rv:
+        sv = _structures_raw(sim_frame, ply); rv = _structures_raw(rep_frame, ply)
+        if not _cmp_unit_lists(sv, rv):
             out[f"p{ply}_structures"] = (sv, rv)
-        sv = _mobiles_raw(sim_frame, ply)
-        rv = _mobiles_raw(rep_frame, ply)
-        if sv != rv:
+        sv = _mobiles_raw(sim_frame, ply); rv = _mobiles_raw(rep_frame, ply)
+        if not _cmp_unit_lists(sv, rv):
             out[f"p{ply}_mobiles"] = (sv, rv)
-        sv = _units_raw(sim_frame, ply, 6)
-        rv = _units_raw(rep_frame, ply, 6)
-        if sv != rv:
+        sv = _units_raw(sim_frame, ply, 6); rv = _units_raw(rep_frame, ply, 6)
+        if not _cmp_unit_lists(sv, rv):
             out[f"p{ply}_removal_pseudo"] = (sv, rv)
-        sv = _units_raw(sim_frame, ply, 7)
-        rv = _units_raw(rep_frame, ply, 7)
-        if sv != rv:
+        sv = _units_raw(sim_frame, ply, 7); rv = _units_raw(rep_frame, ply, 7)
+        if not _cmp_unit_lists(sv, rv):
             out[f"p{ply}_upgrade_pseudo"] = (sv, rv)
 
-    # --- events (9) — ORDER-SENSITIVE, per user guidance ---
+    # --- events (9) — ORDER-SENSITIVE ---
     sim_ev = sim_frame.get("events") or {}
     rep_ev = rep_frame.get("events") or {}
     for bucket in ("attack", "breach", "damage", "death", "melee", "move",
                    "selfDestruct", "shield", "spawn"):
         sv = sim_ev.get(bucket) or []
         rv = rep_ev.get(bucket) or []
-        if sv != rv:
+        if not _cmp_event_lists(sv, rv, bucket):
             out[f"event_{bucket}"] = (sv, rv)
 
     return out

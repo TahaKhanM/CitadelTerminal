@@ -34,6 +34,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple  # noqa: F401
 
+import numpy as np
+
 from .config import (
     IDX_DEMOLISHER,
     IDX_INTERCEPTOR,
@@ -72,14 +74,40 @@ from .state import (
 
 _MOVE_THRESHOLD = 0.9999  # engine's accumulator threshold
 
+# Float32 scaffolding (Cluster I). See config.py FP32 note. Pre-computed
+# float32 literals so hot-path expressions don't accidentally upcast via
+# a bare Python float (13.5, 0.1, 0.0, etc.). Mixing np.float32 with a
+# Python float silently widens to float64 — ONE stray literal in a chain
+# of ops defeats the round-trip.
+FP32 = np.float32
+_F32_ZERO = FP32(0.0)
+_F32_TEN = FP32(10.0)
+_F32_ONE_TENTH = FP32(0.1)
+_F32_13_5 = FP32(13.5)
+_F32_DEATH_EPS = FP32(0.001)  # HealthComponent.java:75/83 "<= 0.001f" gate
 
-def _round01(x: float) -> float:
+
+def _round01(x) -> np.float32:
     """Mirror engine's PlayerStats.roundDecimals (PlayerStats.java:151-153):
-    round(x * 10) / 10 — snap to nearest 0.1. Engine applies this after
-    every addToMetal/addToFood, so persistent SP/MP values never carry
-    float-precision noise. SimCore mirrors exactly at every SP/MP
-    mutation site."""
-    return round(x * 10.0) / 10.0
+    `(float)Math.round(inp * 10.0f) / 10.0f` — snap to nearest 0.1, all
+    arithmetic in 32-bit float.
+
+    Engine applies this after every addToMetal/addToFood, so persistent
+    SP/MP values never carry float-precision noise. SimCore mirrors
+    exactly at every SP/MP mutation site (apply_deploy_actions,
+    system_breach refund, system_remove_own_unit refund).
+
+    Returns np.float32. Accepts float / int / np.float32 inputs; the
+    np.float32 cast on the input is defensive — the multiply would
+    upcast to float64 if one operand were a Python float."""
+    x32 = FP32(x)
+    # Python's round() returns int for integer-valued floats; int / float32
+    # → float32 (numpy preserves the float32 dtype on mixed scalar ops).
+    # Engine uses Math.round(float)→long; semantics match for non-halfway
+    # values. (Half-way: Java rounds half-up; Python rounds half-to-even.
+    # SP/MP deductions are whole numbers × 10 ∈ integers, so no halfway
+    # inputs land on the rounding boundary in practice.)
+    return FP32(round(float(x32 * _F32_TEN))) / _F32_TEN
 
 
 def _is_structure(type_idx: int) -> bool:
@@ -260,7 +288,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
                 target_edge = spawn_tile_target_edge(xy)
                 state.mobiles.append(Mobile(
                     xy=xy, type_idx=tidx,
-                    hp=spec.hp, shield=0.0,
+                    hp=spec.hp, shield=_F32_ZERO,
                     uid=uid, player=player,
                     spawn_xy=xy, target_edge=target_edge,
                 ))
@@ -360,7 +388,7 @@ def apply_deploy_actions(state: SimState, config: SimConfig,
             target_edge = spawn_tile_target_edge((x, y))
             state.mobiles.append(Mobile(
                 xy=(x, y), type_idx=tidx,
-                hp=spec.hp, shield=0.0,
+                hp=spec.hp, shield=_F32_ZERO,
                 uid=uid, player=player,
                 spawn_xy=(x, y), target_edge=target_edge,
             ))
@@ -454,7 +482,14 @@ def system_shield_give(state: SimState, config: SimConfig, events: List[dict]) -
             continue
         r = spec.shield_range
         y = s.xy[1]
-        shield_amount = spec.shield_per_unit + (13.5 - abs(13.5 - y)) * spec.shield_bonus_per_y
+        # y is int; (13.5 - abs(13.5 - y)) is a constant in Python double
+        # space. We collapse it to float32 BEFORE multiplying by the
+        # float32 spec.shield_bonus_per_y and adding to float32
+        # spec.shield_per_unit so the whole expression stays in float32.
+        # Engine's ShieldSystem.java:32-33 does this in one Java-float
+        # expression end-to-end; SimCore mirrors.
+        y_factor = FP32(_F32_13_5 - FP32(abs(13.5 - y)))
+        shield_amount = spec.shield_per_unit + y_factor * spec.shield_bonus_per_y
         for m in state.mobiles:
             if m.hp <= 0 or m.player != s.player:
                 continue
@@ -462,7 +497,7 @@ def system_shield_give(state: SimState, config: SimConfig, events: List[dict]) -
                 continue
             if _distance(s.xy, m.xy) > r + 1e-9:
                 continue
-            m.shield += shield_amount
+            m.shield = m.shield + shield_amount  # both FP32, stays FP32
             s.shielded_already.add(m.uid)
             events.append({"type": "shield", "support_uid": s.uid,
                            "target_uid": m.uid, "amount": shield_amount})
@@ -486,7 +521,9 @@ def system_breach(state: SimState, config: SimConfig, events: List[dict]) -> Non
             continue
         spec = config.mobile_spec(m.type_idx)
         enemy = state.player_stats(state.enemy_player(m.player))
-        enemy.hp -= spec.breach_damage
+        # Engine: PlayerStats.dealDamage subtracts damage from totalHP
+        # (Java float). SimCore keeps the same float32 precision.
+        enemy.hp = FP32(enemy.hp - spec.breach_damage)
         own = state.player_stats(m.player)
         # Engine: PlayerStats.addToMetal(metalForBreach) applies
         # roundDecimals after the add, so SP stays snapped to 0.1.
@@ -502,15 +539,20 @@ def system_breach(state: SimState, config: SimConfig, events: List[dict]) -> Non
         # breachers (they have hp=0 like SDers + attack-killed mobiles
         # but should NOT fire, unlike the other two).
         m.breached = True
-        m.hp = 0  # destroyed on same frame; clear_destroyed pops before yield
+        m.hp = _F32_ZERO  # destroyed on same frame; clear_destroyed pops before yield
 
 
-def _apply_damage(target_hp: float, target_shield: float,
-                   dmg: float) -> Tuple[float, float, bool]:
+def _apply_damage(target_hp, target_shield, dmg) -> Tuple[np.float32, np.float32, bool]:
     """Engine damage flow — port of HealthComponent.dealDamageToHealthComponent
     (HealthComponent.java:62-89).
 
-    Returns (new_hp, new_shield, died).
+    Returns (new_hp: float32, new_shield: float32, died: bool).
+
+    All arithmetic operates in np.float32 to match engine's Java-float
+    precision exactly. Inputs are cast defensively at the boundary —
+    callers pass np.float32 state fields and np.float32 config damage
+    values, but a stray Python float literal (e.g. the 0.0 shield arg
+    for structure hits) would upcast the whole expression.
 
     Death semantics: `died` is True ONLY on the first alive→dead transition,
     per engine's `currentHP <= 0.001f && oldHP > 0.0f` gate. Subsequent
@@ -521,14 +563,17 @@ def _apply_damage(target_hp: float, target_shield: float,
     shields and no HP loss or death occurs. If shield is less than dmg,
     the shield is wiped and the remainder hits HP, gated by the death
     check above."""
-    if dmg <= 0:
-        return target_hp, target_shield, False
-    old_hp = target_hp
-    if target_shield >= dmg:
-        return target_hp, target_shield - dmg, False
-    new_hp = target_hp - (dmg - target_shield)
-    died = (new_hp <= 0.001 and old_hp > 0.0)
-    return new_hp, 0.0, died
+    hp32 = FP32(target_hp)
+    sh32 = FP32(target_shield)
+    d32 = FP32(dmg)
+    if d32 <= _F32_ZERO:
+        return hp32, sh32, False
+    old_hp = hp32
+    if sh32 >= d32:
+        return hp32, sh32 - d32, False
+    new_hp = hp32 - (d32 - sh32)
+    died = bool(new_hp <= _F32_DEATH_EPS and old_hp > _F32_ZERO)
+    return new_hp, _F32_ZERO, died
 
 
 def system_self_destruct(state: SimState, config: SimConfig, events: List[dict]) -> None:
@@ -604,7 +649,9 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
                     continue
                 if _distance(m.xy, s.xy) > r + 1e-9:
                     continue
-                new_hp, _sh, died = _apply_damage(s.hp, 0.0, dmg_tower)
+                # Structures have no shield. Use _F32_ZERO not bare 0.0 to
+                # prevent _apply_damage upcasting on a Python-float literal.
+                new_hp, _sh, died = _apply_damage(s.hp, _F32_ZERO, dmg_tower)
                 s.hp = new_hp
                 tower_locs.append(s.xy)
                 events.append({"type": "damage", "xy": s.xy, "dmg": dmg_tower,
@@ -645,7 +692,7 @@ def system_self_destruct(state: SimState, config: SimConfig, events: List[dict])
         events.append({"type": "death", "xy": m.xy, "uid": m.uid,
                        "type_idx": m.type_idx, "player": m.player,
                        "removed": False})
-        m.hp = 0
+        m.hp = _F32_ZERO
 
 
 def _pick_target(attacker_xy: Tuple[int, int], attacker_player: int,
@@ -819,7 +866,8 @@ def system_attack(state: SimState, config: SimConfig, events: List[dict]) -> Non
             target.hp, target.shield = new_hp, new_sh
         else:
             dmg = dmg_tower
-            new_hp, _sh, died = _apply_damage(target.hp, 0.0, dmg)
+            # Structures have no shield — pass _F32_ZERO.
+            new_hp, _sh, died = _apply_damage(target.hp, _F32_ZERO, dmg)
             target.hp = new_hp
         events.append({"type": "attack", "attacker_uid": att_uid,
                        "victim_uid": target.uid, "dmg": dmg,
@@ -890,8 +938,11 @@ def system_remove_own_unit(state: SimState, config: SimConfig,
         # spawnComponent.costMetal = base + upgrade bump (see
         # SpawnUnitsSystem.java:154). For a base structure, total = base.
         # For an upgraded structure, total = base.cost + upgrade.cost.
-        total_cost = base_spec.cost_sp + (spec.cost_sp if s.upgraded else 0.0)
-        hp_pct = s.hp / spec.hp if spec.hp > 0 else 0.0
+        # All operands are float32 (spec.cost_sp and _F32_ZERO); the
+        # ternary selects between two float32 values so the sum stays
+        # float32.
+        total_cost = base_spec.cost_sp + (spec.cost_sp if s.upgraded else _F32_ZERO)
+        hp_pct = s.hp / spec.hp if spec.hp > _F32_ZERO else _F32_ZERO
         refund_metal = total_cost * hp_pct * spec.refund_pct
         placer = state.p1 if s.player == 1 else state.p2
         placer.sp = _round01(placer.sp + refund_metal)

@@ -25,6 +25,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import numpy as np
+
+# Every HP/shield/damage/cost/refund/range/speed/resource float in the
+# engine is a Java 32-bit float. SimCore stores them as numpy.float32 end
+# to end — Python's default float is a 64-bit double, and mixing them
+# silently re-widens intermediate results. See algos/athena/sim/tests/
+# test_float32_propagation.py for the invariants that guard this.
+FP32 = np.float32
+
 # Shorthand constants — MATCH the engine's on-wire values. Athena code that
 # compares unit_type strings must use these, never the doc-level rename.
 SH_WALL = "FF"
@@ -171,34 +180,34 @@ class Resources:
 
 def _struct_spec_from(cfg: Dict[str, Any]) -> StructureSpec:
     return StructureSpec(
-        hp=float(cfg["start_health"]),
-        cost_sp=float(cfg["metal_cost"]),
-        refund_pct=float(cfg["refund_percentage"]),
+        hp=FP32(cfg["start_health"]),
+        cost_sp=FP32(cfg["metal_cost"]),
+        refund_pct=FP32(cfg["refund_percentage"]),
         turns_required_to_remove=int(cfg["turns_required_to_remove"]),
-        attack_range=float(cfg["attack_range"]),
-        attack_damage_walker=float(cfg["attack_damage_walker"]),
-        attack_damage_tower=float(cfg["attack_damage_tower"]),
-        shield_range=float(cfg["shield_range"]),
-        shield_per_unit=float(cfg["shield_per_unit"]),
-        shield_bonus_per_y=float(cfg["shield_bonus_per_y"]),
-        shield_decay=float(cfg["shield_decay"]),
+        attack_range=FP32(cfg["attack_range"]),
+        attack_damage_walker=FP32(cfg["attack_damage_walker"]),
+        attack_damage_tower=FP32(cfg["attack_damage_tower"]),
+        shield_range=FP32(cfg["shield_range"]),
+        shield_per_unit=FP32(cfg["shield_per_unit"]),
+        shield_bonus_per_y=FP32(cfg["shield_bonus_per_y"]),
+        shield_decay=FP32(cfg["shield_decay"]),
     )
 
 
 def _mobile_spec_from(cfg: Dict[str, Any]) -> MobileSpec:
     return MobileSpec(
-        hp=float(cfg["start_health"]),
-        cost_mp=float(cfg["food_cost"]),
-        attack_range=float(cfg["attack_range"]),
-        attack_damage_walker=float(cfg["attack_damage_walker"]),
-        attack_damage_tower=float(cfg["attack_damage_tower"]),
-        speed=float(cfg["speed"]),
-        self_destruct_range=float(cfg["self_destruct_range"]),
-        self_destruct_damage_walker=float(cfg["self_destruct_damage_walker"]),
-        self_destruct_damage_tower=float(cfg["self_destruct_damage_tower"]),
+        hp=FP32(cfg["start_health"]),
+        cost_mp=FP32(cfg["food_cost"]),
+        attack_range=FP32(cfg["attack_range"]),
+        attack_damage_walker=FP32(cfg["attack_damage_walker"]),
+        attack_damage_tower=FP32(cfg["attack_damage_tower"]),
+        speed=FP32(cfg["speed"]),
+        self_destruct_range=FP32(cfg["self_destruct_range"]),
+        self_destruct_damage_walker=FP32(cfg["self_destruct_damage_walker"]),
+        self_destruct_damage_tower=FP32(cfg["self_destruct_damage_tower"]),
         self_destruct_steps_required=int(cfg["self_destruct_steps_required"]),
-        breach_damage=float(cfg["player_breach_damage"]),
-        metal_for_breach=float(cfg["metal_for_breach"]),
+        breach_damage=FP32(cfg["player_breach_damage"]),
+        metal_for_breach=FP32(cfg["metal_for_breach"]),
     )
 
 
