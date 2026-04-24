@@ -52,13 +52,13 @@ class _CoordQueue:
 
     __slots__ = ("_data", "_start", "_end", "_size", "currX", "currY")
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._data: List[int] = [0] * 200
-        self._start = 0
-        self._end = 0
-        self._size = 0
-        self.currX = -559038737
-        self.currY = -558907665
+        self._start: int = 0
+        self._end: int = 0
+        self._size: int = 0
+        self.currX: int = -559038737
+        self.currY: int = -558907665
 
     def push(self, x: int, y: int) -> None:
         if (self._size + 1) * 2 >= len(self._data):
@@ -116,7 +116,7 @@ class PathFinder:
         self._dimension = dimension
         self._size = dimension * dimension
         self._direction = direction
-        self._perfect_list: List[Tuple[int, int]] = [tuple(p) for p in perfect]
+        self._perfect_list: List[Tuple[int, int]] = [(int(p[0]), int(p[1])) for p in perfect]
         self._status = bytearray(self._size)
         self._parent_direction = [0] * self._size  # short[]
         self._pathlength = [0] * self._size        # short[]
