@@ -31,9 +31,25 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 # Make algos/athena package importable for SimCore reference state.
 # parents[0]=offense, [1]=athena_v3_planner, [2]=algos, [3]=worktree-root.
-_SIM_PACKAGE_ROOT = Path(__file__).resolve().parents[2] / "athena"
-if str(_SIM_PACKAGE_ROOT) not in sys.path:
-    sys.path.insert(0, str(_SIM_PACKAGE_ROOT))
+#
+# CRITICAL: on the live competition server, the algo is extracted to
+# the filesystem root, so __file__ = "/offense/sim_eval.py" and only
+# 2 parents exist (/offense and /). parents[2] raised IndexError and
+# blocked the entire offense.sim_eval module from importing — that's
+# why every Athena ranked match has been running on tier 2/3/4
+# fallback (heuristic Scout-spam) for the entire history of the algo.
+# Confirmed via athena_diagnostic_error.txt (2026-04-25).
+#
+# Guarded with try/except: if parents[2] doesn't exist (live server),
+# we silently skip — algos/athena/ isn't shipped in the zip anyway.
+try:
+    _SIM_PACKAGE_ROOT = Path(__file__).resolve().parents[2] / "athena"
+    if str(_SIM_PACKAGE_ROOT) not in sys.path:
+        sys.path.insert(0, str(_SIM_PACKAGE_ROOT))
+except IndexError:
+    # Running with shallow path (live server / unusual layout).
+    # algos/athena/ wouldn't exist there anyway. Skip silently.
+    _SIM_PACKAGE_ROOT = None
 
 
 # ---------------------------------------------------------------------------
@@ -259,14 +275,21 @@ def _default_config_path() -> str:
     so callers see a clear error.
     """
     here = Path(__file__).resolve()
-    candidates = [
-        here.parents[1] / "data" / "citadel_config_snapshot.json",
-        here.parents[2] / "athena" / "data" / "citadel_config_snapshot.json",
-    ]
+    candidates = []
+    # Sibling-of-package: works on live (parents[1] = '/' or algo dir).
+    try:
+        candidates.append(here.parents[1] / "data" / "citadel_config_snapshot.json")
+    except IndexError:
+        pass
+    # algos/athena reference (dev-only): may not exist on shallow live paths.
+    try:
+        candidates.append(here.parents[2] / "athena" / "data" / "citadel_config_snapshot.json")
+    except IndexError:
+        pass
     for c in candidates:
         if c.exists():
             return str(c)
-    return str(candidates[-1])
+    return str(candidates[-1]) if candidates else "data/citadel_config_snapshot.json"
 
 
 # ---------------------------------------------------------------------------
