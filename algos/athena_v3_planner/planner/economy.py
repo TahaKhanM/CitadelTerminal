@@ -375,6 +375,78 @@ class EconomyArbiter:
             # Tier 4 needs at least 1 MP to spawn anything.
             return
 
+        # ----------------------------------------------------------------
+        # SIM_RS LOAD VERIFICATION SIGNATURE (temporary diagnostic)
+        # ----------------------------------------------------------------
+        # On turn 0 only, if sim_rs successfully loaded, spawn ONE Scout
+        # at SIGNATURE_TILE = (12, 1) — a BL-edge tile that no fallback
+        # path (tier 3, tier 4, _last_resort_offense, emergency 1-Scout
+        # spawn) ever uses. After uploading this build:
+        #   - Replay turn-0 spawn at (12, 1)  → sim_rs IS loading on live
+        #   - Replay turn-0 spawn at (13, 0) or (14, 0) → sim_rs NOT
+        #     loading (or failed silently); we're running on tier 2/3/4
+        #
+        # NOTE: game_state.turn_number is the engine's authoritative
+        # turn counter (starts at 0). self.turn_count is incremented at
+        # the start of arb.execute, so it would be 1 on the first turn
+        # — wrong for this check.
+        #
+        # This is a one-time verification build. Once we've observed the
+        # outcome, this block is removed.
+        try:
+            engine_turn = int(getattr(game_state, "turn_number", -1))
+        except Exception:  # noqa: BLE001
+            engine_turn = -1
+        if engine_turn == 0:
+            try:
+                try:
+                    from offense.sim_eval import (  # type: ignore
+                        SIGNATURE_TILE, _SIM_RS_LOAD_PATH, _get_sim_rs,
+                    )
+                except ImportError:
+                    from ..offense.sim_eval import (  # type: ignore
+                        SIGNATURE_TILE, _SIM_RS_LOAD_PATH, _get_sim_rs,
+                    )
+                # Force the load attempt now (it's lazy by default).
+                _get_sim_rs()
+                # Re-import to get the post-load value of _SIM_RS_LOAD_PATH.
+                try:
+                    from offense.sim_eval import _SIM_RS_LOAD_PATH  # type: ignore  # noqa: F811
+                except ImportError:
+                    from ..offense.sim_eval import _SIM_RS_LOAD_PATH  # type: ignore  # noqa: F811
+
+                # Gate on "bundled" specifically. The conda path means
+                # we're in local dev (existing tests verify sim_rs works
+                # locally; we don't need the signature there and it
+                # would short-circuit normal-flow tests). The bundled
+                # path is the LIVE-SERVER path — that's what we actually
+                # need to verify with this signature.
+                if _SIM_RS_LOAD_PATH == "bundled":
+                    scout_sh = self.config["unitInformation"][3]["shorthand"]
+                    n = game_state.attempt_spawn(scout_sh, list(SIGNATURE_TILE))
+                    self.debug_log(
+                        f"[athena DIAG] T0 SIGNATURE @ {SIGNATURE_TILE}: "
+                        f"sim_rs load_path={_SIM_RS_LOAD_PATH} "
+                        f"spawned={n}"
+                    )
+                    if n > 0:
+                        # Diagnostic spawn succeeded. MP is now 0; no
+                        # further offense possible this turn. Return so
+                        # the standard planner doesn't try and fail.
+                        return
+                    # n==0: spawn failed (tile blocked unexpectedly).
+                    # Fall through to normal offense.
+                else:
+                    self.debug_log(
+                        f"[athena DIAG] T0 SIGNATURE skipped: "
+                        f"sim_rs load_path={_SIM_RS_LOAD_PATH} "
+                        f"(only fires on 'bundled')"
+                    )
+            except Exception as exc:  # noqa: BLE001
+                self.debug_log(f"[athena DIAG] T0 SIGNATURE error: {exc!r}")
+                # Continue to normal offense on any error.
+        # ----------------------------------------------------------------
+
         # Build the sim_rs-ready state dict from gamelib. If this fails
         # the planner falls through to tier 3 (state-free rule-based).
         state_dict = None
