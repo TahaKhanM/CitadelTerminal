@@ -104,25 +104,69 @@ _SIM_RS_TRIED = False
 
 
 def _get_sim_rs():
+    """Return the sim_rs module if available, else None.
+
+    Resolution order:
+      1. ``import sim_rs`` from the standard sys.path. Locally finds the
+         maturin-installed wheel in conda's site-packages.
+      2. If that fails, add the bundled wheel directory
+         ``algos/athena_v3_planner/bundled_sim_rs/`` to sys.path and
+         retry. The bundled wheel is a Linux x64 abi3 PyO3 build that
+         loads via dlopen as a Python C-extension — NO subprocess,
+         NO docker invocation. abi3 means it works on any Python 3.9+.
+      3. If both fail, return None — caller falls through to the
+         vendored Python pysim (or the static-binary stdio bridge if
+         available, but that path is currently disabled because it
+         triggers the live sandbox's docker interception).
+    """
     global _SIM_RS, _SIM_RS_TRIED
     if _SIM_RS_TRIED:
         return _SIM_RS
     _SIM_RS_TRIED = True
+
+    # Attempt 1: standard import (local conda wheel, etc.)
     try:
         import sim_rs  # type: ignore
         _SIM_RS = sim_rs
-    except ImportError as e:
-        # Live-server / non-conda env: the PyO3 wheel isn't bundled in
-        # the algo zip. The caller (beam_search) detects this via
-        # ``sim_rs_available()`` and switches to the heuristic path —
-        # so this is a normal degraded mode, not a fatal error.
-        print(
-            f"[sim_eval] sim_rs PyO3 binding not importable ({e}). "
-            "Falling back to heuristic-utility offense scoring "
-            "(see planner.offense._heuristic_utility).",
-            file=sys.stderr,
-        )
-        _SIM_RS = None
+        return _SIM_RS
+    except ImportError:
+        pass
+
+    # Attempt 2: bundled wheel. Only valid on Linux x64 (where the
+    # bundled .so is targeted). On other platforms, importing the
+    # bundled package would fail (wrong architecture); we skip that
+    # attempt rather than emit a confusing "unsupported architecture"
+    # error every time.
+    import platform as _plat
+    if _plat.system() == "Linux" and _plat.machine().lower() in ("x86_64", "amd64"):
+        from pathlib import Path as _Path
+        bundled_dir = _Path(__file__).resolve().parents[1] / "bundled_sim_rs"
+        if bundled_dir.is_dir():
+            if str(bundled_dir) not in sys.path:
+                sys.path.insert(0, str(bundled_dir))
+            try:
+                import sim_rs  # type: ignore  # noqa: F811
+                _SIM_RS = sim_rs
+                print(
+                    f"[sim_eval] sim_rs loaded from bundled wheel at "
+                    f"{bundled_dir} (Linux x64 abi3)",
+                    file=sys.stderr,
+                )
+                return _SIM_RS
+            except ImportError as e:
+                print(
+                    f"[sim_eval] bundled sim_rs failed to load ({e}); "
+                    "falling through to pysim.",
+                    file=sys.stderr,
+                )
+
+    # Attempt 3: nothing available. Caller falls through.
+    print(
+        "[sim_eval] sim_rs not available (neither conda wheel nor "
+        "bundled Linux x64 wheel); using vendored pysim.",
+        file=sys.stderr,
+    )
+    _SIM_RS = None
     return _SIM_RS
 
 
