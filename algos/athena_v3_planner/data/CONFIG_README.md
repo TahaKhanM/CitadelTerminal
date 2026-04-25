@@ -74,3 +74,31 @@ If the competition rules change, regenerate via:
 ```
 
 Or use the skill: `/inspect-config`.
+
+## Phase 5 augmentation — SimCore (sim_rs) keys
+
+Phase 5 (sim adapter close-out) added two SimCore-required keys alongside
+the existing ones:
+
+| SimCore key (added) | Mirror of (existing) |
+|---|---|
+| `_raw_unit_information` | `unitInformation` |
+| `_resources_block_verbatim` | `resources` |
+
+Both schemas now coexist in the same JSON file:
+
+- `unitInformation` + `resources` — used by `gamelib` (`game_state.py`,
+  `unit.py`, `game_map.py`) and Athena's defense / opponent / planner
+  modules. This is what `config["unitInformation"][i]["shorthand"]`
+  returns at runtime.
+- `_raw_unit_information` + `_resources_block_verbatim` — used by
+  SimCore (`algos/athena/sim/config.py` and `algos/athena/sim_rs/src/config.rs`).
+  Required for the sim_rs PyO3 binding `simulate_action_phase_py(state_dict, config_path)`
+  to load.
+
+Both blocks are **byte-identical mirrors** at write time. If you regenerate
+the snapshot via `/inspect-config`, the regen script must populate both
+mirrors. The augmentation script lives inline in
+`algos/athena_v3_planner/offense/state_adapter.py` (`augment_snapshot_for_simcore`)
+and is run automatically when the algo starts up if the snapshot lacks
+the SimCore keys (idempotent — no-op when keys already present).
