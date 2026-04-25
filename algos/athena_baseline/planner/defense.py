@@ -555,8 +555,12 @@ def probabilistic_placement(
             cost = float(game_state.type_cost(shorthand)[SP_IDX])
         except Exception:  # noqa: BLE001
             break
+        # Skip this candidate if too expensive — keep trying cheaper ones.
+        # Previously this was `break`, which abandoned the entire placement
+        # loop the moment a high-value Support (4 SP) was unaffordable,
+        # leaving cheaper Turrets (2 SP) and Walls (1 SP) unplaced.
         if sp < cost:
-            break
+            continue
         try:
             n = game_state.attempt_spawn(shorthand, [x, y])
         except Exception:  # noqa: BLE001

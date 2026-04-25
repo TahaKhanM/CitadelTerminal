@@ -40,6 +40,15 @@
     {"unit": "TURRET", "loc": [7, 9], "upgrade": true, "priority": 4},
     {"unit": "TURRET", "loc": [20, 9], "upgrade": true, "priority": 4},
 
+    {"unit": "SUPPORT", "loc": [10, 8], "upgrade": false, "priority": 4},
+    {"unit": "SUPPORT", "loc": [13, 8], "upgrade": false, "priority": 4},
+    {"unit": "SUPPORT", "loc": [14, 8], "upgrade": false, "priority": 4},
+    {"unit": "SUPPORT", "loc": [17, 8], "upgrade": false, "priority": 4},
+    {"unit": "SUPPORT", "loc": [10, 8], "upgrade": true, "priority": 4},
+    {"unit": "SUPPORT", "loc": [13, 8], "upgrade": true, "priority": 4},
+    {"unit": "SUPPORT", "loc": [14, 8], "upgrade": true, "priority": 4},
+    {"unit": "SUPPORT", "loc": [17, 8], "upgrade": true, "priority": 4},
+
     {"unit": "TURRET", "loc": [11, 5], "upgrade": false, "priority": 5},
     {"unit": "TURRET", "loc": [16, 5], "upgrade": false, "priority": 5},
     {"unit": "TURRET", "loc": [11, 5], "upgrade": true, "priority": 5},
