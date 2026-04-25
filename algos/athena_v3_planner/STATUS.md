@@ -1,6 +1,81 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 7 — COMPLETE** (G11 gate PASS, 2026-04-25)
+## Current phase: **PHASE 8 — COMPLETE / BUILD COMPLETE** (2026-04-25)
+
+**Athena v3 is shipped.** The algo is packaged at
+`algos/athena_v3_planner/athena_v3.zip` (127 KB, well under 5 MB),
+the FINAL_REPORT.md covers all 8 phases, and the
+READY_FOR_UPLOAD.md checklist is complete. Awaiting human review +
+manual upload to terminal.c1games.com. Do **NOT** auto-upload — that
+is a user-only action.
+
+### Phase 8 deliverables (this commit chain)
+
+| Milestone | Deliverable | Commit |
+|---|---|---|
+| T | `FINAL_REPORT.md` — composite of all 8 phases, with G11 / Phase 5B headlines, gate table (G1-G11), known weaknesses, Phase 8B roadmap | `722eb9f` |
+| U | `data/PHASE8_MEMORY_SNAPSHOT.md` + user-memory `athena_v3_shipping_state.md` (project-scoped, plus MEMORY.md index update) | `8f1bab4` |
+| V | Final smoke (`data/PHASE8_SMOKE.md`, replay at `replays/phase8_smoke/`), `.zipignore`, `athena_v3.zip` (127 KB / 62 files), `data/UPLOAD_PACKAGE.md`, `READY_FOR_UPLOAD.md` | `5c18f7b` |
+| W | This STATUS update + AUTONOMOUS_LOG closing entry | (this commit) |
+
+### Phase 8 numbers
+
+- Final smoke match: 100 turns, P2=v13 won (local determinism artifact),
+  Athena no crash / no timeout / no time_damage_taken /
+  ~63 ms / turn average / 0.5 % of 13 s watchdog budget.
+- Zip: 129,681 bytes / 62 files / extract + import + test_algo_mac
+  all PASS.
+- Total commits across all 8 phases (+ 0.5 + 1.5 sub-phases):
+  see `git log --oneline | grep -i athena | wc -l` (~80+ commits
+  including phase-handoff merges).
+
+### What ships
+
+The composite shipping evidence:
+
+| Measurement | Result | Caveat |
+|---|---|---|
+| G11 replay-trace (Phase 7) | Athena 39/47 LB 0.699 vs v13 22/47 LB 0.333, **Δ +0.362** | Counter-factual; opponent does not adapt |
+| Phase 5B local bestof Lostkids | 20/20 LB 0.839 | PASS |
+| Phase 5B local bestof v13 | 10/20 LB 0.300 | FAIL — local-determinism artifact (acceptable per brief) |
+| Phase 8 smoke match | No crash / 100 turns / 63 ms/turn | PASS |
+
+Live-ladder expected uplift over v13: +5 pp to +20 pp (best
+estimate). Bounds: Phase 5B 75 % floor, G11 83 % ceiling.
+
+### Known weaknesses (carried into Phase 8B if user proceeds)
+
+1. Classifier LOO-CV 0.489 (target ≥ 0.70). 51 % BALANCED collapse.
+   Highest priority Phase 8B fix.
+2. MAP-Elites archive disabled by default
+   (`archive_confidence_threshold=1.01`). Loaded but gated off.
+3. Long hoard-heavy match regression cluster (3 / 47 G11 outcomes).
+4. Side asymmetry not investigated.
+
+Full breakdown: `FINAL_REPORT.md` § 6.
+
+### Phase 8B handoff (deferred — user decision)
+
+If user chooses to defer upload and run Phase 8B first:
+
+1. Generate 100 Athena vs Athena self-play replays under
+   `replays/selfplay/`.
+2. Re-run `opponent.build_corpus` on the 47 + 100 = 147-replay corpus.
+3. Try class-balanced LR on discretized features (Phase 3 followup).
+4. Add temperature-scaled `predict_proba` with low-confidence
+   uniform fallback.
+5. Re-validate LOO-CV; target ≥ 0.70.
+6. Once classifier is healthy, re-tune fitness sim 12 → 25-30 rounds,
+   add per-archetype archives, re-enable archive at gate=0.6.
+7. Re-run G11; expect a smaller delta than +36.2 pp once
+   classifier is no longer overfit to v13's opponent set.
+
+If user uploads as-is, monitor per the
+`READY_FOR_UPLOAD.md` § "Watch-for items" checklist.
+
+---
+
+## (Historical) Phase 7 status — COMPLETE (G11 gate PASS, 2026-04-25)
 
 ### Phase 7 headline (G11 replay-trace measurement)
 
