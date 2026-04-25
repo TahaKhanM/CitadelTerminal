@@ -161,8 +161,10 @@ def parse_args(argv):
     if serial:
         workers = 1
     if workers is None:
-        # Default: min(cores, total games). Matches are CPU-bound Java processes.
-        workers = min(os.cpu_count() or 4, 2 * n)
+        # Matches are CPU-bound (Java engine + Python algos with JIT'd Rust
+        # sims). Capping at cores/2 leaves each match ~2 cores, which keeps
+        # per-match wall time near the serial baseline (~160s).
+        workers = min(max((os.cpu_count() or 4) // 2, 1), 2 * n)
     return a, b, n, workers
 
 
@@ -179,9 +181,9 @@ def main(argv):
     # Build task list: first n games with a as P1, then n with b as P1 (so a becomes P2).
     tasks = []
     for i in range(n):
-        tasks.append((str(a_path), str(b_path), str(out_dir), i + 1, 180))
+        tasks.append((str(a_path), str(b_path), str(out_dir), i + 1, 480))
     for i in range(n):
-        tasks.append((str(b_path), str(a_path), str(out_dir), n + i + 1, 180))
+        tasks.append((str(b_path), str(a_path), str(out_dir), n + i + 1, 480))
 
     wall_start = time.time()
     results = [None] * len(tasks)
