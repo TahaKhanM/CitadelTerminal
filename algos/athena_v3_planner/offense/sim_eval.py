@@ -114,7 +114,17 @@ _SIM_RS_TRIED = False
 # any uploaded match. (12, 1) is on the BL spawn edge but outside
 # every fallback / last-resort code path.
 _SIM_RS_LOAD_PATH: str = "untried"
-SIGNATURE_TILE = (12, 1)
+_SIM_RS_LOAD_ERROR: str = ""  # detailed reason why bundled load failed
+_SIM_RS_LOAD_DETAILS: dict = {}  # platform info + diagnostics
+
+# Diagnostic signature tiles (all on BL spawn-edge: y = 13 - x).
+# Each encodes a distinct sim_rs load outcome. None of these tiles is
+# used by any fallback path (tier 3, 4, _last_resort), so observing
+# one in turn-0 of a replay uniquely identifies the load state.
+SIGNATURE_TILE = (12, 1)              # SUCCESS: bundled loaded
+SIGNATURE_TILE_IMPORT_ERROR = (11, 2)  # .so exists but ImportError (ABI / glibc)
+SIGNATURE_TILE_FILE_MISSING = (10, 3)  # bundled dir or .so file not found
+SIGNATURE_TILE_PLATFORM_MISMATCH = (9, 4)  # not Linux x86_64
 
 
 def _get_sim_rs():
@@ -134,9 +144,21 @@ def _get_sim_rs():
          triggers the live sandbox's docker interception).
     """
     global _SIM_RS, _SIM_RS_TRIED, _SIM_RS_LOAD_PATH
+    global _SIM_RS_LOAD_ERROR, _SIM_RS_LOAD_DETAILS
     if _SIM_RS_TRIED:
         return _SIM_RS
     _SIM_RS_TRIED = True
+
+    # Capture environment diagnostics regardless of outcome.
+    import platform as _plat
+    import sys as _sys
+    _SIM_RS_LOAD_DETAILS = {
+        "system": _plat.system(),
+        "machine": _plat.machine(),
+        "python_version": _plat.python_version(),
+        "python_implementation": _plat.python_implementation(),
+        "sys_path_head": _sys.path[:5],
+    }
 
     # Attempt 1: standard import (local conda wheel, etc.)
     try:
@@ -144,47 +166,75 @@ def _get_sim_rs():
         _SIM_RS = sim_rs
         _SIM_RS_LOAD_PATH = "conda"
         return _SIM_RS
-    except ImportError:
-        pass
+    except ImportError as e:
+        _SIM_RS_LOAD_DETAILS["conda_import_error"] = repr(e)
 
-    # Attempt 2: bundled wheel. Only valid on Linux x64 (where the
-    # bundled .so is targeted). On other platforms, importing the
-    # bundled package would fail (wrong architecture); we skip that
-    # attempt rather than emit a confusing "unsupported architecture"
-    # error every time.
-    import platform as _plat
-    if _plat.system() == "Linux" and _plat.machine().lower() in ("x86_64", "amd64"):
-        from pathlib import Path as _Path
-        bundled_dir = _Path(__file__).resolve().parents[1] / "bundled_sim_rs"
-        if bundled_dir.is_dir():
-            if str(bundled_dir) not in sys.path:
-                sys.path.insert(0, str(bundled_dir))
-            try:
-                import sim_rs  # type: ignore  # noqa: F811
-                _SIM_RS = sim_rs
-                _SIM_RS_LOAD_PATH = "bundled"
-                print(
-                    f"[sim_eval] sim_rs loaded from bundled wheel at "
-                    f"{bundled_dir} (Linux x64 abi3)",
-                    file=sys.stderr,
-                )
-                return _SIM_RS
-            except ImportError as e:
-                print(
-                    f"[sim_eval] bundled sim_rs failed to load ({e}); "
-                    "falling through to pysim.",
-                    file=sys.stderr,
-                )
+    # Attempt 2: bundled wheel. Only valid on Linux x64. We're now
+    # MORE LENIENT in the platform check — if we get here on non-Linux
+    # x86_64, we still record the platform mismatch as the failure
+    # reason for diagnostic purposes.
+    is_linux = _plat.system() == "Linux"
+    is_x86_64 = _plat.machine().lower() in ("x86_64", "amd64")
+    if not is_linux or not is_x86_64:
+        _SIM_RS_LOAD_PATH = "platform_mismatch"
+        _SIM_RS_LOAD_ERROR = (
+            f"platform check failed: system={_plat.system()!r} "
+            f"machine={_plat.machine()!r} (need Linux + x86_64/amd64)"
+        )
+        print(f"[sim_eval] {_SIM_RS_LOAD_ERROR}", file=sys.stderr)
+        _SIM_RS = None
+        return _SIM_RS
 
-    # Attempt 3: nothing available. Caller falls through.
-    print(
-        "[sim_eval] sim_rs not available (neither conda wheel nor "
-        "bundled Linux x64 wheel); using vendored pysim.",
-        file=sys.stderr,
-    )
-    _SIM_RS = None
-    _SIM_RS_LOAD_PATH = "failed"
-    return _SIM_RS
+    # On Linux x86_64 — try bundled.
+    from pathlib import Path as _Path
+    bundled_dir = _Path(__file__).resolve().parents[1] / "bundled_sim_rs"
+    bundled_so = bundled_dir / "sim_rs" / "sim_rs.abi3.so"
+    bundled_init = bundled_dir / "sim_rs" / "__init__.py"
+
+    _SIM_RS_LOAD_DETAILS["bundled_dir"] = str(bundled_dir)
+    _SIM_RS_LOAD_DETAILS["bundled_dir_exists"] = bundled_dir.is_dir()
+    _SIM_RS_LOAD_DETAILS["bundled_so_exists"] = bundled_so.is_file()
+    _SIM_RS_LOAD_DETAILS["bundled_init_exists"] = bundled_init.is_file()
+    if bundled_so.is_file():
+        _SIM_RS_LOAD_DETAILS["bundled_so_size"] = bundled_so.stat().st_size
+
+    if not bundled_dir.is_dir() or not bundled_so.is_file():
+        _SIM_RS_LOAD_PATH = "file_missing"
+        _SIM_RS_LOAD_ERROR = (
+            f"bundled wheel missing: dir_exists={bundled_dir.is_dir()} "
+            f"so_exists={bundled_so.is_file()}"
+        )
+        print(f"[sim_eval] {_SIM_RS_LOAD_ERROR}", file=sys.stderr)
+        _SIM_RS = None
+        return _SIM_RS
+
+    if str(bundled_dir) not in sys.path:
+        sys.path.insert(0, str(bundled_dir))
+    try:
+        import sim_rs  # type: ignore  # noqa: F811
+        _SIM_RS = sim_rs
+        _SIM_RS_LOAD_PATH = "bundled"
+        print(
+            f"[sim_eval] sim_rs loaded from bundled wheel at "
+            f"{bundled_dir} (Linux x64 abi3)",
+            file=sys.stderr,
+        )
+        return _SIM_RS
+    except ImportError as e:
+        _SIM_RS_LOAD_PATH = "import_error"
+        _SIM_RS_LOAD_ERROR = (
+            f"bundled .so dlopen failed (likely Python ABI or "
+            f"glibc mismatch): {e!r}"
+        )
+        print(f"[sim_eval] {_SIM_RS_LOAD_ERROR}", file=sys.stderr)
+        _SIM_RS = None
+        return _SIM_RS
+    except Exception as e:  # noqa: BLE001
+        _SIM_RS_LOAD_PATH = "import_error"
+        _SIM_RS_LOAD_ERROR = f"unexpected exception loading bundled .so: {e!r}"
+        print(f"[sim_eval] {_SIM_RS_LOAD_ERROR}", file=sys.stderr)
+        _SIM_RS = None
+        return _SIM_RS
 
 
 def sim_rs_available() -> bool:

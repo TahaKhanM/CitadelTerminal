@@ -376,23 +376,24 @@ class EconomyArbiter:
             return
 
         # ----------------------------------------------------------------
-        # SIM_RS LOAD VERIFICATION SIGNATURE (temporary diagnostic)
+        # SIM_RS LOAD VERIFICATION SIGNATURE — multi-mode diagnostic
         # ----------------------------------------------------------------
-        # On turn 0 only, if sim_rs successfully loaded, spawn ONE Scout
-        # at SIGNATURE_TILE = (12, 1) — a BL-edge tile that no fallback
-        # path (tier 3, tier 4, _last_resort_offense, emergency 1-Scout
-        # spawn) ever uses. After uploading this build:
-        #   - Replay turn-0 spawn at (12, 1)  → sim_rs IS loading on live
-        #   - Replay turn-0 spawn at (13, 0) or (14, 0) → sim_rs NOT
-        #     loading (or failed silently); we're running on tier 2/3/4
+        # On engine turn 0, encode the sim_rs load outcome as a unique
+        # spawn tile location. Each tile is on the BL spawn-edge but
+        # NEVER used by any fallback path (tier 3/4/last_resort), so the
+        # turn-0 spawn in any replay uniquely identifies the load state:
         #
-        # NOTE: game_state.turn_number is the engine's authoritative
-        # turn counter (starts at 0). self.turn_count is incremented at
-        # the start of arb.execute, so it would be 1 on the first turn
-        # — wrong for this check.
+        #   (12, 1) → SUCCESS: bundled .so loaded
+        #   (11, 2) → ImportError on bundled .so dlopen (Python ABI / glibc)
+        #   (10, 3) → bundled dir or .so file missing from zip
+        #   (9, 4)  → platform mismatch (not Linux x86_64)
+        #   default → no diagnostic; sim_rs path is "untried" (defensive)
         #
-        # This is a one-time verification build. Once we've observed the
-        # outcome, this block is removed.
+        # NOTE: game_state.turn_number is the engine's authoritative turn
+        # counter (starts at 0); self.turn_count is incremented at the
+        # start of arb.execute so it'd be wrong here.
+        #
+        # This is a temporary diagnostic; removed after live result.
         try:
             engine_turn = int(getattr(game_state, "turn_number", -1))
         except Exception:  # noqa: BLE001
@@ -401,47 +402,63 @@ class EconomyArbiter:
             try:
                 try:
                     from offense.sim_eval import (  # type: ignore
-                        SIGNATURE_TILE, _SIM_RS_LOAD_PATH, _get_sim_rs,
+                        SIGNATURE_TILE,
+                        SIGNATURE_TILE_IMPORT_ERROR,
+                        SIGNATURE_TILE_FILE_MISSING,
+                        SIGNATURE_TILE_PLATFORM_MISMATCH,
+                        _get_sim_rs,
                     )
                 except ImportError:
                     from ..offense.sim_eval import (  # type: ignore
-                        SIGNATURE_TILE, _SIM_RS_LOAD_PATH, _get_sim_rs,
+                        SIGNATURE_TILE,
+                        SIGNATURE_TILE_IMPORT_ERROR,
+                        SIGNATURE_TILE_FILE_MISSING,
+                        SIGNATURE_TILE_PLATFORM_MISMATCH,
+                        _get_sim_rs,
                     )
-                # Force the load attempt now (it's lazy by default).
-                _get_sim_rs()
-                # Re-import to get the post-load value of _SIM_RS_LOAD_PATH.
+                _get_sim_rs()  # force load attempt (lazy by default)
                 try:
-                    from offense.sim_eval import _SIM_RS_LOAD_PATH  # type: ignore  # noqa: F811
+                    from offense.sim_eval import (  # type: ignore  # noqa: F811
+                        _SIM_RS_LOAD_PATH, _SIM_RS_LOAD_ERROR,
+                        _SIM_RS_LOAD_DETAILS,
+                    )
                 except ImportError:
-                    from ..offense.sim_eval import _SIM_RS_LOAD_PATH  # type: ignore  # noqa: F811
+                    from ..offense.sim_eval import (  # type: ignore  # noqa: F811
+                        _SIM_RS_LOAD_PATH, _SIM_RS_LOAD_ERROR,
+                        _SIM_RS_LOAD_DETAILS,
+                    )
 
-                # Gate on "bundled" specifically. The conda path means
-                # we're in local dev (existing tests verify sim_rs works
-                # locally; we don't need the signature there and it
-                # would short-circuit normal-flow tests). The bundled
-                # path is the LIVE-SERVER path — that's what we actually
-                # need to verify with this signature.
+                # Map load_path → diagnostic tile.
+                tile = None
                 if _SIM_RS_LOAD_PATH == "bundled":
+                    tile = SIGNATURE_TILE
+                elif _SIM_RS_LOAD_PATH == "import_error":
+                    tile = SIGNATURE_TILE_IMPORT_ERROR
+                elif _SIM_RS_LOAD_PATH == "file_missing":
+                    tile = SIGNATURE_TILE_FILE_MISSING
+                elif _SIM_RS_LOAD_PATH == "platform_mismatch":
+                    tile = SIGNATURE_TILE_PLATFORM_MISMATCH
+                # "conda" / "untried" / "failed" → no signature (use
+                # normal flow). "conda" only happens locally; live
+                # server can never be "conda". "untried"/"failed" are
+                # defensive states that shouldn't occur after our forced
+                # _get_sim_rs() call above.
+
+                self.debug_log(
+                    f"[athena DIAG] T0 sim_rs load: path={_SIM_RS_LOAD_PATH} "
+                    f"err={_SIM_RS_LOAD_ERROR!r} "
+                    f"details={_SIM_RS_LOAD_DETAILS}"
+                )
+
+                if tile is not None:
                     scout_sh = self.config["unitInformation"][3]["shorthand"]
-                    n = game_state.attempt_spawn(scout_sh, list(SIGNATURE_TILE))
+                    n = game_state.attempt_spawn(scout_sh, list(tile))
                     self.debug_log(
-                        f"[athena DIAG] T0 SIGNATURE @ {SIGNATURE_TILE}: "
-                        f"sim_rs load_path={_SIM_RS_LOAD_PATH} "
-                        f"spawned={n}"
+                        f"[athena DIAG] T0 SIGNATURE @ {tile}: "
+                        f"path={_SIM_RS_LOAD_PATH} spawned={n}"
                     )
                     if n > 0:
-                        # Diagnostic spawn succeeded. MP is now 0; no
-                        # further offense possible this turn. Return so
-                        # the standard planner doesn't try and fail.
-                        return
-                    # n==0: spawn failed (tile blocked unexpectedly).
-                    # Fall through to normal offense.
-                else:
-                    self.debug_log(
-                        f"[athena DIAG] T0 SIGNATURE skipped: "
-                        f"sim_rs load_path={_SIM_RS_LOAD_PATH} "
-                        f"(only fires on 'bundled')"
-                    )
+                        return  # MP=0 now, normal offense skipped
             except Exception as exc:  # noqa: BLE001
                 self.debug_log(f"[athena DIAG] T0 SIGNATURE error: {exc!r}")
                 # Continue to normal offense on any error.
