@@ -1,0 +1,9 @@
+{
+  "name": "heavy_demo_left",
+  "description": "Five-Demolisher train on BL — for clearing dense fortifications late game.",
+  "side": "BL",
+  "min_mp": 15,
+  "spawns": [
+    {"unit": "DEMOLISHER", "loc": [4, 9], "count": 5}
+  ]
+}
