@@ -374,74 +374,210 @@ and proceeds to Phase 3 per spec protocol.
 
 ---
 
-## NEXT PHASE: 3 — Opponent model
+## Phase 3 — Opponent model
 
-**Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 3.
+**Agent**: Claude Opus 4.7 (1M context).
+**Started / completed**: 2026-04-25.
+**Branch**: `worktree-agent-ab21feea` (off `main` @ `9a67a57`).
+**Plan reference**: `docs/ATHENA_BUILD_PLAN.md` § Phase 3.
+
+### Tasks (commit-by-commit)
+
+| Task | Output                                              | Commit |
+|---|---|---|
+| 1   | Archetype taxonomy (6 classes + ARCHETYPES.md + JSON enum) | `b552558` |
+| 2-3 | Corpus labeling + feature extractor (combined commit)  | `6f84eba` |
+| 4   | Bayesian classifier (numpy GaussianNB)                  | `9cd3259` |
+| 5   | Per-archetype action predictor                          | `0502e5c` |
+| 6   | Leave-one-opponent-out cross-validation                 | `0504042` |
+| 7   | Unit tests (13 new — 25 total in athena_v3_planner)     | `702c603` |
+| 8   | STATUS + AUTONOMOUS_LOG handoff                         | (this commit) |
+
+### Tasks 2-3 batching note
+
+Task 2 (corpus labeling) requires Task 3 (feature extractor) — the
+labeler operates over the feature dict. They were committed together
+in `6f84eba` because `build_corpus.py` produces both labels.json AND
+opponent_features.npz in a single ~2s pass. Same ~100s pre-commit-hook
+amortization rationale Phase 2 used for tasks 2-7.
+
+### Implementation notes
+
+- **Six archetypes** (small enough for a 47-replay corpus):
+  SCOUT_RUSH (25), DEMOLISHER_LINE (7), EDGE_FEINT (1),
+  SUPPORT_BURST (1), TURTLE_GRIND (0), BALANCED (13).
+- **14 features** (`opponent/features.py:FEATURE_NAMES`):
+  spawn-x entropy / peak col / peak share, scout/demolisher/
+  interceptor share, mean MP at spawn, breach rate / turn,
+  edge asymmetry, wall removal rate, mean wave size, support /
+  turret share, turns observed.
+- **Classifier**: pure-numpy Gaussian Naive Bayes with sklearn-style
+  `var_smoothing=1e-3` (bumped from sklearn default 1e-9 because of
+  the small corpus). Laplace +1 prior smoothing. Zero-sample classes
+  fall back to global mean / variance; single-sample classes use the
+  sample mean + global variance.
+- **Action predictor**: empirical (state-bucket -> action -> count)
+  per archetype, with Laplace +1 smoothing and a chain of fallbacks
+  (per-state -> archetype-global -> uniform 'do nothing'). Always
+  returns >=1 action.
+- **No sklearn dependency** — confirmed pre-build that sklearn is
+  not installed on this machine.
+- **Pure stdlib + numpy + pytest**. No engine.jar / sim_rs in any
+  of the Phase 3 code paths.
+
+### Validation results
+
+Leave-one-opponent-out CV (30 folds, all 47 replays):
+
+- **Mean top-1 accuracy: 0.489 (23/47)** — gate FAILED at 0.70 target.
+- Per-class recall: BALANCED 0.769, SCOUT_RUSH 0.440,
+  DEMOLISHER_LINE 0.286, EDGE_FEINT / SUPPORT_BURST 0.000 (singletons),
+  TURTLE_GRIND n/a (0 corpus samples).
+- Confusion matrix shows 21/24 errors land in the BALANCED column —
+  the BALANCED Gaussian is the broadest by construction so it
+  dominates near-median observations.
+- Full report: `data/PHASE3_CV_RESULTS.md` with 4 documented failure
+  modes + Phase 4 implications.
+
+Per spec: gate NOT loosened. The classifier ships as-is; Phase 4
+should use the **archetype posterior, not the top-1 label**, in plan
+scoring so the BALANCED-collapse acts as 'no signal' rather than a
+wrong answer. Phase 9 MAP-Elites can re-fit on a much larger
+self-play corpus.
+
+### Tests
+
+`tests/test_phase3_opponent_model.py` — 13 new tests, all green:
+
+- 4 feature-extractor tests (key/shape sanity, player_index flip,
+  pure-demolisher sanity, invalid-opp-id raises).
+- 5 classifier tests (predict_proba shape + sums-to-1, fit
+  determinism, predict-vs-proba consistency, update_posterior
+  monotonicity on a synthetic well-separated corpus, unfitted
+  raises).
+- 4 action-predictor tests (top_k always returns >=1, zero-obs
+  archetype falls back gracefully, unfitted raises, state-bucket
+  helpers).
+
+Combined with the 12 Phase 0.5 tests: **25 tests, 9.85s on Apple M4**.
+
+### Gotchas / caveats
+
+1. **CV gate failed.** This is by design per spec (do not loosen);
+   Phase 4 must consume the posterior and treat low-confidence
+   predictions as approximately uniform. The classifier's
+   `predict_proba` output is the right interface, not `predict`.
+2. **TURTLE_GRIND has 0 training samples.** v13's ranked corpus
+   skews offensive — none of the 30 distinct opponents played a
+   pure turtle. The classifier handles this gracefully (global-stats
+   fallback) but the class can never be predicted with high
+   confidence on this corpus.
+3. **Singleton classes** (EDGE_FEINT, SUPPORT_BURST) cannot be
+   leave-one-out-recovered: holding out the only training example
+   leaves the fold with zero samples for that class. Structural; not
+   fixable without more data.
+4. **The labeler IS the ground truth.** Both the GaussianNB
+   training labels AND the CV target labels come from the heuristic
+   in `build_corpus.py:_label_from_features`. Future re-labeling
+   passes (e.g. by-hand verification, k-means clustering) should
+   keep that file's threshold-driven approach for reproducibility.
+
+---
+
+## NEXT PHASE: 4 — Offense engine
+
+**Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 5 (the build plan numbers
+the offense / plan-search work as Phase 5 because the original Phase 3
+was offense scripts and Phase 4 was the opponent model — the v3-planner
+build sequence has folded those into Phase 3 = opponent model and
+Phase 4 = the offense engine that consumes it). For implementation
+specifics also reference `docs/ATHENA_BUILD_PLAN.md` § Phase 3
+(offensive script portfolio: corner_ping, demolisher_line,
+escorted_mixed, adaptive_hole, sd_opportunist, misdirection_counter).
 
 ### Scope (3-line summary)
 
-Build a Bayesian archetype classifier over the 47-replay corpus
-(`data/replay_index.json`) that assigns incoming opponents to one of
-~5-7 strategy classes (scout-rush, demolisher-line, corner-castle,
-support-caravan, midfield-funnel, etc.). Per-archetype action
-predictors then forecast next-turn opponent spawns / structures.
+Build a beam-search offense engine that, every turn, generates ~50
+candidate offense plans (template × spawn timing × side selection),
+sim-evaluates the top-K against the action predictor's top-K opponent
+responses, and chooses the plan with the highest expected damage minus
+expected own-loss. Lives at `algos/athena_v3_planner/planner/offense.py`
+and `algos/athena_v3_planner/offense/templates/`.
 
 ### Prerequisites already in place
 
-- 47 ranked replays, parseable, indexed: `data/replay_index.json`.
-- Six action-frame utilities (Phase 0.5) emit per-turn fingerprints:
-  `BatchCountTracker`, `SpawnXHistogram`, `WallRemovalDetector`,
-  `BreachLocationTracker`, `ResourceTracker`, `MisdirectionDetector`.
-  Live in `opponent/action_frame_utils.py`.
-- Citadel config snapshot for unit-cost reasoning:
-  `data/citadel_config_snapshot.json`.
+- 47 ranked replays + 14-feature classifier + per-archetype action
+  predictor (Phase 3, this phase).
+- Three defense archetype JSONs + six defense primitives (Phase 2).
+- Lostkids baseline (Phase 1.5) for regression checks.
+- Rust SimCore at 14.5 K single-core / 88 K 10-thread (Phase 0).
 
-### Recommended Phase 3 task structure
+### Recommended Phase 4 task structure
 
-1. **Feature extractor**: per-replay-turn vector of ~20 features
-   sourced from the six Phase 0.5 utilities (e.g. peak spawn columns,
-   batch-count distribution, mean SP/MP, edge pressure ratios).
-2. **Archetype clustering**: k-means or GMM over the per-turn
-   feature matrix → ~5 clusters; hand-validate cluster labels by
-   sampling 3-5 replays per cluster and confirming the strategic
-   archetype.
-3. **Bayesian classifier**: at runtime, read the live opponent's first
-   N turns of fingerprints; compute posterior over archetype classes.
-4. **Per-archetype action predictor**: simple LR / GBM per cluster
-   predicting (next_turn_mp_spend, next_turn_attack_edge,
-   next_turn_main_unit_type).
-5. **Cross-validation**: 5-fold over the 47 replays; track per-class
-   accuracy and per-replay log-likelihood.
-6. **Wire into v3 planner**: archetype probability vector becomes a
-   feature for the Phase 4 search-based planner. Defense-only variant
-   uses it to swap archetypes mid-match.
+1. **Offense template scaffolding.** Write the `AttackScript` interface
+   (load Phase 3 spec from `docs/ATHENA_BUILD_PLAN.md` § Phase 3) and
+   six initial templates seeded from the finalist corpus:
+   - `corner_ping.py` (FUNNEL — first-wave Scout count from Citadel
+     wall_HP/scout_HP, NOT hardcoded).
+   - `demolisher_line.py` (Lostkids — Demolisher range 4.5 abuse).
+   - `escorted_mixed.py` (2 Interceptor front, 6-12 Scout trail).
+   - `adaptive_hole.py` (Harvard — side-sense weights using Citadel
+     unit names).
+   - `sd_opportunist.py` (BFS for dead-ends, Interceptor sniper).
+   - `misdirection_counter.py` (Lostkids — counter the feint).
 
-### Phase 2 outputs Phase 3 will consume
+2. **Beam search.** `planner/offense.py:beam_search` — generate ~50
+   candidate plans per turn, prune via `fast_static_eval` (~10us
+   per plan), full SimCore eval on top 10. Score against the action
+   predictor's top-K opponent response. Mandatory no-prediction
+   baseline candidate (lower-bound EV).
 
-- `algos/athena_v3_planner/planner/defense.py` — defense primitives
-  used by the search rollout.
-- `algos/athena_v3_planner/defenses/*.json` — archetype options to
-  swap between.
-- `algos/athena_v3_planner_defense_only/` — regression baseline. Phase
-  3 should re-run the same `/bestof 20` vs v13 + Lostkids and confirm
-  defense-only behavior is unchanged (no regressions in the defense
-  primitives) before Phase 3 changes land.
+3. **Score function.** Damage to opp HP (weight 3.5) + bonus SP from
+   breaches − own mobile loss × support_loss_weight − defense
+   compromise. Weights are tunable for Phase 9 MAP-Elites.
 
-### Gotchas inherited from Phase 2
+4. **Wire into algo_strategy.py.** Replace the defense-only variant
+   with v3_planner main: each turn, run defense primitives FIRST
+   (consumes SP), then offense beam search (consumes MP), with the
+   13s SIGALRM watchdog + safe-fallback already in place from
+   Phase 1.5.
 
-1. **Defense-only loses to ALL local-engine baselines.** This is by
-   design (no offense). Phase 3's evaluation should NOT use
-   defense-only as a proxy for "is the planner good"; instead either
-   add Phase 3 offense to the v3_planner main algo or score Phase 3
-   on classifier accuracy / replay log-likelihood directly.
-2. **The 100s pre-commit hook on every commit** dominates the wall-
-   clock budget. Phase 3 should batch logically related commits to
-   stay under 25 min total. The hook can NOT be skipped (no
-   `--no-verify`) per project policy.
-3. **Phase 2B archetype rebalancing** is a useful prerequisite for
-   any work that benchmarks the v3 planner end-to-end. If Phase 3
-   needs a stronger defense baseline to compare offense-augmented
-   variants against, do task 1 of the Phase 2B list first.
+5. **Validation.** /bestof 20 vs v13_second_ring + athena_baseline_lostkids.
+   Build-plan gate: portfolio Wilson LB > 65% vs v13, > 50% vs Lostkids.
+   Phase 2 defense-only baseline was 0/40 — any positive win-rate is
+   evidence the offense engine is doing useful work.
+
+### Phase 3 outputs Phase 4 will consume
+
+- `opponent/classifier.py:ArchetypeClassifier` — `predict_proba`
+  during a live match for the current opponent posterior.
+- `opponent/action_predictor.py:ActionPredictor` — `top_k(state,
+  posterior, k)` returns the (action, prob) list to score offense
+  plans against.
+- `data/opponent_features.npz` + `opponent/labels.json` — for
+  re-fitting if Phase 4 wants different feature weights or a larger
+  corpus.
+
+### Gotchas inherited from Phase 3
+
+1. **The classifier's CV gate FAILED at 0.489.** Phase 4 should NOT
+   trust the top-1 label; instead use the full posterior in scoring.
+   The BALANCED-collapse failure mode is, paradoxically, the right
+   signal for unknown opponents (it approximates a uniform prior).
+2. **Singletons + zero-sample classes.** TURTLE_GRIND has 0 training
+   samples; EDGE_FEINT and SUPPORT_BURST have 1 each. Phase 4 should
+   include a `low_confidence_fallback` path (e.g. when max-posterior
+   < 0.40) that uses a generic offense template rather than the
+   archetype-specific predictor.
+3. **Action predictor returns marginal probabilities** that don't
+   necessarily sum to 1 (they're scores, not strict probabilities).
+   Treat as weights when scoring multi-step plans.
+4. **The 100s pre-commit hook** still dominates wall-clock. Phase 4
+   has more code than Phase 3 — batch logically.
+5. **Phase 2B follow-ups still open.** The defense-only variant still
+   loses 0/40 to v13 + Lostkids. Phase 4 must include offense to win
+   anything; do not regress on the per-turn compute or watchdog
+   safety baseline.
 
 
 ---
