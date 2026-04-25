@@ -40,6 +40,15 @@ from opponent.action_frame_utils import BreachLocationTracker  # noqa: E402
 from planner.budget import BudgetExceeded, Watchdog  # noqa: E402
 from planner.economy import EconomyArbiter  # noqa: E402
 
+# Phase 3 OpponentModel — best-effort fit at game start.
+try:
+    from opponent.classifier import ArchetypeClassifier, fit_default_classifier  # noqa: E402
+    from opponent.action_predictor import ActionPredictor  # noqa: E402
+
+    _OPPONENT_MODEL_AVAILABLE = True
+except Exception:  # noqa: BLE001
+    _OPPONENT_MODEL_AVAILABLE = False
+
 
 # --- Production safety: turn-time watchdog (lifted from Lostkids) -----------
 TURN_WATCHDOG_SECONDS = 13
@@ -91,8 +100,9 @@ _ARCHETYPES = {
     "v_funnel": "v_funnel.json",
     "two_layer_keep": "two_layer_keep.json",
     "spread_line": "spread_line.json",
+    "v13_inspired": "v13_inspired.json",
 }
-_DEFAULT_ARCHETYPE = "v_funnel"
+_DEFAULT_ARCHETYPE = "v13_inspired"  # Phase 5B: switch default to the v13 skeleton.
 
 
 def _archetype_path(name: str) -> str:
@@ -116,8 +126,14 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.archetype_file = _archetype_path(self.archetype)
         self.snapshot_file = _snapshot_path()
         self.breach_tracker = BreachLocationTracker(self_player_id=1)
+        # Action-frame buffer for feature extraction (Phase 5B).
+        # Capped to MAX_FRAME_BUFFER to bound memory; extract_features
+        # is monotone-ish in the trackers so the cap is safe.
+        self._action_frames: list = []
         self.arbiter: Optional[EconomyArbiter] = None
         self.turret_shorthand = "DF"
+
+    MAX_FRAME_BUFFER = 5000  # ~50 turns at 100 frames/turn — well under any match
 
     def on_game_start(self, config):
         self.config = config
@@ -140,21 +156,54 @@ class AlgoStrategy(gamelib.AlgoCore):
         except Exception:  # noqa: BLE001
             self.turret_shorthand = "DF"
 
-        # Create the EconomyArbiter once. The Phase 3 classifier +
-        # action_predictor are not wired here yet (Phase 5B work — needs
-        # the trackers→features mapping calibrated). The arbiter handles
-        # ``opponent_classifier=None`` cleanly by skipping posterior
-        # updates and using the heuristic offense path.
+        # Phase 5B: Wire the OpponentModel (best-effort).
+        # If the corpus npz / labels.json aren't present, fall through to
+        # opponent_classifier=None — the arbiter handles that cleanly.
+        opponent_classifier = None
+        action_predictor = None
+        if _OPPONENT_MODEL_AVAILABLE:
+            try:
+                npz_path = os.path.join(_HERE, "data", "opponent_features.npz")
+                labels_path = os.path.join(_HERE, "opponent", "labels.json")
+                if os.path.isfile(npz_path):
+                    opponent_classifier = fit_default_classifier(npz_path)
+                    gamelib.debug_write(
+                        "[athena] ArchetypeClassifier fitted from "
+                        f"{os.path.basename(npz_path)}"
+                    )
+                if os.path.isfile(labels_path):
+                    action_predictor = ActionPredictor().fit_from_labels_json(
+                        labels_path,
+                    )
+                    gamelib.debug_write(
+                        "[athena] ActionPredictor fitted from labels.json"
+                    )
+            except Exception as exc:  # noqa: BLE001
+                gamelib.debug_write(
+                    f"[athena] OpponentModel fit failed: {exc!r} "
+                    "— falling back to no-classifier path"
+                )
+                opponent_classifier = None
+                action_predictor = None
+
+        # Create the EconomyArbiter once. With opponent_classifier and
+        # action_predictor both set, the arbiter will:
+        #   - update the archetype posterior each turn (Milestone E1)
+        #   - feed top-3 opponent actions into beam_search (Milestone E2)
+        # If either is None the arbiter falls back to the heuristic path.
         self.arbiter = EconomyArbiter(
             config=self.config,
             archetype_path=self.archetype_file,
             snapshot_path=self.snapshot_file,
             breach_tracker=self.breach_tracker,
-            opponent_classifier=None,
-            action_predictor=None,
+            opponent_classifier=opponent_classifier,
+            action_predictor=action_predictor,
             watchdog=Watchdog(),
             debug_log_func=gamelib.debug_write,
         )
+        # Expose the action-frame buffer to the arbiter so _update_posterior
+        # can call extract_features(self._action_frames, opp_pid=2).
+        self.arbiter.action_frame_buffer = self._action_frames
         gamelib.debug_write(
             f"[athena] on_game_start; archetype={self.archetype} "
             f"turret_sh={self.turret_shorthand}"
@@ -253,6 +302,13 @@ class AlgoStrategy(gamelib.AlgoCore):
         try:
             frame = json.loads(turn_string)
             self.breach_tracker.consume_action_frame(frame)
+            # Buffer for Phase 5B feature extraction. Bound by
+            # MAX_FRAME_BUFFER — we drop oldest frames if exceeded.
+            self._action_frames.append(frame)
+            if len(self._action_frames) > self.MAX_FRAME_BUFFER:
+                # Drop ~10% to amortize cost
+                drop = self.MAX_FRAME_BUFFER // 10
+                del self._action_frames[:drop]
         except Exception as exc:  # noqa: BLE001
             gamelib.debug_write(
                 f"[athena] on_action_frame exception: {exc!r}"

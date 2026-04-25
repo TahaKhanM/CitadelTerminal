@@ -1,6 +1,6 @@
 {
   "name": "spread_line",
-  "description": "Wider/shallower than V-funnel: turrets distributed evenly along the front line at y=12, larger total wall coverage at y=13, fewer Supports. Trades shield strength for damage breadth - good against opponents who alternate edges.",
+  "description": "Wider/shallower than V-funnel rebalanced for Phase 5B: 12 turrets distributed along y=12, full wall coverage at y=13, supports anchor at y=8. Trades shield strength for damage breadth — good against opponents who alternate edges.",
   "placements": [
     {"unit": "TURRET", "loc": [4, 12], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [23, 12], "upgrade": false, "priority": 1},
@@ -8,6 +8,12 @@
     {"unit": "TURRET", "loc": [17, 12], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [13, 12], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [14, 12], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [6, 12], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [21, 12], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [8, 12], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [19, 12], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [11, 12], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [16, 12], "upgrade": false, "priority": 1},
 
     {"unit": "WALL", "loc": [0, 13], "upgrade": false, "priority": 2},
     {"unit": "WALL", "loc": [27, 13], "upgrade": false, "priority": 2},

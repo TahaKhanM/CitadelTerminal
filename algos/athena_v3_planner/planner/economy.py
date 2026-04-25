@@ -99,7 +99,18 @@ class EconomyArbiter:
             except Exception:  # noqa: BLE001
                 self._posterior = None
 
+        # Phase 5B: action-frame buffer hook. Set externally by
+        # algo_strategy to a list of already-parsed action frames; the
+        # _update_posterior method runs extract_features over it each
+        # turn. None means no posterior update is possible.
+        self.action_frame_buffer: Optional[List[Dict[str, Any]]] = None
+
         self.turn_count = 0
+        # Diagnostics: count of turns where opp_actions_top_k was populated
+        # vs empty. Used by smoke tests and the Phase 5B 90 %% mid-game
+        # invariant in the brief.
+        self._opp_actions_populated_turns: int = 0
+        self._opp_actions_empty_turns: int = 0
 
     # ------------------------------------------------------------------
     # Public API
@@ -151,21 +162,51 @@ class EconomyArbiter:
     # ------------------------------------------------------------------
 
     def _update_posterior(self, game_state) -> None:
-        """Cheap online posterior update.
+        """Phase 5B: feed action-frame buffer through Phase 3 features ->
+        ArchetypeClassifier and update the running posterior.
 
-        We don't compute features from action frames here — that's the
-        Phase 0.5 trackers' job. We just call into the classifier IF a
-        feature vector is exposed somewhere on the trackers.
-        Currently a no-op — Phase 5B/Phase 6 wires the full path
-        (per the Phase 4 followups list).
+        Mechanics:
+          - The classifier was fit at on_game_start over the labeled
+            corpus.
+          - extract_features() runs the Phase 0.5 trackers over the
+            buffered action frames, producing the 14-dim vector the
+            classifier expects.
+          - We call ``predict_proba`` on the cumulative feature vector
+            each turn (cumulative is correct: features are themselves
+            running aggregates, not a per-turn delta), and treat the
+            posterior as ``predict_proba`` directly (NOT
+            ``update_posterior`` — that double-counts when called over
+            the cumulative trackers).
+
+        Throttling: only re-extract once per turn. Bail early if no
+        frames or no classifier. Soft-fail on any exception so the
+        offense pipeline still runs.
         """
         if self.opponent_classifier is None or self._posterior is None:
             return
-        # Hook for Phase 5B: build a feature vector from breach/spawn trackers
-        # and call self.opponent_classifier.update_posterior(self._posterior, ...).
-        # Skipped for Phase 5A — the calibration work + tracker→feature
-        # mapping is its own milestone.
-        return
+        if not self.action_frame_buffer:
+            return
+        try:
+            # Local import — keeps top-level economy.py importable when
+            # opponent/ subpackage isn't available.
+            try:
+                from opponent.features import extract_features  # type: ignore
+            except ImportError:
+                from ..opponent.features import extract_features  # type: ignore
+
+            # opp_pid=2 because the algo runs as player 1 from
+            # gamelib's POV (raw JSON convention 1=us, 2=opp).
+            features = extract_features(
+                self.action_frame_buffer, opponent_player_id=2,
+            )
+            # If no opponent activity yet (turns_observed == 0), keep
+            # the uniform prior — predict_proba on all-zero features
+            # returns garbage.
+            if features.get("turns_observed", 0.0) <= 0.0:
+                return
+            self._posterior = self.opponent_classifier.predict_proba(features)
+        except Exception as exc:  # noqa: BLE001
+            self.debug_log(f"[arbiter] posterior compute soft-fail: {exc!r}")
 
     def _defense_phase(self, game_state) -> None:
         """Compose the six defense primitives in order."""
@@ -261,9 +302,10 @@ class EconomyArbiter:
         if len(cands) <= 1:
             return  # only the "hoard" sentinel — nothing to spawn
 
-        # opp_actions_top_k: stub until Phase 5B wires the full predictor.
-        # When empty, beam_search uses the heuristic-only path internally,
-        # which is a fine fallback (tested in Phase 4).
+        # Phase 5B: opp_actions_top_k populated from ActionPredictor.
+        # k=3 per the brief (smaller than the default 5 to keep beam
+        # search compute under the 8s soft cap; documented in
+        # PHASE5B_RESULTS.md if we drop further).
         opp_actions: List[Tuple[Dict[str, Any], float]] = []
         if self.action_predictor is not None and self._posterior is not None:
             try:
@@ -274,11 +316,19 @@ class EconomyArbiter:
                     opp_mp = 0.0
                 opp_actions = self.action_predictor.top_k(
                     {"mp": opp_mp, "turn": self.turn_count},
-                    self._posterior, k=5,
+                    self._posterior, k=3,
                 )
             except Exception as exc:  # noqa: BLE001
                 self.debug_log(f"[arbiter] action_predictor.top_k: {exc!r}")
                 opp_actions = []
+
+        # Diagnostics for the Phase 5B "≥90% mid-game turns populated"
+        # invariant (turns 10..90).
+        if 10 <= self.turn_count <= 90:
+            if opp_actions:
+                self._opp_actions_populated_turns += 1
+            else:
+                self._opp_actions_empty_turns += 1
 
         # Budget for offense: cap at 8s but leave 1s headroom.
         rem = max(50.0, self.watchdog.remaining_ms() - 1000.0)
@@ -301,7 +351,21 @@ class EconomyArbiter:
             )
         except Exception as exc:  # noqa: BLE001
             self.debug_log(f"[arbiter] beam_search: {exc!r}")
-            return
+            # Phase 5B: degrade gracefully — retry with skip_sim=True so we
+            # at least get the heuristic best plan. This protects us when
+            # sim_rs rejects a corner-case state.
+            try:
+                best = beam_search(
+                    state_dict, cands,
+                    opp_actions_top_k=[],  # forces heuristic path
+                    my_player=1,
+                    budget_ms=min(500.0, offense_budget),
+                    config_path=self.snapshot_path,
+                    skip_sim=True,
+                )
+            except Exception as exc2:  # noqa: BLE001
+                self.debug_log(f"[arbiter] beam_search heuristic retry: {exc2!r}")
+                return
 
         if best is None or best.name == "hoard":
             return
@@ -333,10 +397,18 @@ class EconomyArbiter:
                 break
             spawned += n
 
+        # Phase 5B: surface the most-likely archetype (top-1) when posterior is set.
+        top_arch = "?"
+        if self._posterior:
+            try:
+                top_arch = max(self._posterior.items(), key=lambda kv: kv[1])[0]
+            except Exception:  # noqa: BLE001
+                top_arch = "?"
         self.debug_log(
             f"[arbiter] turn={self.turn_count} pick={candidate.name} "
             f"deploys={len(candidate.deploys)} spawned={spawned} "
-            f"EU={candidate.expected_utility:.2f} sims={candidate.sim_count}"
+            f"EU={candidate.expected_utility:.2f} sims={candidate.sim_count} "
+            f"opp_arch={top_arch}"
         )
 
 

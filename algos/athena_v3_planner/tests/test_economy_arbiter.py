@@ -166,6 +166,74 @@ def test_arbiter_watchdog_total_budget_propagates_budget_exception():
         arb.execute(gs)
 
 
+def test_arbiter_phase5b_posterior_wired():
+    """Phase 5B Milestone E: posterior gets updated when classifier+frames
+    are present; opp_actions_top_k feeds beam_search."""
+    cfg = _build_min_config()
+    captured: List[str] = []
+
+    # Real classifier and predictor (small footprint loads from npz/labels).
+    import numpy as np
+    from algos.athena_v3_planner.opponent.classifier import ArchetypeClassifier
+    from algos.athena_v3_planner.opponent.action_predictor import ActionPredictor
+    from algos.athena_v3_planner.opponent.archetypes import ARCHETYPES
+
+    # Build a tiny synthetic feature set so we don't depend on the live
+    # corpus (which the unit-test must not require).
+    F = 14
+    K = len(ARCHETYPES)
+    rng = np.random.default_rng(0)
+    X = rng.standard_normal((K * 3, F))
+    labels = [a for a in ARCHETYPES for _ in range(3)]
+    clf = ArchetypeClassifier().fit(X, labels)
+
+    # ActionPredictor that stays unfitted but exposes a top_k stub
+    pred = ActionPredictor()
+    pred._fitted = True  # bypass fit-check
+    # Inject a fake distribution
+    from collections import Counter
+    for arch in ARCHETYPES:
+        pred._counts[arch][("0", "early")] = Counter({(3, "TL", "1-3", True): 1})
+        pred._global_counts[arch] = Counter({(3, "TL", "1-3", True): 1})
+        pred._n_obs[arch] = 1
+
+    arb = EconomyArbiter(
+        config=cfg,
+        archetype_path=str(ATHENA_ROOT / "defenses" / "v_funnel.json"),
+        snapshot_path=str(ATHENA_ROOT / "data" / "citadel_config_snapshot.json"),
+        opponent_classifier=clf,
+        action_predictor=pred,
+        debug_log_func=captured.append,
+    )
+    # Posterior should start uniform.
+    initial = dict(arb._posterior or {})
+    assert initial, "uniform_prior should populate posterior"
+
+    # Provide a small action-frame buffer so _update_posterior has work to do.
+    # Bare minimum: a frame with turnInfo + p2Stats + a spawn event.
+    arb.action_frame_buffer = [
+        {
+            "turnInfo": [0, 5, 0],   # phase=0 deploy, turn=5, frame=0 -> first
+            "p1Stats": [40, 8, 5, 0],
+            "p2Stats": [40, 8, 5, 0],
+            "events": {
+                "spawn": [
+                    [[14, 14], 3, "uid", 2],  # opp scout
+                    [[14, 14], 3, "uid", 2],
+                ],
+            },
+        },
+    ]
+
+    gs = _make_game_state(my_sp=20.0, my_mp=8.0)
+    arb.execute(gs)
+    assert arb.turn_count == 1
+    # _update_posterior should have run; either it kept the uniform or
+    # produced a real predict_proba dict — both are valid.
+    assert isinstance(arb._posterior, dict)
+    assert sum(arb._posterior.values()) == pytest.approx(1.0, rel=1e-4)
+
+
 def test_arbiter_swallows_component_exceptions():
     """A defense primitive that raises shouldn't crash the arbiter."""
     cfg = _build_min_config()

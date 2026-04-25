@@ -1,28 +1,108 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 5A — IN-FLIGHT** (2026-04-25)
+## Current phase: **Phase 5 — COMPLETE** (2026-04-25)
 
-Milestones A + B shipped: sim adapter closed, EconomyArbiter wired,
-end-to-end smoke test PASSED (athena beats v13_second_ring 1-0 in a
-single full match, 0 crashes, 0 watchdog fires, ~6 ms avg/turn). See
-`data/PHASE5_SMOKE.md` for details.
+Phase 5B closed out Phase 5: opponent posterior wired into beam search,
+defense rebalanced, bestof 20 validated against both baselines.
+Wilson LB 0.839 vs Lostkids (PASS), 0.300 vs v13 (FAIL — acceptable per
+local-determinism caveat). See `data/PHASE5B_RESULTS.md`.
 
-Milestone C (`/bestof 20` Wilson LB validation) deferred to Phase 5B per
-the brief's authorization to ship "Phase 5A: sim adapter + integration
-architecture" and hand off Phase 5B validation when the time budget gets
-tight. Bestof + opponent-predictor wiring + utility calibration is the
-Phase 5B work.
+**Next: Phase 6 — MAP-Elites archive.** See § "Phase 6 handoff brief"
+below.
 
 ## Phase 5 task ledger
 
 | Task | Status | Commit |
 |---|---|---|
 | A. Sim adapter close-out (snapshot keys + state_adapter.py) | DONE | `7b05fed` |
-| B. EconomyArbiter + algo_strategy integration                | DONE | (this commit) |
-| C. /bestof 20 Wilson LB ≥ 50% validation                     | **DEFERRED to Phase 5B** | — |
-| D. Phase 6 handoff brief                                     | TODO | — |
+| B. EconomyArbiter + algo_strategy integration                | DONE | `0914072` |
+| C. /bestof 20 Wilson LB ≥ 50% validation (deferred to 5B)    | DONE | `7f1a713` |
+| D. Phase 6 handoff brief                                     | DONE | (this commit) |
 
-### Phase 5A validation gate
+### Phase 5B sub-task ledger
+
+| Sub-task | Status | Commit |
+|---|---|---|
+| E1. Wire ArchetypeClassifier into `_update_posterior`        | DONE | `9779e69` |
+| E2. Wire ActionPredictor.top_k(k=3) into `_offense_phase`    | DONE | `9779e69` |
+| E3. Smoke match confirms beam_search runs sim_rs rollouts    | DONE | `9779e69` |
+| F1. Bump turret count in {v_funnel,two_layer_keep,spread_line} to 10-12 | DONE | `9779e69` |
+| F2. Loosen `probabilistic_placement` turret-y to y >= 9      | DONE | `9779e69` |
+| F3. Add `defenses/v13_inspired.json`                         | DONE | `9779e69` |
+| G1. /bestof 20 vs v13_second_ring                            | DONE | `7f1a713` |
+| G2. /bestof 20 vs athena_baseline_lostkids                   | DONE | `7f1a713` |
+| G3. PHASE5B_RESULTS.md                                       | DONE | `7f1a713` |
+| H. STATUS + AUTONOMOUS_LOG handoff to Phase 6                | DONE | (this commit) |
+
+### Phase 5B validation gate
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| Wilson LB ≥ 50% vs v13_second_ring             | **FAIL** (acceptable) | 10/20, LB=0.300. Per brief: "failing v13 but beating Lostkids = local-determinism artifact (acceptable)". |
+| Wilson LB ≥ 50% vs athena_baseline_lostkids    | **PASS**              | 20/20, LB=0.839. |
+| No crashes / no timeouts                        | PASS                  | 0/40 across both bestofs. |
+| Per-turn compute < 13s                          | PASS                  | mean 140 ms, max ~190 ms. Watchdog never fired. |
+| Beam search invokes sim_rs against non-empty opp actions | PASS         | sims=3 on >90% of mid-game turns; smoke match log confirmed. |
+
+## Phase 6 handoff brief
+
+**Goal**: MAP-Elites archive over defense × offense × utility-weight
+genome with sim-evaluated fitness; provides warm starts for the
+offense planner. ≥64 cells in the archive minimum.
+
+Per `docs/ATHENA_BUILD_PLAN.md` § Phase 6, the genome dimensions:
+- Defense archetype (4-way categorical: v_funnel / two_layer_keep /
+  spread_line / v13_inspired).
+- Offense template ID (17-way categorical from
+  `offense/templates/`).
+- Utility weights α (HP_taken penalty), β (MP_spent penalty), γ
+  (struct_kill bonus), δ (SP_gained bonus). Currently 1.0 / 0.5 / 0.2
+  / 0.0 — needs MAP-Elites calibration.
+
+Suggested behavioral characterization (BC) axes for MAP-Elites:
+- BC1: opening MP utilization (mean MP spent in turns 0-5)
+- BC2: defense density (turret count peaked over the match)
+- BC3: edge bias (|left_spawns - right_spawns| / total)
+
+Fitness: average HP delta over a small fuzz harness (e.g. 5 matches
+each vs v13 and Lostkids, 10 matches total) — sim_rs already runs at
+~14 K sims/sec single-core / ~88 K 10-thread, so a 64-cell archive
+with 10 matches/cell × 80 turns/match = ~50 K sims = sub-second per
+generation.
+
+Phase 5B unblocked the integration plumbing (sim_rs adapter is
+production-ready; classifier+predictor are wired; beam_search runs
+real rollouts), so Phase 6 can iterate purely on the genome space
+without touching any of the Phase 5 wiring.
+
+### Phase 5B followups (carried into Phase 6 backlog)
+
+1. **Classifier confidence calibration** — Phase 3 LOO-CV was 0.489
+   (below the 0.70 floor). PHASE5B_RESULTS.md observes the posterior
+   flips opp archetype every few turns mid-match (SCOUT_RUSH ↔
+   DEMOLISHER_LINE ↔ BALANCED), driving noisy expected utility.
+   Suggested: temperature-scale the softmax in `predict_proba`, or
+   add a confidence threshold below which we revert to uniform
+   posterior. Would also benefit from class-balanced LR on
+   discretized features (per Phase 3 followup notes).
+2. **Utility weight α/β/γ/δ calibration** — currently defaults
+   1.0/0.5/0.2/0.0. Phase 6 MAP-Elites can sweep these as part of
+   the genome.
+3. **Defense rebalance was helpful but not decisive vs v13.** The
+   `v13_inspired` archetype matches v13's opening density, so neither
+   side outpaces defensively; the offense-template choice is the
+   bottleneck. Phase 6 should discover offense templates that exploit
+   v13's wall-removal/refund cycle.
+4. **`reactive_to_breach` primitive may be under-utilized** — the
+   breach tracker fires on `on_action_frame` but feeding it through
+   the planner doesn't always trigger reactive turret placements (we
+   often see no `pick=reactive_to_breach` log entry). Profile next.
+5. **`_in_our_half` bounds-check warnings.** "Checked for stationary
+   unit outside of arena bounds" prints frequently in defense-phase
+   logs. Cosmetic but adds log noise — tighten the bounds check
+   upstream of `contains_stationary_unit`.
+
+### Phase 5A validation gate (preserved for context)
 
 | Sub-gate | Status | Evidence |
 |---|---|---|
