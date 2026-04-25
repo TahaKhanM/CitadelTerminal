@@ -1,30 +1,262 @@
-"""Athena v3 planner — Phase 0 stub.
+"""Athena v3 — full integrated algo (Phase 5).
 
-This is a no-op skeleton. The real planner (search-based, Plan D) will be
-layered in across subsequent phases per `docs/ATHENA_BUILD_PLAN.md`. For
-Phase 0 we only need the file to import cleanly so the package is loadable
-by the engine and by downstream tooling.
+Composes:
+  - DefensePlanner (Phase 2, six primitives in `planner.defense`)
+  - OffensePlanner (Phase 4, beam search in `planner.offense`)
+  - OpponentModel (Phase 3, ArchetypeClassifier + ActionPredictor) — optional
+  - Phase 0.5 action-frame trackers (BreachLocationTracker is wired here;
+    others can be added when their consumers land)
+  - EconomyArbiter (Phase 5, `planner.economy`) — the per-turn orchestrator
+  - Watchdog (Phase 4, `planner.budget`)
 
-No game logic is wired here yet. `on_game_start` just stashes the config
-and `on_turn` submits an empty turn so the engine accepts the algo.
+Production safety wrappers (lifted from `algos/athena_baseline_lostkids/`):
+  - 13 s SIGALRM watchdog around `on_turn`
+  - top-level try/except
+  - safe-fallback minimal turret defense on any exception or watchdog fire
 """
+from __future__ import annotations
+
+import json
+import os
+import random
+import signal
+import sys
+import threading
+import time
+import traceback
+from sys import maxsize
+from typing import Optional
 
 import gamelib
+
+# Make the local subpackages importable when the engine launches us.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
+# Local imports
+from offense.state_adapter import augment_snapshot_for_simcore  # noqa: E402
+from opponent.action_frame_utils import BreachLocationTracker  # noqa: E402
+from planner.budget import BudgetExceeded, Watchdog  # noqa: E402
+from planner.economy import EconomyArbiter  # noqa: E402
+
+
+# --- Production safety: turn-time watchdog (lifted from Lostkids) -----------
+TURN_WATCHDOG_SECONDS = 13
+
+
+class _TurnTimeout(Exception):
+    pass
+
+
+def _sigalrm_handler(_signum, _frame):
+    raise _TurnTimeout("on_turn exceeded TURN_WATCHDOG_SECONDS")
+
+
+def _arm_watchdog(seconds):
+    """Arm a SIGALRM watchdog. Returns (disarm, fired_check) tuple.
+
+    Falls back to a thread-Timer if SIGALRM is unavailable. Lifted from
+    `algos/athena_baseline_lostkids/algo_strategy.py`.
+    """
+    if hasattr(signal, "SIGALRM"):
+        try:
+            old_handler = signal.signal(signal.SIGALRM, _sigalrm_handler)
+            signal.alarm(seconds)
+
+            def disarm_sigalrm():
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
+
+            return disarm_sigalrm, lambda: False
+        except (ValueError, OSError):
+            pass
+    fired = {"v": False}
+
+    def fire():
+        fired["v"] = True
+
+    timer = threading.Timer(seconds, fire)
+    timer.daemon = True
+    timer.start()
+
+    def disarm_thread():
+        timer.cancel()
+
+    return disarm_thread, lambda: fired["v"]
+
+
+# --- Defense archetype options ---------------------------------------------
+_ARCHETYPES = {
+    "v_funnel": "v_funnel.json",
+    "two_layer_keep": "two_layer_keep.json",
+    "spread_line": "spread_line.json",
+}
+_DEFAULT_ARCHETYPE = "v_funnel"
+
+
+def _archetype_path(name: str) -> str:
+    return os.path.join(
+        _HERE, "defenses", _ARCHETYPES.get(name, _ARCHETYPES[_DEFAULT_ARCHETYPE]),
+    )
+
+
+def _snapshot_path() -> str:
+    return os.path.join(_HERE, "data", "citadel_config_snapshot.json")
 
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
         super().__init__()
+        seed = random.randrange(maxsize)
+        random.seed(seed)
+        gamelib.debug_write(f"[athena] random seed: {seed}")
         self.config = None
+        self.archetype = _DEFAULT_ARCHETYPE
+        self.archetype_file = _archetype_path(self.archetype)
+        self.snapshot_file = _snapshot_path()
+        self.breach_tracker = BreachLocationTracker(self_player_id=1)
+        self.arbiter: Optional[EconomyArbiter] = None
+        self.turret_shorthand = "DF"
 
     def on_game_start(self, config):
         self.config = config
 
+        # Idempotent: ensure SimCore-required keys are in the vendored
+        # config snapshot. No-op if already present (Phase 5 milestone A
+        # patched the file at build time, but this guards against fresh
+        # checkouts / regenerations).
+        try:
+            changed = augment_snapshot_for_simcore(self.snapshot_file)
+            if changed:
+                gamelib.debug_write(
+                    "[athena] augmented config snapshot with SimCore keys"
+                )
+        except Exception as exc:  # noqa: BLE001
+            gamelib.debug_write(f"[athena] augment_snapshot failed: {exc!r}")
+
+        try:
+            self.turret_shorthand = config["unitInformation"][2]["shorthand"]
+        except Exception:  # noqa: BLE001
+            self.turret_shorthand = "DF"
+
+        # Create the EconomyArbiter once. The Phase 3 classifier +
+        # action_predictor are not wired here yet (Phase 5B work — needs
+        # the trackers→features mapping calibrated). The arbiter handles
+        # ``opponent_classifier=None`` cleanly by skipping posterior
+        # updates and using the heuristic offense path.
+        self.arbiter = EconomyArbiter(
+            config=self.config,
+            archetype_path=self.archetype_file,
+            snapshot_path=self.snapshot_file,
+            breach_tracker=self.breach_tracker,
+            opponent_classifier=None,
+            action_predictor=None,
+            watchdog=Watchdog(),
+            debug_log_func=gamelib.debug_write,
+        )
+        gamelib.debug_write(
+            f"[athena] on_game_start; archetype={self.archetype} "
+            f"turret_sh={self.turret_shorthand}"
+        )
+
     def on_turn(self, turn_state):
-        # No-op: instantiate GameState (so the engine sees a valid handshake)
-        # and immediately submit it with no spawns/upgrades.
-        game_state = gamelib.GameState(self.config, turn_state)
-        game_state.submit_turn()
+        """Wrapped in 13s watchdog + try/except + safe-fallback."""
+        start = time.time()
+        disarm, fired = _arm_watchdog(TURN_WATCHDOG_SECONDS)
+        game_state = None
+        used_fallback = False
+        try:
+            game_state = gamelib.GameState(self.config, turn_state)
+            if self.arbiter is None:
+                # Defensive: shouldn't happen — on_game_start sets it.
+                self._safe_fallback_turn(game_state)
+            else:
+                self.arbiter.execute(game_state)
+            game_state.submit_turn()
+        except _TurnTimeout:
+            gamelib.debug_write(
+                f"[athena] watchdog fired after {TURN_WATCHDOG_SECONDS}s "
+                "— safe fallback"
+            )
+            used_fallback = True
+        except BudgetExceeded as exc:
+            gamelib.debug_write(
+                f"[athena] BudgetExceeded (component={exc.component}, "
+                f"elapsed={exc.elapsed_ms:.1f}ms cap={exc.cap_ms:.1f}ms) "
+                "— safe fallback"
+            )
+            used_fallback = True
+        except Exception as exc:  # noqa: BLE001
+            gamelib.debug_write(
+                f"[athena] on_turn exception: {exc!r}\n{traceback.format_exc()}"
+            )
+            used_fallback = True
+        finally:
+            disarm()
+
+        if used_fallback:
+            try:
+                if game_state is None:
+                    game_state = gamelib.GameState(self.config, turn_state)
+                self._safe_fallback_turn(game_state)
+                game_state.submit_turn()
+            except Exception as exc2:  # noqa: BLE001
+                gamelib.debug_write(
+                    f"[athena] safe-fallback also failed: {exc2!r}"
+                )
+                try:
+                    if game_state is not None:
+                        game_state.submit_turn()
+                except Exception:  # noqa: BLE001
+                    pass
+
+        if fired() and not used_fallback:
+            gamelib.debug_write(
+                f"[athena] watchdog flag set but turn finished in "
+                f"{time.time() - start:.2f}s"
+            )
+
+    # ------------------------------------------------------------------
+    # Safe-fallback (lifted from Lostkids/defense-only variant)
+    # ------------------------------------------------------------------
+
+    _SAFE_FALLBACK_TURRETS = ((2, 13), (25, 13), (3, 13), (24, 13))
+    _SP_IDX = 0
+
+    def _safe_fallback_turn(self, game_state):
+        try:
+            sp = game_state.get_resource(self._SP_IDX, 0)
+        except Exception:  # noqa: BLE001
+            sp = 0.0
+        for loc in self._SAFE_FALLBACK_TURRETS:
+            try:
+                cost = game_state.type_cost(self.turret_shorthand)[self._SP_IDX]
+            except Exception:  # noqa: BLE001
+                cost = 2.0
+            if sp < cost:
+                break
+            try:
+                spawned = game_state.attempt_spawn(
+                    self.turret_shorthand, list(loc),
+                )
+            except Exception:  # noqa: BLE001
+                spawned = 0
+            if spawned:
+                sp -= cost
+
+    # ------------------------------------------------------------------
+    # Action-frame: feed Phase 0.5 trackers
+    # ------------------------------------------------------------------
+
+    def on_action_frame(self, turn_string):
+        try:
+            frame = json.loads(turn_string)
+            self.breach_tracker.consume_action_frame(frame)
+        except Exception as exc:  # noqa: BLE001
+            gamelib.debug_write(
+                f"[athena] on_action_frame exception: {exc!r}"
+            )
 
 
 if __name__ == "__main__":

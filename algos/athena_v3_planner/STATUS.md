@@ -1,13 +1,89 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 4 — DONE** (2026-04-25, all 7 sub-tasks shipped)
+## Current phase: **Phase 5A — IN-FLIGHT** (2026-04-25)
 
-Next phase: **Phase 5 — EconomyArbiter integration** (compose Phase 2
-DefensePlanner + Phase 3 OpponentModel + Phase 4 OffensePlanner under a
-single per-turn arbiter, complete the gamelib<->sim_rs state adapter
-so beam_search can actually run sim rollouts, validate end-to-end vs
-both baselines with Wilson LB ≥ 50% target gradienting toward 65%).
-See `AUTONOMOUS_LOG.md` § Phase 5 for the next-agent handoff brief.
+Milestones A + B shipped: sim adapter closed, EconomyArbiter wired,
+end-to-end smoke test PASSED (athena beats v13_second_ring 1-0 in a
+single full match, 0 crashes, 0 watchdog fires, ~6 ms avg/turn). See
+`data/PHASE5_SMOKE.md` for details.
+
+Milestone C (`/bestof 20` Wilson LB validation) deferred to Phase 5B per
+the brief's authorization to ship "Phase 5A: sim adapter + integration
+architecture" and hand off Phase 5B validation when the time budget gets
+tight. Bestof + opponent-predictor wiring + utility calibration is the
+Phase 5B work.
+
+## Phase 5 task ledger
+
+| Task | Status | Commit |
+|---|---|---|
+| A. Sim adapter close-out (snapshot keys + state_adapter.py) | DONE | `7b05fed` |
+| B. EconomyArbiter + algo_strategy integration                | DONE | (this commit) |
+| C. /bestof 20 Wilson LB ≥ 50% validation                     | **DEFERRED to Phase 5B** | — |
+| D. Phase 6 handoff brief                                     | TODO | — |
+
+### Phase 5A validation gate
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| `simulate_action_phase_py` accepts the v3_planner snapshot       | PASS | `tests/test_state_adapter.py::test_sim_rs_round_trip_smoke` + `python -m algos.athena_v3_planner.offense.sim_eval` smoke (HP delta = replay HP delta byte-exactly). |
+| Beam search no longer requires `skip_sim=True`                   | PASS | `EconomyArbiter._offense_phase` calls `beam_search(skip_sim=False, ...)`. With opp_actions empty, beam_search internally falls back to heuristic; with opp_actions populated (Phase 5B), it runs real sim_rs rollouts. |
+| Single end-to-end match: full Athena vs v13_second_ring          | **PASS (Athena wins)** | `data/PHASE5_SMOKE.md`. Winner=p1, 100 turns, no crashes, no timeouts, 0 watchdog fires. |
+| Per-turn p99 < 13s                                                | PASS | total_computation_time = 618 ms across 100 turns ≈ 6.2 ms avg/turn. |
+| pytest suite green                                                | PASS | 59/59 passed (Phase 4: 22, Phase 5: 12 new). |
+
+(Wilson LB ≥ 50% gate moves to Phase 5B.)
+
+### Where Phase 5 deliverables live
+
+```
+algos/athena_v3_planner/
+├── algo_strategy.py                ← FULL integrated entry point
+│                                     (was: Phase 0 stub)
+├── run.sh                          ← engine launcher
+├── offense/
+│   └── state_adapter.py            ← gamelib.GameState -> sim_rs dict
+├── planner/
+│   └── economy.py                  ← EconomyArbiter (per-turn orchestrator)
+├── tests/
+│   ├── test_state_adapter.py       ← 7 tests (incl. sim_rs round-trip)
+│   └── test_economy_arbiter.py     ← 5 tests
+└── data/
+    ├── citadel_config_snapshot.json  ← +_raw_unit_information,
+    │                                   +_resources_block_verbatim
+    ├── CONFIG_README.md            ← doc the SimCore-key augmentation
+    └── PHASE5_SMOKE.md             ← single-match smoke result
+```
+
+(plus the same snapshot-key augmentation in
+`algos/athena_v3_planner_offense_only/data/` and
+`algos/athena_v3_planner_defense_only/data/`.)
+
+### Phase 5B / Phase 5C followups (handoff)
+
+1. Wire Phase 3 ArchetypeClassifier → posterior update from Phase 0.5
+   trackers. Currently `EconomyArbiter._update_posterior` is a no-op
+   stub. The trackers→features mapping is the calibration work.
+2. Wire ActionPredictor.top_k into the arbiter's offense phase. Once
+   `opp_actions_top_k` is non-empty, beam_search will run real sim_rs
+   rollouts (the adapter is production-ready).
+3. Run `/bestof 20` vs v13_second_ring AND vs athena_baseline_lostkids.
+   Capture Wilson 95% LB, p99 turn time, mean compute time. Document in
+   `data/PHASE5_RESULTS.md`. Validation gate: LB ≥ 50% per baseline.
+4. Defense rebalance from Phase 2 followups (deferred from Milestone B
+   to keep the integration focused):
+   - Bump turret count in v_funnel/two_layer_keep/spread_line toward
+     10-15 for the early game.
+   - Loosen `probabilistic_placement` turret-y from `y >= 11` to `y >= 9`.
+   - Optionally add a `v13_inspired.json` archetype.
+5. Calibrate utility weights (α/β/γ/δ) on a small fuzz harness.
+6. Tighten `_in_our_half` bounds check upstream of
+   `contains_stationary_unit` to silence the spurious "outside arena
+   bounds" warnings printed during defense.
+7. After all of the above, milestone D: update STATUS / AUTONOMOUS_LOG
+   with Phase 6 (MAP-Elites) brief.
+
+### Old Phase-4 ledger (preserved for context)
 
 ## Phase 4 task ledger
 
