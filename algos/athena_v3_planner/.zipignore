@@ -20,6 +20,20 @@
 */eval/*
 */sim/*
 
+# REGRESSION: the competition's Docker sandbox intercepts subprocess.Popen
+# calls and translates them into nested `docker run`. Their nested container
+# image lacks /bin/sh, so any subprocess invocation of a bundled binary
+# crashes the algo at startup with:
+#   "exec: /bin/sh: no such file or directory"
+# (see replays/player-error-360740-15921536.txt)
+# Until we have an alternative path (build sim_rs as an importable Python
+# module / bundle a Linux-compatible PyO3 wheel via cibuildwheel for
+# multiple Python versions), exclude bundled binaries from the upload.
+# sim_bridge.py auto-detects "no binary present" and falls through to
+# vendored pysim cleanly. The binaries stay in-tree under bin/ for local
+# dev and for future fix-forward work.
+*/bin/*
+
 # All Phase ledger markdown — broad pattern
 */data/PHASE*
 */data/G11_*
