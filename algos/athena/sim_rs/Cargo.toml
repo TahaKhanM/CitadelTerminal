@@ -1,0 +1,52 @@
+[package]
+name = "sim_rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["Muhammad Taha"]
+description = "Bit-exact Rust port of SimCore (Citadel Terminal action-phase simulator)"
+
+[lib]
+name = "sim_rs"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["instrumented"]
+# pyo3 extension-module bindings. Opt-in so `cargo build` / `cargo test` work
+# without a matching Python version. Build the PyO3 extension with:
+#   cargo build --release --features pyo3
+pyo3 = ["dep:pyo3"]
+# Emit event-bucket entries (damage/shield/death/selfDestruct). Always on by
+# default so INSTRUMENTED = cross-validator + tests. FAST mode disables via
+# `--no-default-features` — skips the per-event string clone + vec push.
+instrumented = []
+# Expose pathfinder cache hit/miss/invalidation counters via public AtomicUsize
+# statics. Off by default — adds a handful of atomic adds to get_step. Enabled
+# by examples/cache_stats.rs.
+pf_counters = []
+
+[dependencies]
+indexmap = "2"
+bumpalo  = "3"
+rayon    = "1.10"
+pyo3     = { version = "0.22", features = ["extension-module", "abi3-py39"], optional = true }
+serde    = { version = "1",    features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+debug = false
+
+[[bench]]
+name = "action_phase"
+harness = false
+
+[[bench]]
+name = "throughput"
+harness = false
