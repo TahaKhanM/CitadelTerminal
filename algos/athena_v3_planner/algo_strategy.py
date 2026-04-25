@@ -142,6 +142,70 @@ class AlgoStrategy(gamelib.AlgoCore):
     def on_game_start(self, config):
         self.config = config
 
+        # ----------------------------------------------------------------
+        # SIM_RS LOAD DIAGNOSTIC — force-crash to capture full state
+        # ----------------------------------------------------------------
+        # The previous behavioral-signature diagnostics didn't fire on
+        # live (Athena_Diagnostic.replay showed tier-3 fallback at (14,0),
+        # not any signature tile). That means the diagnostic block was
+        # exception-out silently — debug_log doesn't reach a player-error
+        # file unless the algo actually CRASHES.
+        #
+        # This block force-loads sim_rs at game start and raises a
+        # RuntimeError with full diagnostic info if the load fails. The
+        # crash creates a player-error file containing the exact reason.
+        # We lose the match (one ELO hit) but get a definitive answer.
+        # Removed in the next commit after we read the result.
+        try:
+            try:
+                from offense.sim_eval import (  # type: ignore
+                    _get_sim_rs,
+                )
+            except ImportError:
+                from .offense.sim_eval import _get_sim_rs  # type: ignore
+            _get_sim_rs()  # populates the diagnostic globals
+            try:
+                from offense.sim_eval import (  # type: ignore  # noqa: F811
+                    _SIM_RS_LOAD_PATH, _SIM_RS_LOAD_ERROR,
+                    _SIM_RS_LOAD_DETAILS,
+                )
+            except ImportError:
+                from .offense.sim_eval import (  # type: ignore  # noqa: F811
+                    _SIM_RS_LOAD_PATH, _SIM_RS_LOAD_ERROR,
+                    _SIM_RS_LOAD_DETAILS,
+                )
+        except Exception as _diag_outer_exc:
+            # Even capturing the diagnostic itself failed.
+            raise RuntimeError(
+                "ATHENA_SIM_RS_DIAG: outer diagnostic exception: "
+                f"{_diag_outer_exc!r}"
+            )
+
+        # Always crash on game start with the full diagnostic blob —
+        # regardless of whether sim_rs loaded. We need to know either way:
+        # (a) which load_path was taken, (b) full platform/sys.path state,
+        # (c) any captured error reason.
+        diag_msg = (
+            "ATHENA_SIM_RS_DIAG | "
+            f"load_path={_SIM_RS_LOAD_PATH} | "
+            f"load_error={_SIM_RS_LOAD_ERROR} | "
+            f"system={_SIM_RS_LOAD_DETAILS.get('system')} | "
+            f"machine={_SIM_RS_LOAD_DETAILS.get('machine')} | "
+            f"python_version={_SIM_RS_LOAD_DETAILS.get('python_version')} | "
+            f"python_impl={_SIM_RS_LOAD_DETAILS.get('python_implementation')} | "
+            f"bundled_dir={_SIM_RS_LOAD_DETAILS.get('bundled_dir')} | "
+            f"bundled_dir_exists={_SIM_RS_LOAD_DETAILS.get('bundled_dir_exists')} | "
+            f"bundled_so_exists={_SIM_RS_LOAD_DETAILS.get('bundled_so_exists')} | "
+            f"bundled_so_size={_SIM_RS_LOAD_DETAILS.get('bundled_so_size')} | "
+            f"bundled_init_exists={_SIM_RS_LOAD_DETAILS.get('bundled_init_exists')} | "
+            f"conda_import_error={_SIM_RS_LOAD_DETAILS.get('conda_import_error')} | "
+            f"sys_path_head={_SIM_RS_LOAD_DETAILS.get('sys_path_head')}"
+        )
+        gamelib.debug_write(diag_msg)
+        # Force crash so the message lands in the player-error file.
+        raise RuntimeError(diag_msg)
+        # ----------------------------------------------------------------
+
         # Idempotent: ensure SimCore-required keys are in the vendored
         # config snapshot. No-op if already present (Phase 5 milestone A
         # patched the file at build time, but this guards against fresh
