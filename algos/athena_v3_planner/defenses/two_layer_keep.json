@@ -1,11 +1,17 @@
 {
   "name": "two_layer_keep",
-  "description": "FUNNEL pattern: two parallel wall lines with turrets in the gap. Front wall row (y=12) absorbs damage; turrets shoot from y=11; second wall row (y=10) anchors against demolisher pressure. Supports anchor at y=7-8.",
+  "description": "FUNNEL pattern rebalanced for Phase 5B: 10 priority-1 turrets along the y=11 line (matches v13's 12-turret opening density), two parallel wall lines, supports at y=7-8.",
   "placements": [
     {"unit": "TURRET", "loc": [3, 11], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [24, 11], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [13, 11], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [14, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [6, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [21, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [9, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [18, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [11, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [16, 11], "upgrade": false, "priority": 1},
 
     {"unit": "WALL", "loc": [0, 13], "upgrade": false, "priority": 2},
     {"unit": "WALL", "loc": [27, 13], "upgrade": false, "priority": 2},
@@ -16,11 +22,11 @@
     {"unit": "WALL", "loc": [24, 12], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [4, 12], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [23, 12], "upgrade": false, "priority": 3},
-    {"unit": "WALL", "loc": [13, 12], "upgrade": false, "priority": 3},
-    {"unit": "WALL", "loc": [14, 12], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [12, 12], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [15, 12], "upgrade": false, "priority": 3},
 
+    {"unit": "TURRET", "loc": [13, 11], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [14, 11], "upgrade": true, "priority": 4},
     {"unit": "TURRET", "loc": [3, 11], "upgrade": true, "priority": 4},
     {"unit": "TURRET", "loc": [24, 11], "upgrade": true, "priority": 4},
 
@@ -34,8 +40,8 @@
     {"unit": "SUPPORT", "loc": [13, 8], "upgrade": true, "priority": 6},
     {"unit": "SUPPORT", "loc": [14, 8], "upgrade": true, "priority": 6},
 
-    {"unit": "TURRET", "loc": [13, 11], "upgrade": true, "priority": 7},
-    {"unit": "TURRET", "loc": [14, 11], "upgrade": true, "priority": 7},
+    {"unit": "TURRET", "loc": [11, 11], "upgrade": true, "priority": 7},
+    {"unit": "TURRET", "loc": [16, 11], "upgrade": true, "priority": 7},
 
     {"unit": "SUPPORT", "loc": [12, 7], "upgrade": false, "priority": 8},
     {"unit": "SUPPORT", "loc": [15, 7], "upgrade": false, "priority": 8},

@@ -529,7 +529,12 @@ def probabilistic_placement(
         v_s = _support_value(game_state, x, y, support_weight, cfg)
         # Restrict types to roles by Y to avoid placing Supports at the
         # front row or Turrets in the back row.
-        if y >= 11:
+        # Phase 5B: loosen turret-y from y>=11 to y>=9 so the planner can
+        # consider deeper-in turret positions for opportunistic anchors
+        # (mirrors v13_second_ring's "second-ring" concept at [11,5]
+        # / [16,5] but deeper in front of the keep). Walls remain y>=11
+        # because deeper walls block our own MP spawn cones.
+        if y >= 9:
             candidates.append((v_t, turret_sh, x, y))
         if y >= 11:
             candidates.append((v_w, wall_sh, x, y))

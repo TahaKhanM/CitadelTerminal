@@ -1,11 +1,17 @@
 {
   "name": "v_funnel",
-  "description": "Lostkids-style V-shape: walls forming a V toward the back, turrets in the V's mouth, room for upgraded Supports along the back row at Y >= 7 (above Citadel shield-formula break-even).",
+  "description": "Lostkids-style V-shape rebalanced for Phase 5B: 10 priority-1 turrets along the y=11 ring (mirrors v13_second_ring's 12-turret opening), walls at y=13 absorb damage, V-shape walls funnel into the turret line, then upgrades + Supports.",
   "placements": [
     {"unit": "TURRET", "loc": [3, 12], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [24, 12], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [10, 11], "upgrade": false, "priority": 1},
     {"unit": "TURRET", "loc": [17, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [13, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [14, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [6, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [21, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [8, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [19, 11], "upgrade": false, "priority": 1},
 
     {"unit": "WALL", "loc": [0, 13], "upgrade": false, "priority": 2},
     {"unit": "WALL", "loc": [27, 13], "upgrade": false, "priority": 2},
@@ -18,13 +24,13 @@
     {"unit": "WALL", "loc": [23, 12], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [5, 11], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [22, 11], "upgrade": false, "priority": 3},
-    {"unit": "WALL", "loc": [6, 10], "upgrade": false, "priority": 3},
-    {"unit": "WALL", "loc": [21, 10], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [9, 10], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [18, 10], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [11, 10], "upgrade": false, "priority": 3},
     {"unit": "WALL", "loc": [16, 10], "upgrade": false, "priority": 3},
 
+    {"unit": "TURRET", "loc": [13, 11], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [14, 11], "upgrade": true, "priority": 4},
     {"unit": "TURRET", "loc": [3, 12], "upgrade": true, "priority": 4},
     {"unit": "TURRET", "loc": [24, 12], "upgrade": true, "priority": 4},
 
