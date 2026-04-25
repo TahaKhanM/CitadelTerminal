@@ -1174,3 +1174,136 @@ and `algos/athena_v3_planner/offense/templates/`.
    patching `C1GamesStarterKit-master/game-configs.json` to Citadel
    values (or running through the SimCore which has the right config).
    See `docs/UNITS_REFERENCE.md` § Support note.
+
+---
+
+## Phase 6A — MAP-Elites archive (scaffold + populated + integrated)
+
+**Agent**: Claude Opus 4.7 (1M context).
+**Started / completed**: 2026-04-25.
+**Branch**: `worktree-agent-a0e084f4` (off `main` @ `cd5233b` — Phase 5
+merge).
+**Plan reference**: brief in agent prompt (Phase 6 scope; I + J + K + L).
+
+### Tasks (commit-by-commit)
+
+| Task | Output | Commit |
+|---|---|---|
+| I. Genome + behavior space + archive scaffold | `archive/genome.py`, `archive/behavior.py`, `archive/archive.py` + 11 unit tests all green | `4164727` |
+| J. Fitness fn + MAP-Elites loop + archive populated | `archive/fitness.py`, `archive/map_elites.py`, `data/map_elites_archive.json` (22/64 cells, best_fit=-9.0), `data/PHASE6_ARCHIVE.md`; 5 new tests green | `6df016f` |
+| K. Archive plugged into beam search | `planner/offense.py:generate_candidates` accepts archive; `EconomyArbiter` loads it at game-start; `algo_strategy.py` passes path; smoke match 100 turns no-crash, archive_cands ≥ 1 every offensive turn | `a70f35d` |
+| L. STATUS + AUTONOMOUS_LOG handoff | (this commit) | — |
+
+### What landed in Milestone I (commit `4164727`)
+
+11-dim Genome dataclass under `archive/genome.py`:
+  - Defense: `archetype_idx` (4-way categorical),
+    `turret_density_mult` (0.5-1.5), `support_weight` (10-50)
+  - Offense: `dominant_template_idx` (categorical over 17 JSON
+    templates), `mp_hoard_threshold` (0.3-1.0), `spawn_side_bias`
+    (-1..+1), `demo_scout_ratio` (0-1)
+  - Utility weights: `alpha`/`beta`/`gamma`/`delta` covering the
+    Phase 4 utility function with calibratable bounds.
+
+Behavior descriptors (2-D) under `archive/behavior.py`:
+  - BC1 = mean MP at attack (8 bins, denser at low end).
+  - BC2 = defense density (8 bins).
+
+`MAPElitesArchive` (`archive/archive.py`): 8x8 grid, strict-best
+keep-per-cell, JSON serialize/deserialize.
+
+### What landed in Milestone J (commit `6df016f`)
+
+`archive/fitness.py:evaluate(genome) -> (fit, beh, results)`:
+  - Builds an empty sim_rs state dict, places the genome's defense
+    archetype + opponent's, runs N=12 sim rounds applying offense
+    templates per turn, accumulates HP/breach stats.
+  - Aggregate fitness = win_bonus + HP_delta + breach_bonus —
+    breach_penalty.
+  - Per-genome cost ~5-9 ms on Apple M4. Total 200-iter run ~2s.
+
+`archive/map_elites.py:run_map_elites()`:
+  - 10-genome random init, then N iterations of sample-mutate-eval-add.
+  - Saves checkpoint every 50 iterations.
+  - CLI: `python -m algos.athena_v3_planner.archive.map_elites
+    --iterations 500 --seed 42 --output ...`.
+
+Result: 22/64 cells filled (34%), seed=42, 12 rounds, 3 matches per
+baseline, written to `data/map_elites_archive.json`. Best fitness
+-9.0 (see `data/PHASE6_ARCHIVE.md` for top-5 + analysis). Coverage
+plateaus around 22 cells — Phase 6 followups proposed in the doc.
+
+### What landed in Milestone K (commit `a70f35d`)
+
+`planner/offense.py:generate_candidates` gains `archive`,
+`archive_sample_k`, `archive_rng` kwargs. Sampled archive genomes
+translate to virtual offense candidates tagged `archive:<tpl>`.
+
+`planner/economy.py:EconomyArbiter.__init__` accepts `archive_path`
+and loads `MAPElitesArchive.deserialize` at game-start. On any
+failure (missing file, corrupt JSON, ImportError) it falls back to
+JSON-templates-only and logs the reason.
+
+`algo_strategy.py` passes `archive_path=os.path.join(_HERE, "data",
+"map_elites_archive.json")`.
+
+Smoke match (athena_v3_planner vs v13_second_ring) ran all 100 turns
+with no crashes. Log shows:
+  ```
+  [arbiter] map-elites archive loaded: 22/64 cells
+  [arbiter] turn=2 archive_cands=1
+  [arbiter] turn=3 archive_cands=1
+  ...
+  [arbiter] turn=99 pick=scout_rush_center deploys=10 spawned=10 EU=7.10 sims=3 opp_arch=BALANCED
+  ```
+
+Archive consulted ≥1 cand per offensive turn through the full match —
+the K3 invariant from the brief.
+
+### Phase 6B (validation) — DEFERRED (handoff)
+
+Phase 6A shipped milestones I + J + K. The brief allowed shipping as
+6A and handing off bestof validation to 6B. We took that option to
+stay under the ~30 min agent budget; bestof 20 vs each baseline takes
+~10 min each at 140 ms/turn × 100 turns × 20 matches × 2 baselines.
+
+Phase 6B should:
+1. `/bestof 20 athena_v3_planner v13_second_ring`
+2. `/bestof 20 athena_v3_planner athena_baseline_lostkids`
+3. Document Wilson 95% LB in `data/PHASE6_RESULTS.md`. Compare to the
+   Phase 5B 10-10 vs v13 (LB 0.30) / 20-0 vs Lostkids (LB 0.839)
+   baseline. Document whatever we get; no hard gate.
+
+If the archive doesn't move the needle, follow up via the
+`data/PHASE6_ARCHIVE.md` § "Phase 6 followups" — the most likely
+issues are (a) lightweight sim biased against hoarding, and (b)
+fitness tiebreakers too coarse.
+
+### Phase 7 brief (LLM-FunSearch or skip)
+
+Per `docs/ATHENA_BUILD_PLAN.md` § Phase 7. The drop-in is
+`run_map_elites` with an LLM-driven mutation operator instead of
+`mutate_genome` (gaussian + categorical replacement). Same
+`MAPElitesArchive` consumer side; only the genome-generation step
+changes.
+
+If Phase 6B Wilson LB beats Phase 5B by ≥5pp on either baseline,
+Phase 7 may be unnecessary — the existing diversity is sufficient.
+
+### Followups carried into the Phase 6B / Phase 7 backlog
+
+1. **Lightweight sim undercounts hoarding payoff** — extend rounds
+   to 25-30 so high-MP late-burst genomes can win cells.
+2. **`spread_line` archetype unrepresented** in the final archive (0
+   cells out of 22). Investigate whether the lightweight sim biases
+   against its wider deployment.
+3. **Fitness-tiebreaker coarseness** — too many genomes plateau at
+   exactly -9.0 in the current archive. Consider adding MP efficiency
+   or per-frame breach-rate scoring.
+4. **Archive coverage saturates at ~22/64** — adding a third behavior
+   axis (e.g. spawn-side bias) opens 3-D MAP-Elites without growing
+   the genome itself.
+5. **`archive_sample_k=10` is unswept**. Phase 6B can sweep 5..20.
+6. **Carry-forwards from Phase 5B**: classifier confidence
+   calibration (LOO 0.489); utility weight α/β/γ/δ tuning (now part
+   of the Genome via fitness, but not yet swept end-to-end).

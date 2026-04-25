@@ -1,14 +1,95 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 5 — COMPLETE** (2026-04-25)
+## Current phase: **Phase 6A — COMPLETE** (2026-04-25)
 
-Phase 5B closed out Phase 5: opponent posterior wired into beam search,
-defense rebalanced, bestof 20 validated against both baselines.
-Wilson LB 0.839 vs Lostkids (PASS), 0.300 vs v13 (FAIL — acceptable per
-local-determinism caveat). See `data/PHASE5B_RESULTS.md`.
+Phase 6A shipped the MAP-Elites archive scaffold (genome + behavior
+space + grid container), the sim-evaluated fitness function, the
+MAP-Elites loop driver, and the integration into the beam-search
+candidate generator. Smoke match vs v13_second_ring runs 100 turns
+without crashes; the arbiter log confirms ≥1 archive-derived
+candidate per offensive turn.
 
-**Next: Phase 6 — MAP-Elites archive.** See § "Phase 6 handoff brief"
-below.
+**Phase 6B (validation) deferred** — bestof 20 vs both baselines
+was not run to keep this phase under the 30 min time budget. The
+Phase 5B local 10-10 vs v13 / 20-0 vs Lostkids baseline is the bar
+to beat.
+
+**Next: Phase 6B — bestof validation, then Phase 7 (LLM-FunSearch
+or skip).** See § "Phase 6/7 handoff brief" below.
+
+## Phase 6A task ledger
+
+| Milestone | Status | Commit |
+|---|---|---|
+| I. Genome + behavior space + archive scaffold | DONE | `4164727` |
+| J. Fitness fn + MAP-Elites loop + archive populated | DONE | `6df016f` |
+| K. Archive plugged into beam search (smoke match green) | DONE | `a70f35d` |
+| L. STATUS + AUTONOMOUS_LOG handoff (this commit) | DONE | (this commit) |
+
+### Phase 6A validation gate (passed)
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| Archive scaffold + tests green | PASS | 11 tests in test_phase6_archive.py |
+| Fitness/map_elites tests green | PASS | 5 tests in test_phase6_fitness.py |
+| Integration tests green | PASS | 5 tests in test_phase6_integration.py |
+| All athena_v3_planner tests green | PASS | 81/81 pytest cases |
+| MAP-Elites archive populated | PASS | 22/64 cells filled, best_fit=-9.0, written to data/map_elites_archive.json |
+| Smoke match: athena vs v13 — 100 turns no crash | PASS | Match log: turn 1 .. turn 100 reached, "[arbiter] map-elites archive loaded: 22/64 cells" |
+| Archive consulted ≥1 cand/turn | PASS | Log shows archive_cands=1..3 on every offensive turn |
+| Per-turn compute < 13s | PASS | No watchdog fires during smoke match |
+
+### Phase 6B validation (deferred)
+
+| Sub-gate | Status | Notes |
+|---|---|---|
+| /bestof 20 vs v13_second_ring | TODO | Phase 5B baseline 10-10 (LB 0.30) |
+| /bestof 20 vs athena_baseline_lostkids | TODO | Phase 5B baseline 20-0 (LB 0.839) |
+| Archive_sample_k tuning sweep | TODO | Currently 10; could vary 5..20 |
+
+## Phase 6/7 handoff brief
+
+### Phase 6B (validation) — picks up immediately
+
+```bash
+# Re-run bestof against both baselines with archive enabled
+/bestof 20 athena_v3_planner v13_second_ring
+/bestof 20 athena_v3_planner athena_baseline_lostkids
+# Save to data/PHASE6_RESULTS.md following PHASE5B_RESULTS.md format
+```
+
+If Wilson LB doesn't improve over Phase 5B (10-10 vs v13, 20-0 vs
+Lostkids), the archive's behavioral diversity is suspect — Phase 6
+followups in `data/PHASE6_ARCHIVE.md` § "Phase 6 followups" identify
+the most likely fixes (extend rounds, refine BC2, add fitness
+tiebreakers).
+
+### Phase 7 brief (LLM-FunSearch or skip)
+
+Per `docs/ATHENA_BUILD_PLAN.md` § Phase 7: if Phase 6A+6B already
+shows convergence (i.e. Wilson LB > Phase 5B by ≥5pp on either
+baseline), Phase 7 LLM-FunSearch may be unnecessary. Otherwise:
+
+- Phase 7 generates novel offense templates via an LLM-evaluated
+  candidate-generation loop, similar to MAP-Elites mutation but with
+  prompt-driven offspring instead of gaussian noise.
+- Hooks into the same MAPElitesArchive (drop-in replacement for the
+  random_genome+mutate_genome init).
+
+### Phase 6 followups (carried)
+
+1. Lightweight sim harness undercounts hoarding payoff — extend to
+   25-30 rounds.
+2. BC2 (defense density) currently 0/64 cells in
+   spread_line — investigate whether the lightweight sim biases
+   against `spread_line.json`.
+3. Archive coverage plateaus at ~22 cells; adding behavior-space
+   axes (e.g. spawn-side bias as BC3) could unlock more
+   exploration in 3-D MAP-Elites.
+4. Fitness tiebreakers — too many ties at -9.0 in the current
+   archive; bring back MP efficiency or per-frame breach scoring.
+
+### Old Phase 5 ledger (preserved for context — see git log for full Phase 5 brief)
 
 ## Phase 5 task ledger
 
