@@ -404,20 +404,36 @@ def beam_search(
     if sim_evaluator is None:
         sim_evaluator = evaluate_action_phase
 
-    # CRITICAL: when sim_rs PyO3 wheel isn't available (production /
-    # competition server — the wheel isn't bundled in the algo zip),
-    # the sim path's _python_fallback_sim returns identity, so every
-    # spawn candidate gets utility = -BETA*mp_cost (negative) and the
-    # hoard candidate gets 0 → algo always picks hoard → never attacks.
-    # This was the live-ladder failure mode (replays at replays/Athena_loss_*).
-    # Fix: force the heuristic path when sim_rs is missing.
+    # When neither sim_rs (Rust) NOR vendored pysim is available, the
+    # sim_eval._python_fallback_sim returns identity → every spawn
+    # candidate scores -BETA*mp_cost → hoard always wins. We force
+    # skip_sim=True in that case so heuristic_utility takes over and at
+    # least picks a non-hoard candidate. When pysim IS available
+    # (vendored into algos/athena_v3_planner/vendored_sim/) we leave
+    # skip_sim=False so we get REAL sim-evaluated deltas — Rust path
+    # runs at ~14.6 K sims/s, Python path at ~376 sims/s; both are
+    # bit-exact with engine.jar (cross_validate.py: 13319 frames
+    # byte-identical Python ↔ Rust). The Python path is slower but
+    # produces the same strategic-quality output.
     if not skip_sim:
         try:
             from offense.sim_eval import sim_rs_available  # type: ignore
         except ImportError:
             from ..offense.sim_eval import sim_rs_available  # type: ignore
         if not sim_rs_available():
-            skip_sim = True
+            # Probe pysim availability — keep sim mode if pysim works.
+            try:
+                try:
+                    from .. import vendored_sim  # type: ignore
+                    from ..vendored_sim import pysim as _vsim_probe  # type: ignore  # noqa: F401
+                except ImportError:
+                    import vendored_sim  # type: ignore  # noqa: F401
+                    from vendored_sim import pysim as _vsim_probe  # type: ignore  # noqa: F401
+                # Pysim is importable — sim path is viable via the
+                # _python_fallback_sim → pysim.simulate_action_phase chain.
+            except Exception:  # noqa: BLE001
+                # Neither Rust nor Python sim available — heuristic only.
+                skip_sim = True
 
     t0 = time.perf_counter()
 

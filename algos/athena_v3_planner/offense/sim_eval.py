@@ -402,17 +402,216 @@ def _apply_deploys_inplace(
 _DEFAULT_MOBILE_HP = {3: 15.0, 4: 5.0, 5: 40.0}
 
 
-def _python_fallback_sim(state_dict: Dict[str, Any], config_path: str) -> Dict[str, Any]:
-    """Identity fallback when sim_rs isn't available — returns the input
-    state unchanged. The caller still gets a valid (degenerate) delta of 0.
+_PYSIM_CONFIG_CACHE: Dict[str, Any] = {}
 
-    A real Python-side action-phase rollout would require building a
-    SimState from this dict and calling pysim.simulate_action_phase. We
-    don't do that here because (a) the sim_rs wheel is the production
-    path, and (b) constructing a fully-typed SimState from a dict is
-    substantial and not the ROI focus for Phase 4.
+
+def _python_fallback_sim(state_dict: Dict[str, Any], config_path: str) -> Dict[str, Any]:
+    """Run a real action-phase rollout via the vendored pure-Python sim.
+
+    Live-ladder critical: when sim_rs isn't available (the PyO3 wheel is
+    not bundled in the algo zip — it's a platform-specific .so that
+    can't be cross-shipped from the user's local conda to the
+    competition server), we MUST still produce real per-candidate
+    sim deltas. The prior identity-fallback caused beam_search to
+    score every spawn candidate at utility = -BETA*mp_cost (negative)
+    and the hoard candidate at 0, so hoard always won → Athena never
+    attacked → loss.
+
+    The vendored ``vendored_sim.pysim`` is bit-exact with both
+    sim_rs and engine.jar (per ``algos/athena/sim/cross_validate.py``
+    — 13,319 ranked frames + 10K fuzz configs byte-identical
+    Python ↔ Rust). It runs at ~376 sims/s vs Rust's ~14.6K sims/s,
+    but that's still 3000+ sims per 8s offense budget — plenty for
+    beam search width 50 × 3 opp actions = 150 sims/turn.
+
+    On any error (vendored package missing, dict schema mismatch,
+    sim crash), falls back to identity so the caller's downstream
+    logic stays alive. A non-identity result is preferred but a
+    crash here would lose the whole turn.
     """
-    return state_dict
+    try:
+        # Late-import the vendored sim so unit tests that don't need
+        # full sim still import sim_eval cheaply.
+        try:
+            from .. import vendored_sim  # type: ignore
+            from ..vendored_sim import pysim as vsim_pysim  # type: ignore
+            from ..vendored_sim.config import SimConfig as VSimConfig  # type: ignore
+        except ImportError:
+            # Algo runtime: top-level package layout (vendored_sim is on path)
+            import vendored_sim  # type: ignore
+            from vendored_sim import pysim as vsim_pysim  # type: ignore
+            from vendored_sim.config import SimConfig as VSimConfig  # type: ignore
+
+        # Cache config (loading SimConfig parses ~3KB JSON each call)
+        cfg = _PYSIM_CONFIG_CACHE.get(config_path)
+        if cfg is None:
+            from pathlib import Path as _Path
+            cfg = VSimConfig.load(_Path(config_path))
+            _PYSIM_CONFIG_CACHE[config_path] = cfg
+
+        # Build SimState from dict
+        state = _dict_to_sim_state(state_dict, cfg)
+
+        # Run the action phase. simulate_action_phase mutates state in
+        # place and returns an ActionResult with state.final_state.
+        vsim_pysim.simulate_action_phase(state, cfg)
+
+        # Convert post-state SimState back to dict (same schema as input
+        # so caller treats it identically to sim_rs output).
+        return _sim_state_to_dict(state)
+    except Exception as e:
+        # Defensive fallback: log to stderr (engine surfaces it via
+        # printBotErrors=True) and return identity so the planner can
+        # still soft-degrade to lower tiers.
+        print(
+            f"[sim_eval] _python_fallback_sim failed ({type(e).__name__}: {e}); "
+            "returning identity. Beam search will down-score by mp_cost only.",
+            file=sys.stderr,
+        )
+        return state_dict
+
+
+def _dict_to_sim_state(state_dict: Dict[str, Any], cfg: Any) -> Any:
+    """Build a vendored-sim SimState from our schema dict.
+
+    The dict schema (matching ``py_state_to_dict`` and what sim_rs
+    accepts) maps directly onto SimState's dataclass fields. After
+    populating structures + mobiles + stats, we initialize the 4
+    per-edge PathFinders so simulate_action_phase can run.
+    """
+    try:
+        from ..vendored_sim.state import (  # type: ignore
+            SimState, Structure, Mobile, PlayerStats,
+        )
+        from ..vendored_sim.pathfinder import make_pathfinders  # type: ignore
+        from ..vendored_sim.map import edge_tiles  # type: ignore
+    except ImportError:
+        from vendored_sim.state import SimState, Structure, Mobile, PlayerStats  # type: ignore
+        from vendored_sim.pathfinder import make_pathfinders  # type: ignore
+        from vendored_sim.map import edge_tiles  # type: ignore
+
+    import numpy as _np
+
+    p1_in = state_dict.get("p1") or {}
+    p2_in = state_dict.get("p2") or {}
+    p1 = PlayerStats(
+        hp=_np.float32(p1_in.get("hp", 40.0)),
+        sp=_np.float32(p1_in.get("sp", 8.0)),
+        mp=_np.float32(p1_in.get("mp", 1.0)),
+    )
+    p2 = PlayerStats(
+        hp=_np.float32(p2_in.get("hp", 40.0)),
+        sp=_np.float32(p2_in.get("sp", 8.0)),
+        mp=_np.float32(p2_in.get("mp", 1.0)),
+    )
+
+    # Sort structures by uid (engine insertion order) for parity.
+    def _uid_key(s):
+        try:
+            return int(s.get("uid", 0))
+        except (TypeError, ValueError):
+            return 0
+
+    raw_structs = state_dict.get("structures") or []
+    struct_by_xy: Dict[Tuple[int, int], Any] = {}
+    walls_for_pathfinder: List[Tuple[int, int]] = []
+    for s in sorted(raw_structs, key=_uid_key):
+        try:
+            x, y = int(s["xy"][0]), int(s["xy"][1])
+        except (KeyError, IndexError, TypeError):
+            continue
+        ty = s.get("type_idx")
+        if ty is None:
+            ty_str = str(s.get("type", "")).upper()
+            ty = {"WALL": 0, "SUPPORT": 1, "TURRET": 2,
+                  "FF": 0, "EF": 1, "DF": 2}.get(ty_str, 0)
+        struct = Structure(
+            xy=(x, y),
+            type_idx=int(ty),
+            upgraded=bool(s.get("upgraded", False)),
+            hp=_np.float32(s.get("hp", 60.0)),
+            uid=str(s.get("uid", f"v{x}_{y}")),
+            player=int(s.get("player", 1)),
+            turn_start_removal=s.get("turn_start_removal"),
+        )
+        struct_by_xy[(x, y)] = struct
+        # All structures block paths.
+        walls_for_pathfinder.append((x, y))
+
+    # Mobiles
+    raw_mobiles = state_dict.get("mobiles") or []
+    mobiles: List[Any] = []
+    for m in raw_mobiles:
+        try:
+            x, y = int(m["xy"][0]), int(m["xy"][1])
+        except (KeyError, IndexError, TypeError):
+            continue
+        ty = m.get("type_idx")
+        if ty is None:
+            ty_str = str(m.get("type", "")).upper()
+            ty = {"SCOUT": 3, "DEMOLISHER": 4, "INTERCEPTOR": 5,
+                  "PI": 3, "EI": 4, "SI": 5}.get(ty_str, 3)
+        sx_sy = m.get("spawn_xy") or (x, y)
+        try:
+            sx, sy = int(sx_sy[0]), int(sx_sy[1])
+        except (TypeError, IndexError):
+            sx, sy = x, y
+        mobile = Mobile(
+            xy=(x, y),
+            type_idx=int(ty),
+            hp=_np.float32(m.get("hp", _DEFAULT_MOBILE_HP.get(int(ty), 15.0))),
+            shield=_np.float32(m.get("shield", 0.0)),
+            uid=str(m.get("uid", f"vm{len(mobiles)}")),
+            player=int(m.get("player", 1)),
+            spawn_xy=(sx, sy),
+            target_edge=int(m.get("target_edge", 0)),
+            steps_taken=int(m.get("steps_taken", 0)),
+        )
+        mobiles.append(mobile)
+
+    state = SimState(
+        turn=int(state_dict.get("turn", 0)),
+        structures=struct_by_xy,
+        mobiles=mobiles,
+        p1=p1,
+        p2=p2,
+    )
+
+    # Init pathfinders. dim=28; walls = all structure xys; edge tiles per
+    # edge from the map module.
+    edge_to_perfects = {e: edge_tiles(e) for e in (0, 1, 2, 3)}
+    state.pathfinders = make_pathfinders(
+        dimension=28,
+        walls=walls_for_pathfinder,
+        edge_to_perfects=edge_to_perfects,
+    )
+    return state
+
+
+def _sim_state_to_dict(state: Any) -> Dict[str, Any]:
+    """Convert a SimState back to our schema dict (post-action-phase)."""
+    return {
+        "turn": int(state.turn),
+        "p1": {"hp": float(state.p1.hp), "sp": float(state.p1.sp), "mp": float(state.p1.mp)},
+        "p2": {"hp": float(state.p2.hp), "sp": float(state.p2.sp), "mp": float(state.p2.mp)},
+        "structures": [
+            {"xy": list(s.xy), "type_idx": int(s.type_idx),
+             "upgraded": bool(s.upgraded), "hp": float(s.hp),
+             "uid": str(s.uid), "player": int(s.player),
+             "turn_start_removal": s.turn_start_removal}
+            for s in state.structures.values()
+        ],
+        "mobiles": [
+            {"xy": list(m.xy), "type_idx": int(m.type_idx),
+             "hp": float(m.hp), "shield": float(m.shield),
+             "uid": str(m.uid), "player": int(m.player),
+             "spawn_xy": list(m.spawn_xy),
+             "target_edge": int(m.target_edge),
+             "steps_taken": int(m.steps_taken),
+             "breached": bool(getattr(m, "breached", False))}
+            for m in state.mobiles
+        ],
+    }
 
 
 # ---------------------------------------------------------------------------
