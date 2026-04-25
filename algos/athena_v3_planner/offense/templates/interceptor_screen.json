@@ -1,0 +1,10 @@
+{
+  "name": "interceptor_screen",
+  "description": "Defensive Interceptor screen split across both flanks.",
+  "side": "BOTH",
+  "min_mp": 4,
+  "spawns": [
+    {"unit": "INTERCEPTOR", "loc": [6, 7], "count": 2},
+    {"unit": "INTERCEPTOR", "loc": [21, 7], "count": 2}
+  ]
+}
