@@ -102,6 +102,20 @@ def py_state_to_dict(state) -> Dict[str, Any]:
 _SIM_RS = None
 _SIM_RS_TRIED = False
 
+# Diagnostic flag: tells us which path successfully loaded sim_rs.
+# Used by economy._offense_phase to emit a turn-0 behavioral signature
+# proving sim_rs is live on the competition server. Values:
+#   "untried"  — _get_sim_rs() not yet called
+#   "conda"    — loaded from system / conda site-packages (local dev)
+#   "bundled"  — loaded from bundled_sim_rs/ wheel (LIVE SERVER PATH)
+#   "failed"   — neither path worked, sim_rs is None
+# Verification flow: we only KNOW sim_rs is operational on live when
+# we observe a Scout spawn at SIGNATURE_TILE = (12, 1) on turn 0 of
+# any uploaded match. (12, 1) is on the BL spawn edge but outside
+# every fallback / last-resort code path.
+_SIM_RS_LOAD_PATH: str = "untried"
+SIGNATURE_TILE = (12, 1)
+
 
 def _get_sim_rs():
     """Return the sim_rs module if available, else None.
@@ -119,7 +133,7 @@ def _get_sim_rs():
          available, but that path is currently disabled because it
          triggers the live sandbox's docker interception).
     """
-    global _SIM_RS, _SIM_RS_TRIED
+    global _SIM_RS, _SIM_RS_TRIED, _SIM_RS_LOAD_PATH
     if _SIM_RS_TRIED:
         return _SIM_RS
     _SIM_RS_TRIED = True
@@ -128,6 +142,7 @@ def _get_sim_rs():
     try:
         import sim_rs  # type: ignore
         _SIM_RS = sim_rs
+        _SIM_RS_LOAD_PATH = "conda"
         return _SIM_RS
     except ImportError:
         pass
@@ -147,6 +162,7 @@ def _get_sim_rs():
             try:
                 import sim_rs  # type: ignore  # noqa: F811
                 _SIM_RS = sim_rs
+                _SIM_RS_LOAD_PATH = "bundled"
                 print(
                     f"[sim_eval] sim_rs loaded from bundled wheel at "
                     f"{bundled_dir} (Linux x64 abi3)",
@@ -167,6 +183,7 @@ def _get_sim_rs():
         file=sys.stderr,
     )
     _SIM_RS = None
+    _SIM_RS_LOAD_PATH = "failed"
     return _SIM_RS
 
 
