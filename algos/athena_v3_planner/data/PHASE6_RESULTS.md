@@ -3,8 +3,8 @@
 ## Configuration
 
 - Algo under test: `algos/athena_v3_planner/`
-- Phase 6A integration: MAP-Elites archive **enabled** by default
-  (loaded from `data/map_elites_archive.json`, 22/64 cells filled,
+- Phase 6A integration: MAP-Elites archive **loaded** from
+  `data/map_elites_archive.json` (22/64 cells filled,
   `archive_sample_k=10`).
 - Defense default: `v13_inspired` (12-turret static skeleton, Phase 5B).
 - Phase 3 OpponentModel: ArchetypeClassifier + ActionPredictor wired,
@@ -13,123 +13,137 @@
 - Watchdog: 13 s SIGALRM.
 - Per-turn budget: 8 s offense, 1.5 s defense, 0.5 s posterior.
 
-## Result table
+## Result table — three policies tested
 
-| Baseline                    | Wins  | Win rate | Wilson 95% CI    | Wilson LB | Phase 5B LB | Δ vs Phase 5B |
-|-----------------------------|-------|----------|------------------|-----------|-------------|---------------|
-| v13_second_ring             | 15/20 | 75.0%    | [0.53, 0.89]     | **0.531** | 0.300       | **+0.231**    |
-| athena_baseline_lostkids    | 14/20 | 70.0%    | [0.48, 0.85]     | **0.481** | 0.839       | **−0.358**    |
+| Baseline           | Phase 5B (no arch.) | Phase 6A no-gate | Phase 6B gate=0.6 | **Phase 6 default (gate=1.01 — disabled)** |
+|--------------------|---------------------|------------------|-------------------|--------------------------------------------|
+| v13_second_ring    | 10/20 LB 0.300      | 15/20 LB 0.531   | 8/20 LB 0.219     | (smoke: P1 wins 40 to -2)                  |
+| Lostkids           | 20/20 LB 0.839      | 14/20 LB 0.481   | 10/20 LB 0.299    | (smoke: P1 wins 18 to -4)                  |
 
-Per-turn compute (across sampled v13 replays):
-- Mean P1 turn time: ~245 ms (Phase 5B was ~140 ms — slightly higher with
-  archive enabled, expected from extra candidate generation).
-- Median P1 turn time: ~38 ms (low — archive-derived candidates are cheap).
+(See replay archives under `replays/bestof_athena_v3_planner_vs_*_20260425_*` for raw 40 game data.)
+
+Per-turn compute (across sampled v13 replays from Phase 6B no-gate run):
+- Mean P1 turn time: ~245 ms (Phase 5B was ~140 ms — slight uplift from
+  archive candidate generation when gate is open).
+- Median P1 turn time: ~38 ms.
 - Max single turn: 14.7-15.0 s on turn 1 (cold start: classifier fit +
   archive deserialise + sim_rs warmup; within 15 s budget).
-- Crashes: 0/40
-- Timeouts: 0/40
+- Crashes: 0/40. Timeouts: 0/40.
 
-Replay archives:
-- `replays/bestof_athena_v3_planner_vs_v13_second_ring_20260425_034152/`
-- `replays/bestof_athena_v3_planner_vs_athena_baseline_lostkids_20260425_034155/`
+## Verdict — ARCHIVE: DISABLED — regression vs Phase 5B confirmed; pending Phase 6C fitness re-tune
 
-## Per-side breakdown
+Per the Phase 6B brief's hard constraint: **"Never let Athena's
+effective performance drop below Phase 5B's. If archive hurts,
+disable it."**
 
-### vs v13_second_ring (15-5)
+The bestof matrix shows BOTH archive-enabled policies (no-gate and
+gate=0.6) regress vs Phase 5B's 20-0 Lostkids result (LB 0.839):
+- no-gate: −0.36 LB Lostkids regression (despite +0.23 LB v13 gain).
+- gate=0.6: −0.54 LB Lostkids regression AND −0.08 LB v13 regression.
 
-- Athena P1 (a=p1):  8/10 wins
-- Athena P2 (a=p2):  7/10 wins  → near-symmetric, real planner improvement.
+The no-gate v13 improvement (15-5 LB 0.531) is real and statistically
+significant, but it cannot offset the Lostkids regression under the
+brief's per-baseline floor rule.
 
-### vs athena_baseline_lostkids (14-6)
+## Decision (Milestone N) — Path B with capability preserved
 
-- Athena P1 (a=p1): 10/10 wins
-- Athena P2 (a=p2):  4/10 wins  → all 6 losses are P2-side.
+The archive is **loaded** but **disabled by default** via
+``archive_confidence_threshold=1.01`` (max possible posterior is 1.0,
+so the gate is never satisfied). All Phase 6A integration code remains
+in place; users can re-enable for experimentation by passing a lower
+threshold:
 
-The Lostkids loss pattern is asymmetric: Athena dominates on the spawn
-side that v3_planner was tuned for, but loses repeatedly on the flipped
-side. The offense templates skew toward one corner; the archive's
-sampled candidates skew the same way. Phase 5B's deterministic 20/20
-sweep relied on a mirror-tuned set of templates that the archive's
-weighted sampling perturbs.
+```python
+# algo_strategy.py overrides (for Phase 6C / experimentation)
+EconomyArbiter(
+    ...,
+    archive_path=archive_file,
+    archive_confidence_threshold=0.0,  # = Phase 6A always-on
+    # archive_confidence_threshold=0.6,  # = Path C confidence gate
+)
+```
 
-## Verdict — Path C: Mixed
+Smoke matches with the default (gate=1.01, archive disabled):
+- vs v13_second_ring: Athena wins 40 to −2 (80 turns, P1).
+- vs athena_baseline_lostkids: Athena wins 18 to −4 (40 turns, P1).
 
-Per the Phase 6B brief:
+This restores Phase 5B-equivalent behavior on the offense pipeline:
+``generate_candidates`` is called with ``archive=None`` on every turn,
+making candidate enumeration byte-identical to Phase 5B.
 
-- **Path A (helps or neutral)**: not satisfied — Lostkids regression is
-  real (LB 0.839 → 0.481, −0.36 LB).
-- **Path B (clear regression)**: not the cleanest fit — vs v13 the
-  archive **dramatically improves** the LB (+0.23). A blanket disable
-  throws away a real, statistically meaningful gain.
-- **Path C (mixed)**: **APPLIES**. The archive helps versus an
-  archetype-similar opponent (v13 second-ring — same `v13_inspired`
-  defense skeleton) and hurts versus an archetype-different opponent
-  (Lostkids' V-funnel + dual-flank).
+## Why the archive regressed Lostkids
 
-The brief's prescribed Path C remediation is a **classifier-confidence
-gate**: only consult the archive when `max(posterior) > 0.6`, otherwise
-fall back to JSON-templates-only candidate generation.
+Looking at the no-gate side-split:
+- vs Lostkids P1=athena: 10/10 wins (clean sweep).
+- vs Lostkids P1=lostkids: 4/10 wins (regressed from Phase 5B's likely
+  10/10).
 
-Rationale:
-- The archive was populated from sim-evaluated fitness against
-  v13_proxy and lostkids_proxy. The v13_proxy proxy uses the same
-  `v13_inspired` defense the live v13 algo uses; the lostkids_proxy
-  proxy uses `v_funnel` defense. So when our classifier is confident
-  the opponent is v13-like (DEMOLISHER_LINE / SCOUT_RUSH high
-  posterior), the archive's elite genomes line up with reality.
-- When the classifier is uncertain (posterior flips between archetypes
-  every few turns — Phase 3 LOO-CV is 0.489), the archive's elite
-  genomes may be tuned for the **wrong** opponent, so we should fall
-  back to the broader JSON-template set.
+The 22-cell archive over-fits archetype-similar opponents:
+- v13_proxy in fitness eval uses the **same** ``v13_inspired`` defense
+  the live v13 algo uses. Archive-derived candidates' deploy patterns
+  align with v13's reactive-defense gaps.
+- lostkids_proxy in fitness eval uses ``v_funnel`` defense, but
+  Lostkids' actual offense pattern (dual-flank + corner-dive)
+  significantly drifts from the archive's ``scout_flood`` /
+  ``scout_rush_left`` clustering. Archive-perturbed candidates
+  destabilise the Phase 5B mirror-tuned templates that empirically
+  swept Lostkids.
 
-A confidence gate is a strict superset of "always on" or "always off":
-- `posterior_max > 0.6` → archive enabled (recovers v13 improvement).
-- `posterior_max ≤ 0.6` → archive disabled (recovers Lostkids
-  baseline behavior).
-
-## Implementation (Milestone N)
-
-In `EconomyArbiter._offense_phase`, the archive is gated on
-`max(self._posterior.values()) > self.archive_confidence_threshold`
-(default 0.6). When disabled at the call site, `archive=None` is passed
-to `generate_candidates`, restoring exact Phase 5B candidate
-enumeration.
-
-Default threshold rationale: 0.6 is the brief's suggested floor and
-conservatively above the 1/N=0.167 uniform-prior baseline (6
-archetypes). With Phase 3 LOO-CV at 0.489, calibrated per-class
-accuracy is below 0.6 on average — meaning the gate will only fire on
-turns where the posterior has converged to a clear winning archetype
-(typically late mid-game).
+The classifier-confidence gate (Path C) didn't recover this because
+the Phase 3 classifier's calibrated max-posterior rarely exceeds 0.6
+(LOO-CV is 0.489). At 0.6 threshold, the archive is gated off most
+turns, but the gate-state transitions perturb the deterministic
+template-pick path enough to break Lostkids on P1=lostkids side too.
 
 ## Reproduce
 
 ```bash
-# vs v13_second_ring
+# bestof 20 (archive disabled — Phase 6 default)
 /opt/miniconda3/bin/python3.13 tools/bestof.py \
     athena_v3_planner v13_second_ring 10
-
-# vs athena_baseline_lostkids
 /opt/miniconda3/bin/python3.13 tools/bestof.py \
     athena_v3_planner athena_baseline_lostkids 10
+
+# Re-enable archive for Phase 6C experimentation:
+# Edit algos/athena_v3_planner/algo_strategy.py — pass
+# archive_confidence_threshold=0.0 (always-on) or 0.6 (Path C) into
+# the EconomyArbiter constructor, then re-run bestof.
 ```
 
 ## Phase 6 followups (carried into Phase 6C / Phase 8)
 
-1. **Refine the fitness harness so archive elites cover Lostkids
-   (V-funnel) too.** The current sim is 12 rounds, 2 baselines —
-   Lostkids-proxy (v_funnel + dual_flank) is one of them, but the
-   sim's 12-round horizon biases against the late-burst genomes that
-   counter Lostkids' rolling-defense pattern. Extend to 25-30 rounds.
+1. **Refine the fitness harness** so archive elites cover Lostkids
+   (V-funnel) too. The current sim is 12 rounds, 2 baselines —
+   Lostkids-proxy is one of them, but the 12-round horizon biases
+   against late-burst genomes. Extend to 25-30 rounds.
 2. **Add archetype-conditional archive cells** — instead of one global
-   archive, maintain a per-archetype archive (~22 cells × 6 archetypes)
-   so beam_search consults only the archive cells fit for the current
-   classifier's max-posterior archetype.
-3. **Calibrate the confidence threshold** by sweeping
-   `archive_confidence_threshold ∈ {0.3, 0.4, 0.5, 0.6, 0.7}` against
-   bestof 20 vs both baselines. Path C lands at 0.6 by brief default;
-   real optimum may differ.
-4. **Tighten the Phase 3 classifier** (Phase 3 LOO-CV is 0.489). The
-   confidence gate is a band-aid for the underlying calibration
-   problem; once LOO-CV climbs above 0.7, the gate threshold can be
-   lowered safely.
+   archive, maintain per-archetype archives so beam_search consults
+   only cells fit for the current classifier's max-posterior archetype.
+3. **Tighten the Phase 3 classifier** (LOO-CV 0.489 → ≥0.7 target).
+   The confidence gate is a band-aid for the underlying calibration
+   problem; once LOO-CV climbs above 0.7, the 0.6 threshold becomes
+   meaningful again.
+4. **Add fitness tiebreakers** (MP efficiency, structures killed,
+   per-frame breach scoring) to break the −9.0 ties currently
+   crowding 22 cells of the archive at the same fitness.
+5. **Sweep `archive_sample_k`** from 5 → 20 once the fitness function
+   is healthier; current 10 may be too aggressive when the archive's
+   diversity is low.
+
+## Phase 7 recommendation
+
+Per the Phase 6B brief: "If archive was disabled (Path B), skip Phase
+7 and recommend Phase 8 (self-play hardening) instead."
+
+LLM-FunSearch (Phase 7) generates novel offense templates via an
+LLM-evaluated candidate-generation loop, hooking into the same
+``MAPElitesArchive``. With the archive currently regressing vs
+Phase 5B, generating MORE candidates that flow into the same archive
+would compound the over-fit. **Recommended next phase: Phase 8
+(self-play hardening) — generate diverse opponent replays via
+self-play, expand the corpus, retrain the classifier toward LOO-CV
+≥0.7, then re-tune the archive (Phase 6C) on the broader corpus.**
+
+If Phase 8 is bypassed, Phase 6C alone (fitness re-tune,
+archetype-conditional archive cells, tiebreakers) should be the next
+milestone before Phase 7.

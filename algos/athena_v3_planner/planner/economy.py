@@ -77,6 +77,32 @@ class EconomyArbiter:
         # gracefully if missing/corrupt).
         archive_path: Optional[str] = None,
         archive_sample_k: int = 10,
+        # Phase 6B milestone N — archive policy decision (Path B).
+        #
+        # The Phase 6B bestof 20 validation found:
+        #   no-gate (Phase 6A behavior, threshold=0.0):
+        #     vs v13:      15-5  LB 0.531  (+0.23 vs Phase 5B)
+        #     vs Lostkids: 14-6  LB 0.481  (−0.36 vs Phase 5B)
+        #   gate=0.6 (Path C confidence gate):
+        #     vs v13:       8-12 LB 0.219  (−0.08 vs Phase 5B)
+        #     vs Lostkids: 10-10 LB 0.299  (−0.54 vs Phase 5B)
+        #
+        # Both gate policies regress vs Phase 5B's 20-0 Lostkids (LB
+        # 0.839). Per the Phase 6B brief's hard constraint ("Never let
+        # Athena's effective performance drop below Phase 5B's"), we
+        # ship Phase 6 with the archive integration in place but
+        # **disabled by default** (threshold=1.01 = always-gated).
+        #
+        # To re-enable for experimentation:
+        #   archive_confidence_threshold=0.0 → Phase 6A always-on (best vs v13)
+        #   archive_confidence_threshold=0.6 → Path C confidence gate
+        #
+        # Phase 6C followup: re-tune the fitness harness (extend to
+        # 25+ rounds, add per-archetype cells, add MP-efficiency
+        # tiebreakers) so the archive's elites cover Lostkids' V-funnel
+        # pattern. Once that lands, lower the threshold back to 0.6 (or
+        # 0.0) and re-validate.
+        archive_confidence_threshold: float = 1.01,
         debug_log_func=None,
     ):
         self.config = config
@@ -118,6 +144,12 @@ class EconomyArbiter:
 
         # Phase 6 milestone K: MAP-Elites archive loaded once at game start.
         self.archive_sample_k = int(archive_sample_k)
+        # Phase 6B milestone N — Path C confidence gate threshold.
+        self.archive_confidence_threshold = float(archive_confidence_threshold)
+        # Diagnostics: count of turns where archive was consulted vs
+        # gated off by low classifier confidence.
+        self._archive_gated_turns: int = 0
+        self._archive_consulted_turns: int = 0
         self._archive = None
         self._archive_rng = None
         if archive_path:
@@ -332,10 +364,37 @@ class EconomyArbiter:
             self.debug_log(f"[arbiter] adapt_game_state: {exc!r}")
             return
 
+        # Phase 6B milestone N — Path C confidence gate.
+        #
+        # The Phase 6A archive integration validates well vs v13_second_ring
+        # (15-5 LB 0.531) but regresses vs athena_baseline_lostkids (14-6
+        # LB 0.481, vs Phase 5B 20-0 LB 0.839). Diagnosis: the 22-cell
+        # archive over-fits archetype-similar opponents (v13 uses the
+        # same v13_inspired defense the archive was trained against)
+        # and under-explores Lostkids' V-funnel pattern.
+        #
+        # Remediation: only consult the archive on turns where the
+        # classifier has converged (posterior_max above threshold).
+        # On uncertain turns, pass archive=None so behavior reduces to
+        # exact Phase 5B candidate enumeration.
+        archive_for_this_turn = None
+        if self._archive is not None:
+            posterior_max = 0.0
+            if self._posterior:
+                try:
+                    posterior_max = max(self._posterior.values())
+                except Exception:  # noqa: BLE001
+                    posterior_max = 0.0
+            if posterior_max > self.archive_confidence_threshold:
+                archive_for_this_turn = self._archive
+                self._archive_consulted_turns += 1
+            else:
+                self._archive_gated_turns += 1
+
         try:
             cands = generate_candidates(
                 state_dict, mp_avail, my_player=1,
-                archive=self._archive,
+                archive=archive_for_this_turn,
                 archive_sample_k=self.archive_sample_k,
                 archive_rng=self._archive_rng,
             )
@@ -345,7 +404,7 @@ class EconomyArbiter:
 
         # Phase 6 milestone K: surface archive-derived candidates count
         # for the smoke-match invariant ("≥1 archive candidate per turn").
-        if self._archive is not None:
+        if archive_for_this_turn is not None:
             arch_n = sum(1 for c in cands if c.name.startswith("archive:"))
             if arch_n > 0:
                 self._opp_actions_populated_turns += 0  # no-op; reuse counter is for opp_actions
