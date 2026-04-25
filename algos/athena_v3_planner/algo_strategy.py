@@ -132,6 +132,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         self._action_frames: list = []
         self.arbiter: Optional[EconomyArbiter] = None
         self.turret_shorthand = "DF"
+        # Mobile-unit shorthands for the last-resort offense path.
+        # Defaults match the live Citadel config (PI=Scout, EI=Demolisher).
+        self.scout_shorthand = "PI"
+        self.demolisher_shorthand = "EI"
 
     MAX_FRAME_BUFFER = 5000  # ~50 turns at 100 frames/turn — well under any match
 
@@ -155,6 +159,12 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.turret_shorthand = config["unitInformation"][2]["shorthand"]
         except Exception:  # noqa: BLE001
             self.turret_shorthand = "DF"
+        try:
+            self.scout_shorthand = config["unitInformation"][3]["shorthand"]
+            self.demolisher_shorthand = config["unitInformation"][4]["shorthand"]
+        except Exception:  # noqa: BLE001
+            self.scout_shorthand = "PI"
+            self.demolisher_shorthand = "EI"
 
         # Phase 5B: Wire the OpponentModel (best-effort).
         # If the corpus npz / labels.json aren't present, fall through to
@@ -229,6 +239,22 @@ class AlgoStrategy(gamelib.AlgoCore):
                 self._safe_fallback_turn(game_state)
             else:
                 self.arbiter.execute(game_state)
+
+            # ----- LIVE-LADDER HOTFIX (post-2_athena_v3_loss diagnosis) -----
+            # The planner has historically silently produced zero mobile spawns
+            # on the live server (sim_rs missing → identity-fallback sim →
+            # hoard always wins; OR adapt_game_state crash → soft-fail; OR
+            # spawn-locs-blocked filter eats everything; OR attempt_spawn
+            # returns 0 path-blocked). Each individual cause has been patched,
+            # but the safety net guarantees Athena ALWAYS attempts at least
+            # one mobile-unit spawn per turn when MP allows.
+            try:
+                self._last_resort_offense(game_state)
+            except Exception as exc_lr:  # noqa: BLE001
+                gamelib.debug_write(
+                    f"[athena] last-resort offense exception: {exc_lr!r}"
+                )
+
             game_state.submit_turn()
         except _TurnTimeout:
             gamelib.debug_write(
@@ -279,6 +305,96 @@ class AlgoStrategy(gamelib.AlgoCore):
 
     _SAFE_FALLBACK_TURRETS = ((2, 13), (25, 13), (3, 13), (24, 13))
     _SP_IDX = 0
+    _MP_IDX = 1
+
+    # Spawn-edge corner tiles — guaranteed-on-edge spawn locations for
+    # the last-resort offense. Order = preference: corners first (highest
+    # path-survival probability vs static defense), then 1-tile-in.
+    _LAST_RESORT_SPAWN_LOCS = (
+        (13, 0),    # BL center-bottom (closest to opponent's center top)
+        (14, 0),    # BR center-bottom
+        (0, 13),    # BL outer corner
+        (27, 13),   # BR outer corner
+        (1, 12),    # BL one-in
+        (26, 12),   # BR one-in
+    )
+
+    def _last_resort_offense(self, game_state) -> None:
+        """Guarantee at least one mobile-unit spawn per turn when MP allows.
+
+        This runs AFTER the arbiter's offense_phase. If the arbiter
+        already spawned mobile units (visible via opp_history or MP
+        consumption) we still try to spend leftover MP — there's no
+        reason to ever end a turn with > 1 MP unspent on the live server.
+
+        Strategy:
+        - If MP < 1: nothing to do.
+        - Pick the cheapest mobile (Scout = 1 MP).
+        - Try each LAST_RESORT_SPAWN_LOC in order until attempt_spawn
+          returns > 0. Spawn as many Scouts as MP allows.
+        - If none work, spawn one Demolisher at [13, 0] as a final
+          attempt (different unit type, sometimes pathable when Scout
+          isn't due to interceptor-only blocking).
+        """
+        try:
+            mp = float(game_state.get_resource(self._MP_IDX, 0))
+        except Exception:  # noqa: BLE001
+            return
+        if mp < 1.0:
+            return  # nothing to spend
+
+        scout_sh = self.scout_shorthand
+        demo_sh = self.demolisher_shorthand
+        scout_cost = 1.0
+        try:
+            scout_cost = float(
+                game_state.type_cost(scout_sh)[self._MP_IDX]
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
+        # Cap at 5 Scouts max via this safety net (don't over-commit
+        # — leave some MP for the planner next turn if something is wrong).
+        max_scouts = min(int(mp / max(scout_cost, 0.01)), 5)
+        if max_scouts < 1:
+            return
+
+        spawned_total = 0
+        for loc in self._LAST_RESORT_SPAWN_LOCS:
+            if spawned_total >= max_scouts:
+                break
+            try:
+                n = game_state.attempt_spawn(
+                    scout_sh, list(loc), max_scouts - spawned_total,
+                )
+            except Exception:  # noqa: BLE001
+                n = 0
+            spawned_total += int(n) if n else 0
+            if n:
+                # Also log success so live-replay debug surfaces it.
+                gamelib.debug_write(
+                    f"[athena.LAST_RESORT] spawned {n} Scout at {list(loc)} "
+                    f"(mp_was={mp:.2f}, total_this_turn={spawned_total})"
+                )
+                break  # one location succeeding is enough; cascade off
+        if spawned_total == 0:
+            # Final attempt: try a Demolisher at center
+            try:
+                n = game_state.attempt_spawn(demo_sh, [13, 0], 1)
+                if n:
+                    gamelib.debug_write(
+                        f"[athena.LAST_RESORT] spawned 1 Demolisher at [13,0] "
+                        f"(scout cascade failed; mp_was={mp:.2f})"
+                    )
+                else:
+                    gamelib.debug_write(
+                        f"[athena.LAST_RESORT] WARN: no mobile spawned this turn "
+                        f"(mp_was={mp:.2f}); defenses likely blocking all paths."
+                    )
+            except Exception as exc:  # noqa: BLE001
+                gamelib.debug_write(
+                    f"[athena.LAST_RESORT] demolisher fallback failed: {exc!r}"
+                )
 
     def _safe_fallback_turn(self, game_state):
         try:
