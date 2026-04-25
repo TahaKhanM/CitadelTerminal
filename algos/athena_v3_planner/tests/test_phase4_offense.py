@@ -143,9 +143,14 @@ def _stub_evaluator(state_dict, my_deploys, opp_deploys, **kw):
 def test_beam_search_picks_high_utility():
     state = _empty_state(15.0)
     cands = generate_candidates(state, 15.0)
+    # With opp_actions_top_k populated (or skip_sim=False) we DO call the
+    # stub evaluator. Provide a single dummy action so we exercise the
+    # full sim path.
+    actions = [({"primary_mobile_type": -1, "primary_edge": "NONE",
+                 "wave_size_bucket": "0", "spend_mp": False}, 1.0)]
     best = beam_search(
         state, cands,
-        opp_actions_top_k=[],
+        opp_actions_top_k=actions,
         sim_evaluator=_stub_evaluator,
     )
     # Stub gives HP_dealt = #units. Highest = whichever template has the
@@ -155,6 +160,24 @@ def test_beam_search_picks_high_utility():
     assert best is not None
     assert best.expected_utility > 0
     assert best.sim_count >= 1
+
+
+def test_beam_search_skip_sim_uses_heuristic():
+    """skip_sim=True returns a candidate scored by mp_cost heuristic
+    (no sim_evaluator calls)."""
+    state = _empty_state(15.0)
+    cands = generate_candidates(state, 15.0)
+    counter = {"calls": 0}
+
+    def eval_count(*a, **k):
+        counter["calls"] += 1
+        return _stub_evaluator(*a, **k)
+
+    best = beam_search(state, cands, opp_actions_top_k=None,
+                      skip_sim=True, sim_evaluator=eval_count)
+    assert best is not None
+    assert best.sim_count == 0
+    assert counter["calls"] == 0   # never invoked the evaluator
 
 
 def test_beam_search_budget_exits_gracefully():

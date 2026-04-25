@@ -27,17 +27,30 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from ..offense.sim_eval import (
-    UNIT_NAME_TO_IDX,
-    evaluate_action_phase,
-    py_state_to_dict,
-)
-from ..offense.templates import (
-    OffenseTemplate,
-    SPAWN_EDGE_TILES,
-    SpawnGroup,
-    load_all_templates,
-)
+try:
+    from ..offense.sim_eval import (
+        UNIT_NAME_TO_IDX,
+        evaluate_action_phase,
+        py_state_to_dict,
+    )
+    from ..offense.templates import (
+        OffenseTemplate,
+        SPAWN_EDGE_TILES,
+        SpawnGroup,
+        load_all_templates,
+    )
+except ImportError:  # vendored / top-level layout (no parent package)
+    from offense.sim_eval import (  # type: ignore
+        UNIT_NAME_TO_IDX,
+        evaluate_action_phase,
+        py_state_to_dict,
+    )
+    from offense.templates import (  # type: ignore
+        OffenseTemplate,
+        SPAWN_EDGE_TILES,
+        SpawnGroup,
+        load_all_templates,
+    )
 
 
 # ---------------------------------------------------------------------------
