@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.4,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "sim_rs"
+version = "0.1.0"
+description = "Bit-exact Rust port of SimCore (Citadel Terminal action-phase simulator)"
+requires-python = ">=3.9"
+authors = [{ name = "Muhammad Taha" }]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+
+# Built via `maturin develop --release --features pyo3` from this directory.
+# The abi3-py39 PyO3 feature (declared in Cargo.toml) makes a single wheel
+# compatible with CPython 3.9+; no per-Python-minor rebuilds needed.
+
+[tool.maturin]
+# The PyO3 bindings live behind the `pyo3` cargo feature so that plain
+# `cargo build` / `cargo test` continue to work without a Python toolchain.
+features = ["pyo3"]
+# `python-source` unset — there's no pure-Python wrapper; the extension
+# module is the whole package. `module-name` defaults to package name.
