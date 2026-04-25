@@ -112,15 +112,29 @@ def _get_sim_rs():
         import sim_rs  # type: ignore
         _SIM_RS = sim_rs
     except ImportError as e:
+        # Live-server / non-conda env: the PyO3 wheel isn't bundled in
+        # the algo zip. The caller (beam_search) detects this via
+        # ``sim_rs_available()`` and switches to the heuristic path —
+        # so this is a normal degraded mode, not a fatal error.
         print(
-            f"sim_rs PyO3 binding not importable ({e}). "
-            "Build with: cd algos/athena/sim_rs && "
-            "/opt/miniconda3/bin/python3.13 -m maturin develop "
-            "--release --features pyo3",
+            f"[sim_eval] sim_rs PyO3 binding not importable ({e}). "
+            "Falling back to heuristic-utility offense scoring "
+            "(see planner.offense._heuristic_utility).",
             file=sys.stderr,
         )
         _SIM_RS = None
     return _SIM_RS
+
+
+def sim_rs_available() -> bool:
+    """Return True iff the Rust SimCore PyO3 wheel is importable.
+
+    Caches the answer on first call. Used by ``planner.offense.beam_search``
+    to switch to ``_heuristic_utility`` when running on a host without
+    the wheel (e.g., the competition's ranked-match server, where the
+    algo zip doesn't bundle the binary).
+    """
+    return _get_sim_rs() is not None
 
 
 def _default_config_path() -> str:
