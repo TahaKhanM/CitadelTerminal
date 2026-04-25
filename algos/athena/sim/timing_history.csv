@@ -35,3 +35,8 @@ date,scope,seed,overall,float32_propagation,mode_parity
 2026-04-25,quick,42,pass,pass,pass
 2026-04-25,quick,42,fail,fail,pass
 2026-04-25,quick,42,fail,fail,pass
+2026-04-25,quick,42,fail,fail,pass
+2026-04-25,quick,42,pass,pass,pass
+2026-04-25,quick,42,pass,pass,pass
+2026-04-25,quick,42,pass,pass,pass
+2026-04-25,quick,42,pass,pass,pass
