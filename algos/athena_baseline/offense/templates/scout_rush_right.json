@@ -1,0 +1,9 @@
+{
+  "name": "scout_rush_right",
+  "description": "Scout swarm from the right edge, classic rush.",
+  "side": "BR",
+  "min_mp": 8,
+  "spawns": [
+    {"unit": "SCOUT", "loc": [24, 10], "count": 8}
+  ]
+}
