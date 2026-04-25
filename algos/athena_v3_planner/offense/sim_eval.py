@@ -229,12 +229,15 @@ def evaluate_action_phase(
         1 for s in state_dict_in["structures"] if s["player"] == opp_player
     )
 
-    # Run the action phase.
+    # Run the action phase. Three paths in priority order:
+    #   1. PyO3 sim_rs wheel (in-process, ~14.6 K sims/s) — local conda only
+    #   2. Static binary via stdio bridge (~3-5 K sims/s post-IPC) — LIVE SERVER
+    #   3. Vendored Python pysim (~376 sims/s) — universal fallback
     sim_rs = _get_sim_rs() if use_rust else None
     if sim_rs is not None:
         post = sim_rs.simulate_action_phase_py(state_dict_in, config_path)
     else:
-        post = _python_fallback_sim(state_dict_in, config_path)
+        post = _bridge_or_pysim(state_dict_in, config_path)
 
     p1_post = post["p1"]
     p2_post = post["p2"]
@@ -403,6 +406,49 @@ _DEFAULT_MOBILE_HP = {3: 15.0, 4: 5.0, 5: 40.0}
 
 
 _PYSIM_CONFIG_CACHE: Dict[str, Any] = {}
+
+
+def _bridge_or_pysim(
+    state_dict: Dict[str, Any], config_path: str,
+) -> Dict[str, Any]:
+    """Sim-without-PyO3 path: bridge first, then pysim.
+
+    Order matters: the static-binary bridge gives ~5 K sims/s of REAL
+    sim_rs (bit-exact with PyO3). pysim gives ~376 sims/s of bit-exact
+    Python sim. The bridge is roughly 13× faster — try it first; on any
+    failure (binary not bundled, IPC error, etc.) fall through to pysim
+    which always works.
+    """
+    # 1. Bridge to static sim_rs binary
+    try:
+        try:
+            from ..sim_bridge import (  # type: ignore
+                BridgeError,
+                sim_bridge_available,
+                simulate_action_phase_via_bridge,
+            )
+        except ImportError:
+            from sim_bridge import (  # type: ignore
+                BridgeError,
+                sim_bridge_available,
+                simulate_action_phase_via_bridge,
+            )
+        if sim_bridge_available(config_path):
+            try:
+                return simulate_action_phase_via_bridge(state_dict, config_path)
+            except BridgeError:
+                # Bridge probe-and-degrade: fall through to pysim. The
+                # bridge has marked itself dead if the failure was
+                # process-level; per-request errors leave it alive for
+                # next call.
+                pass
+    except Exception as exc:  # noqa: BLE001
+        # Bridge module itself unavailable — log once and move on.
+        print(f"[sim_eval] sim_bridge unavailable ({exc!r}); using pysim.",
+              file=sys.stderr)
+
+    # 2. Pure-Python pysim
+    return _python_fallback_sim(state_dict, config_path)
 
 
 def _python_fallback_sim(state_dict: Dict[str, Any], config_path: str) -> Dict[str, Any]:
