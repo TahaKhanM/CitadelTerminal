@@ -1,12 +1,97 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 2 — DONE** (2026-04-25, gates documented as FAIL)
+## Current phase: **Phase 3 — DONE** (2026-04-25, CV gate documented as FAIL)
 
-Next phase: **Phase 3 — Opponent model** (Bayesian archetype classifier
-on action-frame fingerprints + per-archetype action predictors;
-trained / cross-validated on the 47-replay corpus indexed in
-`data/replay_index.json`; see `docs/ATHENA_BUILD_PLAN.md` § Phase 3).
-See `AUTONOMOUS_LOG.md` § Phase 3 for the next-agent handoff brief.
+Next phase: **Phase 4 — Offense engine** (beam search width 50 over
+offense templates × spawn timings × side selection; sim-evaluated
+rollouts vs the action predictor's top-K opponent responses; lives at
+`algos/athena_v3_planner/planner/offense.py` with templates seeded
+under `algos/athena_v3_planner/offense/templates/`; templates seeded
+from finalist corpus + the soon-to-come MAP-Elites archive; see
+`docs/ATHENA_BUILD_PLAN.md` § Phase 5 — Plan search engine).
+See `AUTONOMOUS_LOG.md` § Phase 4 for the next-agent handoff brief.
+
+## Phase 3 task ledger
+
+| Task | Status | Commit |
+|---|---|---|
+| 1. Archetype taxonomy (6 classes + ARCHETYPES.md) | DONE | `b552558` |
+| 2-3. Corpus labeling + feature extractor (47 x 14 matrix) | DONE | `6f84eba` (combined) |
+| 4. Bayesian classifier (numpy GaussianNB) | DONE | `9cd3259` |
+| 5. Per-archetype action predictor | DONE | `0502e5c` |
+| 6. Leave-one-opponent-out CV | DONE | `0504042` |
+| 7. Unit tests (13 new tests) | DONE | `702c603` |
+| 8. STATUS + AUTONOMOUS_LOG handoff | DONE | (this commit) |
+
+### Validation gate (per `docs/ATHENA_BUILD_PLAN.md` § Phase 3)
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| Mean top-1 archetype accuracy >= 0.70 | **FAIL** | LOO-CV = 0.489 (23/47). See `data/PHASE3_CV_RESULTS.md` for confusion matrix + 4 documented failure modes. |
+| pytest suite < 30s | PASS | 25 tests in 9.85s on Apple M4. |
+| Classifier / predictor handle 0-sample classes | PASS | TURTLE_GRIND has 0 corpus samples — classifier falls back to global stats; predictor returns >=1 valid 'do-nothing' action. |
+| Player_index flip explicitly tested | PASS | `test_feature_extractor_player_index_flip` swaps p1/p2 spawns and confirms symmetric features. |
+| Posterior update monotonicity | PASS | Synthetic well-separated corpus + obs at archetype mean -> archetype posterior never decreases. |
+
+Per spec: "If FAIL: do NOT loosen the gate; document failure modes
+... and proceed. Phase 4 can still use the classifier (just with
+calibrated confidence) and Phase 9 (MAP-Elites) can re-fit." We
+followed that protocol — diagnosis is in `data/PHASE3_CV_RESULTS.md`.
+
+### Where the Phase 3 deliverables live
+
+```
+algos/athena_v3_planner/
+├── opponent/
+│   ├── ARCHETYPES.md             ← 6-class taxonomy + features per archetype
+│   ├── archetypes.json           ← canonical enum
+│   ├── archetypes.py             ← Python loader (ARCHETYPES, archetype_index)
+│   ├── features.py               ← 14-feature extract_features() + features_from_replay()
+│   ├── build_corpus.py           ← one-shot ETL: feeds 47 replays through extractor + heuristic labeler
+│   ├── labels.json               ← per-replay archetype labels + features
+│   ├── classifier.py             ← ArchetypeClassifier (numpy GaussianNB)
+│   ├── action_predictor.py       ← ActionPredictor (per-archetype empirical action distribution)
+│   └── cv_runner.py              ← leave-one-opponent-out CV runner -> PHASE3_CV_RESULTS.md
+└── data/
+    ├── opponent_features.npz     ← 47 x 14 feature matrix + label/opponent strings
+    └── PHASE3_CV_RESULTS.md      ← LOO-CV report with confusion matrix + failure-mode docs
+```
+
+### Phase 3B follow-ups (deferred)
+
+Recorded in `data/PHASE3_CV_RESULTS.md` § "Failure-mode notes":
+1. Tighter labeler thresholds for SCOUT_RUSH / DEMOLISHER_LINE so
+   BALANCED is genuinely small-sample (currently the catch-all has
+   the broadest Gaussian and dominates predictions for borderline
+   cases).
+2. Try a multinomial NB on discretized features OR a class-balanced
+   logistic regression — likely better fits than GaussianNB on a
+   47-sample, 14-feature, 6-class problem with skewed labels.
+3. Augment the corpus with self-play replays once Phase 4-5 ship —
+   the singletons (EDGE_FEINT, SUPPORT_BURST) and 0-sample classes
+   (TURTLE_GRIND) need more samples.
+4. Add a `predict_proba`-aware confidence calibrator for Phase 4
+   beam search (e.g. temperature-scale the softmax, or fall back
+   to uniform when max(post) < 0.4).
+
+These will be picked up either at the start of Phase 9 MAP-Elites
+(when self-play data lands) or as part of Phase 6 predictor framework
+integration if Phase 4-5 prove the offense engine is the larger
+bottleneck.
+
+## How to reproduce Phase 3
+
+```bash
+# 1. Rebuild feature matrix + labels (47 replays, ~2s)
+/opt/miniconda3/bin/python3.13 -m algos.athena_v3_planner.opponent.build_corpus
+
+# 2. Run cross-validation
+/opt/miniconda3/bin/python3.13 -m algos.athena_v3_planner.opponent.cv_runner
+
+# 3. Run all unit tests
+/opt/miniconda3/bin/python3.13 -m pytest algos/athena_v3_planner/tests/ -v
+```
+
 
 ## Phase 2 task ledger
 
