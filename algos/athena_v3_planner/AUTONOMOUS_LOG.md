@@ -570,7 +570,247 @@ M4**.
 
 ---
 
-## NEXT PHASE: 5 — EconomyArbiter integration
+## Phase 5A — Sim adapter close-out + EconomyArbiter integration
+
+**Agent**: Claude Opus 4.7 (1M context).
+**Started / completed**: 2026-04-25.
+**Branch**: `worktree-agent-a23bf4a8` (off `main` @ `7d538f2`).
+**Plan reference**: brief in agent prompt (Phase 5 scope; A+B shipped,
+C deferred to 5B per authorization to ship as Phase 5A).
+
+### Tasks (commit-by-commit)
+
+| Task | Output | Commit |
+|---|---|---|
+| A. Sim adapter close-out (snapshot keys + `state_adapter.py` + 7 tests) | adapter no longer crashes sim_rs; HP delta byte-exact vs replay | `7b05fed` |
+| B. EconomyArbiter + algo_strategy integration + smoke pass             | full Athena algo wired; beats v13_second_ring 1-0 single-match  | `0914072` |
+| C. /bestof 20 Wilson LB validation                                     | **DEFERRED to Phase 5B** | — |
+| D. Phase 6 handoff brief                                               | (this commit) | — |
+
+### What landed in milestone A (commit `7b05fed`)
+
+The Phase 4 beam search had `skip_sim=True` because the v3_planner
+config snapshot (`data/citadel_config_snapshot.json`) used
+`unitInformation` / `resources` keys (gamelib schema) but sim_rs
+requires `_raw_unit_information` / `_resources_block_verbatim`
+(SimCore schema). Fix:
+
+1. Augment the snapshot with byte-identical mirrors under the
+   underscore-prefixed keys. Both schemas now coexist in one file.
+   Mirrored in the vendored copies under `*_offense_only/data/` and
+   `*_defense_only/data/`. Documented in `data/CONFIG_README.md`
+   § "Phase 5 augmentation".
+2. New `offense/state_adapter.py` with two functions:
+   - `adapt_game_state(game_state, my_player, turn)` — translates a
+     live `gamelib.GameState` into the sim_rs-schema dict consumed
+     by `simulate_action_phase_py`. Reads HP/cost/etc. from runtime
+     config; never hardcodes. Walks the GameMap, classifies stationary
+     vs mobile, synthesizes unique UIDs.
+   - `augment_snapshot_for_simcore(path)` — idempotent runtime safety
+     net: re-adds the SimCore keys at startup if missing.
+3. New `tests/test_state_adapter.py` (7 tests, ~0.04 s):
+   schema validation, own/opp player-index conversion, mobile fields,
+   idempotent augmentation, and a sim_rs round-trip smoke (built
+   adapter dict accepted by Rust sim, no crash).
+
+Verification: existing `python -m algos.athena_v3_planner.offense.sim_eval`
+smoke now passes (HP delta = replay HP delta byte-exactly: |Δ|=0.00 for
+both p1 and p2 at turn 1). All 22 Phase 4 tests still green.
+
+### What landed in milestone B (commit `0914072`)
+
+The first commit where Athena ships as a real, integrated algo:
+
+1. **`planner/economy.py:EconomyArbiter`** — new module. Per-turn flow:
+   `Watchdog.start_turn` → (stub) opponent posterior → defense
+   pipeline (six primitives) → offense pipeline (`adapt_game_state` →
+   `generate_candidates` → `beam_search` with real sim rollouts when
+   `opp_actions_top_k` populated, heuristic fallback otherwise) →
+   spawn the chosen plan. Top-level `BudgetExceeded` re-raises into
+   the algo's safe-fallback; component-level exceptions are caught +
+   logged so a single misbehaving primitive can't poison the turn.
+2. **`algo_strategy.py`** — Phase 0 stub replaced by full integrated
+   entry point. Production safety wrappers (13 s SIGALRM watchdog +
+   try/except + safe-fallback minimal turret defense) lifted verbatim
+   from `algos/athena_baseline_lostkids/`. `on_action_frame` feeds
+   the BreachLocationTracker.
+3. **`planner/offense.py`** — converted `..offense.{sim_eval,templates}`
+   imports to dual-mode (try relative, fall back to top-level) so the
+   module imports both at test time AND at runtime under the engine.
+4. **`run.sh`** — engine launcher (chmod +x).
+5. **`tests/test_economy_arbiter.py`** — 5 tests exercising arbiter
+   wiring (low-MP skip, single-turn no-crash, watchdog propagation,
+   exception swallowing). All green; full suite is 59/59.
+
+### Smoke test result (`data/PHASE5_SMOKE.md`)
+
+Single full local match: **athena_v3_planner vs v13_second_ring**.
+
+| Metric | Value |
+|---|---|
+| Winner | **athena_v3_planner** (p1) |
+| Turn count | 100 (full game) |
+| Crashes | 0 (athena, opp) |
+| Watchdog fires | 0 |
+| BudgetExceeded events | 0 |
+| `time_damage_taken` | 0 |
+| `total_computation_time` | 618 ms |
+| Avg turn time | ~6.2 ms |
+
+Beam search picks a non-hoard plan every MP-having turn (sample
+sequence: corner_dive_left → interceptor_screen → scout_rush_left →
+demo_train_left → escorted_mixed_left). `sims=0` because
+`opp_actions_top_k=[]` is currently passed (predictor wiring is Phase
+5B); beam_search auto-falls back to the heuristic path. Both paths
+are now sim-safe with milestone A's adapter fix — once the predictor
+is wired, `sims > 0` will appear and real sim_rs rollouts will run.
+
+### Validation gate status (Phase 5A)
+
+| Gate | Status | Evidence |
+|---|---|---|
+| `simulate_action_phase_py` accepts the v3_planner snapshot | PASS | `test_sim_rs_round_trip_smoke` + sim_eval CLI smoke. |
+| Beam search no longer requires `skip_sim=True`             | PASS | EconomyArbiter calls `beam_search(skip_sim=False, ...)`. |
+| Single end-to-end match: full Athena vs v13_second_ring     | PASS (Athena wins) | `PHASE5_SMOKE.md`. |
+| Per-turn p99 < 13 s                                          | PASS | 6.2 ms avg over 100 turns. |
+| pytest suite green                                           | PASS | 59/59 in 10 s. |
+| **Wilson 95% LB ≥ 50% vs each baseline (Milestone C gate)**  | **DEFERRED to Phase 5B** | — |
+
+The brief explicitly authorized Phase 5A as a ship point: "Phase 5A
+(sim adapter + integration architecture) and hand off Phase 5B
+(validation + tuning) if budget tight." Bestof + predictor wiring +
+defense rebalance + utility calibration is the Phase 5B work.
+
+### Implementation notes / gotchas observed
+
+- **Dual-mode imports.** When `algo_strategy.py` runs as `__main__`
+  under the engine, `_HERE` (the algo dir) is on `sys.path` and the
+  subpackages (`planner`, `offense`, `opponent`) are top-level. When
+  the same code is imported from tests as
+  `algos.athena_v3_planner.planner.economy`, they're nested.
+  `..offense` works in the latter, fails in the former. Fixed by
+  `try: relative; except ImportError: top-level` at every cross-
+  package import edge.
+- **Pre-commit gate took 102 s per commit** as expected. Two commits
+  for Phase 5A (A and B) → ~3.5 min in pre-commit alone. Milestone D
+  is the third commit.
+- **Spurious "outside arena bounds" warnings.** Defense.py's
+  `_location_is_buildable` calls `game_state.contains_stationary_unit`
+  which prints to stderr when fed an off-board coord. Tightening the
+  upstream bounds check would silence these — Phase 5B cleanup item.
+- **The augment-on-startup safety net** (`augment_snapshot_for_simcore`
+  in `on_game_start`) means that even if the snapshot regenerates from
+  scratch (without the SimCore keys), the algo self-heals at first
+  turn. No reupload/rebuild needed.
+
+### Phase 5B / Phase 5C followups (handoff)
+
+These are the open items the next agent should pick up:
+
+1. **Wire ArchetypeClassifier into the arbiter.**
+   `EconomyArbiter._update_posterior` is a no-op stub — the trackers→
+   features mapping needs to be calibrated. Once it's live, the
+   posterior-based predictor.top_k call (already plumbed) will return
+   non-empty `opp_actions_top_k` and beam_search will run real sim
+   rollouts.
+2. **Wire Phase 3 ActionPredictor.top_k.** Already plumbed through
+   `EconomyArbiter._offense_phase`; just needs `action_predictor` and
+   `posterior` arguments to be passed at construction time
+   (`on_game_start`). Per the Phase 3 CV-gate FAIL, treat low-
+   confidence (max < 0.40) predictions as approximately uniform.
+3. **`/bestof 20` vs both baselines.** Wilson 95% LB ≥ 50% per
+   baseline is the deferred validation gate.
+4. **Phase 2B defense rebalance.** Deferred from milestone B — bump
+   v_funnel/two_layer_keep/spread_line turret count toward 10–15 in
+   the early game; loosen `probabilistic_placement` y constraint from
+   y≥11 to y≥9; optionally add `v13_inspired.json`.
+5. **Calibrate utility weights** (α/β/γ/δ) on a small fuzz harness.
+6. **Tighten upstream bounds check** to silence spurious warnings.
+7. **Confidence calibration** for the ArchetypeClassifier — temperature-
+   scale the posterior or fall back to uniform when max < 0.4 (per
+   Phase 3 CV failure mode).
+
+### Phase 5 commits
+
+- `7b05fed` — milestone A
+- `0914072` — milestone B
+- `<this>`  — milestone D (handoff)
+
+---
+
+## NEXT PHASE: 6 — MAP-Elites archive (warm starts for the planner)
+
+**Spec reference**: `docs/ATHENA_BUILD_PLAN.md` § Phase 6.
+
+### Scope (3-line summary)
+
+Build a MAP-Elites behavioral archive (≥64 cells, behavioral-genome-
+parameterized) seeded by an evolutionary search using sim-evaluated
+fitness. The archive provides warm starts for the offense planner's
+beam search (cell with the closest current-state behavior signature
+serves as a high-utility candidate seed). Phase 6 is upstream of
+the strategy-search loop, NOT a runtime path — the archive is
+computed offline + embedded as a JSON manifest the planner can
+look up at game start.
+
+### Prerequisites (now satisfied as of Phase 5A)
+
+- Sim adapter is production-ready (`adapt_game_state` produces a
+  sim_rs-ingestible dict; `simulate_action_phase_py` runs without
+  crashing on it). Required for the fitness function.
+- EconomyArbiter is the orchestrator the archive will eventually
+  inject candidates into. Phase 6 doesn't need to touch it — just
+  emit a JSON manifest.
+- 17 offense templates + 6 defense primitives + 3 archetype JSONs
+  define the genome's discrete components.
+
+### Phase 6 task structure (recommended)
+
+1. **Behavioral genome.** Define the genome dimensions: per-archetype
+   defense weights (3-5 dims), offense template preferences (8-10
+   dims), spawn timing schedule (3-5 dims), upgrade priorities (2-3
+   dims). Total ~16-25 floats.
+2. **Behavior signature.** Pick 2-4 behavioral descriptors (e.g.
+   {"avg_mp_pressure": float, "defense_density_y": float,
+   "scout_to_demo_ratio": float, "edge_left_vs_right": float}).
+   The MAP-Elites grid is over these descriptors.
+3. **Fitness function.** Win-rate (or expected damage delta) against
+   a fixed roster of opponents (v13_second_ring, athena_baseline_
+   lostkids, plus any new opp variants Phase 5B-uses). Use sim_rs
+   rollout via `evaluate_action_phase` for speed.
+4. **MAP-Elites driver.** Stable iteration target: ~10K evaluations
+   per descriptor cell to fill the archive. Parallelize with the
+   sim_rs 10-thread benchmark (88K sims/s) — ~10 min wall to fill
+   64 cells with 5K evals each.
+5. **Manifest emission.** Write `data/map_elites_archive.json`
+   with `{cell_signature: {genome: {...}, fitness: float}}`.
+6. **Phase 6 validation gate.** Archive coverage ≥ 50/64 cells
+   filled; mean fitness over archive > 0.5; archive size < 5 MB.
+
+### Open items inherited from Phase 5A
+
+See "Phase 5B / Phase 5C followups" above. Phase 6 should NOT
+attempt to merge those — Phase 5B is its own follow-on agent. The
+clean handoff sequence is:
+
+  Phase 5B (predictor wiring + bestof) → Phase 6 (MAP-Elites archive)
+                                       → Phase 7+ (strategy-search loop)
+
+### Gotchas inherited
+
+1. **Pre-commit hook still ~100 s.** Batch evaluations into one
+   commit per archive snapshot, not per cell.
+2. **Phase 3 classifier CV FAIL** still in effect — Phase 6's fitness
+   function should NOT rely on opponent-archetype prediction, only on
+   absolute fitness vs the fixed roster.
+3. **Single-thread sim_rs from Python** is ~14.5 K sims/s; the
+   parallel example is `cargo run --release --example parallel_bench`.
+   Phase 6 will likely want to call sim_rs in batches via a thread
+   pool.
+
+---
+
+## OLD: NEXT PHASE: 5 — EconomyArbiter integration (now COMPLETE as 5A)
 
 **Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 5/6 (the build plan
 varies in numbering; the next phase composes Defense + Offense +
