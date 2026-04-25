@@ -1,30 +1,106 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 6A — COMPLETE** (2026-04-25)
+## Current phase: **Phase 6 — COMPLETE** (Phase 6B landed 2026-04-25)
 
-Phase 6A shipped the MAP-Elites archive scaffold (genome + behavior
-space + grid container), the sim-evaluated fitness function, the
-MAP-Elites loop driver, and the integration into the beam-search
-candidate generator. Smoke match vs v13_second_ring runs 100 turns
-without crashes; the arbiter log confirms ≥1 archive-derived
-candidate per offensive turn.
+Phase 6A shipped the MAP-Elites archive scaffold + integration. Phase
+6B validated the integration via bestof 20 vs both baselines and
+landed the **archive policy decision (Path B — disabled by default)**
+based on the Phase 5B regression bar.
 
-**Phase 6B (validation) deferred** — bestof 20 vs both baselines
-was not run to keep this phase under the 30 min time budget. The
-Phase 5B local 10-10 vs v13 / 20-0 vs Lostkids baseline is the bar
-to beat.
+### Phase 6B headline numbers
 
-**Next: Phase 6B — bestof validation, then Phase 7 (LLM-FunSearch
-or skip).** See § "Phase 6/7 handoff brief" below.
+| Baseline           | Phase 5B       | Phase 6B no-gate | Phase 6B gate=0.6 | Phase 6 default (gate=1.01) |
+|--------------------|----------------|------------------|-------------------|------------------------------|
+| v13_second_ring    | 10/20 LB 0.300 | 15/20 LB 0.531   | 8/20 LB 0.219     | smoke: P1 wins 40 to -2     |
+| Lostkids           | 20/20 LB 0.839 | 14/20 LB 0.481   | 10/20 LB 0.299    | smoke: P1 wins 18 to -4     |
 
-## Phase 6A task ledger
+Both archive-enabled policies regressed vs Phase 5B's Lostkids floor
+(LB 0.839). Per the Phase 6B brief's hard constraint ("Never let
+Athena's effective performance drop below Phase 5B's"), the archive
+is **loaded but gated off by default** (``archive_confidence_threshold
+= 1.01``). Phase 6A integration code remains in place; Phase 6C / 8
+will re-tune the fitness harness + classifier and re-enable.
+
+**Phase 7 (LLM-FunSearch) is SKIPPED per the brief — recommended next
+phase is Phase 8 (self-play hardening), then Phase 6C (archive
+re-tune on broader corpus).** See § "Phase 6C / Phase 8 handoff
+brief" below.
+
+## Phase 6 task ledger
+
+### Phase 6A (commit chain `4447d1d`)
 
 | Milestone | Status | Commit |
 |---|---|---|
 | I. Genome + behavior space + archive scaffold | DONE | `4164727` |
 | J. Fitness fn + MAP-Elites loop + archive populated | DONE | `6df016f` |
 | K. Archive plugged into beam search (smoke match green) | DONE | `a70f35d` |
-| L. STATUS + AUTONOMOUS_LOG handoff (this commit) | DONE | (this commit) |
+| L. STATUS + AUTONOMOUS_LOG handoff | DONE | `4447d1d` |
+
+### Phase 6B (commit chain ending at this commit)
+
+| Milestone | Status | Commit |
+|---|---|---|
+| M. Bestof 20 vs both baselines (archive enabled) | DONE | `2bd6f2d` |
+| N. Archive policy decision (Path B) + Path C gate scaffold + 5 tests | DONE | `0daa130` |
+| O. STATUS + AUTONOMOUS_LOG handoff | DONE | (this commit) |
+
+### Phase 6B validation gate
+
+| Sub-gate | Status | Evidence |
+|---|---|---|
+| /bestof 20 vs v13_second_ring (archive on) | DONE | 15/20, LB 0.531 (improvement vs Phase 5B) |
+| /bestof 20 vs Lostkids (archive on) | DONE | 14/20, LB 0.481 (regression vs Phase 5B) |
+| /bestof 20 vs v13 (archive Path C gate=0.6) | DONE | 8/20, LB 0.219 (regression) |
+| /bestof 20 vs Lostkids (archive Path C gate=0.6) | DONE | 10/20, LB 0.299 (regression) |
+| Smoke vs v13 with archive disabled (default) | DONE | P1 wins 40 to −2, 80 turns, no crash |
+| Smoke vs Lostkids with archive disabled (default) | DONE | P1 wins 18 to −4, 40 turns, no crash |
+| All Phase 6 + new gate tests green | DONE | 86/86 pytest cases (was 81/81 + 5 new) |
+| Effective performance ≥ Phase 5B floor maintained | PASS | archive disabled by default → exact Phase 5B candidate enumeration |
+
+## Phase 6C / Phase 8 handoff brief
+
+### Why the archive hurts (diagnosis)
+
+1. **Fitness sim too short.** 12 rounds undercounts hoarding payoff;
+   archive overfits eager-Scout genomes (BC1 col=2 dominates).
+2. **Fitness signal too coarse.** 22 cells all sit at fitness=−9.0;
+   keep-best-per-cell tiebreakers are random.
+3. **Behavior space too narrow.** No archetype-conditional structure;
+   archive elites fit v13-like opponents but degrade Lostkids-like.
+4. **Classifier calibration poor.** LOO-CV 0.489 means the Path C
+   confidence gate fires unpredictably.
+
+### Phase 6C — re-tune the fitness harness (priority order)
+
+1. Extend fitness sim from 12 → 25-30 rounds. Add a v_funnel-flavored
+   baseline that better matches Lostkids' actual deploy pattern.
+2. Add fitness tiebreakers (MP efficiency, per-frame breach scoring).
+3. Per-archetype archives — one 22-cell grid per of 6 Phase 3
+   archetypes. Beam search consults only the matching archive.
+4. Sweep ``archive_sample_k`` (5..20) and confidence threshold
+   (0.0..0.7) jointly, validate vs both baselines.
+
+### Phase 8 — self-play hardening (parallel)
+
+1. Self-play replay generation: 100 Athena vs Athena matches under
+   `replays/selfplay/`.
+2. Re-run `opponent.build_corpus` on the 47 → ~150 expanded corpus.
+   Re-fit ArchetypeClassifier. Target LOO-CV ≥ 0.7.
+3. Re-tune utility weights α/β/γ/δ on the expanded labelled corpus.
+
+### Re-validation target
+
+After 6C + 8 land, re-run Phase 6B bestof with
+``archive_confidence_threshold=0.6``. Target: vs v13 LB ≥ 0.531
+**AND** vs Lostkids LB ≥ 0.839 (union of best historical results).
+
+## Phase 6/7 handoff brief (HISTORICAL — superseded by 6B)
+
+The original Phase 6A brief recommended Phase 7 (LLM-FunSearch) as the
+next logical phase. Phase 6B's regression vs Phase 5B inverted that —
+LLM-driven candidate generation would compound the over-fit until the
+fitness harness is healthier. Phase 7 is sequenced **after** 6C + 8.
 
 ### Phase 6A validation gate (passed)
 
