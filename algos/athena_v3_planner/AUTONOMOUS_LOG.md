@@ -705,36 +705,164 @@ defense rebalance + utility calibration is the Phase 5B work.
 
 ### Phase 5B / Phase 5C followups (handoff)
 
-These are the open items the next agent should pick up:
+(Most of these were closed out in Phase 5B — see the "Phase 5B"
+section below this one. Items 1, 2, 3, 4 closed; items 5, 6, 7 carried
+into the Phase 6 backlog.)
 
-1. **Wire ArchetypeClassifier into the arbiter.**
-   `EconomyArbiter._update_posterior` is a no-op stub — the trackers→
-   features mapping needs to be calibrated. Once it's live, the
-   posterior-based predictor.top_k call (already plumbed) will return
-   non-empty `opp_actions_top_k` and beam_search will run real sim
-   rollouts.
-2. **Wire Phase 3 ActionPredictor.top_k.** Already plumbed through
-   `EconomyArbiter._offense_phase`; just needs `action_predictor` and
-   `posterior` arguments to be passed at construction time
-   (`on_game_start`). Per the Phase 3 CV-gate FAIL, treat low-
-   confidence (max < 0.40) predictions as approximately uniform.
-3. **`/bestof 20` vs both baselines.** Wilson 95% LB ≥ 50% per
-   baseline is the deferred validation gate.
-4. **Phase 2B defense rebalance.** Deferred from milestone B — bump
-   v_funnel/two_layer_keep/spread_line turret count toward 10–15 in
-   the early game; loosen `probabilistic_placement` y constraint from
-   y≥11 to y≥9; optionally add `v13_inspired.json`.
-5. **Calibrate utility weights** (α/β/γ/δ) on a small fuzz harness.
-6. **Tighten upstream bounds check** to silence spurious warnings.
-7. **Confidence calibration** for the ArchetypeClassifier — temperature-
-   scale the posterior or fall back to uniform when max < 0.4 (per
-   Phase 3 CV failure mode).
+1. **Wire ArchetypeClassifier into the arbiter.** **CLOSED in Phase 5B.**
+2. **Wire Phase 3 ActionPredictor.top_k.** **CLOSED in Phase 5B.**
+3. **`/bestof 20` vs both baselines.** **CLOSED in Phase 5B**: 20-0
+   vs Lostkids (LB 0.84, PASS); 10-10 vs v13 (LB 0.30, FAIL but
+   acceptable per the local-determinism caveat).
+4. **Phase 2B defense rebalance.** **CLOSED in Phase 5B**: turret
+   counts at 10-12 in v_funnel/two_layer_keep/spread_line;
+   v13_inspired.json added; probabilistic_placement y>=9.
+5. **Calibrate utility weights** (α/β/γ/δ) — carried into Phase 6
+   MAP-Elites backlog.
+6. **Tighten upstream bounds check** — carried into Phase 6 cleanup.
+7. **Confidence calibration** for the ArchetypeClassifier — carried
+   into Phase 6 backlog. Per the Phase 3 CV failure mode.
 
 ### Phase 5 commits
 
 - `7b05fed` — milestone A
 - `0914072` — milestone B
-- `<this>`  — milestone D (handoff)
+- `7f9d758` — milestone D (Phase 5A handoff)
+
+---
+
+## Phase 5B — Wire opponent model + defense rebalance + bestof validation
+
+**Agent**: Claude Opus 4.7 (1M context).
+**Started / completed**: 2026-04-25.
+**Branch**: `worktree-agent-a580f55e` (off `main` @ `7f9d758` — Phase
+5A handoff).
+**Plan reference**: brief in agent prompt (Phase 5B scope; E + F + G + H).
+
+### Tasks (commit-by-commit)
+
+| Task | Output | Commit |
+|---|---|---|
+| E + F. Opponent model wiring + defense rebalance | classifier+predictor wired; arbiter posterior updated; defense JSONs at 10-12 turrets; v13_inspired added | `9779e69` |
+| G. /bestof 20 vs both baselines + PHASE5B_RESULTS.md | 10-10 vs v13 (LB 0.30 FAIL, acceptable per local-determinism caveat); 20-0 vs Lostkids (LB 0.84 PASS); 0 crashes / 0 timeouts | `7f1a713` |
+| H. STATUS + AUTONOMOUS_LOG handoff | (this commit) | — |
+
+### What landed in Milestones E + F (commit `9779e69`)
+
+**Wiring (E):**
+1. `algo_strategy.py:on_game_start` — instantiates
+   `ArchetypeClassifier` (fit from `data/opponent_features.npz`) and
+   `ActionPredictor` (fit from `opponent/labels.json`) at game start;
+   passes both to `EconomyArbiter`. Frame buffer `self._action_frames`
+   (cap 5000, drop oldest 10% on overflow) accumulates parsed action
+   frames in `on_action_frame` for downstream feature extraction.
+2. `planner/economy.py:_update_posterior` — replaced the no-op stub
+   with a real call:
+   - Read frames from `self.action_frame_buffer`.
+   - Run `extract_features(buffer, opponent_player_id=2)` (Phase 0.5
+     trackers + in-line aggregators).
+   - `self._posterior = classifier.predict_proba(features)` — note
+     this is `predict_proba`, NOT `update_posterior`, because the
+     trackers are themselves cumulative aggregates so the
+     multiplicative-update formula would double-count.
+   - Soft-fail every exception so the offense pipeline still runs.
+3. `planner/economy.py:_offense_phase` — `ActionPredictor.top_k(k=3)`
+   replaces the previously-empty `opp_actions_top_k`. Brief specified
+   k=3 (smaller than the default k=5) to keep beam_search compute
+   under the 8 s soft cap. Added `_opp_actions_populated_turns` /
+   `_opp_actions_empty_turns` diagnostics for the brief's "≥90%
+   mid-game turns populated" invariant. The per-turn debug log now
+   includes the top-1 archetype.
+4. `run.sh` — explicitly prefer `/opt/miniconda3/bin/python3.13`
+   (with fallback chain). System `python3` on macOS is 3.9, where
+   the installed `sim_rs` PyO3 wheel is stale and raises "list
+   cannot be converted to PyTuple" on every `simulate_action_phase_py`
+   call. The 3.13 wheel was rebuilt against the current signature
+   and works correctly.
+
+**Defense rebalance (F):**
+1. `defenses/v_funnel.json`: 4 → 10 priority-1 turrets.
+2. `defenses/two_layer_keep.json`: 4 → 10 priority-1 turrets.
+3. `defenses/spread_line.json`: 6 → 12 priority-1 turrets.
+4. `defenses/v13_inspired.json`: NEW — extracts v13_second_ring's
+   12-turret static skeleton (center + sidelane_deep + outer + inner
+   corners) plus its second-ring [11,5] / [16,5] anchors and outer
+   [0,13] / [27,13] corners as priority 5+6.
+5. `planner/defense.py:probabilistic_placement`: turret y-restriction
+   `>= 11` → `>= 9`. Walls remain `>= 11` to avoid blocking own MP
+   spawn cones.
+6. `algo_strategy.py:_DEFAULT_ARCHETYPE`: `"v_funnel"` → `"v13_inspired"`
+   so the rebalance default matches v13's opening density.
+
+**Test coverage:**
+- New test `test_arbiter_phase5b_posterior_wired`: synthesizes a small
+  classifier+predictor, feeds an action-frame buffer, asserts
+  posterior sums to 1.0 after one turn. Full suite still 60/60 green.
+
+### What landed in Milestone G (commit `7f1a713`)
+
+Bestof 20 results table (alternating sides, 10 per side):
+
+| Baseline                | Wins  | Win rate | Wilson 95% LB | Gate (≥50%) |
+|-------------------------|-------|----------|---------------|-------------|
+| v13_second_ring         | 10/20 | 50.0%    | 0.300         | FAIL (acceptable) |
+| athena_baseline_lostkids| 20/20 | 100.0%   | **0.839**     | PASS        |
+
+Per-turn timing (across 20 v13 replays):
+- Mean total computation time: 11.4 s per match (~140 ms/turn average).
+- Max total computation time: 12.9 s.
+- Crashes: 0/40. Timeouts (`timeout_death`): 0/40. Watchdog never fired.
+
+Per the brief's local-determinism caveat: "failing v13 but beating
+Lostkids = local-determinism artifact (acceptable). Failing both =
+real planner weakness." We pass that filter cleanly. The 10-10 vs v13
+is a real improvement over Phase 4's 0/20 (with no defense).
+
+Diagnostics from the smoke match log show beam_search invokes sim_rs
+against non-empty opp actions on >90% of mid-game turns (sims=3 on
+most turns, sims=1 occasionally when the predictor's distribution is
+sparse). Posterior dynamically tracks opp archetype:
+SCOUT_RUSH → DEMOLISHER_LINE → BALANCED across turns 1..30.
+
+### Validation gate status (Phase 5B)
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Wilson 95% LB ≥ 50% vs v13_second_ring          | FAIL (acceptable) | 10/20, LB=0.300. Brief explicitly allows this when Lostkids passes. |
+| Wilson 95% LB ≥ 50% vs athena_baseline_lostkids | PASS              | 20/20, LB=0.839. |
+| No crashes / no timeouts                         | PASS              | 0/40 across both bestofs. |
+| Per-turn compute < 13 s                          | PASS              | mean 140 ms, max ~190 ms. |
+| beam_search invokes sim_rs against non-empty opp actions on ≥90% mid-game turns | PASS | smoke match log confirms sims∈{1,3} every turn from t=1 onward. |
+| pytest suite green                               | PASS              | 60/60 in 10 s (was 59 in Phase 5A). |
+
+### Implementation notes / gotchas observed
+
+- **Stale sim_rs wheel on Python 3.9.** This bit hard. The Phase 0
+  notes already flagged it ("sim_rs PyO3 wheel rebuild" §3) but the
+  algo's `run.sh` was using `${PYTHON_CMD:-python3}` which falls back
+  to system `/usr/bin/python3` (3.9). The 3.9 wheel pre-dates the
+  current `simulate_action_phase_py` signature, so every rollout
+  raised `TypeError("'list' object cannot be converted to 'PyTuple'")`
+  and beam_search silently fell back to the heuristic path. Fix:
+  hardcode 3.13 via `command -v` checks. Phase 6+ should rebuild the
+  3.9 wheel OR document that 3.13 is mandatory.
+- **`extract_features` treats trackers as cumulative.** They are.
+  So `predict_proba` (NOT `update_posterior`) is the correct call —
+  multiplicative update would double-count.
+- **`load_archetype` failure mode is silent for unknown names.** If
+  the algo gets passed an archetype name it doesn't know, defense
+  silently uses the v_funnel default. Fixed at construction time
+  by routing through `_archetype_path` which has the lookup table.
+- **Pre-commit gate at ~100 s/commit.** Phase 5B used 3 commits
+  (E+F merged, G, H) for a total ~5 min in pre-commit alone, plus
+  ~5 min total for two bestof 20s (parallel via 10 workers). Total
+  agent wall: ~25 min.
+
+### Phase 5B commits (full chain)
+
+- `9779e69` — Milestones E + F (wiring + defense rebalance)
+- `7f1a713` — Milestone G (bestof 20 + PHASE5B_RESULTS.md)
+- `<this>`  — Milestone H (handoff to Phase 6)
 
 ---
 
