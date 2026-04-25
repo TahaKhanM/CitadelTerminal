@@ -60,10 +60,48 @@ except ImportError:
 # Utility weights — tuned later by Phase 9 MAP-Elites
 # ---------------------------------------------------------------------------
 
-ALPHA_HP_TAKEN = 1.0    # weight on HP we lose
-BETA_MP_SPENT = 0.5     # weight on MP we spend
-GAMMA_STRUCT_KILLED = 0.2  # weight on opponent structures destroyed
-DELTA_SP_GAINED = 0.3   # weight on SP we gain (from breaches)
+# Athena_loss replay (2026-04-25, 0-45 in 35 turns) showed beam search
+# converging on interceptor_screen (4 Interceptors at (6,7)/(21,7))
+# 80 times across 35 turns — total HP dealt to opponent: 0. Sim said
+# defensive plays had highest expected utility because:
+#   util_interceptor    = 0 - 1.0*0   - 0.5*4 = -2.0  (stops sim'd opp scouts)
+#   util_scout_rush     = 2 - 1.0*8   - 0.5*8 = -10   (loses to opp scouts)
+#   util_hoard          = 0 - 1.0*8   - 0     =  -8   (just absorbs damage)
+# Interceptor wins. But on LIVE the synthetic-opp prediction is wrong —
+# real opponents don't always send the predicted scout rushes, so our
+# interceptors at (6,7)/(21,7) don't engage real attacks and we score 0.
+#
+# Re-weighted to bias offense:
+#   - HP_DEALT_MULTIPLIER = 2.5: dealing damage matters MORE than not
+#     receiving (asymmetric — we need to score to win)
+#   - ALPHA_HP_TAKEN = 0.3: less penalty for absorbing damage; reflects
+#     that defense is uncertain (sim's "interceptor stops scout" doesn't
+#     always hold against real opponents)
+#   - BETA_MP_SPENT = 0.2: less penalty for big plays; prefer expensive
+#     offense over cheap defense
+#
+# SECOND-PASS TUNING (post-investigation): the sim reports
+# interceptor_screen has hp_dealt = 4 even vs PASSIVE opp (because
+# its 4 Interceptors at (6,7)/(21,7) walk to opp's edge after killing
+# any incoming scouts and "breach" in the 1-turn rollout). On live,
+# this never actually happens — opp's defense kills our interceptors
+# before they reach the edge. Sim is bit-exact with engine.jar but
+# the SCENARIO it sims doesn't match a multi-turn live game.
+#
+# Final weights:
+#   - HP_DEALT_MULT = 3.0: triple-weight offensive damage so plans
+#     that score real Scout/Demolisher breaches dominate.
+#   - α = 0.1: don't penalize offense for damage we'll take regardless
+#     (handled by defense_phase, not offense_phase).
+#   - INTERCEPTOR_HEAVY_PENALTY = 10.0: subtract from util when >50%
+#     of deploys are interceptors. Calibrated to make interceptor
+#     plans uncompetitive at low MP.
+HP_DEALT_MULTIPLIER = 3.0
+ALPHA_HP_TAKEN = 0.1
+BETA_MP_SPENT = 0.2
+GAMMA_STRUCT_KILLED = 0.2
+DELTA_SP_GAINED = 0.3
+INTERCEPTOR_HEAVY_PENALTY = 10.0
 
 
 # ---------------------------------------------------------------------------
@@ -637,22 +675,49 @@ def _opp_spawn_from_action(action: Dict[str, Any]) -> List[Tuple[str, Tuple[int,
 # Utility & beam search
 # ---------------------------------------------------------------------------
 
-def _utility(eval_result: Dict[str, Any], mp_cost: float) -> float:
-    """Per-spec utility:
-       delta_HP_dealt - α * delta_HP_taken - β * MP_spent + γ * structures_destroyed
-       + δ * SP_gained
+def _utility(
+    eval_result: Dict[str, Any],
+    mp_cost: float,
+    deploys: Optional[Sequence[Tuple[str, Any]]] = None,
+) -> float:
+    """Per-spec utility (tuned post-Athena_loss replay analysis).
+
+    Includes calibration penalty for interceptor-heavy plans: the sim
+    consistently predicts interceptors breach for 4 HP per turn (even
+    vs passive opponents) because in a 1-turn rollout, after their
+    target mobile units die, the surviving interceptors continue toward
+    opp's edge with no further opposition. On live this almost never
+    happens — opp's defensive turrets kill our interceptors before
+    they reach the edge, AND our interceptors aren't supposed to breach
+    (they're defensive units). Net effect: sim overpredicts interceptor
+    util by ~5-8 every turn, and beam search converges on
+    interceptor_screen at low-mid MP. Athena_loss replay (0-45 in 35
+    turns, 80 interceptors deployed, 0 actual breaches) is the canary.
+
+    Penalty: -5.0 for plans where >50% of deploys are interceptors.
+    Calibrated so plans with at-least-some Scout/Demolisher offense
+    win ties.
     """
     hp_dealt = float(eval_result.get("delta_hp_opp", 0.0))
     hp_taken = float(eval_result.get("delta_hp_self", 0.0))
     structs_killed = int(eval_result.get("structures_destroyed_opp", 0))
     sp_gained = float(eval_result.get("delta_sp_self", 0.0))
-    return (
-        hp_dealt
+    util = (
+        HP_DEALT_MULTIPLIER * hp_dealt
         - ALPHA_HP_TAKEN * hp_taken
         - BETA_MP_SPENT * float(mp_cost)
         + GAMMA_STRUCT_KILLED * structs_killed
         + DELTA_SP_GAINED * sp_gained
     )
+    if deploys:
+        n_total = len(deploys)
+        n_int = sum(
+            1 for u, _ in deploys
+            if str(u).upper() in ("INTERCEPTOR", "SI")
+        )
+        if n_total > 0 and (n_int / n_total) > 0.5:
+            util -= INTERCEPTOR_HEAVY_PENALTY
+    return util
 
 
 def _heuristic_utility(cand: Candidate) -> float:
@@ -796,7 +861,7 @@ def beam_search(
                 my_player=my_player,
                 config_path=config_path,
             )
-            u = _utility(res, cand.mp_cost)
+            u = _utility(res, cand.mp_cost, deploys=cand.deploys)
             weighted_util += p * u
             sims += 1
 

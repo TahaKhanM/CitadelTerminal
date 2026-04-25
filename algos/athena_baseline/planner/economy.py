@@ -59,34 +59,39 @@ def _synthetic_opp_actions(
     # Edge: TR (opponent's right = our right edge), TL (opp's left = our left)
     # wave_size_bucket strings come from the action_predictor's vocab.
 
+    # Re-weighted post-Athena_loss replay: less aggressive opp distribution.
+    # Previously gave 8-14 wave_size_bucket (10 Scouts) 36% probability
+    # combined, which made our interceptor_screen the highest-utility
+    # plan because sim said "interceptors stop incoming 10-Scout wave".
+    # Real opponents at this ELO don't always send max-size waves — many
+    # are hoarding, doing demo trains, or attacking different edges.
+    # Down-weight the heavy-attack predictions to ~25% combined and add
+    # more passive/light-attack mass.
     if opp_mp >= 8.0:
-        # High-MP scout rushes
         actions.append(({"primary_mobile_type": 3, "primary_edge": "TR",
-                         "wave_size_bucket": "8-14", "spend_mp": True}, 0.18))
+                         "wave_size_bucket": "8-14", "spend_mp": True}, 0.10))
         actions.append(({"primary_mobile_type": 3, "primary_edge": "TL",
-                         "wave_size_bucket": "8-14", "spend_mp": True}, 0.18))
-        # Demo trains
+                         "wave_size_bucket": "8-14", "spend_mp": True}, 0.10))
         actions.append(({"primary_mobile_type": 4, "primary_edge": "TR",
-                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.12))
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.08))
         actions.append(({"primary_mobile_type": 4, "primary_edge": "TL",
-                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.12))
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.08))
 
     if opp_mp >= 4.0:
-        # Medium-MP rushes
         actions.append(({"primary_mobile_type": 3, "primary_edge": "TR",
-                         "wave_size_bucket": "4-7", "spend_mp": True}, 0.12))
+                         "wave_size_bucket": "4-7", "spend_mp": True}, 0.10))
         actions.append(({"primary_mobile_type": 3, "primary_edge": "TL",
-                         "wave_size_bucket": "4-7", "spend_mp": True}, 0.12))
+                         "wave_size_bucket": "4-7", "spend_mp": True}, 0.10))
 
     if opp_mp >= 1.0:
         actions.append(({"primary_mobile_type": 3, "primary_edge": "TR",
-                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.08))
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.07))
         actions.append(({"primary_mobile_type": 3, "primary_edge": "TL",
-                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.08))
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.07))
 
-    # Always include passive (opponent hoards / nothing).
+    # Heavy weight on passive — opp often hoards, especially mid-game.
     actions.append(({"primary_mobile_type": -1, "primary_edge": "NONE",
-                     "wave_size_bucket": "0", "spend_mp": False}, 0.10))
+                     "wave_size_bucket": "0", "spend_mp": False}, 0.30))
 
     # Normalize so weights sum to 1.0.
     total = sum(p for _, p in actions)
