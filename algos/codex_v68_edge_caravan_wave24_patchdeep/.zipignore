@@ -1,9 +1,0 @@
-README.md
-*.ps1
-*.pyc
-.DS_Store
-__pycache__/*
-documentation/*
-*/documentation/*
-tests/*
-*/.git/*
