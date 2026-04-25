@@ -28,11 +28,19 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 # 8-way bin edges chosen so common values map to interior cells. The
 # upper bound is inclusive at the rightmost cell.
+#
+# MP-at-attack bins reflect the realistic Citadel attack-MP regime:
+# the MP-decay rule (x0.75 each turn) plus per-turn income (1+turn//5)
+# pushes a hoarding genome's mean attack MP into the 8-20 range; an
+# eager genome holds 1-4. Bins are denser at the low end.
+# Defense-density bins were tuned from the Phase 5 archetypes (priority
+# 1+2 placements: v_funnel=14, two_layer_keep=14, spread_line=20,
+# v13_inspired=16) — finer bins to differentiate close values.
 BC_BINS_MP_AT_ATTACK_8: Tuple[float, ...] = (
-    0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 20.0, 30.0, 1e9,
+    0.0, 1.5, 3.0, 5.0, 7.5, 10.0, 13.0, 17.0, 1e9,
 )
 BC_BINS_DEF_DENSITY_8: Tuple[float, ...] = (
-    0.0, 8.0, 14.0, 20.0, 26.0, 32.0, 38.0, 50.0, 1e9,
+    0.0, 8.0, 12.0, 14.5, 17.0, 19.5, 22.0, 28.0, 1e9,
 )
 
 
