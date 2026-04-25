@@ -107,6 +107,7 @@ def _synthetic_opp_actions(
 from .budget import BudgetExceeded, Watchdog
 from .defense import (
     SP_IDX,
+    anti_demo_hardening,
     build_default_defences,
     edge_block_and_remove,
     max_heap_repair,
@@ -114,6 +115,71 @@ from .defense import (
     reactive_to_breach,
     refund_low_health_structures,
 )
+
+
+# --- Live-replay-driven adaptive triggers ---
+# These are the heuristics the live replays motivated:
+# 1) anti-demo trigger: switch to forward Y=12 turrets when opp demos appear.
+# 2) heavy-wall trigger: override scout offense with demolishers when opp
+#    front-line walls are dense enough that scouts won't breach.
+ANTI_DEMO_TRIGGER_COUNT = 3      # opp Demos in last 3 turns
+ANTI_DEMO_TRIGGER_TURNS = 3
+HEAVY_WALL_OVERRIDE_THRESHOLD = 18    # opp walls in y∈[14,17]
+HEAVY_WALL_OVERRIDE_MAX_TURRETS = 6   # opp turrets in y∈[14,17] — ABOVE this means heavy turrets, demos die
+HEAVY_WALL_OVERRIDE_MIN_MP = 9        # 3 demos = 9 MP
+DEMOLISHER_UNIT_INDEX = 4             # in events.spawn frames
+
+
+def _count_recent_opp_demolishers(action_frame_buffer, current_turn, n_turns):
+    """Scan the action-frame buffer for opp's Demolisher spawns in the
+    last ``n_turns`` turns. Returns 0 on empty buffer or any error."""
+    if not action_frame_buffer:
+        return 0
+    threshold_turn = max(0, current_turn - n_turns)
+    count = 0
+    for frame in action_frame_buffer:
+        try:
+            ti = frame.get("turnInfo", [])
+            if len(ti) < 2:
+                continue
+            if ti[1] < threshold_turn:
+                continue
+            for s in frame.get("events", {}).get("spawn", []) or []:
+                if (
+                    isinstance(s, list) and len(s) >= 4
+                    and s[1] == DEMOLISHER_UNIT_INDEX
+                    and s[3] == 2
+                ):
+                    count += 1
+        except Exception:  # noqa: BLE001 — defensive over malformed frames
+            continue
+    return count
+
+
+def _count_opp_front_structures(game_state):
+    """Count opponent's WALL and TURRET units in their forward rows y∈[14,17].
+
+    These are the structures that block our scout paths. Above 17 is too
+    far back to matter for athena's offense; below 14 is in our half.
+    Returns (wall_count, turret_count)."""
+    walls = 0
+    turrets = 0
+    for x in range(28):
+        for y in range(14, 18):
+            try:
+                u = game_state.contains_stationary_unit([x, y])
+            except Exception:  # noqa: BLE001
+                continue
+            if not u:
+                continue
+            if getattr(u, "player_index", -1) != 1:
+                continue
+            unit_type = getattr(u, "unit_type", "")
+            if unit_type == "FF":
+                walls += 1
+            elif unit_type == "DF":
+                turrets += 1
+    return walls, turrets
 
 
 class EconomyArbiter:
@@ -369,6 +435,26 @@ class EconomyArbiter:
         except Exception as exc:  # noqa: BLE001
             self.debug_log(f"[arbiter] max_heap_repair: {exc!r}")
 
+        # Anti-demo trigger: if opp's recent Demolisher count is high,
+        # place forward Y=12 turrets BEFORE probabilistic_placement consumes
+        # leftover SP. Each anti-demo turret puts demos at Y=14 in range —
+        # base turrets at Y=11 cannot reach Y=14.
+        try:
+            recent_demos = _count_recent_opp_demolishers(
+                self.action_frame_buffer,
+                self.turn_count,
+                ANTI_DEMO_TRIGGER_TURNS,
+            )
+            if recent_demos >= ANTI_DEMO_TRIGGER_COUNT:
+                placed = anti_demo_hardening(game_state, config=self.config)
+                if placed:
+                    self.debug_log(
+                        f"[arbiter] anti_demo_hardening placed {placed} "
+                        f"(opp_demos_3turns={recent_demos})"
+                    )
+        except Exception as exc:  # noqa: BLE001
+            self.debug_log(f"[arbiter] anti_demo_hardening: {exc!r}")
+
         try:
             sp = float(game_state.get_resource(SP_IDX, 0))
         except Exception:  # noqa: BLE001
@@ -541,6 +627,40 @@ class EconomyArbiter:
                 )
             except Exception:  # noqa: BLE001
                 pass
+            return
+
+        # Heavy-wall override: when opp has dense walls but FEW turrets in
+        # their front, the beam search's scout-flood plans bounce off
+        # (scouts can't damage walls; they die to turrets, but here turrets
+        # are few). Replace the plan with a Demolisher train + scout
+        # follow-up. Demos chew walls; scouts breach the gap.
+        # NOTE: trigger requires LOW turret count specifically because
+        # demos die fast vs heavy turret defense (e.g. v13_second_ring's
+        # turret line). Heavy-walls + heavy-turrets is NOT this condition.
+        try:
+            opp_walls_front, opp_turrets_front = _count_opp_front_structures(game_state)
+        except Exception:  # noqa: BLE001
+            opp_walls_front, opp_turrets_front = 0, 0
+        # Heavy-wall + low-turret triggers the override.
+        if (
+            opp_walls_front >= HEAVY_WALL_OVERRIDE_THRESHOLD
+            and opp_turrets_front <= HEAVY_WALL_OVERRIDE_MAX_TURRETS
+            and mp_avail >= HEAVY_WALL_OVERRIDE_MIN_MP
+        ):
+            override_deploys: List[Tuple[str, Tuple[int, int]]] = []
+            n_demos = 3  # 9 MP for the demo train
+            for _ in range(n_demos):
+                override_deploys.append(("DEMOLISHER", (4, 9)))
+            scout_mp = max(0, int(mp_avail - n_demos * 3))
+            for _ in range(scout_mp):
+                override_deploys.append(("SCOUT", (3, 10)))
+            self.debug_log(
+                f"[arbiter] heavy-wall override: opp_walls={opp_walls_front}, "
+                f"mp={mp_avail:.1f}, plan={n_demos}D+{scout_mp}S"
+            )
+            self._execute_offense_plan_from_deploys(
+                game_state, override_deploys, plan.tier
+            )
             return
 
         self._execute_offense_plan_from_deploys(game_state, plan.deploys, plan.tier)
