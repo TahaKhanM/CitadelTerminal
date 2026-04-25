@@ -1,6 +1,76 @@
 # Athena v3 planner — STATUS
 
-## Current phase: **Phase 6 — COMPLETE** (Phase 6B landed 2026-04-25)
+## Current phase: **Phase 7 — COMPLETE** (G11 gate PASS, 2026-04-25)
+
+### Phase 7 headline (G11 replay-trace measurement)
+
+| Metric | Value |
+|---|---|
+| Replays evaluated | 47 / 47 (0 skipped, 0 crashes) |
+| v13 actual win rate | 22/47 = 0.468 (Wilson LB95 0.333) |
+| Athena predicted win rate | 39/47 = **0.830** (Wilson LB95 0.699) |
+| Δ (Athena − v13) | **+0.362** |
+| Phase 7 gate (Δ ≥ 0.15) | **PASS** by +21 pp |
+| Total wall clock | 12.8s (avg 0.27s/replay) |
+
+**Per-opponent breakdown** (30 distinct opponents):
+
+| Bucket | Count |
+|---|---|
+| Athena improves over v13 | 11 opponents (top: oleh-v2 +0.778/match, jae-3 +0.750/match) |
+| Athena ties v13's outcome | 17 opponents |
+| Athena strictly regresses | 2 opponents (1 single-match each) |
+
+3 strict regression matches (out of 22 v13 wins): all share a long-
+match (24–25 turn) hoard-heavy profile. Diagnosis pinned to the empty
+action-predictor posterior (classifier LOO-CV 0.489 — known issue
+from Phase 3, carried forward as a Phase 8B re-tune target).
+
+### Phase 7 commit chain
+
+| Commit | Milestone |
+|---|---|
+| `f563490` | P — replay-trace eval harness + 3-replay smoke |
+| `a74669b` | Q — G11 full sweep on 47 replays + gate PASS |
+| `82df333` | R — per-opponent breakdown + regression analysis |
+| (this commit) | S — STATUS + AUTONOMOUS_LOG + Phase 8 brief |
+
+### Phase 7 deliverables
+
+```
+algos/athena_v3_planner/
+├── eval/
+│   ├── __init__.py
+│   ├── replay_trace.py            ← evaluate_replay() — single-replay G11
+│   ├── run_g11.py                  ← driver across the 47-replay corpus
+│   └── per_opponent.py             ← breakdown + regression analysis
+└── data/
+    ├── G11_RESULTS.json            ← machine-readable per-replay records
+    ├── G11_RESULTS.md              ← human-readable summary + per-replay table + gate
+    └── G11_PER_OPPONENT.md         ← per-opponent W/L delta + diagnosis
+```
+
+### Phase 8 brief (handoff)
+
+Phase 8 is **final report + packaging + upload-ready zip**.
+
+1. `data/ATHENA_FINAL_REPORT.md` — composite report covering Phases 0–7.
+   Headline: G11 +21 pp delta (the only uncontaminated quality
+   measurement), supported by Phase 5B 30/40 local bestof.
+2. `scripts/zipalgo_mac algos/athena_v3_planner/ athena.zip` — verify
+   < 5 MB.
+3. `READY_FOR_UPLOAD.md` — user-facing checklist for terminal.c1games.com
+   upload (do NOT upload — user-only action).
+4. Final smoke match `athena_v3_planner` vs `v13_second_ring` from the
+   bundled zip to confirm production safety wrappers remain intact.
+5. Phase 8B (deferred) — re-tune classifier (target LOO-CV ≥ 0.7) on
+   self-play augmented corpus; re-enable archive at threshold 0.6 once
+   per-archetype archives + extended fitness sim land (see Phase 6C
+   brief in this file).
+
+---
+
+## (Historical) Phase 6 status — COMPLETE (Phase 6B landed 2026-04-25)
 
 Phase 6A shipped the MAP-Elites archive scaffold + integration. Phase
 6B validated the integration via bestof 20 vs both baselines and
