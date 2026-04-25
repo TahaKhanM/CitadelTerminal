@@ -333,50 +333,61 @@ class EconomyArbiter:
             self.debug_log(f"[arbiter] reactive_to_breach: {exc!r}")
 
     def _offense_phase(self, game_state) -> None:
-        """Generate candidates, run beam search, execute the chosen plan."""
-        # Local imports — defer to runtime so the module imports even when
-        # the offense subpackage isn't fully built. We support BOTH:
-        #   - top-level import (algo runtime: `_HERE` is on sys.path so the
-        #     algo's `offense` and `planner` are top-level packages)
-        #   - relative-package import (test runtime: imported as
-        #     `algos.athena_v3_planner.planner.economy`)
+        """Pick offense via the robust multi-tier planner; execute the plan.
+
+        The new planner (planner.offense_planner.pick_offense_plan)
+        guarantees a non-empty deploy list whenever MP >= 1.0. Each
+        internal failure is logged and the next tier kicks in:
+
+          T1 sim-evaluated beam search (full sim_rs rollouts)
+            ↓ on any exception or empty-result
+          T2 heuristic beam search (templates + state, no sim)
+            ↓ on any exception or empty-result
+          T3 rule-based MP-aware (turn + state-derived enemy strength)
+            ↓ on any exception
+          T4 hardcoded (alternating-side scouts, can't fail)
+
+        Replaces the prior _offense_phase which had multiple silent-return
+        paths (adapt_game_state crash → no offense; generate_candidates
+        crash → no offense; beam_search crash → no offense; hoard pick →
+        no offense). Live-ladder analysis (3+ uploads, ~13 games) showed
+        every loss was driven by the silent-return path firing every turn.
+        """
+        try:
+            from .offense_planner import pick_offense_plan  # type: ignore
+        except ImportError:
+            from planner.offense_planner import pick_offense_plan  # type: ignore
+
         try:
             from offense.state_adapter import adapt_game_state  # type: ignore
-            from planner.offense import beam_search, generate_candidates  # type: ignore
         except ImportError:
-            from ..offense.state_adapter import adapt_game_state  # type: ignore
-            from .offense import beam_search, generate_candidates  # type: ignore
+            try:
+                from ..offense.state_adapter import adapt_game_state  # type: ignore
+            except ImportError:
+                adapt_game_state = None  # type: ignore
 
         MP_IDX = 1
         try:
             mp_avail = float(game_state.get_resource(MP_IDX, 0))
         except Exception:  # noqa: BLE001
             mp_avail = 0.0
-        if mp_avail < self.offense_min_mp:
-            return  # not enough MP to even consider spawning
-
-        # Build the sim_rs-ready state dict from gamelib.
-        try:
-            state_dict = adapt_game_state(
-                game_state, my_player=1, turn=self.turn_count,
-            )
-        except Exception as exc:  # noqa: BLE001
-            self.debug_log(f"[arbiter] adapt_game_state: {exc!r}")
+        if mp_avail < 1.0:
+            # Tier 4 needs at least 1 MP to spawn anything.
             return
 
-        # Phase 6B milestone N — Path C confidence gate.
-        #
-        # The Phase 6A archive integration validates well vs v13_second_ring
-        # (15-5 LB 0.531) but regresses vs athena_baseline_lostkids (14-6
-        # LB 0.481, vs Phase 5B 20-0 LB 0.839). Diagnosis: the 22-cell
-        # archive over-fits archetype-similar opponents (v13 uses the
-        # same v13_inspired defense the archive was trained against)
-        # and under-explores Lostkids' V-funnel pattern.
-        #
-        # Remediation: only consult the archive on turns where the
-        # classifier has converged (posterior_max above threshold).
-        # On uncertain turns, pass archive=None so behavior reduces to
-        # exact Phase 5B candidate enumeration.
+        # Build the sim_rs-ready state dict from gamelib. If this fails
+        # the planner falls through to tier 3 (state-free rule-based).
+        state_dict = None
+        if adapt_game_state is not None:
+            try:
+                state_dict = adapt_game_state(
+                    game_state, my_player=1, turn=self.turn_count,
+                )
+            except Exception as exc:  # noqa: BLE001
+                self.debug_log(f"[arbiter] adapt_game_state: {exc!r}")
+                # state_dict stays None → tier 3+ takes over
+
+        # Phase 6B confidence-gated MAP-Elites archive (preserved).
         archive_for_this_turn = None
         if self._archive is not None:
             posterior_max = 0.0
@@ -391,38 +402,10 @@ class EconomyArbiter:
             else:
                 self._archive_gated_turns += 1
 
-        try:
-            cands = generate_candidates(
-                state_dict, mp_avail, my_player=1,
-                archive=archive_for_this_turn,
-                archive_sample_k=self.archive_sample_k,
-                archive_rng=self._archive_rng,
-            )
-        except Exception as exc:  # noqa: BLE001
-            self.debug_log(f"[arbiter] generate_candidates: {exc!r}")
-            return
-
-        # Phase 6 milestone K: surface archive-derived candidates count
-        # for the smoke-match invariant ("≥1 archive candidate per turn").
-        if archive_for_this_turn is not None:
-            arch_n = sum(1 for c in cands if c.name.startswith("archive:"))
-            if arch_n > 0:
-                self._opp_actions_populated_turns += 0  # no-op; reuse counter is for opp_actions
-                self.debug_log(
-                    f"[arbiter] turn={self.turn_count} archive_cands={arch_n}"
-                )
-
-        if len(cands) <= 1:
-            return  # only the "hoard" sentinel — nothing to spawn
-
-        # Phase 5B: opp_actions_top_k populated from ActionPredictor.
-        # k=3 per the brief (smaller than the default 5 to keep beam
-        # search compute under the 8s soft cap; documented in
-        # PHASE5B_RESULTS.md if we drop further).
+        # Opponent action top-k (Phase 5B). Soft-fails on any error.
         opp_actions: List[Tuple[Dict[str, Any], float]] = []
         if self.action_predictor is not None and self._posterior is not None:
             try:
-                # Estimate opp MP — they have whatever they had pre-deploy.
                 try:
                     opp_mp = float(game_state.get_resource(MP_IDX, 1))
                 except Exception:  # noqa: BLE001
@@ -435,55 +418,44 @@ class EconomyArbiter:
                 self.debug_log(f"[arbiter] action_predictor.top_k: {exc!r}")
                 opp_actions = []
 
-        # Diagnostics for the Phase 5B "≥90% mid-game turns populated"
-        # invariant (turns 10..90).
         if 10 <= self.turn_count <= 90:
             if opp_actions:
                 self._opp_actions_populated_turns += 1
             else:
                 self._opp_actions_empty_turns += 1
 
-        # Budget for offense: cap at 8s but leave 1s headroom.
+        # Budget for offense.
         rem = max(50.0, self.watchdog.remaining_ms() - 1000.0)
         offense_budget = min(8000.0, rem)
 
-        # Real sim rollouts when opp_actions populated; heuristic fallback
-        # when empty. With Milestone A's adapter fix sim_rs no longer crashes
-        # on the synthesized state — both paths are safe.
-        try:
-            best = beam_search(
-                state_dict, cands,
-                opp_actions_top_k=opp_actions,
-                my_player=1,
-                budget_ms=offense_budget,
-                config_path=self.snapshot_path,
-                # When opp_actions is empty, beam_search auto-falls back
-                # to the heuristic path (no sim calls). When non-empty,
-                # it runs real sim_rs rollouts.
-                skip_sim=False,
-            )
-        except Exception as exc:  # noqa: BLE001
-            self.debug_log(f"[arbiter] beam_search: {exc!r}")
-            # Phase 5B: degrade gracefully — retry with skip_sim=True so we
-            # at least get the heuristic best plan. This protects us when
-            # sim_rs rejects a corner-case state.
-            try:
-                best = beam_search(
-                    state_dict, cands,
-                    opp_actions_top_k=[],  # forces heuristic path
-                    my_player=1,
-                    budget_ms=min(500.0, offense_budget),
-                    config_path=self.snapshot_path,
-                    skip_sim=True,
-                )
-            except Exception as exc2:  # noqa: BLE001
-                self.debug_log(f"[arbiter] beam_search heuristic retry: {exc2!r}")
-                return
+        # Run the robust planner. NEVER returns empty when mp_avail >= 1.0.
+        plan = pick_offense_plan(
+            state_dict, mp_avail,
+            turn=self.turn_count,
+            posterior=self._posterior,
+            opp_actions_top_k=opp_actions,
+            config_path=self.snapshot_path,
+            archive=archive_for_this_turn,
+            budget_ms=offense_budget,
+            log_fn=self.debug_log,
+        )
 
-        if best is None or best.name == "hoard":
+        if not plan.deploys:
+            # Should be unreachable when mp_avail >= 1.0, but defend
+            # against contract bugs.
+            self.debug_log(
+                f"[arbiter] planner returned empty plan (mp={mp_avail:.1f}, "
+                f"tier={plan.tier}); spawning emergency scout"
+            )
+            try:
+                game_state.attempt_spawn(
+                    self.config["unitInformation"][3]["shorthand"], [13, 0], 1,
+                )
+            except Exception:  # noqa: BLE001
+                pass
             return
 
-        self._execute_offense_plan(game_state, best)
+        self._execute_offense_plan_from_deploys(game_state, plan.deploys, plan.tier)
 
     def _execute_offense_plan(self, game_state, candidate) -> None:
         """Spawn each unit in the candidate's deploy list."""
@@ -523,6 +495,56 @@ class EconomyArbiter:
             f"EU={candidate.expected_utility:.2f} sims={candidate.sim_count} "
             f"opp_arch={top_arch}"
         )
+
+    def _execute_offense_plan_from_deploys(
+        self,
+        game_state,
+        deploys,
+        tier: int = 0,
+    ) -> int:
+        """Spawn each (unit_name, (x,y)) in ``deploys``.
+
+        Differs from ``_execute_offense_plan`` in that:
+          - Takes a raw deploys list (from the multi-tier offense_planner)
+            instead of a Candidate object.
+          - Does NOT break the cascade on a single attempt_spawn failure.
+            Live ladder analysis showed a single early failure (e.g. one
+            blocked tile) was killing the entire offense for the turn.
+            We now skip-and-continue so subsequent deploys at unblocked
+            tiles still fire.
+
+        Returns total units spawned. Logs to debug for live diagnostics.
+        """
+        scout_sh = self.config["unitInformation"][3]["shorthand"]
+        demo_sh = self.config["unitInformation"][4]["shorthand"]
+        intercept_sh = self.config["unitInformation"][5]["shorthand"]
+        name_to_sh = {
+            "SCOUT": scout_sh,
+            "DEMOLISHER": demo_sh,
+            "INTERCEPTOR": intercept_sh,
+        }
+
+        spawned_total = 0
+        attempted = 0
+        skipped = 0
+        for unit_name, loc in deploys:
+            sh = name_to_sh.get(str(unit_name).upper(), scout_sh)
+            attempted += 1
+            try:
+                n = game_state.attempt_spawn(sh, list(loc))
+            except Exception as exc:  # noqa: BLE001
+                self.debug_log(f"[arbiter] attempt_spawn {sh}@{loc!r}: {exc!r}")
+                n = 0
+            if n:
+                spawned_total += int(n)
+            else:
+                skipped += 1
+
+        self.debug_log(
+            f"[arbiter] T{self.turn_count} TIER{tier} attempted={attempted} "
+            f"spawned={spawned_total} skipped={skipped}"
+        )
+        return spawned_total
 
 
 __all__ = ["EconomyArbiter"]

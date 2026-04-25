@@ -240,14 +240,14 @@ class AlgoStrategy(gamelib.AlgoCore):
             else:
                 self.arbiter.execute(game_state)
 
-            # ----- LIVE-LADDER HOTFIX (post-2_athena_v3_loss diagnosis) -----
-            # The planner has historically silently produced zero mobile spawns
-            # on the live server (sim_rs missing → identity-fallback sim →
-            # hoard always wins; OR adapt_game_state crash → soft-fail; OR
-            # spawn-locs-blocked filter eats everything; OR attempt_spawn
-            # returns 0 path-blocked). Each individual cause has been patched,
-            # but the safety net guarantees Athena ALWAYS attempts at least
-            # one mobile-unit spawn per turn when MP allows.
+            # The new multi-tier offense planner (planner.offense_planner)
+            # called inside arbiter.execute already guarantees a non-empty
+            # deploy list when MP >= 1.0 (see economy.py:_offense_phase).
+            # _last_resort_offense remains as defence-in-depth: if the
+            # arbiter raises a top-level exception (caught below), the
+            # safe-fallback path runs without offense; this catch-all
+            # guarantees an attempt even then. Should essentially never
+            # fire under normal conditions.
             try:
                 self._last_resort_offense(game_state)
             except Exception as exc_lr:  # noqa: BLE001
