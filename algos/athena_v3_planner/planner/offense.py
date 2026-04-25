@@ -27,17 +27,33 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from ..offense.sim_eval import (
-    UNIT_NAME_TO_IDX,
-    evaluate_action_phase,
-    py_state_to_dict,
-)
-from ..offense.templates import (
-    OffenseTemplate,
-    SPAWN_EDGE_TILES,
-    SpawnGroup,
-    load_all_templates,
-)
+# Dual-mode imports: relative for test-time `algos.athena_v3_planner.*`
+# package layout, top-level for runtime where `_HERE` (the algo dir) is
+# on sys.path and `offense` / `planner` are top-level packages.
+try:
+    from ..offense.sim_eval import (
+        UNIT_NAME_TO_IDX,
+        evaluate_action_phase,
+        py_state_to_dict,
+    )
+    from ..offense.templates import (
+        OffenseTemplate,
+        SPAWN_EDGE_TILES,
+        SpawnGroup,
+        load_all_templates,
+    )
+except ImportError:
+    from offense.sim_eval import (  # type: ignore
+        UNIT_NAME_TO_IDX,
+        evaluate_action_phase,
+        py_state_to_dict,
+    )
+    from offense.templates import (  # type: ignore
+        OffenseTemplate,
+        SPAWN_EDGE_TILES,
+        SpawnGroup,
+        load_all_templates,
+    )
 
 
 # ---------------------------------------------------------------------------
