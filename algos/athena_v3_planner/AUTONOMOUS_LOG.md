@@ -484,7 +484,202 @@ Combined with the 12 Phase 0.5 tests: **25 tests, 9.85s on Apple M4**.
 
 ---
 
-## NEXT PHASE: 4 — Offense engine
+## Phase 4 — Offense engine
+
+**Agent**: Claude Opus 4.7 (1M context).
+**Started / completed**: 2026-04-25.
+**Branch**: `worktree-agent-af823461` (off `main` @ `6385d6e`).
+**Plan reference**: `docs/ATHENA_BUILD_PLAN.md` § Phase 4 / 5 (the build
+plan numbers vary; Phase 3 = opp model, Phase 4 = offense engine in
+this build sequence).
+
+### Tasks (commit-by-commit)
+
+| Task | Output | Commit |
+|---|---|---|
+| 1 | Offense template library (17 JSON + loader/validator) | `723111f` |
+| 2 | `offense/sim_eval.py` (sim_rs wrapper) + smoke test    | `1bd864f` |
+| 3 | `planner/offense.py:generate_candidates`               | `ac11377` |
+| 4 | `planner/offense.py:beam_search` + 13 unit tests       | `6026462` |
+| 5 | `planner/budget.py:Watchdog` + 8 unit tests            | `60f7b63` |
+| 6 | `algos/athena_v3_planner_offense_only/` variant + smoke | `a6af590` |
+| 7 | `/bestof 20` vs v13 + Lostkids → 0/20 each (expected)  | `8b65e8c` |
+| 8 | STATUS + log handoff                                   | (this commit) |
+
+### Implementation notes
+
+- **17 templates** (spec asked for 10-20): scout_rush_{left,right,
+  center}, scout_flood, scout_flood_right, demo_train_{left,right},
+  heavy_demo_{left,right}, mixed_burst_{left,right},
+  escorted_mixed_{left,right}, interceptor_screen, dual_flank,
+  corner_dive_{left,right}. All spawn locs validated against the 28
+  bottom-spawn-edge tiles at load time.
+- **Beam search budget management**: tracks elapsed wall clock between
+  candidates AND inside the per-opp-action inner loop. Returns
+  best-so-far if `budget_ms` exceeded. Always returns >=1 valid
+  Candidate (hoard sentinel).
+- **`skip_sim=True` fast path**: added because the gamelib<->sim_rs
+  state adapter isn't fully wired (Phase 5 work). With skip_sim, beam
+  search scores by a heuristic (`mp_cost + 0.5 * #demolishers`) — not
+  great, but doesn't crash on a partial state dict.
+- **Watchdog component caps**: per build-plan spec exactly —
+  SimCore=200, OppPosterior=500, Defense=1500, Offense=8000,
+  MAP-Elites=100, GC=4000 ms. Total 13000ms (with 2s headroom under
+  the 15s deploy-time hard cap).
+- **Offense-only variant**: minimal hand-written defense (4 turrets
+  at y=12, 6 walls at edge corners) + the full Phase 4 offense engine.
+  Production wrappers (SIGALRM watchdog + try/except + safe-fallback)
+  lifted from the Phase 1.5 baseline. `sim_rs` is imported but
+  unused at runtime due to skip_sim=True.
+
+### Validation results
+
+| Matchup | Wins | Losses | Wilson 95% CI |
+|---|---|---|---|
+| offense-only vs v13_second_ring     | 0 | 20 | [0.00, 0.16] |
+| offense-only vs athena_baseline_lostkids | 0 | 20 | [0.00, 0.16] |
+
+Wall: ~22-23s per 20-game bestof. **Both gates fail per spec — no
+hard gate on this phase. The 0/20 sweep is the EXPECTED outcome of
+testing offense in isolation with minimal defense.** Documented in
+`data/PHASE4_RESULTS.md`.
+
+What this *did* validate: 0 crashes, 0 watchdog fires, beam search
+fires every MP-having turn, attempt_spawn executes without error.
+The harness works; the meaningful test is Phase 5 integration.
+
+### Tests
+
+`tests/test_phase4_offense.py` — 14 tests:
+- 5 template loader/validator tests (28 spawn-edge tiles, all 17
+  templates load, malformed inputs reject correctly).
+- 3 candidate-gen tests (hoard always present, min_mp filter,
+  blocked-spawn filter).
+- 5 beam-search tests (high-utility pick, budget cuts gracefully,
+  hoard fallback when starved, multi-action aggregation, skip_sim
+  heuristic path).
+- 1 pick_offense_plan top-level smoke test.
+
+`tests/test_phase4_budget.py` — 8 tests (default caps match spec,
+start_turn resets clock, remaining_ms decreases, total-budget exceed
+raises, per-component cap raises, unknown component falls through,
+force_fallback always raises, begin marker scopes elapsed).
+
+Combined with the 25 prior tests: **47 total tests, ~10s on Apple
+M4**.
+
+---
+
+## NEXT PHASE: 5 — EconomyArbiter integration
+
+**Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 5/6 (the build plan
+varies in numbering; the next phase composes Defense + Offense +
+OpponentModel under one arbiter).
+
+### Scope (3-line summary)
+
+Compose Phase 2 (DefensePlanner), Phase 3 (OpponentModel), and Phase 4
+(OffensePlanner) into a single `algos/athena_v3_planner` algo. Wire the
+gamelib<->sim_rs state adapter so beam_search can run actual sim
+rollouts (Phase 4 ships with `skip_sim=True`). Validate end-to-end
+vs both baselines with a Wilson LB ≥ 50% target gradienting toward
+65%.
+
+### Prerequisites already in place
+
+- 17 offense templates + beam search + Watchdog (Phase 4, this phase).
+- 6 defense primitives + 3 archetype JSONs (Phase 2).
+- ArchetypeClassifier + ActionPredictor (Phase 3, despite CV gate FAIL).
+- Lostkids baseline (Phase 1.5) for regression checks.
+- Rust SimCore at 14.5 K single-core / 88 K 10-thread (Phase 0).
+- 47 ranked replays for fitting (Phase 0).
+
+### Recommended Phase 5 task structure
+
+1. **Complete the gamelib→sim_rs state adapter.** This is the biggest
+   single Phase 5 task. The adapter must build a full sim_rs-compatible
+   state dict from a `gamelib.GameState`, including:
+   - Stable `uid` per structure / mobile (use the engine's
+     `unit.unit_id` if exposed; else synthesize monotonic).
+   - Live HP from each `unit.health`.
+   - The `_raw_unit_information` config key that sim_rs requires (it's
+     in `algos/athena/data/citadel_config_snapshot.json` but NOT in the
+     vendored `algos/athena_v3_planner/data/...` snapshot — Phase 0
+     captured a smaller config). Fix: copy the larger snapshot OR run
+     `/inspect-config` afresh into the vendored data path.
+   - Pathfinder seed: sim_rs may need `target_edge` per mobile pre-set;
+     for spawned mobiles use `spawn_tile_target_edge(spawn_xy, player)`.
+2. **Wire Phase 3 posterior → Phase 4 beam search.** `on_action_frame`
+   feeds the BreachLocationTracker + classifier; `on_turn` calls
+   `classifier.predict_proba(features)` then
+   `predictor.top_k({"mp": opp_mp, "turn": t}, posterior, k=5)` and
+   passes the result to `beam_search.opp_actions_top_k`.
+3. **Promote the full Phase 2 defense.** Replace the offense_only's
+   4-turret stub with `build_default_defences` + `refund_low_health` +
+   `max_heap_repair` + `probabilistic_placement` + `edge_block_and_remove`
+   + `reactive_to_breach`.
+4. **EconomyArbiter** (new module). Per-turn budget split:
+   - Defense first (consumes SP).
+   - Offense second (consumes MP).
+   - If Watchdog.remaining_ms < 1s, force fallback.
+   The Arbiter is mostly a glue layer; Phase 5's complexity is in
+   tasks 1-3 above, NOT the arbiter itself.
+5. **Validation gate**:
+   - `/bestof 20 athena_v3_planner v13_second_ring`: target Wilson LB
+     ≥ 50% (gradient toward 65% by end of Phase 9).
+   - `/bestof 20 athena_v3_planner athena_baseline_lostkids`: same.
+   - Per-turn compute < 12s p99.
+   - 0 watchdog fires across 40 games.
+
+### Phase 4 outputs Phase 5 will consume
+
+- `planner/offense.py:beam_search(skip_sim=False, opp_actions_top_k=...)` —
+  the production-mode call signature once the adapter lands.
+- `planner/budget.py:Watchdog` — already wired into offense_only's
+  on_turn; Phase 5 inherits unchanged.
+- `offense/templates/` — 17 templates, no changes expected.
+- `offense/sim_eval.py:evaluate_action_phase` — works on any
+  sim_rs-schema dict; Phase 5 just needs to feed it a valid one.
+
+### Open items inherited from Phase 4 (verbatim from PHASE4_RESULTS.md)
+
+1. Wire the gamelib<->sim_rs state adapter (the big one).
+2. Calibrate utility weights α=1.0, β=0.5, γ=0.2, δ=0.3 — these
+   are stabs; a small fuzz harness pre-Phase 9 would be a smart
+   sanity check.
+3. Replace minimal defense with full Phase 2 archetype.
+4. Wire Phase 3 posterior into beam search.
+5. Profile per-turn compute when sim rollout is on.
+
+### Defense rebalance (Phase 2B carry-forward)
+
+The defense-only variant from Phase 2 lost 0/40 to v13 + Lostkids.
+The Phase 2B follow-ups (rebalance v_funnel.json toward heavier early
+turrets, loosen `probabilistic_placement` y constraint, optionally
+add a v13_ring archetype) are STILL OPEN and Phase 5 should pick them
+up as part of the integration work — without a stronger defense, the
+offense engine's win-rate gains will be capped.
+
+### Gotchas inherited
+
+1. **The classifier's CV gate FAILED at 0.489.** Phase 5 should NOT
+   trust top-1 labels; use the full posterior and treat low-confidence
+   (max < 0.4) predictions as approximately uniform. Phase 4's beam
+   search already takes a posterior dict, so this is a 1-line
+   integration when the rest of the wiring lands.
+2. **The 100s pre-commit hook** still dominates wall-clock. Batch
+   logically.
+3. **sim_rs config schema mismatch.** The Phase 0 vendored snapshot
+   (`algos/athena_v3_planner/data/citadel_config_snapshot.json`) is
+   missing `_raw_unit_information`, which sim_rs requires. Phase 0
+   used `/inspect-config` for a different purpose (gamelib runtime
+   config) — for sim_rs, the working snapshot is at
+   `algos/athena/data/citadel_config_snapshot.json`. Phase 5 should
+   either alias the latter or regenerate.
+4. **Phase 2 + Phase 4 both ship with `skip_sim=True` / no rollout.**
+   Phase 5 is the FIRST place where end-to-end sim rollout actually
+   runs in production. Don't be surprised if the first integration
+   surfaces a fresh class of bugs (uid collision, NaN HP, etc.).
 
 **Spec**: `docs/ATHENA_BUILD_PLAN.md` § Phase 5 (the build plan numbers
 the offense / plan-search work as Phase 5 because the original Phase 3
