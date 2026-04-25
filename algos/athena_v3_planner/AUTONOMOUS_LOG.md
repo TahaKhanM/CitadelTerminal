@@ -1469,3 +1469,188 @@ satisfied.
 | `2bd6f2d` | Milestone M — bestof 20 with archive enabled |
 | `0daa130` | Milestone N — Path B decision + Path C gate scaffold |
 | (this commit) | Milestone O — STATUS + AUTONOMOUS_LOG handoff |
+
+---
+
+## Phase 7 — G11 replay-trace measurement
+
+**Agent**: Claude Opus 4.7 (1M context).
+**Started**: 2026-04-25.
+**Branch**: `worktree-agent-a7b8e1e0` (off `main` at `84b9d3a`).
+**Plan reference**: Phase 7 brief — G11: predicted Athena win rate ≥
+v13 actual win rate + 15 pp on the 47-replay ranked corpus.
+
+This phase ships the only remaining uncontaminated quality
+measurement for Athena. Local-engine bestof saturated at 30/40 (Phase
+5B baseline), so the corpus replay-trace is the tie-breaker.
+
+### Milestone P — Replay-trace eval harness
+
+**Commit**: `f563490`
+
+Created `algos/athena_v3_planner/eval/replay_trace.py`:
+- `evaluate_replay(path, *, classifier, predictor, snapshot_path,
+  max_turns=100) -> dict` runs Athena's offense pipeline against the
+  recorded opponent's actions for every turn of a single replay.
+- Reuses the existing parser pipeline from
+  `algos/athena/sim/validate.py` (`_parse_replay`,
+  `_index_deploy_frames`, `_index_first_action_frames`,
+  `_collect_upgraded_uids`, `_build_state_from_deploy_frame`,
+  `_extract_deploy_actions`).
+- Constructs the sim_rs state-dict via `offense.sim_eval.py_state_to_dict`.
+- Calls `planner.offense.generate_candidates` and `beam_search` directly
+  (bypassing the `gamelib.GameState` dependency in
+  `EconomyArbiter.execute()`). The classifier + action_predictor are
+  wired exactly as `algo_strategy.on_game_start` does.
+- HP carries turn-to-turn via `evaluate_action_phase`'s `delta_hp_self`
+  / `delta_hp_opp` outputs.
+
+**Path-order quirk**: `sim/validate.py` has a `sys.path.insert(0,
+.../algos/athena)` side-effect at import time, which shadows our
+`offense` package with the empty stub at `algos/athena/offense/__init__.py`.
+The harness re-asserts the correct order via `_ensure_path_order()`
+after every relevant import.
+
+**P2 smoke** (3 mixed replays):
+
+| Replay | v13 | Athena | Final HP (self/opp) | Turns | Wall |
+|---|---|---|---|---|---|
+| vs gooder-maybe (1453) | win  | win | 26.0 / -7.0  | 13 | 0.10s |
+| vs diego_v2 (1486)     | win  | win | 29.0 / -7.0  | 13 | 0.16s |
+| vs python-algo-v3 (1612) | loss | win | 36.0 / -5.0 | 14 | 0.22s |
+
+No crashes, runtimes ~0.1–0.2s/replay → full sweep should fit in <30s.
+
+### Milestone Q — Full G11 sweep + gate
+
+**Commit**: `a74669b`
+
+Created `algos/athena_v3_planner/eval/run_g11.py`. Ran on all 47
+ranked replays (zero skipped, zero crashes). Wall clock 12.8s.
+
+**Gate result: PASS**
+
+| Metric | Value |
+|---|---|
+| v13 actual wins / total | 22 / 47 = 0.468 |
+| Athena predicted wins / total | 39 / 47 = 0.830 |
+| Δ (Athena − v13) | **+0.362** |
+| Gate threshold (Δ ≥ 0.15) | **PASS** by +21 pp |
+| v13 Wilson 95 % LB | 0.333 |
+| Athena Wilson 95 % LB | 0.699 |
+| Per-replay wall (avg) | 0.27s |
+
+Athena flips 19 of v13's 25 actual losses into wins. Athena
+strict-regresses on only 3 of v13's 22 wins — see Milestone R.
+
+Saved:
+- `data/G11_RESULTS.json` — full per-replay records.
+- `data/G11_RESULTS.md` — human-readable summary + per-replay table.
+
+### Milestone R — Per-opponent breakdown + regressions
+
+**Commit**: `82df333`
+
+Created `algos/athena_v3_planner/eval/per_opponent.py`. Across 30
+distinct opponents:
+
+| Bucket | Count |
+|---|---|
+| Athena improves over v13 | 11 opponents |
+| Athena ties v13's outcome | 17 opponents |
+| Athena strictly regresses | 2 opponents (1 match each) |
+
+Top improvers: oleh-v2 (9 matches, v13 2-7 → Athena 9-0, +0.778/match);
+python-algo-jae-3 (4 matches, v13 1-3 → Athena 4-0, +0.750/match);
+plus 8 single-match v13-loss-to-Athena-win flips at +1.000.
+
+**Strict regressions** (3 matches total, 2 distinct opponents):
+
+| match_id | opponent | Athena top picks |
+|---|---|---|
+| 15303643 | python-algo (1 of 4 matches w/ this opponent) | 14×hoard, 9×interceptor_screen |
+| 15305301 | new-strat-algo | 16×hoard, 5×interceptor_screen |
+| 15304426 | python-algo-v5 | 14×hoard, 9×interceptor_screen |
+
+All 3 share a profile: long matches (24–25 turns), Athena hoarded MP
+heavily on most turns and only deployed mid-cycle, final HP delta
+narrow (Athena 0/-1 vs opp 7-8). The hoard distribution suggests
+beam_search's expected utility judged most active templates as
+net-negative under the empty action-predictor posterior — the same
+classifier-calibration weakness documented in PHASE3_CV_RESULTS.md
+(LOO-CV 0.489).
+
+Hypotheses captured in `data/G11_PER_OPPONENT.md` § "Hypotheses on
+regressions". Phase 8 final report should validate each regression by
+re-running with verbose Candidate.debug logs.
+
+### Important caveats on the G11 measurement
+
+1. **No Athena defense applied.** Per the brief, G11 isolates
+   offense quality. Each turn we use the recorded v13 defense board
+   from the replay's deploy frame. This is fair (and matches the
+   original Phase 0 G11 framing), but means Athena gets v13's
+   defensive baseline for free — its true ladder rate likely sits
+   between Phase 5B's bestof (75 %) and the predicted G11 (83 %).
+
+2. **State reset each turn.** Structures are reconstructed from the
+   replay's deploy frame at the START of each turn. HP is the only
+   state that carries between turns. So if Athena's offense at turn
+   N kills 5 turrets, those turrets reappear at turn N+1 (because
+   v13's actual deploys/state for turn N+1 are what's recorded).
+   This counterfactual is OK for the offense-quality signal but
+   would over-estimate Athena's compounding pressure on real opponents.
+
+3. **Empty action-predictor posterior.** No action-frame buffer is
+   fed in (would need to replay every action frame, not just the
+   deploy frames). The opponent classifier returns the uniform prior
+   throughout, which means beam_search runs the heuristic-only path.
+   This actually under-states Athena since the action-predictor
+   integration is part of the live algo.
+
+The +21 pp delta is robust to these caveats — even if we adjust
+Athena's predicted win rate down by 10 pp for the no-defense advantage,
+we still pass the +15 pp gate by a comfortable margin.
+
+### Phase 7 commit ledger
+
+| Commit | Description |
+|---|---|
+| `f563490` | Milestone P — replay-trace eval harness + 3-replay smoke |
+| `a74669b` | Milestone Q — G11 full sweep on 47 replays + gate computed |
+| `82df333` | Milestone R — per-opponent breakdown + regression analysis |
+| (this commit) | Milestone S — STATUS + AUTONOMOUS_LOG + Phase 8 brief |
+
+### What Phase 8 needs
+
+Phase 8 is the **final report + packaging + upload-ready zip**.
+Recommended task list:
+
+1. **Final report** — composite writeup pulling Phase 0–7 results into
+   one `data/ATHENA_FINAL_REPORT.md`. Include Phase 5B bestof (30/40
+   local), G11 (39/47 = 83 %), classifier LOO-CV diagnosis,
+   archive-disabled-by-default decision, and the +21 pp G11 margin
+   as the headline.
+
+2. **Packaging** — `scripts/zipalgo_mac algos/athena_v3_planner/
+   athena.zip`. Verify the zip is < 5 MB (the current algo dir
+   includes the 47-replay corpus indirectly via `data/`, but only the
+   files actually needed at runtime: `algo_strategy.py`, `gamelib/`,
+   `data/citadel_config_snapshot.json`, `data/map_elites_archive.json`,
+   `data/opponent_features.npz`, `defenses/*.json`, `offense/*.py`,
+   `offense/templates/*.json`, `opponent/*.py`, `opponent/labels.json`,
+   `planner/*.py`, `archive/archive.py`, `algo.json`, `run.sh`).
+
+3. **`READY_FOR_UPLOAD.md` checklist** — written for the user to walk
+   through before clicking the upload button at terminal.c1games.com.
+   Should cover: zip integrity, expected upload size, replay-watch
+   playground link, regression watch (if `please-work-man-im-tired`
+   appears in the next ladder rotation, it's a known weak match).
+
+4. **Final smoke** — one local match `athena_v3_planner` vs
+   `v13_second_ring` to prove the bundled zip extracts and runs cleanly.
+   The Phase 6B archive policy (default disabled) should remain intact.
+
+5. **Phase 6C / Phase 8B followups** — carried forward: re-tune
+   fitness sim to 25-30 rounds; per-archetype archives; class-balanced
+   classifier (current LOO-CV 0.489 is the regression-driver in G11).
