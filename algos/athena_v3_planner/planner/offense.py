@@ -404,6 +404,21 @@ def beam_search(
     if sim_evaluator is None:
         sim_evaluator = evaluate_action_phase
 
+    # CRITICAL: when sim_rs PyO3 wheel isn't available (production /
+    # competition server — the wheel isn't bundled in the algo zip),
+    # the sim path's _python_fallback_sim returns identity, so every
+    # spawn candidate gets utility = -BETA*mp_cost (negative) and the
+    # hoard candidate gets 0 → algo always picks hoard → never attacks.
+    # This was the live-ladder failure mode (replays at replays/Athena_loss_*).
+    # Fix: force the heuristic path when sim_rs is missing.
+    if not skip_sim:
+        try:
+            from offense.sim_eval import sim_rs_available  # type: ignore
+        except ImportError:
+            from ..offense.sim_eval import sim_rs_available  # type: ignore
+        if not sim_rs_available():
+            skip_sim = True
+
     t0 = time.perf_counter()
 
     # 1. Static prune (fast scoring) if too many candidates
