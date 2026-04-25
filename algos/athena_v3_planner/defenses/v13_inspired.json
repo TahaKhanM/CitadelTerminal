@@ -1,0 +1,53 @@
+{
+  "name": "v13_inspired",
+  "description": "Static skeleton lifted from v13_second_ring (Phase 5B addition). 12-turret opening: 4 center [11,11]/[13,11]/[14,11]/[16,11] + 2 sidelane-deep [7,9]/[20,9] + 4 outer [5,11]/[8,11]/[19,11]/[22,11] + 2 inner corners [1,13]/[26,13]. Walls along y=12 except at the [12,12]/[15,12] middle gap. NO dynamic logic — that lives in the planner. Includes the second-ring [11,5]/[16,5] and outer [0,13]/[27,13] corners as later-priority placements.",
+  "placements": [
+    {"unit": "TURRET", "loc": [13, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [14, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [11, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [16, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [7, 9], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [20, 9], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [5, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [22, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [8, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [19, 11], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [1, 13], "upgrade": false, "priority": 1},
+    {"unit": "TURRET", "loc": [26, 13], "upgrade": false, "priority": 1},
+
+    {"unit": "WALL", "loc": [2, 12], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [25, 12], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [3, 12], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [24, 12], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [4, 12], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [23, 12], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [2, 13], "upgrade": false, "priority": 2},
+    {"unit": "WALL", "loc": [25, 13], "upgrade": false, "priority": 2},
+
+    {"unit": "WALL", "loc": [6, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [21, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [9, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [18, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [10, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [17, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [13, 12], "upgrade": false, "priority": 3},
+    {"unit": "WALL", "loc": [14, 12], "upgrade": false, "priority": 3},
+
+    {"unit": "TURRET", "loc": [13, 11], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [14, 11], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [11, 11], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [16, 11], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [7, 9], "upgrade": true, "priority": 4},
+    {"unit": "TURRET", "loc": [20, 9], "upgrade": true, "priority": 4},
+
+    {"unit": "TURRET", "loc": [11, 5], "upgrade": false, "priority": 5},
+    {"unit": "TURRET", "loc": [16, 5], "upgrade": false, "priority": 5},
+    {"unit": "TURRET", "loc": [11, 5], "upgrade": true, "priority": 5},
+    {"unit": "TURRET", "loc": [16, 5], "upgrade": true, "priority": 5},
+
+    {"unit": "TURRET", "loc": [0, 13], "upgrade": false, "priority": 6},
+    {"unit": "TURRET", "loc": [27, 13], "upgrade": false, "priority": 6},
+    {"unit": "TURRET", "loc": [0, 13], "upgrade": true, "priority": 6},
+    {"unit": "TURRET", "loc": [27, 13], "upgrade": true, "priority": 6}
+  ]
+}
