@@ -73,6 +73,10 @@ class EconomyArbiter:
         wall_refund_threshold: float = 0.5,
         turret_refund_threshold: float = 0.3,
         breach_reactive_threshold: float = 1.0,
+        # Phase 6 milestone K: MAP-Elites archive (loaded lazily, degrade
+        # gracefully if missing/corrupt).
+        archive_path: Optional[str] = None,
+        archive_sample_k: int = 10,
         debug_log_func=None,
     ):
         self.config = config
@@ -111,6 +115,41 @@ class EconomyArbiter:
         # invariant in the brief.
         self._opp_actions_populated_turns: int = 0
         self._opp_actions_empty_turns: int = 0
+
+        # Phase 6 milestone K: MAP-Elites archive loaded once at game start.
+        self.archive_sample_k = int(archive_sample_k)
+        self._archive = None
+        self._archive_rng = None
+        if archive_path:
+            try:
+                # Lazy import — keeps economy.py importable when the
+                # archive subpackage is absent (older worktrees).
+                try:
+                    from archive.archive import MAPElitesArchive  # type: ignore
+                except ImportError:
+                    from ..archive.archive import MAPElitesArchive  # type: ignore
+                import os
+                if os.path.exists(archive_path):
+                    self._archive = MAPElitesArchive.deserialize(archive_path)
+                    import random as _random
+                    self._archive_rng = _random.Random(0xA7C71)
+                    self.debug_log(
+                        f"[arbiter] map-elites archive loaded: "
+                        f"{self._archive.coverage()[0]}/"
+                        f"{self._archive.coverage()[1]} cells"
+                    )
+                else:
+                    self.debug_log(
+                        f"[arbiter] map-elites archive not found at "
+                        f"{archive_path}; falling back to JSON templates."
+                    )
+            except Exception as exc:  # noqa: BLE001
+                self.debug_log(
+                    f"[arbiter] map-elites archive load failed: {exc!r}; "
+                    "falling back to JSON templates."
+                )
+                self._archive = None
+                self._archive_rng = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -294,10 +333,25 @@ class EconomyArbiter:
             return
 
         try:
-            cands = generate_candidates(state_dict, mp_avail, my_player=1)
+            cands = generate_candidates(
+                state_dict, mp_avail, my_player=1,
+                archive=self._archive,
+                archive_sample_k=self.archive_sample_k,
+                archive_rng=self._archive_rng,
+            )
         except Exception as exc:  # noqa: BLE001
             self.debug_log(f"[arbiter] generate_candidates: {exc!r}")
             return
+
+        # Phase 6 milestone K: surface archive-derived candidates count
+        # for the smoke-match invariant ("≥1 archive candidate per turn").
+        if self._archive is not None:
+            arch_n = sum(1 for c in cands if c.name.startswith("archive:"))
+            if arch_n > 0:
+                self._opp_actions_populated_turns += 0  # no-op; reuse counter is for opp_actions
+                self.debug_log(
+                    f"[arbiter] turn={self.turn_count} archive_cands={arch_n}"
+                )
 
         if len(cands) <= 1:
             return  # only the "hoard" sentinel — nothing to spawn
