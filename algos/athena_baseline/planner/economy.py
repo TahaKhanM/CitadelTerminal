@@ -33,6 +33,67 @@ import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+
+def _synthetic_opp_actions(
+    opp_mp: float, turn: int,
+) -> List[Tuple[Dict[str, Any], float]]:
+    """Static fallback opp_actions when the predictor isn't useful.
+
+    Used when ActionPredictor.top_k returns only the NONE fallback (a
+    common state when labels.json doesn't contain state-conditioned
+    distributions, as observed in the 4 athena_baseline ranked-loss
+    replays — 13ms median compute = 1 sim per candidate against a
+    passive opponent only).
+
+    Returns a distribution of 6-9 plausible opponent moves covering
+    common archetypes (scout rush, demo train, passive). Probabilities
+    sum to ~1.0 so beam_search's weighted-utility computation is
+    well-formed.
+
+    The set scales with opp_mp: at low MP we only include cheap-MP
+    actions (corner Scout); at high MP we include heavy waves.
+    """
+    actions: List[Tuple[Dict[str, Any], float]] = []
+
+    # Shorthand: SCOUT=3, DEMOLISHER=4, INTERCEPTOR=5
+    # Edge: TR (opponent's right = our right edge), TL (opp's left = our left)
+    # wave_size_bucket strings come from the action_predictor's vocab.
+
+    if opp_mp >= 8.0:
+        # High-MP scout rushes
+        actions.append(({"primary_mobile_type": 3, "primary_edge": "TR",
+                         "wave_size_bucket": "8-14", "spend_mp": True}, 0.18))
+        actions.append(({"primary_mobile_type": 3, "primary_edge": "TL",
+                         "wave_size_bucket": "8-14", "spend_mp": True}, 0.18))
+        # Demo trains
+        actions.append(({"primary_mobile_type": 4, "primary_edge": "TR",
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.12))
+        actions.append(({"primary_mobile_type": 4, "primary_edge": "TL",
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.12))
+
+    if opp_mp >= 4.0:
+        # Medium-MP rushes
+        actions.append(({"primary_mobile_type": 3, "primary_edge": "TR",
+                         "wave_size_bucket": "4-7", "spend_mp": True}, 0.12))
+        actions.append(({"primary_mobile_type": 3, "primary_edge": "TL",
+                         "wave_size_bucket": "4-7", "spend_mp": True}, 0.12))
+
+    if opp_mp >= 1.0:
+        actions.append(({"primary_mobile_type": 3, "primary_edge": "TR",
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.08))
+        actions.append(({"primary_mobile_type": 3, "primary_edge": "TL",
+                         "wave_size_bucket": "1-3", "spend_mp": True}, 0.08))
+
+    # Always include passive (opponent hoards / nothing).
+    actions.append(({"primary_mobile_type": -1, "primary_edge": "NONE",
+                     "wave_size_bucket": "0", "spend_mp": False}, 0.10))
+
+    # Normalize so weights sum to 1.0.
+    total = sum(p for _, p in actions)
+    if total > 0:
+        actions = [(a, p / total) for a, p in actions]
+    return actions
+
 # These imports are absolute relative to the algo's vendored package layout.
 # They work both inside `algos/athena_v3_planner/` (when imported as
 # `algos.athena_v3_planner.planner.economy`) and inside the variant
@@ -404,12 +465,12 @@ class EconomyArbiter:
 
         # Opponent action top-k (Phase 5B). Soft-fails on any error.
         opp_actions: List[Tuple[Dict[str, Any], float]] = []
+        try:
+            opp_mp = float(game_state.get_resource(MP_IDX, 1))
+        except Exception:  # noqa: BLE001
+            opp_mp = 0.0
         if self.action_predictor is not None and self._posterior is not None:
             try:
-                try:
-                    opp_mp = float(game_state.get_resource(MP_IDX, 1))
-                except Exception:  # noqa: BLE001
-                    opp_mp = 0.0
                 # athena_baseline: k=30 (max realistic opp-response set).
                 # Combined with ~1000-candidate beam, target is ~30,000
                 # sims/turn = ~50% sim_rs budget utilization.
@@ -420,6 +481,25 @@ class EconomyArbiter:
             except Exception as exc:  # noqa: BLE001
                 self.debug_log(f"[arbiter] action_predictor.top_k: {exc!r}")
                 opp_actions = []
+
+        # Loss-replay diagnosis (4 ranked games against athena_baseline):
+        # action_predictor.top_k returns only [(NONE, 1.0)] — the labels.json
+        # file has replay-level archetype labels but NO state-conditioned
+        # action counts, so _counts is empty for every archetype, marginal
+        # is empty, top_k always returns the NONE fallback. Net effect:
+        # beam_search ran against a passive opponent (1 sim per candidate
+        # ≈ 12 ms/turn). The 30,000-sims/turn throttle never engaged.
+        #
+        # Fix: when the predictor returns <3 real (non-NONE) actions,
+        # AUGMENT with a static distribution of plausible opponent moves.
+        # Beam search now sims our plans against a realistic opponent
+        # spread instead of a single passive opponent.
+        n_real = sum(
+            1 for a, _ in opp_actions
+            if int(a.get("primary_mobile_type", -1)) >= 0
+        )
+        if n_real < 3:
+            opp_actions = _synthetic_opp_actions(opp_mp, self.turn_count)
 
         if 10 <= self.turn_count <= 90:
             if opp_actions:
