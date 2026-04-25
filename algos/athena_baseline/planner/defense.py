@@ -204,12 +204,15 @@ def build_default_defences(
 # Task 3 — edge_block_and_remove
 # ---------------------------------------------------------------------------
 
-# Our spawn-edge tiles. The two diagonals BOTTOM_LEFT (y=x to [0,13]) and
-# BOTTOM_RIGHT (y=27-x to [27,13]). For "block & remove" we only care
-# about the y=13 corner tiles — those are the ones that block scout
-# paths into our edges.
-_EDGE_BLOCK_TILES_LEFT = [[0, 13], [1, 13]]
-_EDGE_BLOCK_TILES_RIGHT = [[27, 13], [26, 13]]
+# Tiles to block during opp's action phase via the same-turn
+# spawn-then-remove trick. We deliberately EXCLUDE (0,13) and (27,13) —
+# those are our own spawn-edge corners. A wall there blocks our offense
+# planner's corner_dive_left/right templates from spawning at (0,13)/(27,13)
+# (live replays show this wasted MP every time the planner picked corner
+# anchors). (1,13) and (26,13) are NOT on the spawn-edge diagonal and
+# still cover the scout-path entry tiles.
+_EDGE_BLOCK_TILES_LEFT = [[1, 13]]
+_EDGE_BLOCK_TILES_RIGHT = [[26, 13]]
 EDGE_BLOCK_TILES = _EDGE_BLOCK_TILES_LEFT + _EDGE_BLOCK_TILES_RIGHT
 
 
@@ -256,6 +259,59 @@ def edge_block_and_remove(game_state, config: Optional[Dict[str, Any]] = None) -
                 game_state.attempt_remove(tile)
             except Exception:  # noqa: BLE001
                 pass
+    return placed
+
+
+# ---------------------------------------------------------------------------
+# Anti-demolisher hardening — forward Y=12 turrets when opp pressures with
+# Demolisher trains. Demos at Y=14 area chew athena's wall line at Y=12;
+# base turrets at Y=11 have range 2.5 (cannot reach Y=14). Adding turrets
+# at Y=12 with range 2.5 puts demos at Y=14 IN RANGE → demos die before
+# they damage walls. Triggered ONLY when opp's recent demo count is high,
+# so this doesn't regress vs scout-flood opponents.
+# ---------------------------------------------------------------------------
+
+# Anti-demo turret slots — placed AT Y=12 in gaps between v13_inspired
+# walls. v13_inspired walls at Y=12 occupy (2,3,4,6,9,10,13,14,17,18,21,23,24,25);
+# these slots (5,7,8,11,12,15,16,19,20,22) are the FREE gaps.
+ANTI_DEMO_TURRET_SLOTS = [
+    (5, 12), (11, 12), (16, 12), (22, 12),
+]
+
+
+def anti_demo_hardening(
+    game_state,
+    config: Optional[Dict[str, Any]] = None,
+) -> int:
+    """Place forward Y=12 turrets to attack incoming Demolishers.
+
+    Caller is responsible for the trigger condition (e.g. opp has spawned
+    >=3 Demolishers in last 3 turns). When called, this function tries to
+    place ALL anti-demo turret slots that aren't yet occupied. SP is
+    deducted normally; if SP runs out mid-walk, remaining slots wait for
+    next turn.
+
+    Returns count of turrets placed.
+    """
+    cfg = config or game_state.config
+    turret_sh = _shorthand_for(cfg, TURRET_IDX)
+    placed = 0
+    for x, y in ANTI_DEMO_TURRET_SLOTS:
+        if not _location_is_buildable(game_state, x, y):
+            continue
+        try:
+            sp = float(game_state.get_resource(SP_IDX, 0))
+            cost = float(game_state.type_cost(turret_sh)[SP_IDX])
+        except Exception:  # noqa: BLE001
+            break
+        if sp < cost:
+            break
+        try:
+            n = game_state.attempt_spawn(turret_sh, [x, y])
+        except Exception:  # noqa: BLE001
+            n = 0
+        if n:
+            placed += int(n)
     return placed
 
 
