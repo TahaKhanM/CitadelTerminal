@@ -191,6 +191,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         #   - update the archetype posterior each turn (Milestone E1)
         #   - feed top-3 opponent actions into beam_search (Milestone E2)
         # If either is None the arbiter falls back to the heuristic path.
+        # Phase 6 milestone K: locate the MAP-Elites archive (relative
+        # to this algo dir). Falls back gracefully if absent — see
+        # EconomyArbiter for the load+catch logic.
+        archive_file = os.path.join(_HERE, "data", "map_elites_archive.json")
+
         self.arbiter = EconomyArbiter(
             config=self.config,
             archetype_path=self.archetype_file,
@@ -199,6 +204,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             opponent_classifier=opponent_classifier,
             action_predictor=action_predictor,
             watchdog=Watchdog(),
+            archive_path=archive_file,
+            archive_sample_k=10,
             debug_log_func=gamelib.debug_write,
         )
         # Expose the action-frame buffer to the arbiter so _update_posterior

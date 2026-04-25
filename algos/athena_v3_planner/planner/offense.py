@@ -160,6 +160,9 @@ def generate_candidates(
     mp_costs: Optional[Dict[str, float]] = None,
     my_player: int = 1,
     max_candidates: int = 100,
+    archive=None,                          # MAPElitesArchive | None
+    archive_sample_k: int = 10,
+    archive_rng=None,                      # random.Random | None
 ) -> List[Candidate]:
     """Enumerate ~30-100 offense candidates feasible at the current state.
 
@@ -167,6 +170,11 @@ def generate_candidates(
     Templates that don't fit the MP budget are skipped, except: any
     template whose ``min_mp <= mp_available`` is included (truncated to
     fit the actual budget if needed).
+
+    Phase 6 milestone K: when ``archive`` is a MAPElitesArchive, sample
+    up to ``archive_sample_k`` cells and translate each genome into a
+    "virtual" offense candidate. These get evaluated alongside the JSON
+    templates so beam search can pick the best of both.
     """
     if templates is None:
         templates = load_all_templates()
@@ -185,6 +193,20 @@ def generate_candidates(
         debug={"reason": "save MP for next turn"},
     ))
 
+    # Build a name->template index so archive-derived candidates can
+    # rebind to the corresponding template in O(1).
+    tpl_by_name: Dict[str, OffenseTemplate] = {t.name: t for t in templates}
+
+    seen_signatures: set = set()  # de-dup by (template_name, mp_cost) bucket
+
+    def _push(cand: Candidate, source: str) -> None:
+        sig = (cand.template, round(cand.mp_cost, 1), source)
+        if sig in seen_signatures:
+            return
+        seen_signatures.add(sig)
+        out.append(cand)
+
+    # ------- 1. Stock JSON templates -------
     for tpl in templates:
         if tpl.min_mp > mp_available + 1e-9:
             continue  # not enough MP for this template's minimum
@@ -200,13 +222,50 @@ def generate_candidates(
         if _spawn_locs_blocked(state_dict, deploys, my_player=my_player):
             continue
 
-        out.append(Candidate(
+        _push(Candidate(
             name=tpl.name,
             template=tpl.name,
             side=tpl.side,
             deploys=deploys,
             mp_cost=total,
-        ))
+        ), source="template")
+
+    # ------- 2. Archive-derived candidates (Phase 6 milestone K) -------
+    if archive is not None and archive_sample_k > 0:
+        try:
+            sampled = archive.sample(archive_sample_k, rng=archive_rng)
+        except Exception:  # noqa: BLE001
+            sampled = []
+        for genome in sampled:
+            try:
+                tpl_name = genome.template_name
+            except Exception:  # noqa: BLE001
+                continue
+            tpl = tpl_by_name.get(tpl_name)
+            if tpl is None:
+                continue
+            if tpl.min_mp > mp_available + 1e-9:
+                continue
+            deploys, total = _expand_template_to_deploys(tpl, mp_costs)
+            if total > mp_available + 1e-9:
+                deploys, total = _truncate_to_mp(
+                    deploys, mp_costs, mp_available,
+                )
+                if not deploys:
+                    continue
+            if _spawn_locs_blocked(state_dict, deploys, my_player=my_player):
+                continue
+            # Tag archive-derived candidates with name "archive:<tpl>"
+            # so smoke tests + logs can verify integration.
+            _push(Candidate(
+                name=f"archive:{tpl.name}",
+                template=tpl.name,
+                side=tpl.side,
+                deploys=deploys,
+                mp_cost=total,
+                debug={"source": "map_elites_archive",
+                       "genome": genome.to_dict()},
+            ), source="archive")
 
     # Heuristic prune to max_candidates if we somehow exceed it
     if len(out) > max_candidates:
