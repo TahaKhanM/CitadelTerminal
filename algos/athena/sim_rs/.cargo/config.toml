@@ -1,0 +1,16 @@
+[build]
+rustflags = ["-C", "target-cpu=native"]
+
+# Override for the Linux musl cross-compile (sim_stdio binary). The
+# top-level [build] rustflags above sets target-cpu=native which means
+# "apple-m4" on the host — invalid when the target is x86_64. Per-target
+# rustflags here REPLACE (not append to) the global ones, scoping the
+# native-cpu opt to the host build only.
+[target.x86_64-unknown-linux-musl]
+rustflags = ["-C", "target-cpu=x86-64"]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "target-cpu=x86-64"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "target-cpu=native"]
