@@ -1,0 +1,240 @@
+[athena] random seed: 136348019022409808
+---------------- Starting Your Algo --------------------
+[athena] ArchetypeClassifier fitted from opponent_features.npz
+[athena] ActionPredictor fitted from labels.json
+[arbiter] map-elites archive loaded: 22/64 cells
+[athena] on_game_start; archetype=v13_inspired turret_sh=DF
+[offense_planner] T1 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (28.0ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T1 TIER1 attempted=1 spawned=1 skipped=0
+[offense_planner] T2 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (23.5ms): sim-beam pick=corner_dive_left@(3, 10) util=3.07
+[arbiter] T2 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T3 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (26.3ms): sim-beam pick=corner_dive_left@(3, 10) util=3.07
+[arbiter] T3 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T4 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (31.9ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T4 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T5 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (34.0ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T5 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T6 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (32.8ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T6 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T7 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (46.5ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T7 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T8 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (56.7ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T8 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T9 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (45.4ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T9 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T10 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (52.8ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T10 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T11 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (102.3ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T11 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T12 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (98.9ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T12 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T13 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (100.0ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T13 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T14 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (168.8ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T14 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T15 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (115.7ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T15 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T16 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (398.0ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T16 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T17 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (367.3ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T17 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T18 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (393.7ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T18 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T19 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (339.8ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T19 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T20 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (302.5ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T20 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T21 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (289.7ms): sim-beam pick=scout_micro_left util=12.20
+[arbiter] T21 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T22 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (295.5ms): sim-beam pick=scout_micro_left util=12.20
+[arbiter] T22 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T23 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (588.9ms): sim-beam pick=scout_micro_left util=12.08
+[arbiter] T23 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T24 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (741.9ms): sim-beam pick=scout_micro_left util=12.04
+[arbiter] T24 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T25 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (751.7ms): sim-beam pick=scout_micro_left util=12.04
+[arbiter] T25 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T26 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (837.1ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T26 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T27 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (915.6ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T27 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T28 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (1317.1ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T28 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T29 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (1205.2ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T29 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T30 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (1022.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T30 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T31 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (1075.6ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T31 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T32 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (998.0ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T32 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T33 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (996.3ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T33 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T34 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (1066.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T34 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T35 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (1063.6ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T35 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T36 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (1727.0ms): sim-beam pick=scout_rush_left util=24.44
+[arbiter] T36 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T37 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (1641.0ms): sim-beam pick=scout_rush_left util=24.44
+[arbiter] T37 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T38 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (1622.0ms): sim-beam pick=scout_rush_left@(5, 8) util=24.44
+[arbiter] T38 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T39 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (1571.6ms): sim-beam pick=scout_rush_left@(5, 8) util=24.44
+[arbiter] T39 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T40 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (1647.2ms): sim-beam pick=scout_rush_left@(5, 8) util=24.44
+[arbiter] T40 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T41 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (2131.5ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T41 TIER1 attempted=9 spawned=9 skipped=0
+[offense_planner] T42 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (2194.9ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T42 TIER1 attempted=9 spawned=9 skipped=0
