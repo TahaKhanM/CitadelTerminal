@@ -1,0 +1,34 @@
+# Phase 8 — exclude build-time artifacts and docs from the upload zip.
+# Runtime-required files (algo_strategy.py, algo.json, run.sh, gamelib/,
+# planner/, offense/, opponent/, archive/, defenses/,
+# data/citadel_config_snapshot.json, data/map_elites_archive.json,
+# data/opponent_features.npz, opponent/labels.json) are NOT listed here.
+
+# Phase / build documentation at top level
+*/STATUS.md
+*/AUTONOMOUS_LOG.md
+*/FINAL_REPORT.md
+*/READY_FOR_UPLOAD.md
+*/README.md
+*.ps1
+
+# The output zip itself
+*/athena_v3.zip
+
+# Tests, eval, sim — never executed at runtime
+*/tests/*
+*/eval/*
+*/sim/*
+
+# All Phase ledger markdown — broad pattern
+*/data/PHASE*
+*/data/G11_*
+*/data/PERF_*
+*/data/CONFIG_*
+*/data/replay_index.json
+
+# Git / OS noise
+*/.git/*
+*/.DS_Store
+*/__pycache__/*
+*.pyc
