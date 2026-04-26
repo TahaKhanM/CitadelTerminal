@@ -1,5 +1,17 @@
 # Milestone Prompts — oracle_pure improvement plan
 
+> **STATUS UPDATE (2026-04-26)**:
+> - **M1 as originally specified (G7+G3) was REJECTED** by Tier A 10/10
+>   rule (G3 caused 4/10 regression and broke G7's snorkeldink breakthrough).
+>   See `MILESTONE_M1_RESULTS.md`.
+> - **M1-Lite (G7 only) is being shipped** — see Part 1 of
+>   `M1_LITE_SHIP_AND_G3_INVESTIGATE.md`.
+> - **G3 is on a separate investigation track** — see Part 2 of
+>   `M1_LITE_SHIP_AND_G3_INVESTIGATE.md` for the G3-Additive proposed fix.
+> - **M2-M5 prompts below are unchanged in goal** but should:
+>   - Treat M1-Lite (not M1) as the foundation
+>   - Recognize that G3 may not be available; G2 (M2) may underperform without it
+
 This file contains 5 self-contained prompts, one per milestone. Each prompt
 is complete enough to give to a fresh Claude session without additional
 context. Each milestone produces a NEW upload folder for live testing and
@@ -253,17 +265,29 @@ If validation passes:
 
 ## PROMPT — Milestone 2: Sampling (G8 + G2)
 
-You are implementing **Milestone 2**. **M1 must have passed local
+You are implementing **Milestone 2**. **M1-Lite must have passed local
 validation AND live ladder confirmation** (≥10 ranked matches without
-ELO regression). Read `MILESTONE_M1_RESULTS.md` first.
+ELO regression). Read `MILESTONE_M1_RESULTS.md` AND
+`M1_LITE_SHIP_AND_G3_INVESTIGATE.md` first.
 
 This milestone ships:
 - **G8**: Pass breach TILES (not just count) from `algo_strategy` →
   `search` → `opponent_model.sample()`. Plumbing only.
-- **G2**: Use opp's OBSERVED MP-spend posterior (now properly populated by
-  G3 from M1) to size adversarial samples. Replaces hand-tuned magic
-  constants with data-derived weights. **Cap weights at 3.0** to prevent
-  monopolization.
+- **G2**: Use opp's OBSERVED MP-spend posterior to size adversarial
+  samples. Replaces hand-tuned magic constants with data-derived weights.
+  **Cap weights at 3.0** to prevent monopolization.
+
+**Important — G3 dependency note:** G2's effectiveness depends on whether
+G3 (or G3-Additive) populated the br1_2/br3p prior buckets. Three
+scenarios:
+1. **If G3-Additive shipped before M2**: G2 works as designed; full
+   benefit expected.
+2. **If only M1-Lite shipped (no G3)**: G2 still works on the in-game
+   posterior, but the prior contribution to br1_2/br3p is empty. G2 will
+   only kick in after ≥3 in-game opp observations populate the
+   posterior. Expect smaller improvement.
+3. **If G3-Additive failed and was abandoned**: same as case 2.
+Document which scenario applies in MILESTONE_M2_RESULTS.md.
 
 ### Implementation steps
 
@@ -530,16 +554,21 @@ This milestone ships:
 
 ---
 
-## Master execution checklist
+## Master execution checklist (REVISED 2026-04-26)
 
 For each milestone, in order:
 
-- [ ] **M1**: Foundation (G7 + G3) — implement, validate, upload, live
-      test, merge to main.
-- [ ] **M2**: Sampling (G8 + G2) — same. Requires M1.
-- [ ] **M3**: Defense templates (G1 + G5) — same. Requires M2. **High
+- [x] **M1 (original G7+G3)**: REJECTED. See MILESTONE_M1_RESULTS.md.
+- [ ] **M1-Lite (G7 only)**: ship per Part 1 of M1_LITE_SHIP_AND_G3_INVESTIGATE.md.
+      Tier A 10/10 + Tier B 2/2 (snorkeldink BREAKTHROUGH).
+- [ ] **G3-Investigate (G3-Additive variant)**: per Part 2 of
+      M1_LITE_SHIP_AND_G3_INVESTIGATE.md. If passes → ship as M1.5.
+      If fails → continue M2 without G3.
+- [ ] **M2**: Sampling (G8 + G2) — requires M1-Lite shipped. Effectiveness
+      depends on G3-Additive status (see scenario notes in M2 prompt above).
+- [ ] **M3**: Defense templates (G1 + G5) — requires M2. **High
       regression risk.**
-- [ ] **M4**: Compute scaling (G4) — same. Requires M1 (G7); M2 preferred.
+- [ ] **M4**: Compute scaling (G4) — requires M1-Lite (G7); M2 preferred.
 - [ ] **M5**: Behavioral (G6) — OPTIONAL. Skip if M1-M4 already met
       target.
 
