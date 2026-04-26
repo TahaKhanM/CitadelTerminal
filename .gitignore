@@ -53,3 +53,7 @@ Ranked Replays/
 /athena_v5/
 /athena_v3_diagnostic/
 /athena_v3_upload/
+
+# Engine-generated error files (per-match crash dumps; not source)
+errorFile*.txt
+**/errorFile*.txt
