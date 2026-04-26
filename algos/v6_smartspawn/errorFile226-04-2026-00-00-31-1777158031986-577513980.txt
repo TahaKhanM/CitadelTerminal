@@ -1,0 +1,3 @@
+lostkids_v3 random seed: 8669933529542475964
+---------------- Starting Your Algo --------------------
+Configuring lostkids_v3...

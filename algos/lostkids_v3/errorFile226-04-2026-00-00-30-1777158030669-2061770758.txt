@@ -1,0 +1,6 @@
+lostkids_v3 random seed: 8913277118650651860
+---------------- Starting Your Algo --------------------
+Configuring lostkids_v3...
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn FF at location [3, 12]. Location is blocked.
+Could not spawn FF at location [4, 12]. Location is blocked.
