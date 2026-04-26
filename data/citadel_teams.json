@@ -1,0 +1,717 @@
+{
+  "5902": {
+    "teamId": 5902,
+    "name": "test run",
+    "createdAt": "2026-04-21T20:34:32.125Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70954": {
+        "id": 70954,
+        "isAdmin": false,
+        "displayName": "maxrivaldii",
+        "dateJoined": "2026-04-11T10:50:39.047Z",
+        "avatarUrl": null
+      },
+      "70910": {
+        "id": 70910,
+        "isAdmin": false,
+        "displayName": "gencersarp",
+        "dateJoined": "2026-04-08T17:43:01.015Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/119081352?v=4"
+      },
+      "70090": {
+        "id": 70090,
+        "isAdmin": false,
+        "displayName": "joshua-bode",
+        "dateJoined": "2026-02-21T21:30:10.955Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/62960021?v=4"
+      }
+    }
+  },
+  "5888": {
+    "teamId": 5888,
+    "name": "citftw",
+    "createdAt": "2026-04-15T19:43:41.287Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70907": {
+        "id": 70907,
+        "isAdmin": false,
+        "displayName": "txnujk09",
+        "dateJoined": "2026-04-08T12:33:19.743Z",
+        "avatarUrl": null
+      },
+      "70950": {
+        "id": 70950,
+        "isAdmin": false,
+        "displayName": "not-tnb",
+        "dateJoined": "2026-04-11T04:32:16.353Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/79249093?v=4"
+      },
+      "70867": {
+        "id": 70867,
+        "isAdmin": false,
+        "displayName": "suchir-g",
+        "dateJoined": "2026-04-07T15:13:41.152Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/96109754?v=4"
+      }
+    }
+  },
+  "5901": {
+    "teamId": 5901,
+    "name": "The OverFiTTERS",
+    "createdAt": "2026-04-21T19:04:24.447Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70944": {
+        "id": 70944,
+        "isAdmin": false,
+        "displayName": "pxannnna",
+        "dateJoined": "2026-04-10T21:08:59.501Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/235768191?v=4"
+      },
+      "70902": {
+        "id": 70902,
+        "isAdmin": false,
+        "displayName": "Nicole",
+        "dateJoined": "2026-04-08T09:14:51.300Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5895": {
+    "teamId": 5895,
+    "name": "Europe Test",
+    "createdAt": "2026-04-21T16:27:00.650Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "43339": {
+        "id": 43339,
+        "isAdmin": true,
+        "displayName": "C1Beatrice",
+        "dateJoined": "2022-03-21T16:50:50Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5893": {
+    "teamId": 5893,
+    "name": "Sk",
+    "createdAt": "2026-04-21T13:36:16.562Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70953": {
+        "id": 70953,
+        "isAdmin": false,
+        "displayName": "Egil",
+        "dateJoined": "2026-04-11T09:45:58.657Z",
+        "avatarUrl": null
+      },
+      "70207": {
+        "id": 70207,
+        "isAdmin": false,
+        "displayName": "krishpatel",
+        "dateJoined": "2026-03-03T12:56:51.318Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/245396650?v=4"
+      },
+      "70872": {
+        "id": 70872,
+        "isAdmin": false,
+        "displayName": "Anoimanoi",
+        "dateJoined": "2026-04-07T15:23:52.509Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5891": {
+    "teamId": 5891,
+    "name": "Winnerteam",
+    "createdAt": "2026-04-20T19:44:08.223Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70894": {
+        "id": 70894,
+        "isAdmin": false,
+        "displayName": "foxhenderson",
+        "dateJoined": "2026-04-07T20:06:39.526Z",
+        "avatarUrl": null
+      },
+      "70879": {
+        "id": 70879,
+        "isAdmin": false,
+        "displayName": "pipmy",
+        "dateJoined": "2026-04-07T16:25:51.212Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/133515897?v=4"
+      },
+      "70863": {
+        "id": 70863,
+        "isAdmin": false,
+        "displayName": "Ltb",
+        "dateJoined": "2026-04-07T15:10:01.044Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5890": {
+    "teamId": 5890,
+    "name": " ",
+    "createdAt": "2026-04-20T17:25:23.539Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70882": {
+        "id": 70882,
+        "isAdmin": false,
+        "displayName": "Vmc",
+        "dateJoined": "2026-04-07T16:53:17.701Z",
+        "avatarUrl": null
+      },
+      "70873": {
+        "id": 70873,
+        "isAdmin": false,
+        "displayName": "Ryan_Lam",
+        "dateJoined": "2026-04-07T15:27:06.548Z",
+        "avatarUrl": null
+      },
+      "70923": {
+        "id": 70923,
+        "isAdmin": false,
+        "displayName": "mjwtan",
+        "dateJoined": "2026-04-09T17:34:08.631Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/174955333?v=4"
+      }
+    }
+  },
+  "5889": {
+    "teamId": 5889,
+    "name": "Lehman Brothers Quant",
+    "createdAt": "2026-04-20T17:21:27.694Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70871": {
+        "id": 70871,
+        "isAdmin": false,
+        "displayName": "Purujit_Aggarwal",
+        "dateJoined": "2026-04-07T15:22:58.744Z",
+        "avatarUrl": null
+      },
+      "70990": {
+        "id": 70990,
+        "isAdmin": false,
+        "displayName": "Denys",
+        "dateJoined": "2026-04-14T23:38:40.045Z",
+        "avatarUrl": null
+      },
+      "70905": {
+        "id": 70905,
+        "isAdmin": false,
+        "displayName": "AP1",
+        "dateJoined": "2026-04-08T11:05:59.319Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5885": {
+    "teamId": 5885,
+    "name": "terminal_velocity",
+    "createdAt": "2026-04-15T10:40:13.028Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70870": {
+        "id": 70870,
+        "isAdmin": false,
+        "displayName": "hectorkennerley",
+        "dateJoined": "2026-04-07T15:20:02Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/121647461?v=4"
+      },
+      "70945": {
+        "id": 70945,
+        "isAdmin": false,
+        "displayName": "NKessler",
+        "dateJoined": "2026-04-10T21:43:15.377Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/197271250?v=4"
+      },
+      "70943": {
+        "id": 70943,
+        "isAdmin": false,
+        "displayName": "ashmit",
+        "dateJoined": "2026-04-10T20:41:40.651Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5883": {
+    "teamId": 5883,
+    "name": "Better jmc ",
+    "createdAt": "2026-04-15T07:27:17.668Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70875": {
+        "id": 70875,
+        "isAdmin": false,
+        "displayName": "sebk",
+        "dateJoined": "2026-04-07T15:39:46.063Z",
+        "avatarUrl": null
+      },
+      "70961": {
+        "id": 70961,
+        "isAdmin": false,
+        "displayName": "hussain",
+        "dateJoined": "2026-04-11T22:12:20.274Z",
+        "avatarUrl": null
+      },
+      "70948": {
+        "id": 70948,
+        "isAdmin": false,
+        "displayName": "aaron",
+        "dateJoined": "2026-04-10T23:49:48.491Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5881": {
+    "teamId": 5881,
+    "name": "bobby tables",
+    "createdAt": "2026-04-14T20:40:02.389Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70919": {
+        "id": 70919,
+        "isAdmin": false,
+        "displayName": "aa0",
+        "dateJoined": "2026-04-09T13:59:12.318Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/71089234?v=4"
+      },
+      "70938": {
+        "id": 70938,
+        "isAdmin": false,
+        "displayName": "ameyg",
+        "dateJoined": "2026-04-10T18:13:33.063Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5880": {
+    "teamId": 5880,
+    "name": "turrets syndrome",
+    "createdAt": "2026-04-14T19:47:47.192Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70877": {
+        "id": 70877,
+        "isAdmin": false,
+        "displayName": "louiebwu",
+        "dateJoined": "2026-04-07T16:10:04.512Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/151873293?v=4"
+      },
+      "70960": {
+        "id": 70960,
+        "isAdmin": false,
+        "displayName": "icylapras24",
+        "dateJoined": "2026-04-11T20:24:22.352Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/178221559?v=4"
+      },
+      "70935": {
+        "id": 70935,
+        "isAdmin": false,
+        "displayName": "juliurius",
+        "dateJoined": "2026-04-10T17:18:48.989Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5879": {
+    "teamId": 5879,
+    "name": "3 RINGS",
+    "createdAt": "2026-04-14T18:49:40.008Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70856": {
+        "id": 70856,
+        "isAdmin": false,
+        "displayName": "ayo",
+        "dateJoined": "2026-04-07T15:05:07.244Z",
+        "avatarUrl": null
+      },
+      "70881": {
+        "id": 70881,
+        "isAdmin": false,
+        "displayName": "integrace",
+        "dateJoined": "2026-04-07T16:41:34.636Z",
+        "avatarUrl": null
+      },
+      "70868": {
+        "id": 70868,
+        "isAdmin": false,
+        "displayName": "jae",
+        "dateJoined": "2026-04-07T15:13:58.443Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/208215066?v=4"
+      }
+    }
+  },
+  "5878": {
+    "teamId": 5878,
+    "name": "Team1",
+    "createdAt": "2026-04-14T15:23:27.991Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70857": {
+        "id": 70857,
+        "isAdmin": false,
+        "displayName": "diego",
+        "dateJoined": "2026-04-07T15:04:57.956Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/110174371?v=4"
+      },
+      "70885": {
+        "id": 70885,
+        "isAdmin": false,
+        "displayName": "n1hal",
+        "dateJoined": "2026-04-07T17:17:42.376Z",
+        "avatarUrl": null
+      },
+      "70888": {
+        "id": 70888,
+        "isAdmin": false,
+        "displayName": "AKunjoor",
+        "dateJoined": "2026-04-07T18:04:51.652Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5858": {
+    "teamId": 5858,
+    "name": "sudo rm -rf /*",
+    "createdAt": "2026-04-13T12:04:45.486Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70861": {
+        "id": 70861,
+        "isAdmin": false,
+        "displayName": "Krey",
+        "dateJoined": "2026-04-07T15:08:35.570Z",
+        "avatarUrl": null
+      },
+      "70972": {
+        "id": 70972,
+        "isAdmin": false,
+        "displayName": "Zan",
+        "dateJoined": "2026-04-13T12:25:14.996Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5877": {
+    "teamId": 5877,
+    "name": "Ctrl Alt Defeat",
+    "createdAt": "2026-04-14T12:36:21.691Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70937": {
+        "id": 70937,
+        "isAdmin": false,
+        "displayName": "max guo",
+        "dateJoined": "2026-04-10T18:07:31.106Z",
+        "avatarUrl": null
+      },
+      "70955": {
+        "id": 70955,
+        "isAdmin": false,
+        "displayName": "Josh",
+        "dateJoined": "2026-04-11T11:08:08.770Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5876": {
+    "teamId": 5876,
+    "name": "nala",
+    "createdAt": "2026-04-14T11:55:28.445Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70896": {
+        "id": 70896,
+        "isAdmin": false,
+        "displayName": "Roshan",
+        "dateJoined": "2026-04-07T22:11:51.934Z",
+        "avatarUrl": null
+      },
+      "70887": {
+        "id": 70887,
+        "isAdmin": false,
+        "displayName": "octavian202",
+        "dateJoined": "2026-04-07T17:33:24.229Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/32011780?v=4"
+      },
+      "70855": {
+        "id": 70855,
+        "isAdmin": false,
+        "displayName": "Hussein",
+        "dateJoined": "2026-04-07T15:04:30Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5875": {
+    "teamId": 5875,
+    "name": "No edge",
+    "createdAt": "2026-04-14T11:55:07.929Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70909": {
+        "id": 70909,
+        "isAdmin": false,
+        "displayName": "Olezha",
+        "dateJoined": "2026-04-08T16:58:13.036Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/67047059?v=4"
+      },
+      "70878": {
+        "id": 70878,
+        "isAdmin": false,
+        "displayName": "sk0812",
+        "dateJoined": "2026-04-07T16:21:38.851Z",
+        "avatarUrl": null
+      },
+      "70862": {
+        "id": 70862,
+        "isAdmin": false,
+        "displayName": "Lothaire",
+        "dateJoined": "2026-04-07T15:09:47.511Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5873": {
+    "teamId": 5873,
+    "name": "the g squad",
+    "createdAt": "2026-04-14T11:53:13.707Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70956": {
+        "id": 70956,
+        "isAdmin": false,
+        "displayName": "sned",
+        "dateJoined": "2026-04-11T12:53:47.936Z",
+        "avatarUrl": null
+      },
+      "70859": {
+        "id": 70859,
+        "isAdmin": false,
+        "displayName": "melindamorkeh",
+        "dateJoined": "2026-04-07T15:06:12.857Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/122207864?v=4"
+      }
+    }
+  },
+  "5857": {
+    "teamId": 5857,
+    "name": "thebigwick",
+    "createdAt": "2026-04-13T10:53:52.401Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70891": {
+        "id": 70891,
+        "isAdmin": false,
+        "displayName": "angshumang",
+        "dateJoined": "2026-04-07T18:28:16.789Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/70235050?v=4"
+      }
+    }
+  },
+  "5853": {
+    "teamId": 5853,
+    "name": "The Gooners",
+    "createdAt": "2026-04-12T20:20:08.401Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70890": {
+        "id": 70890,
+        "isAdmin": false,
+        "displayName": "Orangemath",
+        "dateJoined": "2026-04-07T18:14:38.599Z",
+        "avatarUrl": null
+      },
+      "70880": {
+        "id": 70880,
+        "isAdmin": false,
+        "displayName": "shrxvxn007",
+        "dateJoined": "2026-04-07T16:37:14.555Z",
+        "avatarUrl": null
+      },
+      "71006": {
+        "id": 71006,
+        "isAdmin": false,
+        "displayName": "zarifahmed997",
+        "dateJoined": "2026-04-16T12:25:16.759Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/102858737?v=4"
+      }
+    }
+  },
+  "5852": {
+    "teamId": 5852,
+    "name": "very kuai",
+    "createdAt": "2026-04-12T18:42:15.686Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70975": {
+        "id": 70975,
+        "isAdmin": false,
+        "displayName": "enxgmatic",
+        "dateJoined": "2026-04-13T15:01:45.987Z",
+        "avatarUrl": null
+      },
+      "70912": {
+        "id": 70912,
+        "isAdmin": false,
+        "displayName": "pseudoflash",
+        "dateJoined": "2026-04-09T09:31:18.304Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/47863581?v=4"
+      }
+    }
+  },
+  "5827": {
+    "teamId": 5827,
+    "name": "sr",
+    "createdAt": "2026-04-08T23:17:25.933Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70901": {
+        "id": 70901,
+        "isAdmin": false,
+        "displayName": "ragd",
+        "dateJoined": "2026-04-08T07:47:01.510Z",
+        "avatarUrl": null
+      },
+      "69842": {
+        "id": 69842,
+        "isAdmin": false,
+        "displayName": "Stella",
+        "dateJoined": "2026-01-24T23:15:53.106Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/135436298?v=4"
+      },
+      "70139": {
+        "id": 70139,
+        "isAdmin": false,
+        "displayName": "jaminimathur",
+        "dateJoined": "2026-02-25T18:48:02.855Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5826": {
+    "teamId": 5826,
+    "name": "Wick",
+    "createdAt": "2026-04-08T18:06:41.261Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70895": {
+        "id": 70895,
+        "isAdmin": false,
+        "displayName": "TAHA",
+        "dateJoined": "2026-04-07T20:43:47.471Z",
+        "avatarUrl": null
+      },
+      "70866": {
+        "id": 70866,
+        "isAdmin": false,
+        "displayName": "Rham",
+        "dateJoined": "2026-04-07T15:13:38.505Z",
+        "avatarUrl": null
+      }
+    }
+  },
+  "5822": {
+    "teamId": 5822,
+    "name": "",
+    "createdAt": "2026-04-07T20:29:54.919Z",
+    "isPublic": true,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70985": {
+        "id": 70985,
+        "isAdmin": false,
+        "displayName": "Arun__ls",
+        "dateJoined": "2026-04-14T08:16:14.543Z",
+        "avatarUrl": null
+      },
+      "70883": {
+        "id": 70883,
+        "isAdmin": false,
+        "displayName": "Hera Choi",
+        "dateJoined": "2026-04-07T17:05:33.980Z",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/62640172?v=4"
+      }
+    }
+  },
+  "5820": {
+    "teamId": 5820,
+    "name": "WFreakS",
+    "createdAt": "2026-04-07T15:46:18.387Z",
+    "isPublic": false,
+    "isActive": true,
+    "competition_team_number": "",
+    "members": {
+      "70865": {
+        "id": 70865,
+        "isAdmin": false,
+        "displayName": "vik07x",
+        "dateJoined": "2026-04-07T15:12:41.955Z",
+        "avatarUrl": null
+      },
+      "70869": {
+        "id": 70869,
+        "isAdmin": false,
+        "displayName": "sheli",
+        "dateJoined": "2026-04-07T15:19:23.555Z",
+        "avatarUrl": null
+      }
+    }
+  }
+}
