@@ -1,0 +1,39 @@
+# Oracle v2 zipignore — exclude build-time + dev artifacts from upload.
+# Runtime-required files (KEEP in zip):
+#   - algo_strategy.py, algo.json, run.sh
+#   - gamelib/         (engine API)
+#   - oracle_core/     (search, enumerator, value, opponent_model, sim_eval, state_adapter)
+#   - bundled_sim_rs/  (PyO3 Linux x64 wheel — sim_rs at runtime)
+#   - vendored_sim/    (pure-Python sim fallback)
+#   - data/opp_model_cache.pkl  (fast opp_model load)
+#   - data/citadel_config_snapshot.json  (sim_rs config)
+#   - sim_bridge.py    (subprocess fallback; blocked by sandbox but harmless)
+
+# Tests + dev files
+*/oracle_core/test_*.py
+*/tests/*
+*/eval/*
+
+# Docs
+*/STATUS.md
+*/AUTONOMOUS_LOG.md
+*/FINAL_REPORT.md
+*/READY_FOR_UPLOAD.md
+*/README.md
+*/REPORT.md
+*/REPORT.txt
+*.ps1
+
+# Static binary (sandbox blocks subprocess; useless on live)
+*/bin/*
+
+# Output zip itself
+*/oracle.zip
+*/athena_v3.zip
+
+# Git / OS noise
+*/.git/*
+*/.DS_Store
+*/__pycache__/*
+*.pyc
+*.pyo

@@ -1,9 +1,0 @@
-{
-  "name": "demo_train_left",
-  "description": "Demolisher line from BL — clears walls/turrets at range 4.5.",
-  "side": "BL",
-  "min_mp": 9,
-  "spawns": [
-    {"unit": "DEMOLISHER", "loc": [4, 9], "count": 3}
-  ]
-}

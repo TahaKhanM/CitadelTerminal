@@ -1,0 +1,1906 @@
+{
+  "0": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          10,
+          11
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          17,
+          11
+        ]
+      ],
+      [
+        "WALL",
+        [
+          10,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          17,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          3,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        1
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "1": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          24,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          2,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          0,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "2": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          3,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "3": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          23,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          2,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "4": {
+    "structures": [
+      [
+        "WALL",
+        [
+          1,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          2,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          3,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          24,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        2
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "5": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          5,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          6,
+          11
+        ]
+      ],
+      [
+        "WALL",
+        [
+          7,
+          10
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "6": {
+    "structures": [
+      [
+        "WALL",
+        [
+          8,
+          9
+        ]
+      ],
+      [
+        "WALL",
+        [
+          9,
+          8
+        ]
+      ],
+      [
+        "WALL",
+        [
+          10,
+          7
+        ]
+      ],
+      [
+        "WALL",
+        [
+          11,
+          6
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "7": {
+    "structures": [
+      [
+        "WALL",
+        [
+          12,
+          5
+        ]
+      ],
+      [
+        "WALL",
+        [
+          13,
+          4
+        ]
+      ],
+      [
+        "WALL",
+        [
+          14,
+          4
+        ]
+      ],
+      [
+        "WALL",
+        [
+          15,
+          5
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "8": {
+    "structures": [
+      [
+        "WALL",
+        [
+          16,
+          6
+        ]
+      ],
+      [
+        "WALL",
+        [
+          17,
+          7
+        ]
+      ],
+      [
+        "WALL",
+        [
+          18,
+          8
+        ]
+      ],
+      [
+        "WALL",
+        [
+          19,
+          9
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        5
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "9": {
+    "structures": [
+      [
+        "WALL",
+        [
+          20,
+          10
+        ]
+      ],
+      [
+        "WALL",
+        [
+          21,
+          11
+        ]
+      ],
+      [
+        "WALL",
+        [
+          22,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          23,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "10": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          5,
+          11
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          6,
+          10
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 12
+  },
+  "11": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          7,
+          9
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          8,
+          8
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 11
+  },
+  "12": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          9,
+          7
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          10,
+          6
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          11,
+          5
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          12,
+          4
+        ]
+      ],
+      [
+        "WALL",
+        [
+          3,
+          10
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        8
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 11
+  },
+  "13": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          13,
+          3
+        ]
+      ],
+      [
+        "WALL",
+        [
+          4,
+          9
+        ]
+      ],
+      [
+        "WALL",
+        [
+          5,
+          8
+        ]
+      ],
+      [
+        "WALL",
+        [
+          6,
+          7
+        ]
+      ],
+      [
+        "WALL",
+        [
+          7,
+          6
+        ]
+      ],
+      [
+        "WALL",
+        [
+          8,
+          5
+        ]
+      ],
+      [
+        "WALL",
+        [
+          9,
+          4
+        ]
+      ],
+      [
+        "WALL",
+        [
+          10,
+          3
+        ]
+      ],
+      [
+        "WALL",
+        [
+          11,
+          2
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 11
+  },
+  "14": {
+    "structures": [
+      [
+        "WALL",
+        [
+          12,
+          1
+        ]
+      ],
+      [
+        "WALL",
+        [
+          13,
+          0
+        ]
+      ],
+      [
+        "WALL",
+        [
+          14,
+          0
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 11
+  },
+  "15": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        0,
+        13
+      ],
+      [
+        1,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "16": {
+    "structures": [],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        10
+      ]
+    ],
+    "upgrades": [
+      [
+        2,
+        13
+      ],
+      [
+        3,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "17": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        24,
+        13
+      ],
+      [
+        25,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "18": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ],
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "19": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        5,
+        12
+      ],
+      [
+        6,
+        11
+      ]
+    ],
+    "_n_present": 11
+  },
+  "20": {
+    "structures": [],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        12
+      ]
+    ],
+    "upgrades": [
+      [
+        7,
+        10
+      ],
+      [
+        23,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "21": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        3,
+        12
+      ],
+      [
+        2,
+        11
+      ]
+    ],
+    "_n_present": 11
+  },
+  "22": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        24,
+        12
+      ]
+    ],
+    "_n_present": 11
+  },
+  "23": {
+    "structures": [
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "24": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        13
+      ]
+    ],
+    "upgrades": [
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "25": {
+    "structures": [],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        16
+      ]
+    ],
+    "upgrades": [
+      [
+        2,
+        12
+      ]
+    ],
+    "_n_present": 11
+  },
+  "26": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        25,
+        12
+      ]
+    ],
+    "_n_present": 11
+  },
+  "27": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        3,
+        11
+      ]
+    ],
+    "_n_present": 11
+  },
+  "28": {
+    "structures": [],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        16
+      ]
+    ],
+    "upgrades": [
+      [
+        23,
+        12
+      ]
+    ],
+    "_n_present": 11
+  },
+  "29": {
+    "structures": [
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ],
+      [
+        2,
+        11
+      ]
+    ],
+    "_n_present": 11
+  },
+  "30": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        19
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 11
+  },
+  "31": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          25,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 11
+  },
+  "32": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        18
+      ]
+    ],
+    "upgrades": [
+      [
+        25,
+        13
+      ]
+    ],
+    "_n_present": 11
+  },
+  "33": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 10
+  },
+  "34": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ],
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 10
+  },
+  "35": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        22
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 10
+  },
+  "36": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          24,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        21
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 10
+  },
+  "37": {
+    "structures": [
+      [
+        "WALL",
+        [
+          24,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        24,
+        13
+      ],
+      [
+        25,
+        13
+      ]
+    ],
+    "_n_present": 10
+  },
+  "38": {
+    "structures": [
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ]
+    ],
+    "_n_present": 8
+  },
+  "39": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 8
+  },
+  "40": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          20,
+          9
+        ]
+      ],
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 8
+  },
+  "41": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "SUPPORT",
+        [
+          23,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        25,
+        13
+      ]
+    ],
+    "_n_present": 7
+  },
+  "42": {
+    "structures": [
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        30
+      ]
+    ],
+    "upgrades": [
+      [
+        26,
+        13
+      ]
+    ],
+    "_n_present": 7
+  },
+  "43": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ],
+      [
+        "SUPPORT",
+        [
+          22,
+          11
+        ]
+      ],
+      [
+        "SUPPORT",
+        [
+          21,
+          10
+        ]
+      ],
+      [
+        "SUPPORT",
+        [
+          20,
+          9
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        27,
+        13
+      ],
+      [
+        25,
+        11
+      ],
+      [
+        26,
+        12
+      ]
+    ],
+    "_n_present": 7
+  },
+  "44": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        24,
+        11
+      ],
+      [
+        20,
+        9
+      ]
+    ],
+    "_n_present": 7
+  },
+  "45": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        25,
+        13
+      ],
+      [
+        23,
+        11
+      ]
+    ],
+    "_n_present": 7
+  },
+  "46": {
+    "structures": [
+      [
+        "WALL",
+        [
+          3,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ],
+      [
+        27,
+        13
+      ],
+      [
+        3,
+        13
+      ]
+    ],
+    "_n_present": 7
+  },
+  "47": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        22,
+        11
+      ]
+    ],
+    "_n_present": 7
+  },
+  "48": {
+    "structures": [],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        32
+      ]
+    ],
+    "upgrades": [
+      [
+        21,
+        10
+      ]
+    ],
+    "_n_present": 7
+  },
+  "49": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "DEMOLISHER",
+        [
+          24,
+          10
+        ],
+        8
+      ]
+    ],
+    "upgrades": [
+      [
+        25,
+        13
+      ],
+      [
+        26,
+        13
+      ],
+      [
+        23,
+        13
+      ]
+    ],
+    "_n_present": 2
+  },
+  "50": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          26,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        17
+      ]
+    ],
+    "upgrades": [
+      [
+        26,
+        13
+      ],
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 2
+  },
+  "51": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          24,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "52": {
+    "structures": [
+      [
+        "SUPPORT",
+        [
+          23,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "53": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          24,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          24,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "54": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          23,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        36
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "55": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          22,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "56": {
+    "structures": [
+      [
+        "WALL",
+        [
+          23,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          12,
+          1
+        ]
+      ],
+      [
+        "WALL",
+        [
+          13,
+          0
+        ]
+      ],
+      [
+        "WALL",
+        [
+          14,
+          0
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "57": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        24,
+        13
+      ],
+      [
+        25,
+        13
+      ]
+    ],
+    "_n_present": 1
+  },
+  "58": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        26,
+        13
+      ],
+      [
+        27,
+        13
+      ]
+    ],
+    "_n_present": 1
+  },
+  "59": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          24,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "60": {
+    "structures": [
+      [
+        "WALL",
+        [
+          24,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "61": {
+    "structures": [
+      [
+        "WALL",
+        [
+          23,
+          13
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          5,
+          11
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "62": {
+    "structures": [],
+    "mobiles": [],
+    "upgrades": [
+      [
+        24,
+        13
+      ],
+      [
+        25,
+        13
+      ]
+    ],
+    "_n_present": 1
+  },
+  "63": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          24,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          24,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        47
+      ]
+    ],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "64": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          23,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          0,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          1,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "65": {
+    "structures": [
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          22,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "66": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          24,
+          12
+        ]
+      ],
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "67": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          23,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          24,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "68": {
+    "structures": [
+      [
+        "TURRET",
+        [
+          25,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          25,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "69": {
+    "structures": [
+      [
+        "WALL",
+        [
+          26,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          27,
+          13
+        ]
+      ],
+      [
+        "WALL",
+        [
+          22,
+          12
+        ]
+      ],
+      [
+        "WALL",
+        [
+          23,
+          13
+        ]
+      ]
+    ],
+    "mobiles": [],
+    "upgrades": [],
+    "_n_present": 1
+  },
+  "70": {
+    "structures": [],
+    "mobiles": [
+      [
+        "SCOUT",
+        [
+          24,
+          10
+        ],
+        49
+      ]
+    ],
+    "upgrades": [
+      [
+        0,
+        13
+      ],
+      [
+        1,
+        13
+      ]
+    ],
+    "_n_present": 1
+  }
+}

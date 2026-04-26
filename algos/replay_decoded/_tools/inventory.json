@@ -1,0 +1,1801 @@
+{
+  "python-algo": {
+    "n_replays": 89,
+    "avg_rating": 1565.2359550561798,
+    "max_rating": 1976,
+    "min_rating": 1038,
+    "wins_against_us": 39,
+    "losses_against_us": 50,
+    "our_algos_played": [
+      "athena_baseline",
+      "athena_v3_planner",
+      "athena_v_supports",
+      "baseline",
+      "lostkids_v2",
+      "lostkids_v3_codex",
+      "phalanx_v7",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate",
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/athena_baseline/athena_baseline_win_python-algo_1453_15309733.replay",
+      "Ranked Replays/athena_baseline/athena_baseline_win_python-algo_1497_15309718.replay",
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo_1431_15309517.replay",
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo_1637_15309486.replay",
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_win_python-algo_1439_15309485.replay",
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_win_python-algo_1442_15309490.replay",
+      "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo_1534_15310267.replay",
+      "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo_1536_15310255.replay",
+      "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo_1548_15310255.replay",
+      "Ranked Replays/athena_v_supports/athena_v_supports_win_python-algo_1403_15310260.replay",
+      "Ranked Replays/athena_v_supports/athena_v_supports_win_python-algo_1414_15310260.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo_1734_15309919.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo_1765_15309919.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo_1890_15308645.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo_1909_15308122.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo_1913_15308651.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo_1953_15308747.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1644_15307295.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1654_15307295.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1671_15307295.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1713_15309440.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1794_15307292.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1797_15309282.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1815_15307462.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1816_15308144.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1866_15308019.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo_1976_15308059.replay",
+      "Ranked Replays/lostkids_v2/lostkids_v2_win_python-algo_1576_15309994.replay",
+      "Ranked Replays/lostkids_v2/lostkids_v2_win_python-algo_1654_15309995.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1281_15310137.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1322_15310137.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1403_15310140.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1414_15310140.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1425_15310140.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo_1038_15310234.replay",
+      "Ranked Replays/phalanx_v7/phalanx_v7_loss_python-algo_1732_15310256.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1542_15309347.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1580_15307517.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1735_15302640.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1745_15302640.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1416_15310081.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1431_15309520.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1502_15303643.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1524_15309384.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1525_15305639.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1535_15309240.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1547_15306323.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1550_15306171.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1578_15307012.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1599_15303999.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1631_15303107.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1398_15307461.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1440_15306745.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1623_15307870.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1637_15305596.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1640_15307346.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1381_15305783.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1429_15310050.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1447_15306413.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1463_15305870.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1492_15307468.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1534_15305973.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1548_15306264.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1601_15307154.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1398_15307454.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1440_15306740.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1469_15306106.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1492_15307446.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1549_15307108.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1640_15307339.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1644_15307923.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1679_15306583.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1815_15307436.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1851_15308100.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1890_15308637.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1057_15307698.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1082_15309249.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1408_15307414.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1430_15307793.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1457_15306253.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1471_15305840.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1520_15306286.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1547_15306327.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1573_15308429.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_python-algo_1534_15310303.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_python-algo_1765_15310316.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo_1281_15310304.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo_1536_15310308.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo_1616_15310314.replay"
+    ]
+  },
+  "<unknown>": {
+    "n_replays": 48,
+    "avg_rating": null,
+    "max_rating": null,
+    "min_rating": null,
+    "wins_against_us": 0,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      null
+    ],
+    "replays": [
+      "Ranked Replays/baseline/LostKidsPort_vs_1421.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1557.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1584.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1595.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1666.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1666_2.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1671.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1718.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1754.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1784.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1794.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1813.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1813_2.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1815.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1816.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1819.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1832.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1866.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1909.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1915.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1954.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1969.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1976.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_1976_2.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2002.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2018.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2056.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2072.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2080.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2082.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2085.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2098.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2099.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2100.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2104.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2115.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2117.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2122.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2123.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2130.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2132.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2150.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2151.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2158.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2178.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2181.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2185.replay",
+      "Ranked Replays/baseline/LostKidsPort_vs_2282.replay"
+    ]
+  },
+  "oleh-v2": {
+    "n_replays": 20,
+    "avg_rating": 1776.4,
+    "max_rating": 2282,
+    "min_rating": 1410,
+    "wins_against_us": 16,
+    "losses_against_us": 4,
+    "our_algos_played": [
+      "athena_baseline",
+      "baseline",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/athena_baseline/athena_baseline_loss_oleh-v2_1727_15309721.replay",
+      "Ranked Replays/baseline/baseline_loss_oleh-v2_2098_15307335.replay",
+      "Ranked Replays/baseline/baseline_loss_oleh-v2_2282_15307827.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1683_15306512.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1706_15303878.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1706_15305993.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1728_15303499.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1763_15303255.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1783_15303926.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1799_15303336.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1807_15303408.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1824_15303601.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_oleh-v2_1410_15305865.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_oleh-v2_1700_15303276.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_oleh-v2_1704_15303546.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_oleh-v2_1683_15306495.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_oleh-v2_1706_15305994.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_oleh-v2_1727_15309332.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_oleh-v2_2282_15307808.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_oleh-v2_1410_15305863.replay"
+    ]
+  },
+  "defensive-order-algo": {
+    "n_replays": 13,
+    "avg_rating": 1404.923076923077,
+    "max_rating": 1684,
+    "min_rating": 1059,
+    "wins_against_us": 7,
+    "losses_against_us": 6,
+    "our_algos_played": [
+      "athena_v3_planner",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_defensive-order-algo_1583_15309487.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_defensive-order-algo_1347_15309161.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_defensive-order-algo_1553_15307703.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_defensive-order-algo_1583_15309480.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_defensive-order-algo_1385_15309843.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_defensive-order-algo_1591_15309856.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_defensive-order-algo_1684_15307452.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_defensive-order-algo_1347_15309165.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_defensive-order-algo_1466_15307371.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1059_15309099.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1065_15309156.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1196_15309467.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1405_15307613.replay"
+    ]
+  },
+  "switch2": {
+    "n_replays": 12,
+    "avg_rating": 1763.3333333333333,
+    "max_rating": 1925,
+    "min_rating": 1020,
+    "wins_against_us": 9,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "baseline",
+      "lostkids_v2",
+      "phalanx_v7",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_switch2_1686_15308792.replay",
+      "Ranked Replays/baseline/baseline_loss_switch2_1782_15309211.replay",
+      "Ranked Replays/baseline/baseline_loss_switch2_1798_15309211.replay",
+      "Ranked Replays/baseline/baseline_loss_switch2_1840_15309211.replay",
+      "Ranked Replays/baseline/baseline_loss_switch2_1882_15309184.replay",
+      "Ranked Replays/baseline/baseline_loss_switch2_1925_15308492.replay",
+      "Ranked Replays/baseline/baseline_win_switch2_1876_15308517.replay",
+      "Ranked Replays/baseline/baseline_win_switch2_1895_15308578.replay",
+      "Ranked Replays/lostkids_v2/lostkids_v2_loss_switch2_1782_15309996.replay",
+      "Ranked Replays/phalanx_v7/phalanx_v7_loss_switch2_1798_15310254.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_switch2_1876_15308503.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_switch2_1020_15308553.replay"
+    ]
+  },
+  "python-algo1": {
+    "n_replays": 11,
+    "avg_rating": 1476.090909090909,
+    "max_rating": 1758,
+    "min_rating": 1342,
+    "wins_against_us": 1,
+    "losses_against_us": 10,
+    "our_algos_played": [
+      "athena_v_supports",
+      "baseline",
+      "lostkids_v3_codex",
+      "v13_second_ring",
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v_supports/athena_v_supports_win_python-algo1_1451_15310261.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo1_1689_15310133.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo1_1342_15310273.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo1_1378_15310323.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo1_1398_15310288.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo1_1573_15310039.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1342_15310271.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1452_15310216.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1456_15310241.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1758_15302704.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo1_1398_15310305.replay"
+    ]
+  },
+  "python-algo-jae-3": {
+    "n_replays": 11,
+    "avg_rating": 1624.3636363636363,
+    "max_rating": 1786,
+    "min_rating": 1322,
+    "wins_against_us": 9,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "baseline",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_python-algo-jae-3_1784_15307296.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-3_1641_15304771.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-3_1714_15304106.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-3_1786_15303734.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-jae-3_1639_15304067.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1623_15307650.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1643_15307650.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1677_15307650.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1717_15306218.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-jae-3_1322_15307532.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-jae-3_1322_15307529.replay"
+    ]
+  },
+  "funnel-rush-v8": {
+    "n_replays": 10,
+    "avg_rating": 1858.3,
+    "max_rating": 2211,
+    "min_rating": 1050,
+    "wins_against_us": 6,
+    "losses_against_us": 4,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_1832_15308408.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_1910_15308541.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_2063_15308490.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_2211_15308556.replay",
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v8_1813_15308456.replay",
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v8_1951_15308448.replay",
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v8_1989_15308448.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v8_1813_15308449.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v8_1951_15308445.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_funnel-rush-v8_1050_15308439.replay"
+    ]
+  },
+  "funnel-rush-v9": {
+    "n_replays": 8,
+    "avg_rating": 1981.0,
+    "max_rating": 2141,
+    "min_rating": 1831,
+    "wins_against_us": 8,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_1831_15308600.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_1854_15308901.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_1992_15309020.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_2012_15308978.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_2046_15308808.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_2141_15308691.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v9_1831_15308593.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v9_2141_15308685.replay"
+    ]
+  },
+  "terminator": {
+    "n_replays": 7,
+    "avg_rating": 1581.4285714285713,
+    "max_rating": 1654,
+    "min_rating": 1460,
+    "wins_against_us": 7,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "athena_baseline",
+      "v13_second_ring",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/athena_baseline/athena_baseline_loss_terminator_1612_15309730.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1546_15308971.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1568_15308971.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1592_15308771.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1638_15308771.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1654_15308771.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_terminator_1460_15308846.replay"
+    ]
+  },
+  "python-algo-v5": {
+    "n_replays": 7,
+    "avg_rating": 1619.0,
+    "max_rating": 1735,
+    "min_rating": 1412,
+    "wins_against_us": 5,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "athena_v_supports",
+      "baseline",
+      "v13_second_ring",
+      "v21_temporal_phase_gate",
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo-v5_1735_15310246.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo-v5_1658_15309764.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo-v5_1663_15309764.replay",
+      "Ranked Replays/baseline/baseline_loss_python-algo-v5_1734_15309712.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-v5_1468_15304426.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-v5_1412_15305535.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_python-algo-v5_1663_15310311.replay"
+    ]
+  },
+  "python-algo-classic": {
+    "n_replays": 7,
+    "avg_rating": 1707.7142857142858,
+    "max_rating": 1718,
+    "min_rating": 1696,
+    "wins_against_us": 4,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "baseline",
+      "v13_second_ring",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_python-algo-classic_1696_15307357.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-classic_1697_15307357.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-classic_1718_15307357.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-classic_1696_15307318.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-classic_1711_15307318.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-classic_1718_15307318.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-classic_1718_15307315.replay"
+    ]
+  },
+  "python-algo-claude": {
+    "n_replays": 6,
+    "avg_rating": 1463.0,
+    "max_rating": 1476,
+    "min_rating": 1449,
+    "wins_against_us": 4,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "athena_baseline",
+      "lostkids_v3_codex",
+      "phalanx_v7",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/athena_baseline/athena_baseline_loss_python-algo-claude_1464_15309748.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo-claude_1460_15310136.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo-claude_1469_15310136.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo-claude_1476_15310136.replay",
+      "Ranked Replays/phalanx_v7/phalanx_v7_win_python-algo-claude_1460_15310249.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-claude_1449_15305550.replay"
+    ]
+  },
+  "python-algo-babayaga3": {
+    "n_replays": 6,
+    "avg_rating": 1686.8333333333333,
+    "max_rating": 1732,
+    "min_rating": 1609,
+    "wins_against_us": 3,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "baseline",
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_python-algo-babayaga3_1622_15309057.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-babayaga3_1729_15309134.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-babayaga3_1731_15309134.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga3_1609_15306664.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga3_1698_15306832.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga3_1732_15308419.replay"
+    ]
+  },
+  "python-algo-baseline": {
+    "n_replays": 6,
+    "avg_rating": 1541.5,
+    "max_rating": 1583,
+    "min_rating": 1441,
+    "wins_against_us": 5,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "phalanx_v7",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/phalanx_v7/phalanx_v7_win_python-algo-baseline_1551_15310259.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1551_15302827.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1561_15302827.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1562_15302827.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1583_15302827.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-baseline_1441_15305597.replay"
+    ]
+  },
+  "python-algo-v11": {
+    "n_replays": 5,
+    "avg_rating": 1712.4,
+    "max_rating": 1731,
+    "min_rating": 1691,
+    "wins_against_us": 1,
+    "losses_against_us": 4,
+    "our_algos_played": [
+      "athena_v3_planner",
+      "baseline",
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo-v11_1731_15309502.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-v11_1691_15309512.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-v11_1718_15309512.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-v11_1731_15309512.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo-v11_1691_15310315.replay"
+    ]
+  },
+  "streeter": {
+    "n_replays": 5,
+    "avg_rating": 1603.6,
+    "max_rating": 1655,
+    "min_rating": 1444,
+    "wins_against_us": 3,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "baseline",
+      "phalanx_v7",
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_streeter_1636_15307280.replay",
+      "Ranked Replays/baseline/baseline_loss_streeter_1647_15307280.replay",
+      "Ranked Replays/baseline/baseline_loss_streeter_1655_15307280.replay",
+      "Ranked Replays/phalanx_v7/phalanx_v7_win_streeter_1636_15310252.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_streeter_1444_15305087.replay"
+    ]
+  },
+  "python-algo-v3-1": {
+    "n_replays": 5,
+    "avg_rating": 1302.0,
+    "max_rating": 1460,
+    "min_rating": 1153,
+    "wins_against_us": 0,
+    "losses_against_us": 5,
+    "our_algos_played": [
+      "lostkids_v3_codex",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3-1_1212_15310138.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3-1_1225_15310138.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-v3-1_1153_15308877.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-v3-1_1460_15308944.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-v3-1_1460_15308932.replay"
+    ]
+  },
+  "python-algo-tnb": {
+    "n_replays": 5,
+    "avg_rating": 1468.0,
+    "max_rating": 1544,
+    "min_rating": 1401,
+    "wins_against_us": 5,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1401_15310117.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1428_15310117.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1429_15310117.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1544_15310068.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-tnb_1538_15310018.replay"
+    ]
+  },
+  "algo12": {
+    "n_replays": 5,
+    "avg_rating": 1544.8,
+    "max_rating": 1607,
+    "min_rating": 1500,
+    "wins_against_us": 0,
+    "losses_against_us": 5,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1500_15309570.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1525_15309570.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1535_15309570.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1557_15309570.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1607_15309570.replay"
+    ]
+  },
+  "python-algo-turtle-v4": {
+    "n_replays": 4,
+    "avg_rating": 1598.25,
+    "max_rating": 1601,
+    "min_rating": 1590,
+    "wins_against_us": 2,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "athena_v3_planner",
+      "v13_second_ring",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo-turtle-v4_1601_15309489.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-turtle-v4_1590_15302618.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-turtle-v4_1601_15302618.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-turtle-v4_1601_15305547.replay"
+    ]
+  },
+  "econ-support-greedy": {
+    "n_replays": 4,
+    "avg_rating": 1400.25,
+    "max_rating": 1423,
+    "min_rating": 1386,
+    "wins_against_us": 0,
+    "losses_against_us": 4,
+    "our_algos_played": [
+      "athena_v3_planner",
+      "lostkids_v3_codex"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_win_econ-support-greedy_1423_15309488.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_econ-support-greedy_1386_15310141.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_econ-support-greedy_1394_15310141.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_econ-support-greedy_1398_15310141.replay"
+    ]
+  },
+  "python-algo-v10": {
+    "n_replays": 4,
+    "avg_rating": 1573.5,
+    "max_rating": 1645,
+    "min_rating": 1460,
+    "wins_against_us": 1,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "athena_v_supports",
+      "baseline",
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo-v10_1460_15310286.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-v10_1645_15310335.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo-v10_1577_15310313.replay",
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo-v10_1612_15310336.replay"
+    ]
+  },
+  "funnel-crush": {
+    "n_replays": 4,
+    "avg_rating": 1849.5,
+    "max_rating": 1957,
+    "min_rating": 1744,
+    "wins_against_us": 4,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "lostkids_v2"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-crush_1823_15309820.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-crush_1874_15309794.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-crush_1957_15309869.replay",
+      "Ranked Replays/lostkids_v2/lostkids_v2_loss_funnel-crush_1744_15309999.replay"
+    ]
+  },
+  "python-algo-v3": {
+    "n_replays": 4,
+    "avg_rating": 1315.5,
+    "max_rating": 1402,
+    "min_rating": 1275,
+    "wins_against_us": 1,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "lostkids_v3_codex",
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3_1275_15310139.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3_1289_15310139.replay",
+      "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3_1296_15310139.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-v3_1402_15302606.replay"
+    ]
+  },
+  "python-algo_2": {
+    "n_replays": 4,
+    "avg_rating": 1420.0,
+    "max_rating": 1448,
+    "min_rating": 1392,
+    "wins_against_us": 0,
+    "losses_against_us": 4,
+    "our_algos_played": [
+      "v13_second_ring",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_2_1392_15307892.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_2_1448_15308021.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_2_1392_15307901.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_2_1448_15308024.replay"
+    ]
+  },
+  "jack": {
+    "n_replays": 3,
+    "avg_rating": 1590.6666666666667,
+    "max_rating": 1622,
+    "min_rating": 1575,
+    "wins_against_us": 3,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "athena_baseline",
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/athena_baseline/athena_baseline_loss_jack_1575_15309737.replay",
+      "Ranked Replays/baseline/baseline_loss_jack_1575_15307408.replay",
+      "Ranked Replays/baseline/baseline_loss_jack_1622_15307408.replay"
+    ]
+  },
+  "funnel-rush-v7-1": {
+    "n_replays": 3,
+    "avg_rating": 2092.3333333333335,
+    "max_rating": 2178,
+    "min_rating": 1976,
+    "wins_against_us": 2,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v7-1_1976_15308382.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v7-1_2178_15307744.replay",
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v7-1_2123_15307695.replay"
+    ]
+  },
+  "repentance": {
+    "n_replays": 3,
+    "avg_rating": 1785.6666666666667,
+    "max_rating": 1802,
+    "min_rating": 1762,
+    "wins_against_us": 3,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_repentance_1793_15307294.replay",
+      "Ranked Replays/baseline/baseline_loss_repentance_1802_15307294.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_repentance_1762_15305931.replay"
+    ]
+  },
+  "algo-v4": {
+    "n_replays": 3,
+    "avg_rating": 1777.0,
+    "max_rating": 1788,
+    "min_rating": 1766,
+    "wins_against_us": 0,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_algo-v4_1766_15307297.replay",
+      "Ranked Replays/baseline/baseline_win_algo-v4_1777_15307297.replay",
+      "Ranked Replays/baseline/baseline_win_algo-v4_1788_15307297.replay"
+    ]
+  },
+  "python-algo-babayaga2": {
+    "n_replays": 3,
+    "avg_rating": 1726.0,
+    "max_rating": 1742,
+    "min_rating": 1715,
+    "wins_against_us": 2,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline",
+      "v13_second_ring",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_python-algo-babayaga2_1715_15308789.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga2_1721_15309071.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-babayaga2_1742_15306208.replay"
+    ]
+  },
+  "python-algo-tuned": {
+    "n_replays": 3,
+    "avg_rating": 1421.0,
+    "max_rating": 1421,
+    "min_rating": 1421,
+    "wins_against_us": 0,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "baseline",
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_python-algo-tuned_1421_15307273.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-tuned_1421_15305595.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-tuned_1421_15305537.replay"
+    ]
+  },
+  "python-algo-v4": {
+    "n_replays": 3,
+    "avg_rating": 1590.0,
+    "max_rating": 1614,
+    "min_rating": 1572,
+    "wins_against_us": 1,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_python-algo-v4_1572_15307285.replay",
+      "Ranked Replays/baseline/baseline_win_python-algo-v4_1584_15307285.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-v4_1614_15305534.replay"
+    ]
+  },
+  "algo-v3": {
+    "n_replays": 3,
+    "avg_rating": 1619.6666666666667,
+    "max_rating": 1631,
+    "min_rating": 1608,
+    "wins_against_us": 3,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "lostkids_v2",
+      "phalanx_v7",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/lostkids_v2/lostkids_v2_loss_algo-v3_1620_15310001.replay",
+      "Ranked Replays/phalanx_v7/phalanx_v7_loss_algo-v3_1631_15310258.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_algo-v3_1608_15305533.replay"
+    ]
+  },
+  "terminator-i": {
+    "n_replays": 3,
+    "avg_rating": 1588.0,
+    "max_rating": 1588,
+    "min_rating": 1588,
+    "wins_against_us": 1,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "lostkids_v2",
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/lostkids_v2/lostkids_v2_win_terminator-i_1588_15310198.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator-i_1588_15310173.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_terminator-i_1588_15310183.replay"
+    ]
+  },
+  "please-work-man-im-tired": {
+    "n_replays": 3,
+    "avg_rating": 1700.6666666666667,
+    "max_rating": 1776,
+    "min_rating": 1612,
+    "wins_against_us": 3,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_please-work-man-im-tired_1612_15304630.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_please-work-man-im-tired_1714_15304224.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_please-work-man-im-tired_1776_15304872.replay"
+    ]
+  },
+  "python-algo-v3-detectors": {
+    "n_replays": 3,
+    "avg_rating": 1644.6666666666667,
+    "max_rating": 1686,
+    "min_rating": 1584,
+    "wins_against_us": 3,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-v3-detectors_1686_15304561.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-v3-detectors_1584_15308864.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-v3-detectors_1664_15305594.replay"
+    ]
+  },
+  "doublegap": {
+    "n_replays": 3,
+    "avg_rating": 1421.3333333333333,
+    "max_rating": 1437,
+    "min_rating": 1403,
+    "wins_against_us": 0,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_doublegap_1403_15302625.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_doublegap_1424_15302625.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_doublegap_1437_15302625.replay"
+    ]
+  },
+  "python-algo_3": {
+    "n_replays": 3,
+    "avg_rating": 1479.6666666666667,
+    "max_rating": 1545,
+    "min_rating": 1447,
+    "wins_against_us": 0,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_3_1447_15308090.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_3_1545_15307946.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_3_1447_15308091.replay"
+    ]
+  },
+  "python-algo_4": {
+    "n_replays": 3,
+    "avg_rating": 1554.6666666666667,
+    "max_rating": 1627,
+    "min_rating": 1410,
+    "wins_against_us": 0,
+    "losses_against_us": 3,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_4_1627_15308206.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_4_1410_15308173.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_4_1627_15308195.replay"
+    ]
+  },
+  "chaewon-online": {
+    "n_replays": 2,
+    "avg_rating": 1451.0,
+    "max_rating": 1451,
+    "min_rating": 1451,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "athena_v3_planner",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_chaewon-online_1451_15309601.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_chaewon-online_1451_15309598.replay"
+    ]
+  },
+  "potential-algo": {
+    "n_replays": 2,
+    "avg_rating": 1621.5,
+    "max_rating": 1639,
+    "min_rating": 1604,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "athena_v_supports",
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v_supports/athena_v_supports_loss_potential-algo_1604_15310248.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_potential-algo_1639_15305215.replay"
+    ]
+  },
+  "terminator-f": {
+    "n_replays": 2,
+    "avg_rating": 1538.5,
+    "max_rating": 1549,
+    "min_rating": 1528,
+    "wins_against_us": 0,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "athena_v_supports",
+      "lostkids_v2"
+    ],
+    "replays": [
+      "Ranked Replays/athena_v_supports/athena_v_supports_win_terminator-f_1528_15310242.replay",
+      "Ranked Replays/lostkids_v2/lostkids_v2_win_terminator-f_1549_15310003.replay"
+    ]
+  },
+  "funnel-rush-v10": {
+    "n_replays": 2,
+    "avg_rating": 2031.5,
+    "max_rating": 2080,
+    "min_rating": 1983,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v10_1983_15309421.replay",
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v10_2080_15309390.replay"
+    ]
+  },
+  "funnel-rush-v67b": {
+    "n_replays": 2,
+    "avg_rating": 2181.0,
+    "max_rating": 2181,
+    "min_rating": 2181,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v67b_2181_15308081.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v67b_2181_15308061.replay"
+    ]
+  },
+  "funnel-rush-v75c": {
+    "n_replays": 2,
+    "avg_rating": 2117.0,
+    "max_rating": 2117,
+    "min_rating": 2117,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75c_2117_15308239.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v75c_2117_15308234.replay"
+    ]
+  },
+  "funnel-rush-v78": {
+    "n_replays": 2,
+    "avg_rating": 2002.0,
+    "max_rating": 2002,
+    "min_rating": 2002,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v78_2002_15308214.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v78_2002_15308202.replay"
+    ]
+  },
+  "funnel-rush-v91": {
+    "n_replays": 2,
+    "avg_rating": 2100.0,
+    "max_rating": 2100,
+    "min_rating": 2100,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v91_2100_15308282.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v91_2100_15308278.replay"
+    ]
+  },
+  "funnel-rush-v43": {
+    "n_replays": 2,
+    "avg_rating": 2158.0,
+    "max_rating": 2158,
+    "min_rating": 2158,
+    "wins_against_us": 1,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v43_2158_15307373.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v43_2158_15307319.replay"
+    ]
+  },
+  "python-algo-v8": {
+    "n_replays": 2,
+    "avg_rating": 1666.0,
+    "max_rating": 1666,
+    "min_rating": 1666,
+    "wins_against_us": 1,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline",
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_python-algo-v8_1666_15307288.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-v8_1666_15304485.replay"
+    ]
+  },
+  "diego_v2": {
+    "n_replays": 2,
+    "avg_rating": 1589.0,
+    "max_rating": 1692,
+    "min_rating": 1486,
+    "wins_against_us": 1,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_diego_v2_1692_15303183.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_diego_v2_1486_15302609.replay"
+    ]
+  },
+  "python-algo-Riv": {
+    "n_replays": 2,
+    "avg_rating": 1628.5,
+    "max_rating": 1635,
+    "min_rating": 1622,
+    "wins_against_us": 2,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-Riv_1622_15306241.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-Riv_1635_15306241.replay"
+    ]
+  },
+  "python-algo-babayaga": {
+    "n_replays": 2,
+    "avg_rating": 1503.0,
+    "max_rating": 1503,
+    "min_rating": 1503,
+    "wins_against_us": 0,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-babayaga_1503_15306057.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-babayaga_1503_15306060.replay"
+    ]
+  },
+  "python-algo-jae-4": {
+    "n_replays": 2,
+    "avg_rating": 1339.5,
+    "max_rating": 1567,
+    "min_rating": 1112,
+    "wins_against_us": 0,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-jae-4_1112_15304981.replay",
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-jae-4_1567_15305497.replay"
+    ]
+  },
+  "python-algo-master": {
+    "n_replays": 2,
+    "avg_rating": 1554.5,
+    "max_rating": 1689,
+    "min_rating": 1420,
+    "wins_against_us": 1,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring",
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-master_1420_15302620.replay",
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-master_1689_15308718.replay"
+    ]
+  },
+  "python-algo-v2": {
+    "n_replays": 2,
+    "avg_rating": 1449.0,
+    "max_rating": 1449,
+    "min_rating": 1449,
+    "wins_against_us": 0,
+    "losses_against_us": 2,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support",
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-v2_1449_15305598.replay",
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-v2_1449_15305531.replay"
+    ]
+  },
+  "funnel-rush-v67": {
+    "n_replays": 1,
+    "avg_rating": 2150.0,
+    "max_rating": 2150,
+    "min_rating": 2150,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v67_2150_15308034.replay"
+    ]
+  },
+  "funnel-rush-v67c": {
+    "n_replays": 1,
+    "avg_rating": 2132.0,
+    "max_rating": 2132,
+    "min_rating": 2132,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v67c_2132_15308158.replay"
+    ]
+  },
+  "funnel-rush-v75": {
+    "n_replays": 1,
+    "avg_rating": 2140.0,
+    "max_rating": 2140,
+    "min_rating": 2140,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75_2140_15308179.replay"
+    ]
+  },
+  "funnel-rush-v75b": {
+    "n_replays": 1,
+    "avg_rating": 2072.0,
+    "max_rating": 2072,
+    "min_rating": 2072,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75b_2072_15308223.replay"
+    ]
+  },
+  "funnel-rush-v75d": {
+    "n_replays": 1,
+    "avg_rating": 2185.0,
+    "max_rating": 2185,
+    "min_rating": 2185,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75d_2185_15308254.replay"
+    ]
+  },
+  "funnel-rush-v75e": {
+    "n_replays": 1,
+    "avg_rating": 2115.0,
+    "max_rating": 2115,
+    "min_rating": 2115,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75e_2115_15308305.replay"
+    ]
+  },
+  "funnel-rush-v75f": {
+    "n_replays": 1,
+    "avg_rating": 2082.0,
+    "max_rating": 2082,
+    "min_rating": 2082,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75f_2082_15308347.replay"
+    ]
+  },
+  "funnel-rush-v75g": {
+    "n_replays": 1,
+    "avg_rating": 2151.0,
+    "max_rating": 2151,
+    "min_rating": 2151,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v75g_2151_15308366.replay"
+    ]
+  },
+  "funnel-rush-v94": {
+    "n_replays": 1,
+    "avg_rating": 2056.0,
+    "max_rating": 2056,
+    "min_rating": 2056,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_funnel-rush-v94_2056_15308326.replay"
+    ]
+  },
+  "popcorn-v2-online": {
+    "n_replays": 1,
+    "avg_rating": 1821.0,
+    "max_rating": 1821,
+    "min_rating": 1821,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_loss_popcorn-v2-online_1821_15309565.replay"
+    ]
+  },
+  "alt-algo": {
+    "n_replays": 1,
+    "avg_rating": 1595.0,
+    "max_rating": 1595,
+    "min_rating": 1595,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_alt-algo_1595_15307275.replay"
+    ]
+  },
+  "funnel-rush-v43b": {
+    "n_replays": 1,
+    "avg_rating": 2122.0,
+    "max_rating": 2122,
+    "min_rating": 2122,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v43b_2122_15307737.replay"
+    ]
+  },
+  "funnel-rush-v43c": {
+    "n_replays": 1,
+    "avg_rating": 1969.0,
+    "max_rating": 1969,
+    "min_rating": 1969,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v43c_1969_15307897.replay"
+    ]
+  },
+  "funnel-rush-v47": {
+    "n_replays": 1,
+    "avg_rating": 2018.0,
+    "max_rating": 2018,
+    "min_rating": 2018,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v47_2018_15307489.replay"
+    ]
+  },
+  "funnel-rush-v55": {
+    "n_replays": 1,
+    "avg_rating": 1819.0,
+    "max_rating": 1819,
+    "min_rating": 1819,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v55_1819_15307646.replay"
+    ]
+  },
+  "funnel-rush-v59": {
+    "n_replays": 1,
+    "avg_rating": 2085.0,
+    "max_rating": 2085,
+    "min_rating": 2085,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v59_2085_15307835.replay"
+    ]
+  },
+  "funnel-rush-v59b": {
+    "n_replays": 1,
+    "avg_rating": 2099.0,
+    "max_rating": 2099,
+    "min_rating": 2099,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v59b_2099_15307912.replay"
+    ]
+  },
+  "funnel-rush-v59c": {
+    "n_replays": 1,
+    "avg_rating": 2080.0,
+    "max_rating": 2080,
+    "min_rating": 2080,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v59c_2080_15307959.replay"
+    ]
+  },
+  "funnel-rush-v63": {
+    "n_replays": 1,
+    "avg_rating": 1954.0,
+    "max_rating": 1954,
+    "min_rating": 1954,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v63_1954_15307937.replay"
+    ]
+  },
+  "funnel-rush-v65": {
+    "n_replays": 1,
+    "avg_rating": 2104.0,
+    "max_rating": 2104,
+    "min_rating": 2104,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "baseline"
+    ],
+    "replays": [
+      "Ranked Replays/baseline/baseline_win_funnel-rush-v65_2104_15307995.replay"
+    ]
+  },
+  "banana": {
+    "n_replays": 1,
+    "avg_rating": 1952.0,
+    "max_rating": 1952,
+    "min_rating": 1952,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_banana_1952_15303042.replay"
+    ]
+  },
+  "funnel-rush-v53": {
+    "n_replays": 1,
+    "avg_rating": 1789.0,
+    "max_rating": 1789,
+    "min_rating": 1789,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_funnel-rush-v53_1789_15307588.replay"
+    ]
+  },
+  "python-algo-jae-2": {
+    "n_replays": 1,
+    "avg_rating": 1772.0,
+    "max_rating": 1772,
+    "min_rating": 1772,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-2_1772_15303134.replay"
+    ]
+  },
+  "python-algo-turtle-new-submis": {
+    "n_replays": 1,
+    "avg_rating": 1852.0,
+    "max_rating": 1852,
+    "min_rating": 1852,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-turtle-new-submis_1852_15302638.replay"
+    ]
+  },
+  "python-algo_v3": {
+    "n_replays": 1,
+    "avg_rating": 1669.0,
+    "max_rating": 1669,
+    "min_rating": 1669,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_v3_1669_15309984.replay"
+    ]
+  },
+  "takedown1-algo": {
+    "n_replays": 1,
+    "avg_rating": 1651.0,
+    "max_rating": 1651,
+    "min_rating": 1651,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_takedown1-algo_1651_15302611.replay"
+    ]
+  },
+  "the-goat-algo": {
+    "n_replays": 1,
+    "avg_rating": 1771.0,
+    "max_rating": 1771,
+    "min_rating": 1771,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_loss_the-goat-algo_1771_15303451.replay"
+    ]
+  },
+  "algo4": {
+    "n_replays": 1,
+    "avg_rating": 1757.0,
+    "max_rating": 1757,
+    "min_rating": 1757,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_algo4_1757_15302627.replay"
+    ]
+  },
+  "gooder-maybe": {
+    "n_replays": 1,
+    "avg_rating": 1453.0,
+    "max_rating": 1453,
+    "min_rating": 1453,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_gooder-maybe_1453_15302602.replay"
+    ]
+  },
+  "new-strat-algo": {
+    "n_replays": 1,
+    "avg_rating": 1576.0,
+    "max_rating": 1576,
+    "min_rating": 1576,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_new-strat-algo_1576_15305301.replay"
+    ]
+  },
+  "python-algo3": {
+    "n_replays": 1,
+    "avg_rating": 1551.0,
+    "max_rating": 1551,
+    "min_rating": 1551,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo3_1551_15302622.replay"
+    ]
+  },
+  "yunjin-v4-online": {
+    "n_replays": 1,
+    "avg_rating": 1444.0,
+    "max_rating": 1444,
+    "min_rating": 1444,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v13_second_ring"
+    ],
+    "replays": [
+      "Ranked Replays/v13_second_ring/v13_second_ring_win_yunjin-v4-online_1444_15309546.replay"
+    ]
+  },
+  "algo6": {
+    "n_replays": 1,
+    "avg_rating": 1767.0,
+    "max_rating": 1767,
+    "min_rating": 1767,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_algo6_1767_15305919.replay"
+    ]
+  },
+  "funnel-rush-v20": {
+    "n_replays": 1,
+    "avg_rating": 2187.0,
+    "max_rating": 2187,
+    "min_rating": 2187,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_funnel-rush-v20_2187_15306610.replay"
+    ]
+  },
+  "funnel-rush-v5": {
+    "n_replays": 1,
+    "avg_rating": 2199.0,
+    "max_rating": 2199,
+    "min_rating": 2199,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_funnel-rush-v5_2199_15306140.replay"
+    ]
+  },
+  "python-algo-counter": {
+    "n_replays": 1,
+    "avg_rating": 1435.0,
+    "max_rating": 1435,
+    "min_rating": 1435,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v21_quadrant_adaptive_support"
+    ],
+    "replays": [
+      "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-counter_1435_15305592.replay"
+    ]
+  },
+  "funnel-rush-v25": {
+    "n_replays": 1,
+    "avg_rating": 2141.0,
+    "max_rating": 2141,
+    "min_rating": 2141,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v25_2141_15307330.replay"
+    ]
+  },
+  "funnel-rush-v44": {
+    "n_replays": 1,
+    "avg_rating": 1932.0,
+    "max_rating": 1932,
+    "min_rating": 1932,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v44_1932_15307389.replay"
+    ]
+  },
+  "python-algo-jae-5": {
+    "n_replays": 1,
+    "avg_rating": 1604.0,
+    "max_rating": 1604,
+    "min_rating": 1604,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-jae-5_1604_15306059.replay"
+    ]
+  },
+  "python-algo_5": {
+    "n_replays": 1,
+    "avg_rating": 1456.0,
+    "max_rating": 1456,
+    "min_rating": 1456,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_5_1456_15308110.replay"
+    ]
+  },
+  "algo7": {
+    "n_replays": 1,
+    "avg_rating": 1581.0,
+    "max_rating": 1581,
+    "min_rating": 1581,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v21_temporal_phase_gate"
+    ],
+    "replays": [
+      "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_algo7_1581_15306128.replay"
+    ]
+  },
+  "algo-v6": {
+    "n_replays": 1,
+    "avg_rating": 1737.0,
+    "max_rating": 1737,
+    "min_rating": 1737,
+    "wins_against_us": 1,
+    "losses_against_us": 0,
+    "our_algos_played": [
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_algo-v6_1737_15310317.replay"
+    ]
+  },
+  "takedown2-algo": {
+    "n_replays": 1,
+    "avg_rating": 1617.0,
+    "max_rating": 1617,
+    "min_rating": 1617,
+    "wins_against_us": 0,
+    "losses_against_us": 1,
+    "our_algos_played": [
+      "v4_smartdemo"
+    ],
+    "replays": [
+      "Ranked Replays/v4_smartdemo/v4_smartdemo_win_takedown2-algo_1617_15310310.replay"
+    ]
+  }
+}

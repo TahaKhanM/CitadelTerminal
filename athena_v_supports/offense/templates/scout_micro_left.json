@@ -1,9 +1,0 @@
-{
-  "name": "scout_micro_left",
-  "description": "Mini Scout rush at BL flank — fits at low MP (4-7). Athena_baseline hotfix.",
-  "side": "BL",
-  "min_mp": 4,
-  "spawns": [
-    {"unit": "SCOUT", "loc": [3, 10], "count": 4}
-  ]
-}
