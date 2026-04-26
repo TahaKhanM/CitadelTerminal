@@ -1,0 +1,1307 @@
+[athena] random seed: 6142325557202022325
+---------------- Starting Your Algo --------------------
+[athena] ArchetypeClassifier fitted from opponent_features.npz
+[athena] ActionPredictor fitted from labels.json
+[arbiter] map-elites archive loaded: 22/64 cells
+[athena] on_game_start; archetype=v13_inspired turret_sh=DF
+[offense_planner] T1 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (17.0ms): sim-beam pick=corner_dive_left util=3.07
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T1 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T2 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (17.2ms): sim-beam pick=corner_dive_left util=3.07
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T2 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T3 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (22.5ms): sim-beam pick=corner_dive_left util=3.07
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T3 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T4 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (18.7ms): sim-beam pick=corner_dive_left util=3.07
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T4 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T5 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (24.1ms): sim-beam pick=corner_dive_left@(3, 10) util=3.07
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T5 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T6 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (23.7ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T6 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T7 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (25.3ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T7 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T8 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (28.2ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T8 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T9 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (28.8ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T9 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T10 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (28.9ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T10 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T11 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (65.2ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T11 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T12 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (60.4ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T12 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T13 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (61.0ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T13 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T14 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (60.3ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T14 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T15 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (62.5ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T15 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T16 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (232.5ms): sim-beam pick=scout_micro_left util=12.23
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T16 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T17 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (217.6ms): sim-beam pick=scout_micro_left util=12.23
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T17 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T18 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (203.0ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T18 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T19 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (198.6ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T19 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T20 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (193.7ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T20 TIER1 attempted=4 spawned=4 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=3)
+[offense_planner] T21 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (202.1ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T21 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T22 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (208.4ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T22 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T23 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (208.3ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T23 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T24 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (212.6ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T24 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=3)
+[offense_planner] T25 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (215.7ms): sim-beam pick=scout_micro_left util=12.20
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T25 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T26 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (455.6ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.28
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T26 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T27 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (253.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.40
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T27 TIER1 attempted=6 spawned=6 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=4)
+[offense_planner] T28 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (249.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.40
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T28 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T29 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (235.4ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.40
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T29 TIER1 attempted=6 spawned=6 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=4)
+[offense_planner] T30 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (247.9ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.40
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T30 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T31 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (246.3ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.40
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T31 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=4)
+[offense_planner] T32 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (423.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.28
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T32 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T33 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (418.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.28
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T33 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T34 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (468.7ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.26
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T34 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=5)
+[offense_planner] T35 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (259.3ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.40
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T35 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T36 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (787.6ms): sim-beam pick=scout_rush_left util=24.48
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T36 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T37 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (815.8ms): sim-beam pick=scout_rush_left util=24.44
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T37 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T38 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (777.2ms): sim-beam pick=scout_rush_left util=24.48
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T38 TIER1 attempted=8 spawned=8 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=5)
+[offense_planner] T39 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (807.1ms): sim-beam pick=scout_rush_left util=24.44
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T39 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T40 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (970.5ms): sim-beam pick=scout_rush_left util=24.48
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T40 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T41 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (1282.3ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T41 TIER1 attempted=9 spawned=9 skipped=0
+[offense_planner] T42 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (1392.7ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=9.0, plan=3D+0S
+[arbiter] T42 TIER1 attempted=3 spawned=3 skipped=0
+[offense_planner] T43 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (1229.5ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T43 TIER1 attempted=9 spawned=9 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=6)
+[offense_planner] T44 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (1272.0ms): sim-beam pick=demo_train_left__pure_scout util=27.56
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=9.0, plan=3D+0S
+[arbiter] T44 TIER1 attempted=3 spawned=3 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=6)
+[offense_planner] T45 mp=9.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (1184.8ms): sim-beam pick=demo_train_left__pure_scout util=27.56
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T45 TIER1 attempted=9 spawned=9 skipped=0
+[offense_planner] T46 mp=10.0 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (1342.1ms): sim-beam pick=scout_rush_center util=30.64
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=10.0, plan=3D+1S
+[arbiter] T46 TIER1 attempted=4 spawned=4 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T47 mp=10.0 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (1190.2ms): sim-beam pick=scout_rush_center util=30.64
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T47 TIER1 attempted=10 spawned=10 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=6)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T48 mp=10.0 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (1336.6ms): sim-beam pick=scout_rush_center util=30.64
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=10.0, plan=3D+1S
+[arbiter] T48 TIER1 attempted=4 spawned=4 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T49 mp=10.0 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (1350.6ms): sim-beam pick=scout_rush_center util=30.64
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T49 TIER1 attempted=10 spawned=10 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T50 mp=10.0 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (1404.3ms): sim-beam pick=scout_rush_center util=30.64
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=10.0, plan=3D+1S
+[arbiter] T50 TIER1 attempted=4 spawned=4 skipped=0
+[arbiter] anti_demo_hardening placed 1 (opp_demos_3turns=7)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T51 mp=11.0 TIER1 n_deploys=11 mp_cost=11.0 side=BL (1715.5ms): sim-beam pick=escorted_mixed_left util=33.74
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T51 TIER1 attempted=11 spawned=11 skipped=0
+[offense_planner] T52 mp=11.0 TIER1 n_deploys=11 mp_cost=11.0 side=BL (1787.2ms): sim-beam pick=escorted_mixed_left util=33.74
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=11.0, plan=3D+2S
+[arbiter] T52 TIER1 attempted=5 spawned=5 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T53 mp=11.0 TIER1 n_deploys=11 mp_cost=11.0 side=BL (1487.6ms): sim-beam pick=escorted_mixed_left util=33.74
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T53 TIER1 attempted=11 spawned=11 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T54 mp=11.0 TIER1 n_deploys=11 mp_cost=11.0 side=BL (1531.5ms): sim-beam pick=escorted_mixed_left util=33.74
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=11.0, plan=3D+2S
+[arbiter] T54 TIER1 attempted=5 spawned=5 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T55 mp=11.0 TIER1 n_deploys=11 mp_cost=11.0 side=BL (1244.7ms): sim-beam pick=escorted_mixed_left util=33.74
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T55 TIER1 attempted=11 spawned=11 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T56 mp=12.0 TIER1 n_deploys=12 mp_cost=12.0 side=BOTH (1887.4ms): sim-beam pick=dual_flank util=36.84
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T56 TIER1 attempted=12 spawned=12 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T57 mp=12.0 TIER1 n_deploys=12 mp_cost=12.0 side=BOTH (1894.3ms): sim-beam pick=dual_flank util=36.84
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] heavy-wall override: opp_walls=18, mp=12.0, plan=3D+3S
+[arbiter] T57 TIER1 attempted=6 spawned=6 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T58 mp=12.0 TIER1 n_deploys=12 mp_cost=12.0 side=BOTH (1471.8ms): sim-beam pick=dual_flank util=36.84
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T58 TIER1 attempted=12 spawned=12 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T59 mp=12.0 TIER1 n_deploys=12 mp_cost=12.0 side=BOTH (1691.3ms): sim-beam pick=dual_flank util=36.84
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T59 TIER1 attempted=12 spawned=12 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T60 mp=12.0 TIER1 n_deploys=12 mp_cost=12.0 side=BOTH (1678.7ms): sim-beam pick=dual_flank util=36.84
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[arbiter] T60 TIER1 attempted=12 spawned=12 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds

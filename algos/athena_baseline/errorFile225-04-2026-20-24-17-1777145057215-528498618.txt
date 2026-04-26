@@ -1,0 +1,448 @@
+[athena] random seed: 3446523690456838568
+---------------- Starting Your Algo --------------------
+[athena] ArchetypeClassifier fitted from opponent_features.npz
+[athena] ActionPredictor fitted from labels.json
+[arbiter] map-elites archive loaded: 22/64 cells
+[athena] on_game_start; archetype=v13_inspired turret_sh=DF
+[offense_planner] T1 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (20.5ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T1 TIER1 attempted=1 spawned=1 skipped=0
+[offense_planner] T2 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (22.1ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T2 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T3 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (23.8ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T3 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T4 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (29.2ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T4 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T5 mp=1.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (31.6ms): sim-beam pick=corner_dive_left util=3.07
+[arbiter] T5 TIER1 attempted=1 spawned=1 skipped=0
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T6 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (28.9ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T6 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T7 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (38.0ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T7 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T8 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (37.1ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T8 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T9 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (40.9ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T9 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T10 mp=2.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (50.7ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T10 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T11 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (88.0ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T11 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T12 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (90.6ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T12 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T13 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (92.7ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T13 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+Checked for stationary unit outside of arena bounds
+[offense_planner] T14 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (91.9ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T14 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T15 mp=3.0 TIER1 n_deploys=1 mp_cost=1.0 side=BL (121.1ms): sim-beam pick=corner_dive_left@(3, 10) util=3.04
+[arbiter] T15 TIER1 attempted=1 spawned=1 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.00, total_this_turn=2)
+[offense_planner] T16 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (381.1ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T16 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T17 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (391.4ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T17 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T18 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (354.5ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T18 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T19 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (378.7ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T19 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T20 mp=4.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (411.1ms): sim-beam pick=scout_micro_left util=12.23
+[arbiter] T20 TIER1 attempted=4 spawned=4 skipped=0
+[offense_planner] T21 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (376.5ms): sim-beam pick=scout_micro_left util=12.20
+[arbiter] T21 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T22 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (378.3ms): sim-beam pick=scout_micro_left util=12.20
+[arbiter] T22 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T23 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (725.0ms): sim-beam pick=scout_micro_left util=12.08
+[arbiter] T23 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T24 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (686.5ms): sim-beam pick=scout_micro_left util=12.04
+[arbiter] T24 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T25 mp=5.0 TIER1 n_deploys=4 mp_cost=4.0 side=BL (693.0ms): sim-beam pick=scout_micro_left util=12.04
+[arbiter] T25 TIER1 attempted=4 spawned=4 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T26 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (775.8ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T26 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T27 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (798.9ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T27 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T28 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (728.1ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T28 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T29 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (702.3ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T29 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T30 mp=6.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (678.2ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T30 TIER1 attempted=6 spawned=6 skipped=0
+[offense_planner] T31 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (726.5ms): sim-beam pick=scout_micro_left__+2interceptor_escort util=18.24
+[arbiter] T31 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T32 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (841.3ms): sim-beam pick=scout_micro_left@(4, 9)__+2interceptor_escort util=18.24
+[arbiter] T32 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T33 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (782.3ms): sim-beam pick=scout_micro_left@(4, 9)__+2interceptor_escort util=18.24
+[arbiter] T33 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T34 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (803.0ms): sim-beam pick=scout_micro_left@(4, 9)__+2interceptor_escort util=18.24
+[arbiter] T34 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T35 mp=7.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (901.9ms): sim-beam pick=scout_micro_left@(4, 9)__+2interceptor_escort util=18.24
+[arbiter] T35 TIER1 attempted=6 spawned=6 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.00, total_this_turn=1)
+[offense_planner] T36 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (1342.5ms): sim-beam pick=scout_rush_left@(4, 9) util=24.44
+[arbiter] T36 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T37 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (3025.4ms): sim-beam pick=scout_rush_left@(4, 9) util=24.44
+[arbiter] T37 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T38 mp=8.0 TIER1 n_deploys=8 mp_cost=8.0 side=BL (3093.7ms): sim-beam pick=scout_rush_left@(4, 9) util=24.44
+[arbiter] T38 TIER1 attempted=8 spawned=8 skipped=0
+[offense_planner] T39 mp=8.0 TIER1 n_deploys=6 mp_cost=6.0 side=BL (8011.0ms): sim-beam pick=scout_micro_left@(4, 9)__+2interceptor_escort util=18.24
+[arbiter] T39 TIER1 attempted=6 spawned=6 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8011.9ms cap=8000.0ms) — safe fallback
+[offense_planner] T40 mp=9.5 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8115.9ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+[arbiter] T40 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8154.3ms cap=8000.0ms) — safe fallback
+[offense_planner] T41 mp=9.4 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8028.7ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+[arbiter] T41 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8029.7ms cap=8000.0ms) — safe fallback
+[offense_planner] T42 mp=9.3 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8014.7ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+[arbiter] T42 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8015.9ms cap=8000.0ms) — safe fallback
+[offense_planner] T43 mp=9.2 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8069.7ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+[arbiter] T43 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8070.8ms cap=8000.0ms) — safe fallback
+[offense_planner] T44 mp=9.2 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8057.0ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+[arbiter] T44 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8064.2ms cap=8000.0ms) — safe fallback
+[offense_planner] T45 mp=9.2 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8062.5ms): sim-beam pick=demo_train_left__pure_scout util=27.54
+[arbiter] T45 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8064.0ms cap=8000.0ms) — safe fallback
+[offense_planner] T46 mp=10.2 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (8026.7ms): sim-beam pick=scout_rush_center util=30.64
+[arbiter] T46 TIER1 attempted=10 spawned=10 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8027.7ms cap=8000.0ms) — safe fallback
+[offense_planner] T47 mp=10.2 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (7903.5ms): sim-beam pick=scout_rush_center util=30.64
+[arbiter] T47 TIER1 attempted=10 spawned=10 skipped=0
+[offense_planner] T48 mp=10.2 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (4063.5ms): sim-beam pick=scout_rush_center util=30.64
+[arbiter] T48 TIER1 attempted=10 spawned=10 skipped=0
+[offense_planner] T49 mp=10.2 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (3541.3ms): sim-beam pick=scout_rush_center util=30.64
+[arbiter] T49 TIER1 attempted=10 spawned=10 skipped=0
+[offense_planner] T50 mp=10.2 TIER1 n_deploys=10 mp_cost=10.0 side=CENTER (3509.1ms): sim-beam pick=scout_rush_center util=30.64
+[arbiter] T50 TIER1 attempted=10 spawned=10 skipped=0
+[offense_planner] T51 mp=11.2 TIER1 n_deploys=11 mp_cost=11.0 side=BL (5042.7ms): sim-beam pick=escorted_mixed_left@(5, 8) util=33.74
+[arbiter] T51 TIER1 attempted=11 spawned=11 skipped=0
+[offense_planner] T52 mp=11.2 TIER1 n_deploys=11 mp_cost=11.0 side=BL (3262.1ms): sim-beam pick=escorted_mixed_left@(5, 8) util=33.74
+[arbiter] T52 TIER1 attempted=11 spawned=11 skipped=0
+[offense_planner] T53 mp=11.2 TIER1 n_deploys=11 mp_cost=11.0 side=BL (3064.0ms): sim-beam pick=escorted_mixed_left@(5, 8) util=33.74
+[arbiter] T53 TIER1 attempted=11 spawned=11 skipped=0
+[offense_planner] T54 mp=11.2 TIER1 n_deploys=11 mp_cost=11.0 side=BL (3142.2ms): sim-beam pick=escorted_mixed_left@(5, 8) util=33.74
+[arbiter] T54 TIER1 attempted=11 spawned=11 skipped=0
+[offense_planner] T55 mp=11.2 TIER1 n_deploys=11 mp_cost=11.0 side=BL (3204.2ms): sim-beam pick=escorted_mixed_left@(5, 8) util=33.74
+[arbiter] T55 TIER1 attempted=11 spawned=11 skipped=0
+[offense_planner] T56 mp=12.2 TIER1 n_deploys=12 mp_cost=12.0 side=BL (6656.4ms): sim-beam pick=mixed_burst_left@(6, 7)__pure_scout util=36.84
+[arbiter] T56 TIER1 attempted=12 spawned=12 skipped=0
+[offense_planner] T57 mp=12.2 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8567.3ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T57 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8585.4ms cap=8000.0ms) — safe fallback
+[offense_planner] T58 mp=14.4 TIER1 n_deploys=1 mp_cost=1.0 side=BL (8643.9ms): sim-beam pick=corner_dive_left@(5, 8) util=2.74
+[arbiter] T58 TIER1 attempted=1 spawned=1 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8645.5ms cap=8000.0ms) — safe fallback
+[offense_planner] T59 mp=22.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8257.1ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T59 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8265.9ms cap=8000.0ms) — safe fallback
+[offense_planner] T60 mp=21.8 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8486.8ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T60 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8489.4ms cap=8000.0ms) — safe fallback
+[offense_planner] T61 mp=22.6 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8284.9ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T61 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8286.2ms cap=8000.0ms) — safe fallback
+[offense_planner] T62 mp=23.2 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8328.4ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T62 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8368.7ms cap=8000.0ms) — safe fallback
+[offense_planner] T63 mp=23.7 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8553.4ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=19.17
+[arbiter] T63 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8562.8ms cap=8000.0ms) — safe fallback
+[offense_planner] T64 mp=24.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8506.8ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T64 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8508.2ms cap=8000.0ms) — safe fallback
+[offense_planner] T65 mp=24.3 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8166.1ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T65 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8177.6ms cap=8000.0ms) — safe fallback
+[offense_planner] T66 mp=25.5 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8159.2ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T66 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8160.8ms cap=8000.0ms) — safe fallback
+[offense_planner] T67 mp=26.4 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8080.2ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T67 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8081.3ms cap=8000.0ms) — safe fallback
+[offense_planner] T68 mp=27.1 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8059.0ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T68 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8060.2ms cap=8000.0ms) — safe fallback
+[offense_planner] T69 mp=27.6 TIER1 n_deploys=15 mp_cost=15.0 side=BL (8054.4ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T69 TIER1 attempted=15 spawned=15 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8055.7ms cap=8000.0ms) — safe fallback
+[offense_planner] T70 mp=23.5 TIER1 n_deploys=16 mp_cost=16.0 side=BL (8015.1ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T70 TIER1 attempted=16 spawned=16 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8016.0ms cap=8000.0ms) — safe fallback
+[offense_planner] T71 mp=20.6 TIER1 n_deploys=16 mp_cost=16.0 side=BL (6756.8ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T71 TIER1 attempted=16 spawned=16 skipped=0
+[athena.LAST_RESORT] spawned 4 Scout at [13, 0] (mp_was=4.60, total_this_turn=4)
+[offense_planner] T72 mp=15.5 TIER1 n_deploys=15 mp_cost=15.0 side=BL (6308.2ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T72 TIER1 attempted=15 spawned=15 skipped=0
+[offense_planner] T73 mp=15.4 TIER1 n_deploys=15 mp_cost=15.0 side=BL (6757.7ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T73 TIER1 attempted=15 spawned=15 skipped=0
+[offense_planner] T74 mp=15.3 TIER1 n_deploys=15 mp_cost=15.0 side=BL (5685.8ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T74 TIER1 attempted=15 spawned=15 skipped=0
+[offense_planner] T75 mp=15.2 TIER1 n_deploys=15 mp_cost=15.0 side=BL (5885.4ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T75 TIER1 attempted=15 spawned=15 skipped=0
+[offense_planner] T76 mp=16.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (6428.1ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T76 TIER1 attempted=16 spawned=16 skipped=0
+[offense_planner] T77 mp=16.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (6084.1ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T77 TIER1 attempted=16 spawned=16 skipped=0
+[offense_planner] T78 mp=16.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (5768.0ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T78 TIER1 attempted=16 spawned=16 skipped=0
+[offense_planner] T79 mp=16.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (6590.3ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T79 TIER1 attempted=16 spawned=16 skipped=0
+[offense_planner] T80 mp=16.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (6668.9ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T80 TIER1 attempted=16 spawned=16 skipped=0
+[offense_planner] T81 mp=17.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (7505.3ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T81 TIER1 attempted=16 spawned=16 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.20, total_this_turn=1)
+[offense_planner] T82 mp=17.2 TIER1 n_deploys=16 mp_cost=16.0 side=BL (8018.2ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T82 TIER1 attempted=16 spawned=16 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8019.6ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T83 mp=17.9 TIER1 n_deploys=16 mp_cost=16.0 side=BL (7794.9ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T83 TIER1 attempted=16 spawned=16 skipped=0
+[athena.LAST_RESORT] spawned 1 Scout at [13, 0] (mp_was=1.90, total_this_turn=1)
+[offense_planner] T84 mp=17.7 TIER1 n_deploys=16 mp_cost=16.0 side=BL (8015.1ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T84 TIER1 attempted=16 spawned=16 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8016.1ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T85 mp=18.3 TIER1 n_deploys=16 mp_cost=16.0 side=BL (8013.2ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T85 TIER1 attempted=16 spawned=16 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8014.4ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T86 mp=19.7 TIER1 n_deploys=16 mp_cost=16.0 side=BL (7445.5ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T86 TIER1 attempted=16 spawned=16 skipped=0
+[athena.LAST_RESORT] spawned 3 Scout at [13, 0] (mp_was=3.70, total_this_turn=3)
+[offense_planner] T87 mp=18.5 TIER1 n_deploys=16 mp_cost=16.0 side=BL (7654.4ms): sim-beam pick=scout_flood@(5, 8)__+2interceptor_escort util=49.24
+[arbiter] T87 TIER1 attempted=16 spawned=16 skipped=0
+[athena.LAST_RESORT] spawned 2 Scout at [13, 0] (mp_was=2.50, total_this_turn=2)
+[offense_planner] T88 mp=18.4 TIER1 n_deploys=15 mp_cost=15.0 side=BL (8016.7ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T88 TIER1 attempted=15 spawned=15 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8025.5ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T89 mp=20.6 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8048.2ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T89 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8050.0ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T90 mp=26.7 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8464.9ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T90 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8466.9ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T91 mp=32.3 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8754.1ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T91 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8768.9ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T92 mp=36.5 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8289.7ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T92 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8291.7ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T93 mp=39.6 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8170.7ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T93 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8172.2ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T94 mp=42.0 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8073.2ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T94 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8074.2ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T95 mp=43.8 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8109.4ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T95 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8136.1ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T96 mp=46.1 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8163.2ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T96 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8180.5ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T97 mp=47.8 TIER1 n_deploys=9 mp_cost=9.0 side=BL (8216.5ms): sim-beam pick=demo_train_left@(5, 8)__pure_scout util=27.54
+[arbiter] T97 TIER1 attempted=9 spawned=9 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8217.5ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T98 mp=49.1 TIER1 n_deploys=15 mp_cost=15.0 side=BL (8100.5ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T98 TIER1 attempted=15 spawned=15 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8101.7ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[offense_planner] T99 mp=45.6 TIER1 n_deploys=15 mp_cost=15.0 side=BL (8015.3ms): sim-beam pick=heavy_demo_left@(5, 8)__pure_scout util=46.14
+[arbiter] T99 TIER1 attempted=15 spawned=15 skipped=0
+[athena] BudgetExceeded (component=OffensePlanner, elapsed=8016.5ms cap=8000.0ms) — safe fallback
+Could not spawn DF at location [2, 13]. Location is blocked.
+Could not spawn DF at location [25, 13]. Location is blocked.
+Could not spawn DF at location [3, 13]. Location is blocked.
+Could not spawn DF at location [24, 13]. Location is blocked.
+[athena] safe-fallback also failed: BrokenPipeError(32, 'Broken pipe')
+Got EOF, parent game process must have died, exiting for cleanup

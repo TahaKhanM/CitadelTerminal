@@ -1,0 +1,9 @@
+{
+  "name": "scout_flood",
+  "description": "Big Scout flood from BL — for late-game high-MP turns.",
+  "side": "BL",
+  "min_mp": 14,
+  "spawns": [
+    {"unit": "SCOUT", "loc": [3, 10], "count": 14}
+  ]
+}
