@@ -1,2 +1,0 @@
-arc_simulator seed: 4430979600407515050
----------------- Starting Your Algo --------------------

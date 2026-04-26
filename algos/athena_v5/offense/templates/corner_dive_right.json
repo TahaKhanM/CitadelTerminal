@@ -1,9 +1,0 @@
-{
-  "name": "corner_dive_right",
-  "description": "Single-Scout corner probe at the BR tip; cheap breach test.",
-  "side": "BR",
-  "min_mp": 1,
-  "spawns": [
-    {"unit": "SCOUT", "loc": [27, 13], "count": 1}
-  ]
-}
