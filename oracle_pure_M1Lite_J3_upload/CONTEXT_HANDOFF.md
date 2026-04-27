@@ -1,0 +1,1368 @@
+# Context Handoff — oracle_pure / oracle_pure_M1Lite project state
+
+**Read this entire document before doing any work on oracle_pure.**
+**§16 contains the most recent and most important update — read it
+before assuming anything in §6 about M2 is current.**
+
+This is a context handoff from a previous Claude Code session whose
+context window was about to expire. Everything you need to make
+informed decisions about oracle_pure's improvement path is here.
+
+Total reading time: ~30 minutes. Worth it — saves you from repeating
+multi-day investigations whose conclusions are documented below.
+
+---
+
+## 0. Quick orientation
+
+You are working on a search-driven algorithm called **`oracle_pure`** for
+the **Citadel Terminal** competition (a special-rules variant of
+Correlation One's *Terminal* — a 2-player tower defense game on a 28×28
+diamond grid). The user is `TAHA` (team WICK, team_id 5826) on
+`terminal.c1games.com`.
+
+**Current canonical base: oracle_pure_M1Lite (G7 fast_copy_state).**
+Live as `oracle_pure_M1Lite_upload`. The earlier M2 attempt
+(path-viability check + ALT-OUTSIDE supports) was implemented,
+shipped, and live-tested — and **REGRESSED vs ameyg/funnel-rush-v6/v7/v8**
+(0/3 where M1Lite is 3/3). M2 has been **rejected and reverted**.
+M1Lite's code is now on `main`. See §16 for the full M2 outcome and
+what it teaches about the failure of the path-check approach.
+
+**Active code state** (verified 2026-04-27):
+- `oracle_core/search.py` has G7 (`_fast_copy_state`); deepcopy fully replaced
+- `oracle_core/enumerator.py` is in M1Lite state — original `SUPPORTS_BACK = [(12,11),(15,11),(13,10),(14,10)]`, NO path-viability check
+- Branch `oracle-pure-M2` preserved as historical record (NOT merged)
+- `oracle_pure_M2_upload/` folder preserved on disk for forensic reference
+
+**No active milestone in flight.** Next step is up to user direction —
+the M2 attempt taught us that simple BFS-based path validation is
+over-conservative (proved that M1Lite's known-good config fails the
+BFS check yet wins matches). Future trap-fix attempts need a different
+approach (see §16's recommendations).
+
+---
+
+## 1. Project context
+
+### What is oracle_pure?
+
+A genuinely search-driven Citadel Terminal algorithm. The search OWNS
+every per-turn decision (defense + offense). It is NOT a heuristic
+pipeline with bolted-on search — that was the prior failed attempt
+(`algos/oracle/`).
+
+Key facts:
+- 100% of decisions come from search picking among ~1500 candidate plans
+- Each plan is evaluated by `sim_rs` (Rust simulator on the live server,
+  pure Python `pysim` fallback locally on Mac)
+- Time budget: 11s soft / 13s SIGALRM watchdog
+- Currently uses ~3.6% of the budget (avg 394ms/turn — see §3.2)
+- The only hardcoded fallback is a "place 4 corner turrets + scout
+  rush" safety net that fires only if the watchdog trips
+
+### Repository root
+
+`/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/`
+
+Critical paths:
+- `algos/oracle_pure/` — current dev folder for oracle_pure (active)
+- `algos/oracle/` — the FAILED prior heuristic-disguised attempt (DO NOT
+  TOUCH; read-only reference for "what not to do")
+- `oracle_pure_upload/` — original oracle_pure (live as `oracle_pure_upload`
+  on the ladder, 3 instances)
+- `oracle_pure_M1Lite_upload/` — M1Lite variant (live as
+  `oracle_pure_M1Lite_upload`, 3 instances)
+- `C1GamesStarterKit-master/` — engine.jar + run_match.py + python-algo
+  reference (read-only)
+- `replays/oracle_pure_live/` — 144+ live ladder replay files (organized
+  by version + result + opponent)
+
+### Key project documents (READ THESE in order)
+
+1. `CLAUDE.md` (repo root) — project orientation, key constants,
+   important "do not confuse this" notes
+2. `AGENTS.md` (repo root) — agent communication conventions
+3. `docs/UNITS_REFERENCE.md` — Citadel-specific unit stats (verify
+   against, never hardcode)
+4. `docs/TARGETING_AND_PATHING.md` — engine targeting + pathing rules
+5. `docs/STRATEGY_GUIDE.md` — archetype reference
+
+For oracle_pure specifically:
+6. `algos/oracle_pure/REPORT.md` — original architecture + anti-patterns
+7. `algos/oracle_pure/VALIDATION.md` — original validation results
+8. `algos/oracle_pure/IMPROVEMENT_PLAN.md` — first improvement plan
+   (22 fixes; many rejected later)
+9. `algos/oracle_pure/M2_IMPLEMENTATION_PROMPT.md` — **CURRENT M2
+   PROMPT** — what's actively being implemented
+
+---
+
+## 2. Algorithm architecture (how oracle_pure works)
+
+### Per-turn flow (`algos/oracle_pure/algo_strategy.py:on_turn`)
+
+```python
+on_turn(turn_state):
+  1. Build gamelib.GameState from turn_state JSON
+  2. Adapt to sim_rs schema dict via state_adapter.adapt_game_state()
+  3. Call search(...) which returns the best ActionPlan
+  4. Apply that ActionPlan via plan.apply_to_game_state()
+  5. Submit turn
+  
+  On exception/watchdog: safe_fallback() places 4 corner turrets
+  and spawns scouts at center launcher (intentionally weak)
+```
+
+### The search loop (`oracle_core/search.py`)
+
+```python
+search(...):
+  base_state = adapt_game_state(...)  # convert once
+  candidates = enumerate_plans(...)    # ~1500 plans
+  
+  # Phase 1: cheap cull (k_opp_phase1=1 sample per candidate)
+  for cand in candidates (~1500):
+    sd = _fast_copy_state(base_state)  # M1Lite: 22x faster than deepcopy
+    apply candidate's structure ops + opp's mobile ops
+    run sim_rs → score via value.evaluate()
+    add to phase1_scores
+  
+  # Phase 2: top-30 with full sampling (k_opp=6 samples each)
+  for cand in top 30 from phase1:
+    avg score over 6 opp samples
+  
+  # Depth-2: top-3 get next-turn projection (cheap heuristic)
+  for cand in top 3:
+    project 1 more turn forward, blend scores
+  
+  return top_scoring_plan
+```
+
+### Enumerator (`oracle_core/enumerator.py`)
+
+Generates ~1500 candidate plans per turn as the cross-product of:
+- **~13 defense templates** (defense:none, defense:t0_full,
+  defense:anchor_corners_walls, defense:walls{2,4,6,8,12},
+  defense:diag_reinforce, defense:side_corners, defense:outer_wide,
+  defense:outer_corner_block, defense:supports, defense:wall_heavy,
+  defense:upg{2,4,8,16}, defense:refund{1,2}, defense:patch{1,2})
+- **~150 offense templates** (offense:hold + scout/demo/interceptor
+  rushes from ~30 launchers × 4-6 batch sizes + mixed waves + two-prong)
+
+Cross-product → ~1500 plans, capped at 2500.
+
+**Key constants** to know (at top of `enumerator.py`):
+- `ANCHOR_TURRETS = [(11,11),(13,11),(14,11),(16,11)]` — central row
+- `OUTER_TURRETS = [(5,11),(22,11),(8,11),(19,11)]` — wider y=11
+- `DIAG_TURRETS = [(4,11),(23,11)]` — diagonal at y=11
+- `INNER_CORNER_TURRETS = [(1,13),(26,13)]` — at corners
+- `OUTER_CORNER_TURRETS = [(0,13),(27,13)]` — at outer corners
+- `SIDELANE_TURRETS = [(7,9),(20,9)]` — y=9 pair
+- `SECOND_RING = [(11,5),(16,5)]` — deep at y=5
+- `WALL_ROW_Y12 = [(WALL_IDX, x, 12) for x in range(2, 26) if x not in (12, 15)]`
+  — 22 walls at y=12 with **launch gaps** at x=12 and x=15
+- `EDGE_WALLS = [(2,13),(25,13),(4,13),(23,13)]`
+- **`SUPPORTS_BACK` — has the BUG** (currently `[(12,11),(15,11),(13,10),(14,10)]`)
+  — see §6 for the M2 fix
+
+### Value function (`oracle_core/value.py`)
+
+Scores a sim_rs post-state from oracle's perspective. Components:
+- **HP differential** (weight 100) — dominant
+- **Structure value** (sum of coef × hp_frac per structure) — coefficients
+  per (type_idx, upgraded): wall 1.5/6.0, turret 4.0/12.0, support
+  0.5/10.0
+- **Resource banking** (saturating log function past ~10 SP/MP)
+- **Breach term** (weight 25 × delta_hp) — currently buggy (see §6.1
+  "code defects" — patch math was wrong)
+- **Support-scout synergy** (small bonus for upgraded supports + our
+  scouts)
+
+**Key blind spot**: the value function has ZERO spatial awareness. A
+turret at (0,13) and a turret at (4,11) score identically per HP. This
+is a known architectural limitation (deferred to future work).
+
+### Opponent model (`oracle_core/opponent_model.py`)
+
+Empirical action-signature distribution conditioned on bucket:
+`(turn_band, opp_mp_band, our_mp_band, breach_band)`.
+
+- **Prior**: built offline from 427 ranked replays
+  (`tools/build_opp_model.py`); cached in `data/opp_model_priors.json`
+- **Posterior**: updated in-game from `on_action_frame` events
+- **Sampling**: top-K by weight (deterministic) — bucket lookup +
+  hand-injected adversarial signatures (5 scout launchers + 5 demo
+  launchers as fallback for cold-start)
+
+**Known issue**: prior currently has only `br0` buckets (M1's G3 fix
+attempted to add `br1_2`/`br3p` coverage but was rejected — see §7).
+G3-Additive proposed for future.
+
+### sim_rs / pysim (`oracle_core/sim_eval.py`, `vendored_sim/`)
+
+- `sim_rs`: Rust action-phase simulator, ~14.6K sims/sec single-thread,
+  bundled as Linux x64 abi3 wheel in `bundled_sim_rs/` (loads on the
+  live server only)
+- `pysim`: pure-Python fallback in `vendored_sim/`, ~3K sims/sec
+  (used locally on Mac since the bundled wheel is Linux-only)
+- Both are bit-exact with engine.jar (verified, see
+  `algos/athena/sim/SIM_PARITY.md`)
+
+### Critical edge-ID convention (the bug that bit us early)
+
+`vendored_sim/map.py` defines:
+- `EDGE_TOP_RIGHT = 0`
+- `EDGE_TOP_LEFT = 1`
+- `EDGE_BOTTOM_LEFT = 2`
+- `EDGE_BOTTOM_RIGHT = 3`
+
+The inherited `state_adapter.py` originally used `BL=0, TR=3` which is
+WRONG vs map.py. **This was fixed early in oracle_pure development**
+(see git history). Both `state_adapter.py` and `plan.py` now correctly
+use map.py's convention. Don't touch these without re-verifying.
+
+---
+
+## 3. Versions and current state
+
+### oracle_pure (original)
+
+Live as `oracle_pure_upload`, 3 instances (algo_ids 361251 / 361264 / 361265).
+
+The first shipping version. Hit 2138 ELO live (vs predicted 1700-1900).
+Beats all 4 official bosses (R1 Sawtooth, R2 Infiltrator, R3 Jukebox,
+R4 Champion). Has the trap bug (see §6).
+
+### oracle_pure_M1Lite
+
+Live as `oracle_pure_M1Lite_upload`, 3 instances (algo_ids 361357 /
+361353 / 361359).
+
+Differs from oracle_pure ONLY in the G7 fast_copy_state fix:
+`oracle_core/search.py` replaces `deepcopy(base_state)` with a
+hand-rolled shallow copy `_fast_copy_state()`. 22× faster per call;
+~37% reduction in per-turn wall-clock; identical algorithm logic
+otherwise.
+
+**Strictly better than oracle_pure** (verified head-to-head, see §5).
+This is the BASE for all future improvements.
+
+### Currently shipped wall-clock telemetry
+
+Measured on heuristic_v1 P1 match (M1Lite vs heuristic_v1):
+
+| Metric | Value | % of 11s budget |
+|---|---|---|
+| Avg wall-clock/turn | 394 ms | 3.6% |
+| Max wall-clock/turn | 810 ms | 7.4% |
+| P50 / P90 / P99 | 430 / 590 / 810 ms | — |
+| Avg sims/turn | 1,604 | — |
+| Max sims/turn | 2,686 | — |
+| Headroom remaining | 96% | — |
+
+**The algorithm is candidate-limited, not compute-limited.** With ~1500
+distinct plans per turn, even infinite compute wouldn't add more
+distinct sims. See §8 for why "use more compute" hasn't worked.
+
+---
+
+## 4. Pre-shipped improvements (the journey so far)
+
+### M0 (the original ship — `algos/oracle_pure/`)
+Built from scratch, beats local Tier 1-3 ladder 10/10, hits 2138 ELO live.
+
+### M1 attempted (G7 + G3) — REJECTED
+- **G7** (fast_copy_state): clean win, 22× faster per copy, no behavior change
+- **G3** (rebuild prior with breach context via `tools/build_opp_model.py`):
+  bucket schema correctly populated (40 → 116 buckets); BUT redistributing
+  observations thinned br0 weights ~50% in many buckets. Against opps that
+  rarely breach (heuristic_v1, python-2l-aet, snorkeldink P2), oracle stays
+  in br0 with weaker predictions. **Broke 4 of 10 Tier A matches.** Also
+  destroyed G7's snorkeldink breakthrough (G7-only got snorkeldink 2/2;
+  G7+G3 dropped to 0/2).
+
+User decision: ship G7 as M1-Lite; investigate G3 separately.
+
+### M1Lite (G7 only) — SHIPPED ✓
+- Tier A: 10/10 vs (v13_second_ring, python-algo, heuristic_v1,
+  Lostkids/python-2l-aet, funnel_INTER) both sides
+- **Tier B: 2/2 vs snorkeldink-v3-1** ★ BREAKTHROUGH (was 0/2)
+- Live ELO: 1806-2103 across 3 instances
+- Wall-clock: -37% vs oracle_pure baseline
+
+### M2 (current work) — IN IMPLEMENTATION
+Path-viability check + ALT-OUTSIDE SUPPORTS_BACK swap. See §6.
+Implementation prompt at `M2_IMPLEMENTATION_PROMPT.md`. Branch
+`oracle-pure-M2` (when shipped). The previous Claude session wrote the
+prompt; a new session executes it.
+
+---
+
+## 5. What we learned from 114 live replays
+
+The user uploaded 6 algo instances (3 of each version). Across all
+instances, **114 non-boss matches** were collected:
+- oracle_pure: 70 matches (52W/18L)
+- M1Lite: 44 matches (36W/8L)
+
+### Head-to-head finding (§5.1)
+
+Across **22 shared opponents** (where both versions played the same opp):
+- 18 dead-heat-perfect (both versions win)
+- 3 dead-heat-zero (both versions lose deterministic counter-patterns)
+- 1 M1Lite IMPROVED (ameyg/funnel-rush-v7: oracle_pure 1/2 → M1Lite 1/1)
+- **0 regressions**
+
+**Verdict: M1Lite is a strict improvement over oracle_pure.** This is
+the head-to-head data — ELO is confounded by matchmaking and is NOT a
+reliable comparison metric.
+
+The single improvement (ameyg/funnel-rush-v7) was investigated:
+turn-by-turn replays are byte-identical T0–T19, then diverge at T20 due
+to G7's faster sims producing slightly different plan selection. The
+divergence cascades and M1Lite wins at T68 vs oracle_pure losing at
+T99. Pure timing-induced sim-budget mechanism — exactly what G7 was
+designed to enable.
+
+### Three persistent counter-patterns (UNSOLVED)
+
+Both versions LOSE IDENTICALLY (byte-identical replays) to:
+
+1. **`aa0/funnel-a`** (left-flank scout funnel)
+   - Opp builds wall corridor + supports late game
+   - 100% of HP loss at left-flank tiles (3,10), (4,9), (7,6), (2,11)
+   - Opp's MP-banking pattern: hold 20+ MP, dump 30+ scouts
+
+2. **`ashmit/funnel-crush-before`** (left-flank scout drill)
+   - 100% of HP loss at single tile (4,9) (50 breaches)
+   - Pure left-side funnel demolisher rush
+
+3. **`Egil/python-algo-siege`** (siege strategy, asymmetric)
+   - Mirror-image losses: oracle ends at 3 HP regardless of side
+   - Loss is structural, not stochastic
+
+These are **deferred to a future plan** — they need fundamentally
+different defenses than current oracle has. ELO ceiling ~2300 until
+they're addressed. Don't try to fix them in M2-M5; they're a separate
+problem.
+
+### The trap bug discovered (§5.2)
+
+The user flagged TWO peculiar 100-turn losses:
+- `m1_lite/inst3` vs `suchir-g/python-algo-baseline`
+- `m1_lite/inst3` vs `not-tnb/python-algo-tnb`
+
+Forensic analysis (3 separate Claude agents in parallel) revealed:
+**oracle's offense is being blocked by its OWN defensive components.**
+
+Mechanism (verified by replay frame-by-frame trace + code inspection):
+1. Search picks `defense:supports` mid-game (T37-T75), placing supports
+   at (12,11) and (15,11)
+2. These tiles are the ONLY y=11 cells adjacent to the wall row's
+   launch gaps at (12,12) and (15,12)
+3. Combined with anchor turrets at (11,11)/(13,11)/(14,11)/(16,11),
+   the gap-approach tiles are sealed
+4. Oracle's mobiles cannot reach (12,11) or (15,11) → cannot step UP
+   through the gaps → walk to (2,11) or (25,11) → SELF-DESTRUCT
+
+Quantitative damage:
+| Match | MP spent | Breaches dealt | % SD in own territory | Final HP |
+|---|---|---|---|---|
+| suchir-g | 1018 | 3 (T0-T2 only!) | 75.1% (587/782) | 35 vs 37 |
+| not-tnb | 1031 | 3 (T0-T2 only!) | 39.2% (338/863) | 35 vs 37 |
+
+**Both losses: oracle outspent opp 4.7× in MP, lost 3-vs-5 on breaches.**
+100% of self-destructs were at (2,11) or (25,11) — the only edge tiles
+left reachable.
+
+This is the **PRIMARY motivation for M2**.
+
+---
+
+## 6. M2 — what's being implemented now
+
+### The fix (two changes to one file)
+
+Both changes are in `oracle_core/enumerator.py`:
+
+**Change A — path-viability check** (the principled fix)
+
+Add a new helper `_is_offense_viable(game_state, plan_structure_xys)`
+that BFS-checks whether ANY spawn-edge tile can still reach opp
+territory (y≥14) after the plan's structures are added. Insert a
+rejection check at the end of `_build_defense_plan()` — if no path
+exists, return `None` (reject the plan).
+
+```python
+from collections import deque
+
+def _is_offense_viable(game_state, plan_structure_xys):
+    blocked = set(plan_structure_xys)
+    for x in range(28):
+        for y in range(14):
+            if not game_state.game_map.in_arena_bounds([x, y]):
+                continue
+            if game_state.contains_stationary_unit([x, y]):
+                blocked.add((x, y))
+    spawn_tiles = ([(x, 13 - x) for x in range(14)] +
+                   [(x, x - 14) for x in range(14, 28)])
+    spawn_tiles = [t for t in spawn_tiles
+                   if game_state.game_map.in_arena_bounds(list(t))
+                   and t not in blocked]
+    visited = set(spawn_tiles)
+    q = deque(spawn_tiles)
+    while q:
+        x, y = q.popleft()
+        if y >= 14:
+            return True
+        for dx, dy in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nx, ny = x+dx, y+dy
+            if not game_state.game_map.in_arena_bounds([nx, ny]): continue
+            if (nx, ny) in blocked: continue
+            if (nx, ny) in visited: continue
+            visited.add((nx, ny))
+            q.append((nx, ny))
+    return False
+```
+
+**Change B — SUPPORTS_BACK swap to ALT-OUTSIDE**
+
+```python
+# OLD (BUGGY):
+SUPPORTS_BACK = [(SUPPORT_IDX, 12, 11), (SUPPORT_IDX, 15, 11),
+                 (SUPPORT_IDX, 13, 10), (SUPPORT_IDX, 14, 10)]
+# NEW:
+SUPPORTS_BACK = [(SUPPORT_IDX, 10, 11), (SUPPORT_IDX, 17, 11),
+                 (SUPPORT_IDX, 13, 10), (SUPPORT_IDX, 14, 10)]
+```
+
+ALT-OUTSIDE has identical upgraded-shield strength (33.4) but doesn't
+seal the gap-adjacent tiles.
+
+### Why both changes (not just one)?
+
+- Change A alone: would correctly reject ALL `defense:supports`
+  variants (they all trap), so we'd lose support-amplification entirely
+- Change B alone: hardcoded patch (different bug class could recur)
+- Together: bug fixed (A), function preserved (B), future bugs prevented (A)
+
+### Verified compute impact
+
+Benchmarked this session:
+- Path check: 0.255 ms/call (constant time at 28×28 grid)
+- Per-turn cost: 13 templates × 0.255 ms = 3.3 ms
+- With 5 patch templates: 4.5 ms/turn
+- Current avg wall-clock: 394 ms/turn
+- After path check: ~398 ms/turn (1.1% overhead)
+- **Sims/turn: UNCHANGED** (check runs at template construction, not
+  per sim)
+- Even worst case (path-check on every plan, 1500/turn): 770ms total,
+  still 7% of 11s budget
+
+### Implementation prompt
+
+Self-contained at `algos/oracle_pure/M2_IMPLEMENTATION_PROMPT.md`.
+Includes:
+- Exact code for Change A + B
+- New `tests/test_path_viability.py` with 5 specific assertions
+- 6 validation gates (component tests, path tests, Tier A 10/10,
+  Tier B snorkeldink 2/2, telemetry sanity, code-change verification)
+- Upload folder creation (folder, NOT zip — user explicit preference)
+- Branch `oracle-pure-M2`, no merge to main until live validation
+- Failure protocol (don't ship if any gate fails)
+
+A fresh Claude session should be able to execute the prompt without
+reading anything else (it's fully self-contained). But if you're the
+new session and need to make decisions ABOUT the M2 plan, read
+PATH_VIABILITY_PLAN.md and CRITICAL_EVAL_v3.md (referenced below).
+
+---
+
+## 7. Plan history (what's been tried, rejected, shipped)
+
+The improvement plan has gone through 4 major iterations. Each one
+taught us something. Don't recreate previous mistakes.
+
+### Iteration 1: `IMPROVEMENT_PLAN.md` (original, 22 fixes)
+
+The first comprehensive plan. Listed 22 fixes across 4 tiers. Many were
+hardcoded shortcuts that violated the project's anti-pattern rules
+(REPORT.md §8). Most are now defunct; the document is preserved for
+context.
+
+### Iteration 2: `FUNNEL_COUNTER_PLAN.md` (REJECTED)
+
+Focused plan to counter funnel archetypes. Rejected after critical
+audit revealed:
+- F1 (flank-corridor templates) was hardcoded — encoded specific tiles
+  from 8 observed losses; would have walled oracle's own launchers
+- F4 (archetype-detector that bumps k_opp_phase1) was a heuristic-switch
+  violation — exactly what the project anti-pattern checklist forbids
+- F2 had magic constants hand-tuned to observed losses
+
+### Iteration 3: `REVISED_IMPROVEMENT_PLAN.md` (G1-G8 framework)
+
+After the FUNNEL critique, restructured into 8 fixes (G1-G8) with
+explicit non-hardcoded alternatives. Spawned the M1 attempt (G7+G3).
+
+### Iteration 4: `IMPROVEMENT_PLAN_v3.md` (REJECTED)
+
+Built to address the trap bug. Proposed T0 (move SUPPORTS_BACK to
+contiguous y=10). User correctly questioned whether this was hardcoded.
+Critical evaluation (`CRITICAL_EVAL_v3.md`) revealed:
+- T0 IS hardcoded (just swapping one tile list for another)
+- My v3 proposal was sub-optimal (8% less shield than original)
+- ALT-OUTSIDE option (which I missed initially) is provably better
+- The principled fix is a path-viability check, NOT tile-list swaps
+
+### Iteration 5: `PATH_VIABILITY_PLAN.md` (CURRENT)
+
+The actual M2 plan. Two changes (Change A + Change B). Verified compute
+analysis. Ships as M2.
+
+### Documents to read in priority order (if you need plan context)
+
+1. `algos/oracle_pure/PATH_VIABILITY_PLAN.md` — the actual current plan
+2. `algos/oracle_pure/M2_IMPLEMENTATION_PROMPT.md` — implementation details
+3. `algos/oracle_pure/CRITICAL_EVAL_v3.md` — why we rejected v3
+4. `algos/oracle_pure/CONTEXT_HANDOFF.md` — this document
+5. `algos/oracle_pure/REPORT.md` — original architecture + anti-patterns
+6. `algos/oracle_pure/MILESTONE_M1_RESULTS.md` — why G3 failed
+7. `algos/oracle_pure/M1_LITE_SHIP_AND_G3_INVESTIGATE.md` — M1Lite ship +
+   G3-Additive investigation prompt
+
+Documents to NOT read unless needed for archaeological purposes:
+- `algos/oracle_pure/IMPROVEMENT_PLAN.md` (superseded)
+- `algos/oracle_pure/FUNNEL_COUNTER_PLAN.md` (rejected)
+- `algos/oracle_pure/REVISED_IMPROVEMENT_PLAN.md` (mostly superseded)
+- `algos/oracle_pure/IMPROVEMENT_PLAN_v3.md` (rejected)
+- `algos/oracle_pure/MILESTONE_PROMPTS.md` (M2 prompt is in
+  M2_IMPLEMENTATION_PROMPT.md instead now)
+
+---
+
+## 8. Hard-won lessons (the principles)
+
+The user has actively pushed back on hardcoded patches throughout the
+project. These are the principles you must apply:
+
+### Lesson 1: "More compute = better" is empirically false
+
+Three documented attempts to use more compute REGRESSED matches:
+- Bumping `k_opp_phase1` from 1 to 2 → lost FUNNEL match
+- Bumping to 3 → lost Lostkids match
+- G3 (richer prior) → broke 4/10 Tier A
+
+Why: the search is **candidate-limited, not compute-limited**. With ~1500
+distinct plans per turn, more compute just adds noisy averages. Sample
+diversity > sample count. Better signal > more samples.
+
+### Lesson 2: Hardcoded tile lists ARE the anti-pattern
+
+REPORT.md §8 explicitly forbids hardcoding heuristic_v1's defense
+skeleton. By extension: hardcoding ANY specific tile coordinates from
+observed losses is the same anti-pattern with different coordinates.
+
+The PRINCIPLED approach: derive from board state, not constants.
+- Path-viability check derives from `game_state` — generalizes
+- "Move SUPPORTS_BACK to ALT-OUTSIDE" is hardcoded — patch only
+
+In M2, Change A is principled; Change B is acknowledged as a hardcoded
+triage that's necessary because Change A would otherwise eliminate ALL
+support templates.
+
+### Lesson 3: ELO is a confounded metric
+
+Don't use ELO to compare two algorithm versions — opponent matchups
+differ between instances. Use **head-to-head shared-opponent comparison**
+instead. M1Lite was confirmed strict-superior via 22 shared opps despite
+having a slightly LOWER aggregate ELO (small sample size noise).
+
+### Lesson 4: Strict-superset rule
+
+Every milestone must beat EVERY opponent the prior milestone beat. ANY
+regression on Tier A = REJECT the milestone. This rule has saved us
+from shipping multiple bad fixes (G3, F1, F4, the v3 T0 sub-optimal).
+
+### Lesson 5: snorkeldink-v3-1 is the breakthrough indicator
+
+Oracle_pure was 0/2 vs snorkeldink-v3-1. M1Lite is 2/2 (BREAKTHROUGH).
+Future milestones must NOT drop below 2/2 — losing this signal would
+mean we lost the M1Lite improvement.
+
+This is the strongest LOCAL indicator we have of "real algorithmic
+improvement" vs "doesn't break anything."
+
+### Lesson 6: Don't waste compute on weak opps already winning
+
+The Tier A/B/C/D framework (in MILESTONE_PROMPTS.md, but copied below
+in §9) is intentionally minimal — ~7 minutes of local matches per
+milestone. Don't re-test the dozens of human-player ladder opponents
+we beat deterministically.
+
+### Lesson 7: Live validation gates the merge
+
+Local Tier A 10/10 ≠ live ladder success. Even passing local gates,
+each milestone branch (`oracle-pure-M2`, etc.) must NOT merge to main
+until live ladder validation confirms (≥10 ranked matches, ELO not
+dropping >40 vs prior milestone).
+
+### Lesson 8: User communication preferences
+
+The user is critical, evidence-driven, and skeptical of enthusiasm:
+- Proposes counter-arguments to your plans (push back when justified)
+- Insists on empirical evidence over claims
+- Catches hardcoded fixes that you might rationalize as structural
+- Does not want celebratory language; wants honest assessment
+- Cares about actual mechanism, not just outcomes
+- Will reject plans that don't have clear validation gates
+
+When in doubt, lean toward more critical analysis, more honest
+acknowledgment of limitations, and more concrete evidence.
+
+---
+
+## 9. Validation framework
+
+This is the SHARED VALIDATION TEST SUITE used for every milestone. Per
+milestone (~7 minutes total local compute):
+
+### Tier A — REGRESSION FLOOR (mandatory, must pass 100%)
+
+10 matches (5 opps × P1+P2). Strict superset of original wins.
+
+| Opp | Path |
+|---|---|
+| v13_second_ring | `algos/v13_second_ring/` |
+| python-algo (starter) | `C1GamesStarterKit-master/python-algo/` |
+| heuristic_v1 | `algos/heuristic_v1/` |
+| Lostkids/python-2l-aet | `research/finalist_repos/Terminal-Lostkids/python-2l-aet/` |
+| funnel_INTER | `research/finalist_repos/Terminal-C1-Midwest-2022/funnel_INTER/` |
+
+Use ABSOLUTE paths in `run_match.py` invocations. Verify NO
+`FailedToLoad` in any log. **ANY single regression = REJECT milestone.**
+
+### Tier B — BREAKTHROUGH SIGNAL (snorkeldink-v3-1)
+
+2 matches vs `research/finalist_repos/terminal-c1/snorkeldink-v3-1/`
+(P1+P2). M1Lite achieves 2/2; future milestones must NOT drop below.
+
+| Result | Interpretation |
+|---|---|
+| 0/2 (regression) | REJECT milestone — lost M1Lite breakthrough |
+| 1/2 | OK but flag — partial regression |
+| 2/2 | preserved — ship |
+
+### Tier C — TARGETED REPRODUCTION
+
+For changes that should affect specific known states. M2 specifically:
+load saved replay states (suchir-g, not-tnb) and verify the new code
+produces meaningfully different output.
+
+### Tier D — TELEMETRY HEALTH CHECK
+
+Per a representative Tier A match (heuristic_v1 P1):
+- avg sims/turn ≥ 1000 (must not drop drastically)
+- avg wall/turn < 0.6s (must not blow up)
+- max wall/turn < 2s (well under watchdog)
+- No `WATCHDOG fired` events
+- No `on_turn exception` events
+
+### Live ladder validation (manual, after upload folder created)
+
+User uploads the `oracle_pure_M{N}_upload/` folder. Watch for ≥10
+ranked matches:
+- ELO not dropping >40 vs prior milestone
+- No new losses against opps prior milestone beat (strict superset
+  applies live too)
+
+If live regresses, REJECT retroactively. Previous milestone's upload
+remains live; failed milestone branch is abandoned.
+
+---
+
+## 10. Forward roadmap (after M2 ships, if approved)
+
+In order of priority. Each is independent of the others (mostly).
+
+### M3 candidate: G3-Additive (rebuild prior, additively)
+
+**Status**: prompt written at `M1_LITE_SHIP_AND_G3_INVESTIGATE.md`
+Part 2. Not yet implemented.
+
+The G3 fix in M1 redistributed observations across br0/br1_2/br3p
+buckets, thinning br0 weights. The Additive variant would record EVERY
+observation at br0 (preserving OLD behavior exactly) AND additionally
+at the actual breach-band bucket — strict superset of OLD prior.
+
+Validation: must verify new prior strictly superset of OLD; Tier A 10/10;
+Tier B snorkeldink 2/2 preserved.
+
+### M4 candidate: G2 (posterior sampling)
+
+**Status**: specified in `MILESTONE_PROMPTS.md`. Depends on G3-Additive.
+
+Use opp's OBSERVED MP-spend distribution to size adversarial samples.
+Replaces hand-tuned magic constants in `opponent_model.py`. Cap
+weights at 3.0 to prevent monopolization.
+
+### Various T1-T6 from v3 plan (smaller fixes)
+
+- **T1**: Allow `defense:refund` to remove SUPPORTS too (escape valve
+  if the path check ever has a hole)
+- **T2**: Penalize "stuck mobile" outcomes in value function (general
+  protection)
+- **T3**: Filter `LAUNCHERS_FAR` by reachability (prevents corner
+  launchers blocked by inner-corner turrets)
+
+### The 3 unsolved counter-patterns (separate plan needed)
+
+aa0/funnel-a, ashmit/funnel-crush-before, Egil/python-algo-siege —
+both versions lose 100% of the time, byte-identical replays. These
+require structural defensive thinking that's out of scope for M2-M4.
+Defer.
+
+### Architectural improvements (long-term)
+
+The value function has zero spatial awareness. The depth-2 projection
+uses a hardcoded "scout from (14,0)" heuristic. The opp model can't
+predict opp's WALL placement (only mobile spawns). These are
+foundational issues that any of T1-T6 only partially address.
+
+---
+
+## 11. File map (where everything lives)
+
+### Source code (modify only with care)
+
+| Path | Purpose | Modified for M2? |
+|---|---|---|
+| `algos/oracle_pure/algo_strategy.py` | main entry point | NO |
+| `algos/oracle_pure/oracle_core/search.py` | search loop (G7 lives here) | NO for M2 |
+| `algos/oracle_pure/oracle_core/enumerator.py` | candidate templates | YES (Change A + B) |
+| `algos/oracle_pure/oracle_core/value.py` | scoring function | NO for M2 |
+| `algos/oracle_pure/oracle_core/opponent_model.py` | opp samples | NO for M2 |
+| `algos/oracle_pure/oracle_core/plan.py` | ActionPlan dataclass | NO |
+| `algos/oracle_pure/oracle_core/state_adapter.py` | game_state → dict | NO (don't touch) |
+| `algos/oracle_pure/oracle_core/sim_eval.py` | sim_rs wrapper | NO (don't touch) |
+
+### Tests
+
+| Path | Purpose |
+|---|---|
+| `algos/oracle_pure/tests/test_components.py` | 8 existing component tests |
+| `algos/oracle_pure/tests/test_fast_copy.py` | M1Lite G7 parity test (3 tests) |
+| `algos/oracle_pure/tests/test_prior_parity.py` | M1 G3 parity test (rejected G3 path) |
+| `algos/oracle_pure/tests/test_path_viability.py` | NEW for M2 — 5 tests |
+
+### Data
+
+| Path | Purpose |
+|---|---|
+| `algos/oracle_pure/data/citadel_config_snapshot.json` | game config (live server's) |
+| `algos/oracle_pure/data/opp_model_priors.json` | the OLD prior (used by M1Lite) |
+| `algos/oracle_pure/data/opp_model_priors.OLD.json` | backup of OLD prior |
+| `algos/oracle_pure/data/opp_model_priors.M1_breach_context.json` | rejected G3 prior |
+
+### Upload folders (live ladder)
+
+| Path | Status |
+|---|---|
+| `oracle_pure_upload/` | original, live as 3 instances |
+| `oracle_pure_M1Lite_upload/` | M1Lite, live as 3 instances |
+| `oracle_pure_M2_upload/` | NOT YET CREATED — M2 will create this |
+
+### Replays (the data we analyzed)
+
+| Path | Contents |
+|---|---|
+| `replays/oracle_pure_live/` | 144+ live ladder replays, organized by `{version}_{instance}_{W/L}_{opp_user}_{opp_algo}_t{turns}_{match_id}.replay` |
+
+The 8 most important replays (the trap losses + comparison wins):
+- `m1_lite_inst3_L_suchir-g_python-algo-baseline_t100_15314226.replay` (trap loss)
+- `m1_lite_inst3_L_not-tnb_python-algo-tnb_t100_15314197.replay` (trap loss)
+- `m1_lite_inst1_W_ameyg_funnel-rush-v7_t68_15314321.replay` (M1Lite improvement)
+- `oracle_pure_inst2_L_ameyg_funnel-rush-v7_t99_15313499.replay` (oracle_pure loss vs v7 — for delta analysis)
+- `oracle_pure_inst3_L_ashmit_funnel-crush-before_t77_15313562.replay` (unsolved counter)
+- 3 byte-identical replays of `aa0/funnel-a` (unsolved counter)
+
+### Tools
+
+| Path | Purpose |
+|---|---|
+| `tools/scrape_ranked_replays.py` | scrape replays from terminal.c1games.com |
+| `tools/bestof.py` | run N matches in parallel with Wilson CI |
+| `tools/analyze_replay.py` | parse a single replay |
+| `tools/detailed_replay.py` | deep replay analysis |
+| `algos/oracle_pure/tools/build_opp_model.py` | rebuild prior (G3 lives here; rejected) |
+
+### Live API (for downloading new replays)
+
+Auth cookie at `~/.c1_session.json`. Endpoints (verified per
+`citadel_live_api.md` memory):
+- `GET /api/game/algo/mine/1338` — list my algos
+- `GET /api/game/algo/{id}/matches` — algo's match history
+- `GET /api/game/replayexpanded/{match_id}` — full replay JSON
+
+Algo IDs:
+- oracle_pure: 361251, 361264, 361265
+- M1Lite: 361357, 361353, 361359
+
+---
+
+## 12. What you should do FIRST as the new session
+
+1. **Read this whole document** (you're doing that now).
+
+2. **Read `algos/oracle_pure/PATH_VIABILITY_PLAN.md`** to confirm the
+   M2 plan in detail. Read `M2_IMPLEMENTATION_PROMPT.md` if you'll be
+   executing M2.
+
+3. **Check git state**:
+   ```bash
+   cd /Users/tahakhan/Documents/Work/Projects/CitadelTerminal
+   git branch --show-current  # likely 'main' or 'oracle-pure-M1-Lite'
+   git log --oneline -10
+   git status --short | head -20
+   ```
+
+4. **Check whether M2 has been started yet**:
+   ```bash
+   git branch -a | grep -i m2
+   ls oracle_pure_M2_upload 2>/dev/null && echo "M2 upload folder exists" \
+                                       || echo "M2 not yet implemented"
+   ```
+
+5. **If M2 not yet implemented**: execute the M2 prompt
+   (`M2_IMPLEMENTATION_PROMPT.md`) — it's self-contained.
+
+6. **If M2 implemented but not validated**: check
+   `algos/oracle_pure/MILESTONE_M2_RESULTS.md` for status.
+
+7. **If M2 validated and live-tested**: based on user feedback,
+   determine if M3 (G3-Additive) is next or if a different focus is
+   needed.
+
+---
+
+## 13. Critical things the user has said (preserve these)
+
+Direct quotes from the user, verbatim, that you should remember:
+
+- *"The exact elo and the losses to an opponent in an elo CANNOT be
+  used to determine which algo performs better as elo can fluctuate
+  between copies of the exact same algo due to the exact opponents
+  given."*
+
+- *"The biggest local indicator of performance improvement would be a
+  win against snorkeldink-v3-1."*
+
+- *"Although it should not waste too much compute and time testing
+  against weaker opponents when already winning all the games."*
+
+- *"You must make sure that the changes you are making are not
+  hardcoded as this will lead to a regression."*
+
+- *"You must also make sure that any changes you are making will not
+  lead to a regression but are a genuine improvement over oracle_pure."*
+
+- *"The improvement must mean that the new algo beats every other algo
+  compared against for first ship that oracle_pure did."* (i.e., strict
+  superset of original wins)
+
+- *"Create an upload folder (not zip) to be uploaded and tested on the
+  live leaderboard."*
+
+These are guardrails. When proposing or evaluating any change, mentally
+check it against all of these.
+
+---
+
+## 14. Open questions / decisions awaiting user input
+
+If M2 ships and is live-validated:
+- Does user want to proceed to G3-Additive (the M1 deferred fix)?
+- Or directly to G2 / G6 from the v3 plan?
+- Or something else (e.g., tackle the 3 unsolved counter-patterns)?
+
+These should NOT be decided unilaterally. Wait for user direction
+after M2 ships.
+
+---
+
+## 15. ⚠️ SKEPTICAL VERIFICATION — DO NOT TRUST MY CONCLUSIONS BLINDLY
+
+**This section is the most important.** Everything above is my analysis.
+I have been WRONG multiple times. The user has pushed back on me
+correctly more than once. You should treat my claims as HYPOTHESES to
+test, not facts to act on.
+
+### My documented track record of being wrong
+
+| What I claimed | What was actually true | How the user/I caught it |
+|---|---|---|
+| "All 8 oracle_pure losses are funnel archetype" (FUNNEL_COUNTER_PLAN.md) | Of 8 losses, 5 were funnel; 3 were a different archetype (demo-siege long-loop) | User downloaded more replays, demanded I re-analyze the "different name" losses; I had grouped by algo NAME not BEHAVIOR |
+| "F1 (flank-corridor templates) is structural" (FUNNEL_COUNTER_PLAN.md) | F1 was hardcoded — encoded 22 specific tiles from observed losses, would have walled oracle's own launchers | User demanded critical evaluation; agent audit caught it |
+| "F4 (archetype-detector) tunes params, doesn't switch strategy" | F4 was exactly the heuristic-mode-switch the project anti-patterns forbid | Critical audit caught it; the plan's OWN §4 NOT-TO-DO list said this is forbidden |
+| "T0 (move SUPPORTS_BACK to (13,9)/(14,9)) is structural" (IMPROVEMENT_PLAN_v3.md) | T0 was hardcoded patch (just swapping one tile list for another); my proposed fix gave 8% LESS shield than original | User asked for critical evaluation; I found ALT-OUTSIDE preserves shield AND fixes trap |
+| "Boss matches were losses" (initial replay analysis) | All 4 boss matches were WINS — API returns `winning_user=None` for boss matches; you have to use `winning_algo.id` | User corrected me directly |
+| "Patch1 places 1 turret per breach" (FUNNEL_COUNTER_PLAN.md math) | Patch1 places **2 turrets** per breach (verified via code grep) | Code-verification agent caught it |
+| First SUPPORTS_BACK proposed fix `[(13,10),(14,10),(13,9),(14,9)]` was the right fix | My BFS test in this session showed the agent's proposed `[(12,10),(13,10),(14,10),(15,10)]` could create a NEW trap; my own proposal had less shield than ALT-OUTSIDE | I ran an independent BFS verification |
+| **M2 (path check + ALT-OUTSIDE) was a "single coherent fix" that would safely fix the trap** (PATH_VIABILITY_PLAN.md) | **M2 regressed 0/3 vs ameyg/funnel-rush-v6/v7/v8 in live ladder** (M1Lite is 3/3). Change B (the hardcoded tile swap I rationalized as "necessary triage") caused a launcher-selection cascade. Change A's BFS proved more conservative than the engine's actual pathfinder — would reject M1Lite's working config too. **See §16 for full outcome.** | User uploaded M2 to live, then noticed the regression. I verified post-mortem |
+
+**Pattern**: I tend to:
+- Rationalize hardcoded fixes as structural
+- Stop searching the design space too early (first fix found feels good enough)
+- Conflate similar-looking patterns (named "funnel" vs behaviorally funnel)
+- Trust my own conclusions without enough independent verification
+
+You should counteract this by being SKEPTICAL.
+
+### Specific claims you should independently verify
+
+For each claim below, I list what to check and the evidence I'd accept
+as refutation. **Do not just confirm; actively try to disprove.**
+
+#### Claim A: "M1Lite is a strict improvement over oracle_pure"
+
+**My evidence**: 22 shared-opp head-to-head shows 18 dead-heat-perfect +
+3 dead-heat-zero + 1 M1Lite improved + 0 regressions.
+
+**How to verify yourself**:
+```bash
+# Re-run the head-to-head comparison from the JSON
+python3 << 'EOF'
+import json
+recs = json.load(open('/tmp/all_records_v2.json'))
+# Wait — does this file still exist? Verify first.
+EOF
+ls -la /tmp/all_records_v2.json 2>&1
+# If gone, regenerate by re-fetching from the live API:
+# python3 << 'EOF'
+# import json, requests
+# cj = json.load(open('/Users/tahakhan/.c1_session.json'))
+# cookies = {'sessionid': cj['sessionid']}
+# ALGOS = {361251:'oracle_pure', 361264:'oracle_pure', 361265:'oracle_pure',
+#          361357:'m1_lite', 361353:'m1_lite', 361359:'m1_lite'}
+# # ... fetch /api/game/algo/{id}/matches for each ...
+# EOF
+```
+
+**What would refute my claim**:
+- Any shared opp where M1Lite LOSES that oracle_pure WINS (a regression I missed)
+- The improvement on ameyg/funnel-rush-v7 being noise rather than systematic
+- New live data showing M1Lite regressing on opps I didn't have data for
+
+#### Claim B: "The trap bug causes the suchir-g and not-tnb losses"
+
+**My evidence**: Agent forensic analysis found 75% / 39% of mobiles
+self-destructed in oracle's own territory; 100% of SDs at (2,11) or
+(25,11); supports were at (12,11)/(15,11) per the buggy SUPPORTS_BACK.
+
+**How to verify yourself**:
+```python
+# Open one of the trap replays directly and check
+import json
+from collections import Counter
+fp = '/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/replays/oracle_pure_live/m1_lite_inst3_L_suchir-g_python-algo-baseline_t100_15314226.replay'
+sd_locs = []
+with open(fp) as f:
+    for line in f:
+        try: d = json.loads(line)
+        except: continue
+        ti = d.get('turnInfo')
+        if not ti or ti[0] != 1: continue
+        for sd in d.get('events',{}).get('selfDestruct', []) or []:
+            # selfDestruct event format: [[x,y], hit_units, attacker_uid, owner]
+            if not sd or len(sd) < 4: continue
+            loc, _, _, owner = sd[:4]
+            if int(owner) == 1:  # oracle is P1
+                sd_locs.append(tuple(loc))
+print(f'Self-destruct locations (P1=oracle): {Counter(sd_locs).most_common(5)}')
+# If 75%+ are at (2,11) or (25,11), trap confirmed
+# If they're scattered, my conclusion is wrong
+```
+
+**What would refute my claim**:
+- Self-destruct locations are scattered (not concentrated at 2,11/25,11)
+- The match has many breaches but few self-destructs (different failure mode)
+- Oracle's structures don't actually include supports at (12,11)/(15,11)
+  (I might have been confused about which template fired)
+
+#### Claim C: "Path-viability check costs 0.255ms/call"
+
+**My evidence**: Benchmark this session.
+
+**How to verify yourself**:
+```python
+# Re-run the benchmark with a NEW state
+import sys, json, time
+sys.path.insert(0, '/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/oracle_pure')
+import gamelib
+from collections import deque
+
+with open('/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/oracle_pure/data/citadel_config_snapshot.json') as f:
+    config = json.load(f)
+# Build a state, run _is_offense_viable() in a loop
+# Time it. If significantly slower than 0.255ms (e.g., >5ms), my claim is wrong.
+```
+
+Pay attention to:
+- The grid size (28×28) is fixed; BFS scales with explored cells
+- pysim slowness vs the actual algo loop has different characteristics
+- The `gs.contains_stationary_unit` call inside the helper might be slower than I measured
+
+**What would refute my claim**:
+- Benchmark shows >2ms/call consistently (M2 prompt's gate already
+  catches this — the test asserts <2ms)
+- Per-turn overhead exceeds 50ms (would still be <0.5% of budget but
+  worth noting)
+
+#### Claim D: "The 3 unsolved counter-patterns are byte-identical losses"
+
+**My evidence**: Agent claimed replays are byte-identical across versions.
+
+**How to verify yourself**:
+```bash
+# md5 the replay payload of two losses to the same opp
+ROOT=/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/replays/oracle_pure_live
+md5 "$ROOT/oracle_pure_inst1_L_aa0_funnel-a_t58_15313355.replay" 2>/dev/null
+md5 "$ROOT/oracle_pure_inst2_2042_L_aa0_funnel-a_t58_15313560.replay" 2>/dev/null
+# If they differ, "byte-identical" claim was loose language —
+# they're STRUCTURALLY similar but not literally byte-equal
+```
+
+The agent's "byte-identical" was probably loose — they meant "outcome
+identical" or "events identical from oracle's perspective." Verify.
+
+**What would refute my claim**:
+- The replays differ structurally (different opp behavior between
+  instances)
+- A different version's loss replay shows oracle making meaningfully
+  different decisions
+- Therefore: the losses ARE solvable, just not by the algorithm we
+  currently have
+
+#### Claim E: "ELO is a confounded metric"
+
+**My evidence**: Aggregate logic — ladder matchmaker pairs each algo
+with different opps, so ELO trajectories aren't comparable.
+
+**How to verify yourself**:
+- Compare match-distribution histograms across the 6 algo instances
+- If they faced wildly different opp populations, ELO comparison is
+  invalid
+- If they faced similar populations, ELO IS comparable
+
+**What would refute my claim**:
+- All 6 instances faced statistically similar opp distributions, so
+  ELO IS a fair comparison
+- (In which case M1Lite's lower aggregate ELO would be evidence against
+  it being strictly better — and the head-to-head comparison would need
+  re-examination)
+
+#### Claim F: "More compute = better is empirically false"
+
+**My evidence**: Three documented regressions when bumping samples /
+prior data.
+
+**How to verify yourself**:
+```bash
+# Read the actual REPORT.md and MILESTONE_M1_RESULTS.md
+cat algos/oracle_pure/REPORT.md | grep -A5 "k_opp_phase1=2"
+cat algos/oracle_pure/MILESTONE_M1_RESULTS.md
+# Verify the regression claims literally appear in the docs
+```
+
+**What would refute my claim**:
+- The regression claims aren't actually documented (I might have
+  misremembered)
+- The regressions had a different root cause than "more samples"
+- A more recent attempt with adaptive expansion (G4 from prior plans)
+  might work even though naive expansion didn't
+
+### Things I think are RIGHT but you should still verify
+
+These are claims I have high confidence in, but skeptical verification
+is worth ~10 minutes each:
+
+1. **The path-viability check is genuinely structural (not hardcoded)**
+   — verify by considering: would it help against a hypothetical 9th
+   funnel attacking a tile we haven't seen? My answer: yes, because the
+   check works on ANY blocked layout. Yours: ?
+
+2. **The shipped M1Lite preserves all of oracle_pure's wins on the
+   shared opps** — verify by independently parsing
+   `/tmp/all_records_v2.json` (or regenerating it from the API). My
+   table at §5 might have errors.
+
+3. **The current M2 plan correctly addresses the trap bug** — verify
+   by running the trap-state through `_is_offense_viable()` after
+   implementing it; the buggy plan should be REJECTED. The
+   M2_IMPLEMENTATION_PROMPT.md test (Gate 2) does this. Confirm the
+   test is correct.
+
+4. **No other defense template has a similar trap-forming pattern** —
+   I haven't exhaustively verified this. Could `defense:diag_reinforce`
+   or `defense:patch{k}` create traps under certain conditions? Worth
+   checking by running them through `_is_offense_viable()` and seeing
+   what surfaces.
+
+### Specific things you should DO before trusting my plan
+
+1. **Run the M2 implementation prompt's Gate 2 test** locally on the
+   current code (BEFORE implementing the fix) — it should FAIL on the
+   buggy supports test. If it doesn't fail, my "trap exists" claim is
+   wrong.
+
+2. **Open one of the trap replays directly** and look at the actual
+   self-destruct events. Don't take my "75% SD" number on faith.
+
+3. **Re-fetch the live match list** from the API. Match counts and
+   ratings might have changed; the head-to-head verdict might no longer
+   be 0 regressions if more matches have happened.
+
+4. **Read the M2 implementation prompt critically** — does the proposed
+   code actually do what it claims? Are there edge cases (e.g., empty
+   spawn tile list, all spawn tiles blocked) that aren't handled?
+
+### How to disagree with me
+
+If your analysis contradicts mine:
+- Document your finding, with citations (file:line, replay frame,
+  benchmark result)
+- Update CONTEXT_HANDOFF.md to reflect the corrected understanding
+- Tell the user: "the prior session claimed X but I verified Y — here's
+  the evidence"
+- Don't just silently override; the user wants visibility into changes
+  of direction
+
+The user's communication style values critical pushback over deferential
+agreement. They will respect a session that says "the prior session was
+wrong about X for these reasons" much more than one that just executes
+the plan blindly.
+
+### The meta-lesson
+
+I've made multiple errors that the user caught by pushing back. The
+errors followed a pattern: I rationalized convenient conclusions
+(hardcoded fixes felt structural; my first proposed fix felt sufficient;
+boss matches looked like losses without checking metadata carefully).
+The fix wasn't to be smarter — it was to be more skeptical of my own
+intuitions and more willing to actively try to disprove them.
+
+You should do the same. Treat my conclusions as starting hypotheses,
+not endpoints.
+
+---
+
+## 16. ⚠️ M2 OUTCOME — implemented, live-tested, REJECTED
+
+**This section supersedes §6 (which describes the M2 plan as
+"in-implementation"). M2 has been completed end-to-end and rejected
+based on live ladder data.** Read this section to understand the
+actual outcome and what it teaches about future fix attempts.
+
+### What happened
+
+1. M2 (path-viability BFS check + ALT-OUTSIDE SUPPORTS_BACK swap) was
+   implemented per `M2_IMPLEMENTATION_PROMPT.md` by a prior session
+2. Local validation gates passed (Tier A 10/10, snorkeldink 2/2, etc.)
+3. M2 was uploaded as `oracle_pure_M2_upload` (2 instances on the live
+   ladder)
+4. Live ladder revealed REGRESSION: M2 went 0/3 vs `ameyg/funnel-rush-v6/v7/v8`
+   while M1Lite went 3/3 on the same opponents
+5. M2 also won against `aa0/funnel-a` (1 match) where both M1Lite and
+   oracle_pure lose — but this single win is far outweighed by the 3
+   regressed matches
+6. Decision: **revert M2; M1Lite is the canonical base**
+
+### Diagnosed mechanism (forensic agent + my independent BFS verification)
+
+- **Change A (path-viability BFS check) did NOT fire** in any of the
+  ameyg matches. It was passive throughout — never rejected a defense
+  template
+- **Change B (SUPPORTS_BACK swap from `(12,11)/(15,11)` to
+  `(10,11)/(17,11)`) caused the regression** via a launcher-selection
+  cascade:
+  - M1Lite's central support at (12,11) shielded scouts on the
+    (14,0) → corner-left path
+  - M2's outside supports at (10,11)/(17,11) shifted the search's
+    preferred launcher to (16,2)/(24,10) which routes scouts through
+    opp's turret cluster
+  - M1Lite scored breaches at T50 → got SP refunds (+6 SP) → built
+    more supports → snowball into opp HP collapse
+  - M2 got 0 breaches → no refunds → stuck at 4 SP → never broke through
+- **dmg/MP comparison: M1Lite 0.111 vs M2 0.021 — 5.3× worse offensive
+  efficiency in M2**
+
+### Critical discovery about Change A's BFS check (the deeper issue)
+
+I independently verified the BFS check during the post-mortem and
+found:
+
+| Config | Launchers viable per BFS |
+|---|---|
+| M1Lite's ORIGINAL `SUPPORTS_BACK = [(12,11),(15,11),(13,10),(14,10)]` | **0/10 — NONE viable** |
+| M2's ALT-OUTSIDE `[(10,11),(17,11),(13,10),(14,10)]` | 8/10 viable |
+
+**M1Lite's currently-shipping `SUPPORTS_BACK` would be REJECTED by the
+BFS check — yet M1Lite wins ameyg matches with this exact config.**
+
+This proves the BFS check is more conservative than the engine's
+actual pathfinder. The engine pathfinder is more flexible:
+- Edge tiles at y=13 are direct entries to opp territory (skipping the
+  y=12 wall row gaps)
+- Skeletons are built INCREMENTALLY — at the turn when supports are
+  placed, not all walls are present yet, so paths exist that my
+  "full-skeleton BFS" doesn't model
+- The orthogonal-only BFS may miss diagonal step approximations
+
+**The implication**: Change A's BFS as designed would reject many
+plans the engine finds viable. This is a fundamental issue with the
+path-check approach, not just a tuning problem.
+
+### Lessons from M2
+
+1. **Local validation is necessary but not sufficient** — M2 passed
+   Tier A 10/10 (the standard regression suite) but still regressed
+   on ameyg matches. The Tier A opponents (heuristic_v1, Lostkids,
+   funnel_INTER, etc.) don't exercise the launcher-selection-cascade
+   mechanism that ameyg's specific defense layout triggers.
+
+2. **The strict-superset rule needs more opponents** — Tier A's 5
+   opponents don't cover the full opponent space. Future milestones
+   should add ameyg variants to Tier A so this regression class is
+   caught locally.
+
+3. **BFS-based path validation is over-conservative** — proven by the
+   "M1Lite original = 0/10 viable yet wins" finding. Future trap-fix
+   attempts must use a different validation mechanism:
+   - Use sim_rs itself as the path oracle (run a "test scout" from
+     each launcher; if it self-destructs in own territory, the
+     template is bad). This uses the actual engine, not approximate BFS.
+   - OR use the value function — penalize outcomes where mobiles SD
+     in own territory after sim_rs simulation (the deferred T2 fix
+     from v3 plan)
+   - OR just delete `defense:supports` and `defense:supports_only`
+     templates. The empirical data shows M1Lite places them too
+     aggressively (causing the trap in suchir-g and not-tnb losses)
+     and the wins they enable (vs aa0/funnel-a in M2) are stochastic.
+     Deletion is blunt but principled.
+
+4. **My pattern of rationalizing hardcoded fixes continues** — Change B
+   (the SUPPORTS_BACK swap to ALT-OUTSIDE) was hardcoded. The user
+   pushed back and I acknowledged it but shipped it anyway as
+   "necessary triage." It was the change that caused the regression.
+   The user was right to be skeptical. **Do not include hardcoded
+   tile-list patches in future plans even when framed as "triage" or
+   "to make the principled fix work."**
+
+### Current state of the trap bug
+
+The original trap (`defense:supports` placing supports at
+(12,11)/(15,11) sealing the wall row gaps) is **STILL PRESENT in
+M1Lite** and will continue to cause occasional 100-turn HP-tiebreak
+losses against opponents like `suchir-g/python-algo-baseline` and
+`not-tnb/python-algo-tnb`.
+
+The user accepted this cost when reverting M2 — the 3+ wins lost on
+ameyg outweigh the 2 losses fixed on suchir-g/not-tnb.
+
+### What should be tried instead (recommendations for future plan)
+
+If addressing the trap bug remains a priority:
+
+**Option A (most surgical)**: Delete `defense:supports` and
+`defense:supports_only` templates entirely. The empirical evidence
+suggests they're net-negative. This is what I should have proposed
+before, and the user pushed me toward (and I rationalized away).
+
+**Option B (most principled)**: Add a value-function penalty for
+"mobiles that self-destructed in own territory" in `value.py`. This
+uses sim_rs's actual simulation output — no approximate BFS, no
+conservatism error. The penalty would naturally make trap-forming
+plans score lower without hardcoded tile knowledge.
+
+**Option C (most aggressive)**: Use sim_rs as the path validator —
+spawn a synthetic "test scout" from each launcher in the post-deploy
+state and check if it self-destructs in own territory. This is
+expensive but accurate.
+
+Each has tradeoffs documented in `IMPROVEMENT_PLAN_v3.md` and
+`CRITICAL_EVAL_v3.md` — read those if pursuing the trap fix.
+
+### Files to read in priority order if working on the trap fix
+
+1. This section (§16) for what's been tried
+2. The two replay pairs that revealed the regression:
+   - `m1l_inst1_W_ameyg_funnel-rush-v6_t57_15314312.replay` (M1Lite WIN)
+   - `m2_inst1_L_ameyg_funnel-rush-v6_t74_15314756.replay` (M2 LOSS)
+   - Diff them to see the launcher-selection bias mechanism
+3. The original trap losses (still happening in M1Lite):
+   - `m1_lite_inst3_L_suchir-g_python-algo-baseline_t100_15314226.replay`
+   - `m1_lite_inst3_L_not-tnb_python-algo-tnb_t100_15314197.replay`
+
+### Branch / commit map (post-M2-revert)
+
+- `main` — currently at the merge of `oracle-pure-M1-Lite`. M1Lite code
+  shipped. Includes all planning docs (PATH_VIABILITY_PLAN.md,
+  CRITICAL_EVAL_v3.md, M2_IMPLEMENTATION_PROMPT.md, etc.) for context.
+  M2 code NOT included.
+- `oracle-pure-M1-Lite` — the M1Lite work branch (now merged into main)
+- `oracle-pure-M2` — historical record of the M2 attempt. Has the
+  Change A + Change B code in `oracle_core/enumerator.py` and the
+  `oracle_pure_M2_upload/` folder. NOT merged. Preserved for
+  archaeological purposes.
+
+If you want to inspect the M2 changes:
+```bash
+git checkout oracle-pure-M2
+git log -p a39b53c -- algos/oracle_pure/oracle_core/enumerator.py
+git checkout main
+```
+
+### Updated decision matrix on Tier B (snorkeldink)
+
+M1Lite achieves snorkeldink 2/2 (the breakthrough). M2 also achieved
+2/2 in local testing. But the snorkeldink win is preserved across
+both — it's a true test of whether the algo handles snorkeldink's
+specific opening (a sustained Demolisher attack from corner) — and
+both M1Lite and M2 pass it. So **snorkeldink 2/2 doesn't distinguish
+M1Lite from M2 even though it's our "breakthrough indicator"**.
+
+The lesson: snorkeldink is a NECESSARY but not SUFFICIENT signal of
+algorithmic strength. Any future milestone must pass snorkeldink AND
+must not regress on ameyg or other opponent classes.
+
+---
+
+## TL;DR
+
+oracle_pure is a search-driven Citadel Terminal algo. **Current
+canonical base is M1Lite** (G7 fast_copy_state, no other changes).
+3 oracle_pure instances + 3 M1Lite instances live. M2 (path-viability
+check + ALT-OUTSIDE supports) was implemented, shipped, live-tested,
+and **REJECTED** because it regressed vs ameyg/funnel-rush-v6/v7/v8
+(0/3 vs M1Lite's 3/3). The M2 attempt taught us the BFS-based path
+check is more conservative than the engine's actual pathfinder
+(M1Lite's original SUPPORTS_BACK = 0/10 viable per BFS yet wins matches).
+See §16 for full M2 outcome.
+
+The ORIGINAL trap bug (defense:supports trapping our offense in
+suchir-g/not-tnb losses) remains unfixed in M1Lite. The user accepted
+this cost rather than ship M2's regression. Future trap-fix attempts
+must use sim_rs-based validation OR value-function penalty OR template
+deletion — NOT BFS-based path checks (proven over-conservative) and
+NOT hardcoded tile-list swaps (proven to cause launcher-selection
+regressions).
+
+I have been wrong multiple times during this project — see §15's
+track record (which now includes M2 as a 4th major instance). Treat
+my claims as hypotheses to verify, not facts to execute. The user
+values critical pushback. If you find something that contradicts my
+analysis, update this document with the corrected understanding and
+surface it explicitly.
+
+Now go — but verify before you trust.
