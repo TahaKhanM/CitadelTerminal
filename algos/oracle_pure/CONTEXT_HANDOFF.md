@@ -1,6 +1,8 @@
 # Context Handoff — oracle_pure / oracle_pure_M1Lite project state
 
 **Read this entire document before doing any work on oracle_pure.**
+**§16 contains the most recent and most important update — read it
+before assuming anything in §6 about M2 is current.**
 
 This is a context handoff from a previous Claude Code session whose
 context window was about to expire. Everything you need to make
@@ -19,15 +21,25 @@ Correlation One's *Terminal* — a 2-player tower defense game on a 28×28
 diamond grid). The user is `TAHA` (team WICK, team_id 5826) on
 `terminal.c1games.com`.
 
-The algorithm is currently **live on the ladder**: 6 instances total,
-3 of `oracle_pure` (rating 1947–2172) and 3 of `oracle_pure_M1Lite`
-(rating 1806–2103). The variant labeled "M1Lite" is a strict improvement
-over the original (verified head-to-head, see §5).
+**Current canonical base: oracle_pure_M1Lite (G7 fast_copy_state).**
+Live as `oracle_pure_M1Lite_upload`. The earlier M2 attempt
+(path-viability check + ALT-OUTSIDE supports) was implemented,
+shipped, and live-tested — and **REGRESSED vs ameyg/funnel-rush-v6/v7/v8**
+(0/3 where M1Lite is 3/3). M2 has been **rejected and reverted**.
+M1Lite's code is now on `main`. See §16 for the full M2 outcome and
+what it teaches about the failure of the path-check approach.
 
-**Current active work**: M2 milestone — adding a path-viability check to
-prevent the algorithm from trapping its own offense. See §6 for full
-details. The implementation prompt is at
-`algos/oracle_pure/M2_IMPLEMENTATION_PROMPT.md`.
+**Active code state** (verified 2026-04-27):
+- `oracle_core/search.py` has G7 (`_fast_copy_state`); deepcopy fully replaced
+- `oracle_core/enumerator.py` is in M1Lite state — original `SUPPORTS_BACK = [(12,11),(15,11),(13,10),(14,10)]`, NO path-viability check
+- Branch `oracle-pure-M2` preserved as historical record (NOT merged)
+- `oracle_pure_M2_upload/` folder preserved on disk for forensic reference
+
+**No active milestone in flight.** Next step is up to user direction —
+the M2 attempt taught us that simple BFS-based path validation is
+over-conservative (proved that M1Lite's known-good config fails the
+BFS check yet wins matches). Future trap-fix attempts need a different
+approach (see §16's recommendations).
 
 ---
 
@@ -897,6 +909,7 @@ test, not facts to act on.
 | "Boss matches were losses" (initial replay analysis) | All 4 boss matches were WINS — API returns `winning_user=None` for boss matches; you have to use `winning_algo.id` | User corrected me directly |
 | "Patch1 places 1 turret per breach" (FUNNEL_COUNTER_PLAN.md math) | Patch1 places **2 turrets** per breach (verified via code grep) | Code-verification agent caught it |
 | First SUPPORTS_BACK proposed fix `[(13,10),(14,10),(13,9),(14,9)]` was the right fix | My BFS test in this session showed the agent's proposed `[(12,10),(13,10),(14,10),(15,10)]` could create a NEW trap; my own proposal had less shield than ALT-OUTSIDE | I ran an independent BFS verification |
+| **M2 (path check + ALT-OUTSIDE) was a "single coherent fix" that would safely fix the trap** (PATH_VIABILITY_PLAN.md) | **M2 regressed 0/3 vs ameyg/funnel-rush-v6/v7/v8 in live ladder** (M1Lite is 3/3). Change B (the hardcoded tile swap I rationalized as "necessary triage") caused a launcher-selection cascade. Change A's BFS proved more conservative than the engine's actual pathfinder — would reject M1Lite's working config too. **See §16 for full outcome.** | User uploaded M2 to live, then noticed the regression. I verified post-mortem |
 
 **Pattern**: I tend to:
 - Rationalize hardcoded fixes as structural
@@ -1144,28 +1157,212 @@ not endpoints.
 
 ---
 
+## 16. ⚠️ M2 OUTCOME — implemented, live-tested, REJECTED
+
+**This section supersedes §6 (which describes the M2 plan as
+"in-implementation"). M2 has been completed end-to-end and rejected
+based on live ladder data.** Read this section to understand the
+actual outcome and what it teaches about future fix attempts.
+
+### What happened
+
+1. M2 (path-viability BFS check + ALT-OUTSIDE SUPPORTS_BACK swap) was
+   implemented per `M2_IMPLEMENTATION_PROMPT.md` by a prior session
+2. Local validation gates passed (Tier A 10/10, snorkeldink 2/2, etc.)
+3. M2 was uploaded as `oracle_pure_M2_upload` (2 instances on the live
+   ladder)
+4. Live ladder revealed REGRESSION: M2 went 0/3 vs `ameyg/funnel-rush-v6/v7/v8`
+   while M1Lite went 3/3 on the same opponents
+5. M2 also won against `aa0/funnel-a` (1 match) where both M1Lite and
+   oracle_pure lose — but this single win is far outweighed by the 3
+   regressed matches
+6. Decision: **revert M2; M1Lite is the canonical base**
+
+### Diagnosed mechanism (forensic agent + my independent BFS verification)
+
+- **Change A (path-viability BFS check) did NOT fire** in any of the
+  ameyg matches. It was passive throughout — never rejected a defense
+  template
+- **Change B (SUPPORTS_BACK swap from `(12,11)/(15,11)` to
+  `(10,11)/(17,11)`) caused the regression** via a launcher-selection
+  cascade:
+  - M1Lite's central support at (12,11) shielded scouts on the
+    (14,0) → corner-left path
+  - M2's outside supports at (10,11)/(17,11) shifted the search's
+    preferred launcher to (16,2)/(24,10) which routes scouts through
+    opp's turret cluster
+  - M1Lite scored breaches at T50 → got SP refunds (+6 SP) → built
+    more supports → snowball into opp HP collapse
+  - M2 got 0 breaches → no refunds → stuck at 4 SP → never broke through
+- **dmg/MP comparison: M1Lite 0.111 vs M2 0.021 — 5.3× worse offensive
+  efficiency in M2**
+
+### Critical discovery about Change A's BFS check (the deeper issue)
+
+I independently verified the BFS check during the post-mortem and
+found:
+
+| Config | Launchers viable per BFS |
+|---|---|
+| M1Lite's ORIGINAL `SUPPORTS_BACK = [(12,11),(15,11),(13,10),(14,10)]` | **0/10 — NONE viable** |
+| M2's ALT-OUTSIDE `[(10,11),(17,11),(13,10),(14,10)]` | 8/10 viable |
+
+**M1Lite's currently-shipping `SUPPORTS_BACK` would be REJECTED by the
+BFS check — yet M1Lite wins ameyg matches with this exact config.**
+
+This proves the BFS check is more conservative than the engine's
+actual pathfinder. The engine pathfinder is more flexible:
+- Edge tiles at y=13 are direct entries to opp territory (skipping the
+  y=12 wall row gaps)
+- Skeletons are built INCREMENTALLY — at the turn when supports are
+  placed, not all walls are present yet, so paths exist that my
+  "full-skeleton BFS" doesn't model
+- The orthogonal-only BFS may miss diagonal step approximations
+
+**The implication**: Change A's BFS as designed would reject many
+plans the engine finds viable. This is a fundamental issue with the
+path-check approach, not just a tuning problem.
+
+### Lessons from M2
+
+1. **Local validation is necessary but not sufficient** — M2 passed
+   Tier A 10/10 (the standard regression suite) but still regressed
+   on ameyg matches. The Tier A opponents (heuristic_v1, Lostkids,
+   funnel_INTER, etc.) don't exercise the launcher-selection-cascade
+   mechanism that ameyg's specific defense layout triggers.
+
+2. **The strict-superset rule needs more opponents** — Tier A's 5
+   opponents don't cover the full opponent space. Future milestones
+   should add ameyg variants to Tier A so this regression class is
+   caught locally.
+
+3. **BFS-based path validation is over-conservative** — proven by the
+   "M1Lite original = 0/10 viable yet wins" finding. Future trap-fix
+   attempts must use a different validation mechanism:
+   - Use sim_rs itself as the path oracle (run a "test scout" from
+     each launcher; if it self-destructs in own territory, the
+     template is bad). This uses the actual engine, not approximate BFS.
+   - OR use the value function — penalize outcomes where mobiles SD
+     in own territory after sim_rs simulation (the deferred T2 fix
+     from v3 plan)
+   - OR just delete `defense:supports` and `defense:supports_only`
+     templates. The empirical data shows M1Lite places them too
+     aggressively (causing the trap in suchir-g and not-tnb losses)
+     and the wins they enable (vs aa0/funnel-a in M2) are stochastic.
+     Deletion is blunt but principled.
+
+4. **My pattern of rationalizing hardcoded fixes continues** — Change B
+   (the SUPPORTS_BACK swap to ALT-OUTSIDE) was hardcoded. The user
+   pushed back and I acknowledged it but shipped it anyway as
+   "necessary triage." It was the change that caused the regression.
+   The user was right to be skeptical. **Do not include hardcoded
+   tile-list patches in future plans even when framed as "triage" or
+   "to make the principled fix work."**
+
+### Current state of the trap bug
+
+The original trap (`defense:supports` placing supports at
+(12,11)/(15,11) sealing the wall row gaps) is **STILL PRESENT in
+M1Lite** and will continue to cause occasional 100-turn HP-tiebreak
+losses against opponents like `suchir-g/python-algo-baseline` and
+`not-tnb/python-algo-tnb`.
+
+The user accepted this cost when reverting M2 — the 3+ wins lost on
+ameyg outweigh the 2 losses fixed on suchir-g/not-tnb.
+
+### What should be tried instead (recommendations for future plan)
+
+If addressing the trap bug remains a priority:
+
+**Option A (most surgical)**: Delete `defense:supports` and
+`defense:supports_only` templates entirely. The empirical evidence
+suggests they're net-negative. This is what I should have proposed
+before, and the user pushed me toward (and I rationalized away).
+
+**Option B (most principled)**: Add a value-function penalty for
+"mobiles that self-destructed in own territory" in `value.py`. This
+uses sim_rs's actual simulation output — no approximate BFS, no
+conservatism error. The penalty would naturally make trap-forming
+plans score lower without hardcoded tile knowledge.
+
+**Option C (most aggressive)**: Use sim_rs as the path validator —
+spawn a synthetic "test scout" from each launcher in the post-deploy
+state and check if it self-destructs in own territory. This is
+expensive but accurate.
+
+Each has tradeoffs documented in `IMPROVEMENT_PLAN_v3.md` and
+`CRITICAL_EVAL_v3.md` — read those if pursuing the trap fix.
+
+### Files to read in priority order if working on the trap fix
+
+1. This section (§16) for what's been tried
+2. The two replay pairs that revealed the regression:
+   - `m1l_inst1_W_ameyg_funnel-rush-v6_t57_15314312.replay` (M1Lite WIN)
+   - `m2_inst1_L_ameyg_funnel-rush-v6_t74_15314756.replay` (M2 LOSS)
+   - Diff them to see the launcher-selection bias mechanism
+3. The original trap losses (still happening in M1Lite):
+   - `m1_lite_inst3_L_suchir-g_python-algo-baseline_t100_15314226.replay`
+   - `m1_lite_inst3_L_not-tnb_python-algo-tnb_t100_15314197.replay`
+
+### Branch / commit map (post-M2-revert)
+
+- `main` — currently at the merge of `oracle-pure-M1-Lite`. M1Lite code
+  shipped. Includes all planning docs (PATH_VIABILITY_PLAN.md,
+  CRITICAL_EVAL_v3.md, M2_IMPLEMENTATION_PROMPT.md, etc.) for context.
+  M2 code NOT included.
+- `oracle-pure-M1-Lite` — the M1Lite work branch (now merged into main)
+- `oracle-pure-M2` — historical record of the M2 attempt. Has the
+  Change A + Change B code in `oracle_core/enumerator.py` and the
+  `oracle_pure_M2_upload/` folder. NOT merged. Preserved for
+  archaeological purposes.
+
+If you want to inspect the M2 changes:
+```bash
+git checkout oracle-pure-M2
+git log -p a39b53c -- algos/oracle_pure/oracle_core/enumerator.py
+git checkout main
+```
+
+### Updated decision matrix on Tier B (snorkeldink)
+
+M1Lite achieves snorkeldink 2/2 (the breakthrough). M2 also achieved
+2/2 in local testing. But the snorkeldink win is preserved across
+both — it's a true test of whether the algo handles snorkeldink's
+specific opening (a sustained Demolisher attack from corner) — and
+both M1Lite and M2 pass it. So **snorkeldink 2/2 doesn't distinguish
+M1Lite from M2 even though it's our "breakthrough indicator"**.
+
+The lesson: snorkeldink is a NECESSARY but not SUFFICIENT signal of
+algorithmic strength. Any future milestone must pass snorkeldink AND
+must not regress on ameyg or other opponent classes.
+
+---
+
 ## TL;DR
 
-oracle_pure is a search-driven Citadel Terminal algo currently on the
-ladder at 1806-2103 ELO across 6 instances (3 oracle_pure + 3 M1Lite,
-where M1Lite is a strict improvement — but verify this yourself per
-§15.A). Replay analysis discovered a trap bug where `defense:supports`
-template traps oracle's own offense by sealing the wall row's launch
-gaps (verify yourself per §15.B). M2 fixes this with a path-viability
-BFS check (principled, generalizes — but you should think about edge
-cases per §15.C and §15-things-I-think-are-right) plus an ALT-OUTSIDE
-SUPPORTS_BACK swap (necessary triage so the path check doesn't
-eliminate ALL support templates). The implementation prompt is at
-`M2_IMPLEMENTATION_PROMPT.md`. Compute overhead claimed at 1.1% of
-the 11s budget (verify yourself per §15.C). 3 unsolved counter-patterns
-(aa0/funnel-a, ashmit/funnel-crush-before, Egil/siege) are deferred
-— but verify they really ARE byte-identical losses per §15.D before
-accepting they're unsolvable.
+oracle_pure is a search-driven Citadel Terminal algo. **Current
+canonical base is M1Lite** (G7 fast_copy_state, no other changes).
+3 oracle_pure instances + 3 M1Lite instances live. M2 (path-viability
+check + ALT-OUTSIDE supports) was implemented, shipped, live-tested,
+and **REJECTED** because it regressed vs ameyg/funnel-rush-v6/v7/v8
+(0/3 vs M1Lite's 3/3). The M2 attempt taught us the BFS-based path
+check is more conservative than the engine's actual pathfinder
+(M1Lite's original SUPPORTS_BACK = 0/10 viable per BFS yet wins matches).
+See §16 for full M2 outcome.
 
-I have been wrong multiple times during this project — see §15's track
-record. Treat my claims as hypotheses to verify, not facts to execute.
-The user values critical pushback. If you find something that
-contradicts my analysis, update this document with the corrected
-understanding and surface it explicitly.
+The ORIGINAL trap bug (defense:supports trapping our offense in
+suchir-g/not-tnb losses) remains unfixed in M1Lite. The user accepted
+this cost rather than ship M2's regression. Future trap-fix attempts
+must use sim_rs-based validation OR value-function penalty OR template
+deletion — NOT BFS-based path checks (proven over-conservative) and
+NOT hardcoded tile-list swaps (proven to cause launcher-selection
+regressions).
+
+I have been wrong multiple times during this project — see §15's
+track record (which now includes M2 as a 4th major instance). Treat
+my claims as hypotheses to verify, not facts to execute. The user
+values critical pushback. If you find something that contradicts my
+analysis, update this document with the corrected understanding and
+surface it explicitly.
 
 Now go — but verify before you trust.
