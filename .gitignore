@@ -45,8 +45,27 @@ algos/athena/*.so
 algos/athena/sim/*.so
 .venv-sim/
 
-# Replay corpus (reproducible via tools/bulk_download_my_replays.py)
-Ranked Replays/
+# Replay corpus (reproducible via tools/bulk_download_my_replays.py).
+# By default ignore everything in Ranked Replays/ — but whitelist the Oracle
+# subset we treat as a versioned backtest corpus (see docs/BACKTEST_CONTEXT.md).
+Ranked Replays/*
+!Ranked Replays/ORACLE_REPLAYS.md
+!Ranked Replays/ORACLE_REPLAYS_MANIFEST.json
+!Ranked Replays/_provenance/
+!Ranked Replays/oracle_pure_upload/
+!Ranked Replays/oracle_upload/
+!Ranked Replays/oracle_pure_M2_upload/
+!Ranked Replays/oracle_pure_M1Lite_upload/
+!Ranked Replays/oracle_pure_M1Lite_IS5_upload/
+!Ranked Replays/oracle_pure_M1Lite_IS6_upload/
+!Ranked Replays/oracle_pure_M1Lite_VA_upload/
+!Ranked Replays/oracle_pure_M1Lite_VC_upload/
+!Ranked Replays/oracle_pure_M1Lite_VD_upload/
+!Ranked Replays/oracle_pure_M1Lite_VF_upload/
+!Ranked Replays/smart_oracle_vd_upload/
+# Don't track the _source/ symlinks — they point at upload folders that
+# already live elsewhere in the tree.
+Ranked Replays/*/_source
 
 # Upload folders at project root (reproducible from algos/<name>/)
 /athena_baseline/
