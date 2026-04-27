@@ -879,22 +879,293 @@ after M2 ships.
 
 ---
 
+## 15. ⚠️ SKEPTICAL VERIFICATION — DO NOT TRUST MY CONCLUSIONS BLINDLY
+
+**This section is the most important.** Everything above is my analysis.
+I have been WRONG multiple times. The user has pushed back on me
+correctly more than once. You should treat my claims as HYPOTHESES to
+test, not facts to act on.
+
+### My documented track record of being wrong
+
+| What I claimed | What was actually true | How the user/I caught it |
+|---|---|---|
+| "All 8 oracle_pure losses are funnel archetype" (FUNNEL_COUNTER_PLAN.md) | Of 8 losses, 5 were funnel; 3 were a different archetype (demo-siege long-loop) | User downloaded more replays, demanded I re-analyze the "different name" losses; I had grouped by algo NAME not BEHAVIOR |
+| "F1 (flank-corridor templates) is structural" (FUNNEL_COUNTER_PLAN.md) | F1 was hardcoded — encoded 22 specific tiles from observed losses, would have walled oracle's own launchers | User demanded critical evaluation; agent audit caught it |
+| "F4 (archetype-detector) tunes params, doesn't switch strategy" | F4 was exactly the heuristic-mode-switch the project anti-patterns forbid | Critical audit caught it; the plan's OWN §4 NOT-TO-DO list said this is forbidden |
+| "T0 (move SUPPORTS_BACK to (13,9)/(14,9)) is structural" (IMPROVEMENT_PLAN_v3.md) | T0 was hardcoded patch (just swapping one tile list for another); my proposed fix gave 8% LESS shield than original | User asked for critical evaluation; I found ALT-OUTSIDE preserves shield AND fixes trap |
+| "Boss matches were losses" (initial replay analysis) | All 4 boss matches were WINS — API returns `winning_user=None` for boss matches; you have to use `winning_algo.id` | User corrected me directly |
+| "Patch1 places 1 turret per breach" (FUNNEL_COUNTER_PLAN.md math) | Patch1 places **2 turrets** per breach (verified via code grep) | Code-verification agent caught it |
+| First SUPPORTS_BACK proposed fix `[(13,10),(14,10),(13,9),(14,9)]` was the right fix | My BFS test in this session showed the agent's proposed `[(12,10),(13,10),(14,10),(15,10)]` could create a NEW trap; my own proposal had less shield than ALT-OUTSIDE | I ran an independent BFS verification |
+
+**Pattern**: I tend to:
+- Rationalize hardcoded fixes as structural
+- Stop searching the design space too early (first fix found feels good enough)
+- Conflate similar-looking patterns (named "funnel" vs behaviorally funnel)
+- Trust my own conclusions without enough independent verification
+
+You should counteract this by being SKEPTICAL.
+
+### Specific claims you should independently verify
+
+For each claim below, I list what to check and the evidence I'd accept
+as refutation. **Do not just confirm; actively try to disprove.**
+
+#### Claim A: "M1Lite is a strict improvement over oracle_pure"
+
+**My evidence**: 22 shared-opp head-to-head shows 18 dead-heat-perfect +
+3 dead-heat-zero + 1 M1Lite improved + 0 regressions.
+
+**How to verify yourself**:
+```bash
+# Re-run the head-to-head comparison from the JSON
+python3 << 'EOF'
+import json
+recs = json.load(open('/tmp/all_records_v2.json'))
+# Wait — does this file still exist? Verify first.
+EOF
+ls -la /tmp/all_records_v2.json 2>&1
+# If gone, regenerate by re-fetching from the live API:
+# python3 << 'EOF'
+# import json, requests
+# cj = json.load(open('/Users/tahakhan/.c1_session.json'))
+# cookies = {'sessionid': cj['sessionid']}
+# ALGOS = {361251:'oracle_pure', 361264:'oracle_pure', 361265:'oracle_pure',
+#          361357:'m1_lite', 361353:'m1_lite', 361359:'m1_lite'}
+# # ... fetch /api/game/algo/{id}/matches for each ...
+# EOF
+```
+
+**What would refute my claim**:
+- Any shared opp where M1Lite LOSES that oracle_pure WINS (a regression I missed)
+- The improvement on ameyg/funnel-rush-v7 being noise rather than systematic
+- New live data showing M1Lite regressing on opps I didn't have data for
+
+#### Claim B: "The trap bug causes the suchir-g and not-tnb losses"
+
+**My evidence**: Agent forensic analysis found 75% / 39% of mobiles
+self-destructed in oracle's own territory; 100% of SDs at (2,11) or
+(25,11); supports were at (12,11)/(15,11) per the buggy SUPPORTS_BACK.
+
+**How to verify yourself**:
+```python
+# Open one of the trap replays directly and check
+import json
+from collections import Counter
+fp = '/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/replays/oracle_pure_live/m1_lite_inst3_L_suchir-g_python-algo-baseline_t100_15314226.replay'
+sd_locs = []
+with open(fp) as f:
+    for line in f:
+        try: d = json.loads(line)
+        except: continue
+        ti = d.get('turnInfo')
+        if not ti or ti[0] != 1: continue
+        for sd in d.get('events',{}).get('selfDestruct', []) or []:
+            # selfDestruct event format: [[x,y], hit_units, attacker_uid, owner]
+            if not sd or len(sd) < 4: continue
+            loc, _, _, owner = sd[:4]
+            if int(owner) == 1:  # oracle is P1
+                sd_locs.append(tuple(loc))
+print(f'Self-destruct locations (P1=oracle): {Counter(sd_locs).most_common(5)}')
+# If 75%+ are at (2,11) or (25,11), trap confirmed
+# If they're scattered, my conclusion is wrong
+```
+
+**What would refute my claim**:
+- Self-destruct locations are scattered (not concentrated at 2,11/25,11)
+- The match has many breaches but few self-destructs (different failure mode)
+- Oracle's structures don't actually include supports at (12,11)/(15,11)
+  (I might have been confused about which template fired)
+
+#### Claim C: "Path-viability check costs 0.255ms/call"
+
+**My evidence**: Benchmark this session.
+
+**How to verify yourself**:
+```python
+# Re-run the benchmark with a NEW state
+import sys, json, time
+sys.path.insert(0, '/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/oracle_pure')
+import gamelib
+from collections import deque
+
+with open('/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/algos/oracle_pure/data/citadel_config_snapshot.json') as f:
+    config = json.load(f)
+# Build a state, run _is_offense_viable() in a loop
+# Time it. If significantly slower than 0.255ms (e.g., >5ms), my claim is wrong.
+```
+
+Pay attention to:
+- The grid size (28×28) is fixed; BFS scales with explored cells
+- pysim slowness vs the actual algo loop has different characteristics
+- The `gs.contains_stationary_unit` call inside the helper might be slower than I measured
+
+**What would refute my claim**:
+- Benchmark shows >2ms/call consistently (M2 prompt's gate already
+  catches this — the test asserts <2ms)
+- Per-turn overhead exceeds 50ms (would still be <0.5% of budget but
+  worth noting)
+
+#### Claim D: "The 3 unsolved counter-patterns are byte-identical losses"
+
+**My evidence**: Agent claimed replays are byte-identical across versions.
+
+**How to verify yourself**:
+```bash
+# md5 the replay payload of two losses to the same opp
+ROOT=/Users/tahakhan/Documents/Work/Projects/CitadelTerminal/replays/oracle_pure_live
+md5 "$ROOT/oracle_pure_inst1_L_aa0_funnel-a_t58_15313355.replay" 2>/dev/null
+md5 "$ROOT/oracle_pure_inst2_2042_L_aa0_funnel-a_t58_15313560.replay" 2>/dev/null
+# If they differ, "byte-identical" claim was loose language —
+# they're STRUCTURALLY similar but not literally byte-equal
+```
+
+The agent's "byte-identical" was probably loose — they meant "outcome
+identical" or "events identical from oracle's perspective." Verify.
+
+**What would refute my claim**:
+- The replays differ structurally (different opp behavior between
+  instances)
+- A different version's loss replay shows oracle making meaningfully
+  different decisions
+- Therefore: the losses ARE solvable, just not by the algorithm we
+  currently have
+
+#### Claim E: "ELO is a confounded metric"
+
+**My evidence**: Aggregate logic — ladder matchmaker pairs each algo
+with different opps, so ELO trajectories aren't comparable.
+
+**How to verify yourself**:
+- Compare match-distribution histograms across the 6 algo instances
+- If they faced wildly different opp populations, ELO comparison is
+  invalid
+- If they faced similar populations, ELO IS comparable
+
+**What would refute my claim**:
+- All 6 instances faced statistically similar opp distributions, so
+  ELO IS a fair comparison
+- (In which case M1Lite's lower aggregate ELO would be evidence against
+  it being strictly better — and the head-to-head comparison would need
+  re-examination)
+
+#### Claim F: "More compute = better is empirically false"
+
+**My evidence**: Three documented regressions when bumping samples /
+prior data.
+
+**How to verify yourself**:
+```bash
+# Read the actual REPORT.md and MILESTONE_M1_RESULTS.md
+cat algos/oracle_pure/REPORT.md | grep -A5 "k_opp_phase1=2"
+cat algos/oracle_pure/MILESTONE_M1_RESULTS.md
+# Verify the regression claims literally appear in the docs
+```
+
+**What would refute my claim**:
+- The regression claims aren't actually documented (I might have
+  misremembered)
+- The regressions had a different root cause than "more samples"
+- A more recent attempt with adaptive expansion (G4 from prior plans)
+  might work even though naive expansion didn't
+
+### Things I think are RIGHT but you should still verify
+
+These are claims I have high confidence in, but skeptical verification
+is worth ~10 minutes each:
+
+1. **The path-viability check is genuinely structural (not hardcoded)**
+   — verify by considering: would it help against a hypothetical 9th
+   funnel attacking a tile we haven't seen? My answer: yes, because the
+   check works on ANY blocked layout. Yours: ?
+
+2. **The shipped M1Lite preserves all of oracle_pure's wins on the
+   shared opps** — verify by independently parsing
+   `/tmp/all_records_v2.json` (or regenerating it from the API). My
+   table at §5 might have errors.
+
+3. **The current M2 plan correctly addresses the trap bug** — verify
+   by running the trap-state through `_is_offense_viable()` after
+   implementing it; the buggy plan should be REJECTED. The
+   M2_IMPLEMENTATION_PROMPT.md test (Gate 2) does this. Confirm the
+   test is correct.
+
+4. **No other defense template has a similar trap-forming pattern** —
+   I haven't exhaustively verified this. Could `defense:diag_reinforce`
+   or `defense:patch{k}` create traps under certain conditions? Worth
+   checking by running them through `_is_offense_viable()` and seeing
+   what surfaces.
+
+### Specific things you should DO before trusting my plan
+
+1. **Run the M2 implementation prompt's Gate 2 test** locally on the
+   current code (BEFORE implementing the fix) — it should FAIL on the
+   buggy supports test. If it doesn't fail, my "trap exists" claim is
+   wrong.
+
+2. **Open one of the trap replays directly** and look at the actual
+   self-destruct events. Don't take my "75% SD" number on faith.
+
+3. **Re-fetch the live match list** from the API. Match counts and
+   ratings might have changed; the head-to-head verdict might no longer
+   be 0 regressions if more matches have happened.
+
+4. **Read the M2 implementation prompt critically** — does the proposed
+   code actually do what it claims? Are there edge cases (e.g., empty
+   spawn tile list, all spawn tiles blocked) that aren't handled?
+
+### How to disagree with me
+
+If your analysis contradicts mine:
+- Document your finding, with citations (file:line, replay frame,
+  benchmark result)
+- Update CONTEXT_HANDOFF.md to reflect the corrected understanding
+- Tell the user: "the prior session claimed X but I verified Y — here's
+  the evidence"
+- Don't just silently override; the user wants visibility into changes
+  of direction
+
+The user's communication style values critical pushback over deferential
+agreement. They will respect a session that says "the prior session was
+wrong about X for these reasons" much more than one that just executes
+the plan blindly.
+
+### The meta-lesson
+
+I've made multiple errors that the user caught by pushing back. The
+errors followed a pattern: I rationalized convenient conclusions
+(hardcoded fixes felt structural; my first proposed fix felt sufficient;
+boss matches looked like losses without checking metadata carefully).
+The fix wasn't to be smarter — it was to be more skeptical of my own
+intuitions and more willing to actively try to disprove them.
+
+You should do the same. Treat my conclusions as starting hypotheses,
+not endpoints.
+
+---
+
 ## TL;DR
 
 oracle_pure is a search-driven Citadel Terminal algo currently on the
 ladder at 1806-2103 ELO across 6 instances (3 oracle_pure + 3 M1Lite,
-where M1Lite is a strict improvement). Replay analysis discovered a
-trap bug where `defense:supports` template traps oracle's own offense
-by sealing the wall row's launch gaps. M2 fixes this with a path-
-viability BFS check (principled, generalizes) plus an ALT-OUTSIDE
+where M1Lite is a strict improvement — but verify this yourself per
+§15.A). Replay analysis discovered a trap bug where `defense:supports`
+template traps oracle's own offense by sealing the wall row's launch
+gaps (verify yourself per §15.B). M2 fixes this with a path-viability
+BFS check (principled, generalizes — but you should think about edge
+cases per §15.C and §15-things-I-think-are-right) plus an ALT-OUTSIDE
 SUPPORTS_BACK swap (necessary triage so the path check doesn't
 eliminate ALL support templates). The implementation prompt is at
-`M2_IMPLEMENTATION_PROMPT.md`. Compute overhead verified at 1.1% of
-the 11s budget; sims/turn unchanged. Validation: Tier A 10/10 + Tier B
-snorkeldink 2/2 + 5 new path-viability tests + telemetry sanity. If
-gates pass, create `oracle_pure_M2_upload/` folder, commit on branch
-`oracle-pure-M2`, hand off for live validation, do NOT merge to main.
-3 unsolved counter-patterns (aa0/funnel-a, ashmit/funnel-crush-before,
-Egil/siege) are deferred — they need a separate plan.
+`M2_IMPLEMENTATION_PROMPT.md`. Compute overhead claimed at 1.1% of
+the 11s budget (verify yourself per §15.C). 3 unsolved counter-patterns
+(aa0/funnel-a, ashmit/funnel-crush-before, Egil/siege) are deferred
+— but verify they really ARE byte-identical losses per §15.D before
+accepting they're unsolvable.
 
-Now go.
+I have been wrong multiple times during this project — see §15's track
+record. Treat my claims as hypotheses to verify, not facts to execute.
+The user values critical pushback. If you find something that
+contradicts my analysis, update this document with the corrected
+understanding and surface it explicitly.
+
+Now go — but verify before you trust.
