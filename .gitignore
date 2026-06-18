@@ -45,6 +45,9 @@ algos/athena/*.so
 algos/athena/sim/*.so
 .venv-sim/
 
+# Generated Java/third-party build output retained only in source form.
+research/finalist_repos/*/java-algo/build/
+
 # Replay corpus (reproducible via tools/bulk_download_my_replays.py).
 # By default ignore everything in Ranked Replays/ — but whitelist the Oracle
 # subset we treat as a versioned backtest corpus (see docs/BACKTEST_CONTEXT.md).
