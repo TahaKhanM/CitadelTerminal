@@ -1,0 +1,4746 @@
+{
+  "python-algo": [
+    {
+      "file": "Ranked Replays/phalanx_v7/phalanx_v7_loss_python-algo_1732_15310256.replay",
+      "name": "phalanx_v7_loss_python-algo_1732_15310256.replay",
+      "our_algo": "phalanx_v7",
+      "result": "loss",
+      "opp_elo": 1732,
+      "max_turn": 57,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1735_15302640.replay",
+      "name": "v13_second_ring_loss_python-algo_1735_15302640.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1735,
+      "max_turn": 81,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1578_15307012.replay",
+      "name": "v13_second_ring_win_python-algo_1578_15307012.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1578,
+      "max_turn": 75,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1431_15309520.replay",
+      "name": "v13_second_ring_win_python-algo_1431_15309520.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1431,
+      "max_turn": 66,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1535_15309240.replay",
+      "name": "v13_second_ring_win_python-algo_1535_15309240.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1535,
+      "max_turn": 97,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1631_15303107.replay",
+      "name": "v13_second_ring_win_python-algo_1631_15303107.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1631,
+      "max_turn": 81,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1416_15310081.replay",
+      "name": "v13_second_ring_win_python-algo_1416_15310081.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1416,
+      "max_turn": 67,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1542_15309347.replay",
+      "name": "v13_second_ring_loss_python-algo_1542_15309347.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1542,
+      "max_turn": 98,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1502_15303643.replay",
+      "name": "v13_second_ring_win_python-algo_1502_15303643.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1502,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1580_15307517.replay",
+      "name": "v13_second_ring_loss_python-algo_1580_15307517.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1580,
+      "max_turn": 82,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1550_15306171.replay",
+      "name": "v13_second_ring_win_python-algo_1550_15306171.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1550,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1547_15306323.replay",
+      "name": "v13_second_ring_win_python-algo_1547_15306323.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1547,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_1745_15302640.replay",
+      "name": "v13_second_ring_loss_python-algo_1745_15302640.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1745,
+      "max_turn": 81,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1525_15305639.replay",
+      "name": "v13_second_ring_win_python-algo_1525_15305639.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1525,
+      "max_turn": 71,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1599_15303999.replay",
+      "name": "v13_second_ring_win_python-algo_1599_15303999.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1599,
+      "max_turn": 51,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_1524_15309384.replay",
+      "name": "v13_second_ring_win_python-algo_1524_15309384.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1524,
+      "max_turn": 99,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_win_python-algo_1654_15309995.replay",
+      "name": "lostkids_v2_win_python-algo_1654_15309995.replay",
+      "our_algo": "lostkids_v2",
+      "result": "win",
+      "opp_elo": 1654,
+      "max_turn": 37,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_win_python-algo_1576_15309994.replay",
+      "name": "lostkids_v2_win_python-algo_1576_15309994.replay",
+      "our_algo": "lostkids_v2",
+      "result": "win",
+      "opp_elo": 1576,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo_1616_15310314.replay",
+      "name": "v4_smartdemo_win_python-algo_1616_15310314.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1616,
+      "max_turn": 41,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_python-algo_1534_15310303.replay",
+      "name": "v4_smartdemo_loss_python-algo_1534_15310303.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "loss",
+      "opp_elo": 1534,
+      "max_turn": 50,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo_1536_15310308.replay",
+      "name": "v4_smartdemo_win_python-algo_1536_15310308.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1536,
+      "max_turn": 38,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_python-algo_1765_15310316.replay",
+      "name": "v4_smartdemo_loss_python-algo_1765_15310316.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "loss",
+      "opp_elo": 1765,
+      "max_turn": 51,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo_1281_15310304.replay",
+      "name": "v4_smartdemo_win_python-algo_1281_15310304.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1281,
+      "max_turn": 38,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1816_15308144.replay",
+      "name": "baseline_win_python-algo_1816_15308144.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1816,
+      "max_turn": 39,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1794_15307292.replay",
+      "name": "baseline_win_python-algo_1794_15307292.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1794,
+      "max_turn": 41,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo_1953_15308747.replay",
+      "name": "baseline_loss_python-algo_1953_15308747.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1953,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1976_15308059.replay",
+      "name": "baseline_win_python-algo_1976_15308059.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1976,
+      "max_turn": 39,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1654_15307295.replay",
+      "name": "baseline_win_python-algo_1654_15307295.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1654,
+      "max_turn": 37,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo_1765_15309919.replay",
+      "name": "baseline_loss_python-algo_1765_15309919.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1765,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1671_15307295.replay",
+      "name": "baseline_win_python-algo_1671_15307295.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1671,
+      "max_turn": 37,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo_1734_15309919.replay",
+      "name": "baseline_loss_python-algo_1734_15309919.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1734,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1797_15309282.replay",
+      "name": "baseline_win_python-algo_1797_15309282.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1797,
+      "max_turn": 49,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo_1890_15308645.replay",
+      "name": "baseline_loss_python-algo_1890_15308645.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1890,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1644_15307295.replay",
+      "name": "baseline_win_python-algo_1644_15307295.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1644,
+      "max_turn": 37,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo_1913_15308651.replay",
+      "name": "baseline_loss_python-algo_1913_15308651.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1913,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1866_15308019.replay",
+      "name": "baseline_win_python-algo_1866_15308019.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1866,
+      "max_turn": 44,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo_1909_15308122.replay",
+      "name": "baseline_loss_python-algo_1909_15308122.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1909,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1713_15309440.replay",
+      "name": "baseline_win_python-algo_1713_15309440.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1713,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo_1815_15307462.replay",
+      "name": "baseline_win_python-algo_1815_15307462.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1815,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1429_15310050.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1429_15310050.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1429,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1463_15305870.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1463_15305870.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1463,
+      "max_turn": 90,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1601_15307154.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1601_15307154.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1601,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1637_15305596.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo_1637_15305596.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1637,
+      "max_turn": 50,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1381_15305783.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1381_15305783.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1381,
+      "max_turn": 88,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1534_15305973.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1534_15305973.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1534,
+      "max_turn": 86,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1623_15307870.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo_1623_15307870.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1623,
+      "max_turn": 63,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1640_15307346.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo_1640_15307346.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1640,
+      "max_turn": 60,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1492_15307468.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1492_15307468.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1492,
+      "max_turn": 94,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1440_15306745.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo_1440_15306745.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1440,
+      "max_turn": 52,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1548_15306264.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1548_15306264.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1548,
+      "max_turn": 58,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_1447_15306413.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_1447_15306413.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1447,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo_1398_15307461.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo_1398_15307461.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1398,
+      "max_turn": 45,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1440_15306740.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1440_15306740.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1440,
+      "max_turn": 52,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1430_15307793.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1430_15307793.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1430,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1679_15306583.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1679_15306583.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1679,
+      "max_turn": 82,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1469_15306106.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1469_15306106.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1469,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1520_15306286.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1520_15306286.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1520,
+      "max_turn": 76,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1815_15307436.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1815_15307436.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1815,
+      "max_turn": 49,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1644_15307923.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1644_15307923.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1644,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1057_15307698.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1057_15307698.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1057,
+      "max_turn": 1,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1398_15307454.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1398_15307454.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1398,
+      "max_turn": 45,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1471_15305840.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1471_15305840.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1471,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1082_15309249.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1082_15309249.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1082,
+      "max_turn": 0,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1547_15306327.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1547_15306327.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1547,
+      "max_turn": 78,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1408_15307414.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1408_15307414.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1408,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1640_15307339.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1640_15307339.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1640,
+      "max_turn": 60,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1851_15308100.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1851_15308100.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1851,
+      "max_turn": 40,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1573_15308429.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1573_15308429.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1573,
+      "max_turn": 69,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1492_15307446.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1492_15307446.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1492,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1890_15308637.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1890_15308637.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1890,
+      "max_turn": 46,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_1549_15307108.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_1549_15307108.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1549,
+      "max_turn": 86,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_1457_15306253.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_1457_15306253.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1457,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_baseline/athena_baseline_win_python-algo_1453_15309733.replay",
+      "name": "athena_baseline_win_python-algo_1453_15309733.replay",
+      "our_algo": "athena_baseline",
+      "result": "win",
+      "opp_elo": 1453,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_baseline/athena_baseline_win_python-algo_1497_15309718.replay",
+      "name": "athena_baseline_win_python-algo_1497_15309718.replay",
+      "our_algo": "athena_baseline",
+      "result": "win",
+      "opp_elo": 1497,
+      "max_turn": 49,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo_1536_15310255.replay",
+      "name": "athena_v_supports_loss_python-algo_1536_15310255.replay",
+      "our_algo": "athena_v_supports",
+      "result": "loss",
+      "opp_elo": 1536,
+      "max_turn": 44,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_win_python-algo_1403_15310260.replay",
+      "name": "athena_v_supports_win_python-algo_1403_15310260.replay",
+      "our_algo": "athena_v_supports",
+      "result": "win",
+      "opp_elo": 1403,
+      "max_turn": 45,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo_1534_15310267.replay",
+      "name": "athena_v_supports_loss_python-algo_1534_15310267.replay",
+      "our_algo": "athena_v_supports",
+      "result": "loss",
+      "opp_elo": 1534,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_win_python-algo_1414_15310260.replay",
+      "name": "athena_v_supports_win_python-algo_1414_15310260.replay",
+      "our_algo": "athena_v_supports",
+      "result": "win",
+      "opp_elo": 1414,
+      "max_turn": 45,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo_1548_15310255.replay",
+      "name": "athena_v_supports_loss_python-algo_1548_15310255.replay",
+      "our_algo": "athena_v_supports",
+      "result": "loss",
+      "opp_elo": 1548,
+      "max_turn": 44,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1425_15310140.replay",
+      "name": "lostkids_v3_codex_loss_python-algo_1425_15310140.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1425,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1322_15310137.replay",
+      "name": "lostkids_v3_codex_loss_python-algo_1322_15310137.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1322,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1414_15310140.replay",
+      "name": "lostkids_v3_codex_loss_python-algo_1414_15310140.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1414,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1403_15310140.replay",
+      "name": "lostkids_v3_codex_loss_python-algo_1403_15310140.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1403,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo_1281_15310137.replay",
+      "name": "lostkids_v3_codex_loss_python-algo_1281_15310137.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1281,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo_1038_15310234.replay",
+      "name": "lostkids_v3_codex_win_python-algo_1038_15310234.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1038,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo_1431_15309517.replay",
+      "name": "athena_v3_planner_loss_python-algo_1431_15309517.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "loss",
+      "opp_elo": 1431,
+      "max_turn": 58,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_win_python-algo_1442_15309490.replay",
+      "name": "athena_v3_planner_win_python-algo_1442_15309490.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "win",
+      "opp_elo": 1442,
+      "max_turn": 40,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo_1637_15309486.replay",
+      "name": "athena_v3_planner_loss_python-algo_1637_15309486.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "loss",
+      "opp_elo": 1637,
+      "max_turn": 85,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_win_python-algo_1439_15309485.replay",
+      "name": "athena_v3_planner_win_python-algo_1439_15309485.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "win",
+      "opp_elo": 1439,
+      "max_turn": 40,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "streeter": [
+    {
+      "file": "Ranked Replays/phalanx_v7/phalanx_v7_win_streeter_1636_15310252.replay",
+      "name": "phalanx_v7_win_streeter_1636_15310252.replay",
+      "our_algo": "phalanx_v7",
+      "result": "win",
+      "opp_elo": 1636,
+      "max_turn": 58,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_streeter_1444_15305087.replay",
+      "name": "v13_second_ring_win_streeter_1444_15305087.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1444,
+      "max_turn": 78,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_streeter_1647_15307280.replay",
+      "name": "baseline_loss_streeter_1647_15307280.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1647,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_streeter_1636_15307280.replay",
+      "name": "baseline_loss_streeter_1636_15307280.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1636,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_streeter_1655_15307280.replay",
+      "name": "baseline_loss_streeter_1655_15307280.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1655,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "switch2": [
+    {
+      "file": "Ranked Replays/phalanx_v7/phalanx_v7_loss_switch2_1798_15310254.replay",
+      "name": "phalanx_v7_loss_switch2_1798_15310254.replay",
+      "our_algo": "phalanx_v7",
+      "result": "loss",
+      "opp_elo": 1798,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_loss_switch2_1782_15309996.replay",
+      "name": "lostkids_v2_loss_switch2_1782_15309996.replay",
+      "our_algo": "lostkids_v2",
+      "result": "loss",
+      "opp_elo": 1782,
+      "max_turn": 48,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_switch2_1882_15309184.replay",
+      "name": "baseline_loss_switch2_1882_15309184.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1882,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_switch2_1895_15308578.replay",
+      "name": "baseline_win_switch2_1895_15308578.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1895,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_switch2_1840_15309211.replay",
+      "name": "baseline_loss_switch2_1840_15309211.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1840,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_switch2_1686_15308792.replay",
+      "name": "baseline_loss_switch2_1686_15308792.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1686,
+      "max_turn": 50,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_switch2_1798_15309211.replay",
+      "name": "baseline_loss_switch2_1798_15309211.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1798,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_switch2_1925_15308492.replay",
+      "name": "baseline_loss_switch2_1925_15308492.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1925,
+      "max_turn": 40,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_switch2_1876_15308517.replay",
+      "name": "baseline_win_switch2_1876_15308517.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1876,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_switch2_1782_15309211.replay",
+      "name": "baseline_loss_switch2_1782_15309211.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1782,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_switch2_1020_15308553.replay",
+      "name": "v21_temporal_phase_gate_win_switch2_1020_15308553.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1020,
+      "max_turn": 10,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_switch2_1876_15308503.replay",
+      "name": "v21_temporal_phase_gate_loss_switch2_1876_15308503.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1876,
+      "max_turn": 32,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-claude": [
+    {
+      "file": "Ranked Replays/phalanx_v7/phalanx_v7_win_python-algo-claude_1460_15310249.replay",
+      "name": "phalanx_v7_win_python-algo-claude_1460_15310249.replay",
+      "our_algo": "phalanx_v7",
+      "result": "win",
+      "opp_elo": 1460,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-claude_1449_15305550.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo-claude_1449_15305550.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1449,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_baseline/athena_baseline_loss_python-algo-claude_1464_15309748.replay",
+      "name": "athena_baseline_loss_python-algo-claude_1464_15309748.replay",
+      "our_algo": "athena_baseline",
+      "result": "loss",
+      "opp_elo": 1464,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo-claude_1469_15310136.replay",
+      "name": "lostkids_v3_codex_loss_python-algo-claude_1469_15310136.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1469,
+      "max_turn": 53,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo-claude_1460_15310136.replay",
+      "name": "lostkids_v3_codex_loss_python-algo-claude_1460_15310136.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1460,
+      "max_turn": 53,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_loss_python-algo-claude_1476_15310136.replay",
+      "name": "lostkids_v3_codex_loss_python-algo-claude_1476_15310136.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "loss",
+      "opp_elo": 1476,
+      "max_turn": 53,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-baseline": [
+    {
+      "file": "Ranked Replays/phalanx_v7/phalanx_v7_win_python-algo-baseline_1551_15310259.replay",
+      "name": "phalanx_v7_win_python-algo-baseline_1551_15310259.replay",
+      "our_algo": "phalanx_v7",
+      "result": "win",
+      "opp_elo": 1551,
+      "max_turn": 30,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1551_15302827.replay",
+      "name": "v13_second_ring_loss_python-algo-baseline_1551_15302827.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1551,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1562_15302827.replay",
+      "name": "v13_second_ring_loss_python-algo-baseline_1562_15302827.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1562,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1583_15302827.replay",
+      "name": "v13_second_ring_loss_python-algo-baseline_1583_15302827.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1583,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-baseline_1561_15302827.replay",
+      "name": "v13_second_ring_loss_python-algo-baseline_1561_15302827.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1561,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-baseline_1441_15305597.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-baseline_1441_15305597.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1441,
+      "max_turn": 62,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo-v3": [
+    {
+      "file": "Ranked Replays/phalanx_v7/phalanx_v7_loss_algo-v3_1631_15310258.replay",
+      "name": "phalanx_v7_loss_algo-v3_1631_15310258.replay",
+      "our_algo": "phalanx_v7",
+      "result": "loss",
+      "opp_elo": 1631,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_loss_algo-v3_1620_15310001.replay",
+      "name": "lostkids_v2_loss_algo-v3_1620_15310001.replay",
+      "our_algo": "lostkids_v2",
+      "result": "loss",
+      "opp_elo": 1620,
+      "max_turn": 35,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_algo-v3_1608_15305533.replay",
+      "name": "v21_temporal_phase_gate_loss_algo-v3_1608_15305533.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1608,
+      "max_turn": 95,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-Riv": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-Riv_1635_15306241.replay",
+      "name": "v13_second_ring_loss_python-algo-Riv_1635_15306241.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1635,
+      "max_turn": 71,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-Riv_1622_15306241.replay",
+      "name": "v13_second_ring_loss_python-algo-Riv_1622_15306241.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1622,
+      "max_turn": 71,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "defensive-order-algo": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_defensive-order-algo_1385_15309843.replay",
+      "name": "v13_second_ring_win_defensive-order-algo_1385_15309843.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1385,
+      "max_turn": 17,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_defensive-order-algo_1553_15307703.replay",
+      "name": "v13_second_ring_loss_defensive-order-algo_1553_15307703.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1553,
+      "max_turn": 60,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_defensive-order-algo_1583_15309480.replay",
+      "name": "v13_second_ring_loss_defensive-order-algo_1583_15309480.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1583,
+      "max_turn": 63,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_defensive-order-algo_1347_15309161.replay",
+      "name": "v13_second_ring_loss_defensive-order-algo_1347_15309161.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1347,
+      "max_turn": 63,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_defensive-order-algo_1591_15309856.replay",
+      "name": "v21_quadrant_adaptive_support_loss_defensive-order-algo_1591_15309856.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1591,
+      "max_turn": 51,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_defensive-order-algo_1347_15309165.replay",
+      "name": "v21_quadrant_adaptive_support_win_defensive-order-algo_1347_15309165.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1347,
+      "max_turn": 65,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_defensive-order-algo_1684_15307452.replay",
+      "name": "v21_quadrant_adaptive_support_loss_defensive-order-algo_1684_15307452.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1684,
+      "max_turn": 59,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1059_15309099.replay",
+      "name": "v21_temporal_phase_gate_win_defensive-order-algo_1059_15309099.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1059,
+      "max_turn": 0,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1065_15309156.replay",
+      "name": "v21_temporal_phase_gate_win_defensive-order-algo_1065_15309156.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1065,
+      "max_turn": 65,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1405_15307613.replay",
+      "name": "v21_temporal_phase_gate_win_defensive-order-algo_1405_15307613.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1405,
+      "max_turn": 50,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_defensive-order-algo_1196_15309467.replay",
+      "name": "v21_temporal_phase_gate_win_defensive-order-algo_1196_15309467.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1196,
+      "max_turn": 77,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_defensive-order-algo_1466_15307371.replay",
+      "name": "v21_temporal_phase_gate_loss_defensive-order-algo_1466_15307371.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1466,
+      "max_turn": 59,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_defensive-order-algo_1583_15309487.replay",
+      "name": "athena_v3_planner_loss_defensive-order-algo_1583_15309487.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "loss",
+      "opp_elo": 1583,
+      "max_turn": 43,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo1": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1758_15302704.replay",
+      "name": "v13_second_ring_win_python-algo1_1758_15302704.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1758,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo1_1573_15310039.replay",
+      "name": "v13_second_ring_loss_python-algo1_1573_15310039.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1573,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1342_15310271.replay",
+      "name": "v13_second_ring_win_python-algo1_1342_15310271.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1342,
+      "max_turn": 57,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1452_15310216.replay",
+      "name": "v13_second_ring_win_python-algo1_1452_15310216.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1452,
+      "max_turn": 57,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo1_1456_15310241.replay",
+      "name": "v13_second_ring_win_python-algo1_1456_15310241.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1456,
+      "max_turn": 57,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo1_1398_15310305.replay",
+      "name": "v4_smartdemo_win_python-algo1_1398_15310305.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1398,
+      "max_turn": 46,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo1_1689_15310133.replay",
+      "name": "baseline_win_python-algo1_1689_15310133.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1689,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_win_python-algo1_1451_15310261.replay",
+      "name": "athena_v_supports_win_python-algo1_1451_15310261.replay",
+      "our_algo": "athena_v_supports",
+      "result": "win",
+      "opp_elo": 1451,
+      "max_turn": 42,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo1_1342_15310273.replay",
+      "name": "lostkids_v3_codex_win_python-algo1_1342_15310273.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1342,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo1_1398_15310288.replay",
+      "name": "lostkids_v3_codex_win_python-algo1_1398_15310288.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1398,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo1_1378_15310323.replay",
+      "name": "lostkids_v3_codex_win_python-algo1_1378_15310323.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1378,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "oleh-v2": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1783_15303926.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1783_15303926.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1783,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1763_15303255.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1763_15303255.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1763,
+      "max_turn": 82,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_oleh-v2_1410_15305865.replay",
+      "name": "v13_second_ring_win_oleh-v2_1410_15305865.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1410,
+      "max_turn": 80,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_oleh-v2_1704_15303546.replay",
+      "name": "v13_second_ring_win_oleh-v2_1704_15303546.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1704,
+      "max_turn": 46,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1728_15303499.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1728_15303499.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1728,
+      "max_turn": 46,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1799_15303336.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1799_15303336.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1799,
+      "max_turn": 50,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1824_15303601.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1824_15303601.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1824,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1683_15306512.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1683_15306512.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1683,
+      "max_turn": 63,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1706_15305993.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1706_15305993.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1706,
+      "max_turn": 77,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_oleh-v2_1700_15303276.replay",
+      "name": "v13_second_ring_win_oleh-v2_1700_15303276.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1700,
+      "max_turn": 43,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1807_15303408.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1807_15303408.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1807,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_oleh-v2_1706_15303878.replay",
+      "name": "v13_second_ring_loss_oleh-v2_1706_15303878.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1706,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_oleh-v2_2098_15307335.replay",
+      "name": "baseline_loss_oleh-v2_2098_15307335.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2098,
+      "max_turn": 39,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_oleh-v2_2282_15307827.replay",
+      "name": "baseline_loss_oleh-v2_2282_15307827.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2282,
+      "max_turn": 45,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_oleh-v2_1683_15306495.replay",
+      "name": "v21_quadrant_adaptive_support_loss_oleh-v2_1683_15306495.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1683,
+      "max_turn": 63,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_oleh-v2_2282_15307808.replay",
+      "name": "v21_temporal_phase_gate_loss_oleh-v2_2282_15307808.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2282,
+      "max_turn": 54,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_oleh-v2_1727_15309332.replay",
+      "name": "v21_temporal_phase_gate_loss_oleh-v2_1727_15309332.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1727,
+      "max_turn": 67,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_oleh-v2_1706_15305994.replay",
+      "name": "v21_temporal_phase_gate_loss_oleh-v2_1706_15305994.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1706,
+      "max_turn": 77,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_oleh-v2_1410_15305863.replay",
+      "name": "v21_temporal_phase_gate_win_oleh-v2_1410_15305863.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1410,
+      "max_turn": 81,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_baseline/athena_baseline_loss_oleh-v2_1727_15309721.replay",
+      "name": "athena_baseline_loss_oleh-v2_1727_15309721.replay",
+      "our_algo": "athena_baseline",
+      "result": "loss",
+      "opp_elo": 1727,
+      "max_turn": 51,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo12": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1535_15309570.replay",
+      "name": "v13_second_ring_win_algo12_1535_15309570.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1535,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1500_15309570.replay",
+      "name": "v13_second_ring_win_algo12_1500_15309570.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1500,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1525_15309570.replay",
+      "name": "v13_second_ring_win_algo12_1525_15309570.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1525,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1557_15309570.replay",
+      "name": "v13_second_ring_win_algo12_1557_15309570.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1557,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_algo12_1607_15309570.replay",
+      "name": "v13_second_ring_win_algo12_1607_15309570.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1607,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo_2": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_2_1448_15308021.replay",
+      "name": "v13_second_ring_win_python-algo_2_1448_15308021.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1448,
+      "max_turn": 54,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo_2_1392_15307892.replay",
+      "name": "v13_second_ring_win_python-algo_2_1392_15307892.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1392,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_2_1392_15307901.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_2_1392_15307901.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1392,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_2_1448_15308024.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_2_1448_15308024.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1448,
+      "max_turn": 54,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "takedown1-algo": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_takedown1-algo_1651_15302611.replay",
+      "name": "v13_second_ring_loss_takedown1-algo_1651_15302611.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1651,
+      "max_turn": 44,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "diego_v2": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_diego_v2_1692_15303183.replay",
+      "name": "v13_second_ring_loss_diego_v2_1692_15303183.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1692,
+      "max_turn": 69,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_diego_v2_1486_15302609.replay",
+      "name": "v13_second_ring_win_diego_v2_1486_15302609.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1486,
+      "max_turn": 52,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "terminator": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1568_15308971.replay",
+      "name": "v13_second_ring_loss_terminator_1568_15308971.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1568,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1592_15308771.replay",
+      "name": "v13_second_ring_loss_terminator_1592_15308771.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1592,
+      "max_turn": 96,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1638_15308771.replay",
+      "name": "v13_second_ring_loss_terminator_1638_15308771.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1638,
+      "max_turn": 96,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1654_15308771.replay",
+      "name": "v13_second_ring_loss_terminator_1654_15308771.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1654,
+      "max_turn": 96,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator_1546_15308971.replay",
+      "name": "v13_second_ring_loss_terminator_1546_15308971.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1546,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_terminator_1460_15308846.replay",
+      "name": "v21_temporal_phase_gate_loss_terminator_1460_15308846.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1460,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_baseline/athena_baseline_loss_terminator_1612_15309730.replay",
+      "name": "athena_baseline_loss_terminator_1612_15309730.replay",
+      "our_algo": "athena_baseline",
+      "result": "loss",
+      "opp_elo": 1612,
+      "max_turn": 72,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-classic": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-classic_1711_15307318.replay",
+      "name": "v13_second_ring_loss_python-algo-classic_1711_15307318.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1711,
+      "max_turn": 87,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-classic_1718_15307318.replay",
+      "name": "v13_second_ring_loss_python-algo-classic_1718_15307318.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1718,
+      "max_turn": 87,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-classic_1696_15307318.replay",
+      "name": "v13_second_ring_loss_python-algo-classic_1696_15307318.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1696,
+      "max_turn": 87,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-classic_1718_15307357.replay",
+      "name": "baseline_win_python-algo-classic_1718_15307357.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1718,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-classic_1697_15307357.replay",
+      "name": "baseline_win_python-algo-classic_1697_15307357.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1697,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-classic_1696_15307357.replay",
+      "name": "baseline_win_python-algo-classic_1696_15307357.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1696,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-classic_1718_15307315.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo-classic_1718_15307315.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1718,
+      "max_turn": 87,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "doublegap": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_doublegap_1437_15302625.replay",
+      "name": "v13_second_ring_win_doublegap_1437_15302625.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1437,
+      "max_turn": 77,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_doublegap_1403_15302625.replay",
+      "name": "v13_second_ring_win_doublegap_1403_15302625.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1403,
+      "max_turn": 77,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_doublegap_1424_15302625.replay",
+      "name": "v13_second_ring_win_doublegap_1424_15302625.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1424,
+      "max_turn": 77,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-jae-3": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-3_1641_15304771.replay",
+      "name": "v13_second_ring_loss_python-algo-jae-3_1641_15304771.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1641,
+      "max_turn": 70,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-jae-3_1639_15304067.replay",
+      "name": "v13_second_ring_win_python-algo-jae-3_1639_15304067.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1639,
+      "max_turn": 50,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-3_1714_15304106.replay",
+      "name": "v13_second_ring_loss_python-algo-jae-3_1714_15304106.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1714,
+      "max_turn": 98,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-3_1786_15303734.replay",
+      "name": "v13_second_ring_loss_python-algo-jae-3_1786_15303734.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1786,
+      "max_turn": 93,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo-jae-3_1784_15307296.replay",
+      "name": "baseline_loss_python-algo-jae-3_1784_15307296.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1784,
+      "max_turn": 35,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1643_15307650.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-jae-3_1643_15307650.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1643,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1677_15307650.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-jae-3_1677_15307650.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1677,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1623_15307650.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-jae-3_1623_15307650.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1623,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-jae-3_1322_15307532.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo-jae-3_1322_15307532.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1322,
+      "max_turn": 72,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-jae-3_1717_15306218.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-jae-3_1717_15306218.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1717,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-jae-3_1322_15307529.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo-jae-3_1322_15307529.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1322,
+      "max_turn": 99,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-jae-2": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-jae-2_1772_15303134.replay",
+      "name": "v13_second_ring_loss_python-algo-jae-2_1772_15303134.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1772,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-tnb": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1401_15310117.replay",
+      "name": "v13_second_ring_loss_python-algo-tnb_1401_15310117.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1401,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1429_15310117.replay",
+      "name": "v13_second_ring_loss_python-algo-tnb_1429_15310117.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1429,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1544_15310068.replay",
+      "name": "v13_second_ring_loss_python-algo-tnb_1544_15310068.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1544,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-tnb_1428_15310117.replay",
+      "name": "v13_second_ring_loss_python-algo-tnb_1428_15310117.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1428,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-tnb_1538_15310018.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-tnb_1538_15310018.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1538,
+      "max_turn": 57,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "banana": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_banana_1952_15303042.replay",
+      "name": "v13_second_ring_loss_banana_1952_15303042.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1952,
+      "max_turn": 78,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo_v3": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo_v3_1669_15309984.replay",
+      "name": "v13_second_ring_loss_python-algo_v3_1669_15309984.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1669,
+      "max_turn": 69,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "potential-algo": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_potential-algo_1639_15305215.replay",
+      "name": "v13_second_ring_loss_potential-algo_1639_15305215.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1639,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_loss_potential-algo_1604_15310248.replay",
+      "name": "athena_v_supports_loss_potential-algo_1604_15310248.replay",
+      "our_algo": "athena_v_supports",
+      "result": "loss",
+      "opp_elo": 1604,
+      "max_turn": 46,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v53": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_funnel-rush-v53_1789_15307588.replay",
+      "name": "v13_second_ring_loss_funnel-rush-v53_1789_15307588.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1789,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-babayaga3": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga3_1732_15308419.replay",
+      "name": "v13_second_ring_loss_python-algo-babayaga3_1732_15308419.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1732,
+      "max_turn": 60,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga3_1609_15306664.replay",
+      "name": "v13_second_ring_loss_python-algo-babayaga3_1609_15306664.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1609,
+      "max_turn": 64,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga3_1698_15306832.replay",
+      "name": "v13_second_ring_loss_python-algo-babayaga3_1698_15306832.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1698,
+      "max_turn": 58,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-babayaga3_1622_15309057.replay",
+      "name": "baseline_win_python-algo-babayaga3_1622_15309057.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1622,
+      "max_turn": 33,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-babayaga3_1729_15309134.replay",
+      "name": "baseline_win_python-algo-babayaga3_1729_15309134.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1729,
+      "max_turn": 33,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-babayaga3_1731_15309134.replay",
+      "name": "baseline_win_python-algo-babayaga3_1731_15309134.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1731,
+      "max_turn": 33,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "new-strat-algo": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_new-strat-algo_1576_15305301.replay",
+      "name": "v13_second_ring_win_new-strat-algo_1576_15305301.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1576,
+      "max_turn": 76,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo4": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_algo4_1757_15302627.replay",
+      "name": "v13_second_ring_win_algo4_1757_15302627.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1757,
+      "max_turn": 82,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "please-work-man-im-tired": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_please-work-man-im-tired_1714_15304224.replay",
+      "name": "v13_second_ring_loss_please-work-man-im-tired_1714_15304224.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1714,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_please-work-man-im-tired_1612_15304630.replay",
+      "name": "v13_second_ring_loss_please-work-man-im-tired_1612_15304630.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1612,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_please-work-man-im-tired_1776_15304872.replay",
+      "name": "v13_second_ring_loss_please-work-man-im-tired_1776_15304872.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1776,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "gooder-maybe": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_gooder-maybe_1453_15302602.replay",
+      "name": "v13_second_ring_win_gooder-maybe_1453_15302602.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1453,
+      "max_turn": 30,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-turtle-v4": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-turtle-v4_1590_15302618.replay",
+      "name": "v13_second_ring_win_python-algo-turtle-v4_1590_15302618.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1590,
+      "max_turn": 78,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-turtle-v4_1601_15302618.replay",
+      "name": "v13_second_ring_win_python-algo-turtle-v4_1601_15302618.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1601,
+      "max_turn": 78,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-turtle-v4_1601_15305547.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo-turtle-v4_1601_15305547.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1601,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo-turtle-v4_1601_15309489.replay",
+      "name": "athena_v3_planner_loss_python-algo-turtle-v4_1601_15309489.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "loss",
+      "opp_elo": 1601,
+      "max_turn": 85,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v3": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-v3_1402_15302606.replay",
+      "name": "v13_second_ring_loss_python-algo-v3_1402_15302606.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1402,
+      "max_turn": 72,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3_1296_15310139.replay",
+      "name": "lostkids_v3_codex_win_python-algo-v3_1296_15310139.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1296,
+      "max_turn": 41,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3_1289_15310139.replay",
+      "name": "lostkids_v3_codex_win_python-algo-v3_1289_15310139.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1289,
+      "max_turn": 41,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3_1275_15310139.replay",
+      "name": "lostkids_v3_codex_win_python-algo-v3_1275_15310139.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1275,
+      "max_turn": 41,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "the-goat-algo": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_the-goat-algo_1771_15303451.replay",
+      "name": "v13_second_ring_loss_the-goat-algo_1771_15303451.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1771,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "terminator-i": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_terminator-i_1588_15310173.replay",
+      "name": "v13_second_ring_loss_terminator-i_1588_15310173.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1588,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_win_terminator-i_1588_15310198.replay",
+      "name": "lostkids_v2_win_terminator-i_1588_15310198.replay",
+      "our_algo": "lostkids_v2",
+      "result": "win",
+      "opp_elo": 1588,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_terminator-i_1588_15310183.replay",
+      "name": "v21_quadrant_adaptive_support_win_terminator-i_1588_15310183.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1588,
+      "max_turn": 86,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo3": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo3_1551_15302622.replay",
+      "name": "v13_second_ring_win_python-algo3_1551_15302622.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1551,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-jae-4": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-jae-4_1112_15304981.replay",
+      "name": "v13_second_ring_win_python-algo-jae-4_1112_15304981.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1112,
+      "max_turn": 68,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-jae-4_1567_15305497.replay",
+      "name": "v13_second_ring_win_python-algo-jae-4_1567_15305497.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1567,
+      "max_turn": 77,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-turtle-new-submis": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-turtle-new-submis_1852_15302638.replay",
+      "name": "v13_second_ring_loss_python-algo-turtle-new-submis_1852_15302638.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1852,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v8": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-v8_1666_15304485.replay",
+      "name": "v13_second_ring_loss_python-algo-v8_1666_15304485.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1666,
+      "max_turn": 72,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v8_1666_15307288.replay",
+      "name": "baseline_win_python-algo-v8_1666_15307288.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1666,
+      "max_turn": 41,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-babayaga2": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-babayaga2_1721_15309071.replay",
+      "name": "v13_second_ring_loss_python-algo-babayaga2_1721_15309071.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1721,
+      "max_turn": 86,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-babayaga2_1715_15308789.replay",
+      "name": "baseline_win_python-algo-babayaga2_1715_15308789.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1715,
+      "max_turn": 33,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-babayaga2_1742_15306208.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo-babayaga2_1742_15306208.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1742,
+      "max_turn": 86,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-babayaga": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-babayaga_1503_15306057.replay",
+      "name": "v13_second_ring_win_python-algo-babayaga_1503_15306057.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1503,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-babayaga_1503_15306060.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo-babayaga_1503_15306060.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1503,
+      "max_turn": 59,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v3-detectors": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_loss_python-algo-v3-detectors_1686_15304561.replay",
+      "name": "v13_second_ring_loss_python-algo-v3-detectors_1686_15304561.replay",
+      "our_algo": "v13_second_ring",
+      "result": "loss",
+      "opp_elo": 1686,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-v3-detectors_1664_15305594.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-v3-detectors_1664_15305594.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1664,
+      "max_turn": 70,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-v3-detectors_1584_15308864.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-v3-detectors_1584_15308864.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1584,
+      "max_turn": 72,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "yunjin-v4-online": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_yunjin-v4-online_1444_15309546.replay",
+      "name": "v13_second_ring_win_yunjin-v4-online_1444_15309546.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1444,
+      "max_turn": 77,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v5": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-v5_1468_15304426.replay",
+      "name": "v13_second_ring_win_python-algo-v5_1468_15304426.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1468,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_python-algo-v5_1663_15310311.replay",
+      "name": "v4_smartdemo_loss_python-algo-v5_1663_15310311.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "loss",
+      "opp_elo": 1663,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo-v5_1663_15309764.replay",
+      "name": "baseline_loss_python-algo-v5_1663_15309764.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1663,
+      "max_turn": 42,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo-v5_1658_15309764.replay",
+      "name": "baseline_loss_python-algo-v5_1658_15309764.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1658,
+      "max_turn": 42,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_python-algo-v5_1734_15309712.replay",
+      "name": "baseline_loss_python-algo-v5_1734_15309712.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1734,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-v5_1412_15305535.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo-v5_1412_15305535.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1412,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo-v5_1735_15310246.replay",
+      "name": "athena_v_supports_loss_python-algo-v5_1735_15310246.replay",
+      "our_algo": "athena_v_supports",
+      "result": "loss",
+      "opp_elo": 1735,
+      "max_turn": 36,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v3-1": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-v3-1_1153_15308877.replay",
+      "name": "v13_second_ring_win_python-algo-v3-1_1153_15308877.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1153,
+      "max_turn": 40,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-v3-1_1460_15308944.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo-v3-1_1460_15308944.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1460,
+      "max_turn": 90,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-v3-1_1460_15308932.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo-v3-1_1460_15308932.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1460,
+      "max_turn": 89,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3-1_1212_15310138.replay",
+      "name": "lostkids_v3_codex_win_python-algo-v3-1_1212_15310138.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1212,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_python-algo-v3-1_1225_15310138.replay",
+      "name": "lostkids_v3_codex_win_python-algo-v3-1_1225_15310138.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1225,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-master": [
+    {
+      "file": "Ranked Replays/v13_second_ring/v13_second_ring_win_python-algo-master_1420_15302620.replay",
+      "name": "v13_second_ring_win_python-algo-master_1420_15302620.replay",
+      "our_algo": "v13_second_ring",
+      "result": "win",
+      "opp_elo": 1420,
+      "max_turn": 31,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_python-algo-master_1689_15308718.replay",
+      "name": "v21_quadrant_adaptive_support_loss_python-algo-master_1689_15308718.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1689,
+      "max_turn": 72,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-crush": [
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_loss_funnel-crush_1744_15309999.replay",
+      "name": "lostkids_v2_loss_funnel-crush_1744_15309999.replay",
+      "our_algo": "lostkids_v2",
+      "result": "loss",
+      "opp_elo": 1744,
+      "max_turn": 54,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-crush_1874_15309794.replay",
+      "name": "baseline_loss_funnel-crush_1874_15309794.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1874,
+      "max_turn": 54,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-crush_1823_15309820.replay",
+      "name": "baseline_loss_funnel-crush_1823_15309820.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1823,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-crush_1957_15309869.replay",
+      "name": "baseline_loss_funnel-crush_1957_15309869.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1957,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "terminator-f": [
+    {
+      "file": "Ranked Replays/lostkids_v2/lostkids_v2_win_terminator-f_1549_15310003.replay",
+      "name": "lostkids_v2_win_terminator-f_1549_15310003.replay",
+      "our_algo": "lostkids_v2",
+      "result": "win",
+      "opp_elo": 1549,
+      "max_turn": 42,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_win_terminator-f_1528_15310242.replay",
+      "name": "athena_v_supports_win_terminator-f_1528_15310242.replay",
+      "our_algo": "athena_v_supports",
+      "result": "win",
+      "opp_elo": 1528,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "takedown2-algo": [
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_takedown2-algo_1617_15310310.replay",
+      "name": "v4_smartdemo_win_takedown2-algo_1617_15310310.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1617,
+      "max_turn": 38,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v10": [
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo-v10_1577_15310313.replay",
+      "name": "v4_smartdemo_win_python-algo-v10_1577_15310313.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1577,
+      "max_turn": 42,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo-v10_1612_15310336.replay",
+      "name": "v4_smartdemo_win_python-algo-v10_1612_15310336.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1612,
+      "max_turn": 42,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v10_1645_15310335.replay",
+      "name": "baseline_win_python-algo-v10_1645_15310335.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1645,
+      "max_turn": 63,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v_supports/athena_v_supports_loss_python-algo-v10_1460_15310286.replay",
+      "name": "athena_v_supports_loss_python-algo-v10_1460_15310286.replay",
+      "our_algo": "athena_v_supports",
+      "result": "loss",
+      "opp_elo": 1460,
+      "max_turn": 32,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v11": [
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_win_python-algo-v11_1691_15310315.replay",
+      "name": "v4_smartdemo_win_python-algo-v11_1691_15310315.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "win",
+      "opp_elo": 1691,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v11_1718_15309512.replay",
+      "name": "baseline_win_python-algo-v11_1718_15309512.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1718,
+      "max_turn": 48,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v11_1691_15309512.replay",
+      "name": "baseline_win_python-algo-v11_1691_15309512.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1691,
+      "max_turn": 48,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v11_1731_15309512.replay",
+      "name": "baseline_win_python-algo-v11_1731_15309512.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1731,
+      "max_turn": 48,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_python-algo-v11_1731_15309502.replay",
+      "name": "athena_v3_planner_loss_python-algo-v11_1731_15309502.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "loss",
+      "opp_elo": 1731,
+      "max_turn": 67,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo-v6": [
+    {
+      "file": "Ranked Replays/v4_smartdemo/v4_smartdemo_loss_algo-v6_1737_15310317.replay",
+      "name": "v4_smartdemo_loss_algo-v6_1737_15310317.replay",
+      "our_algo": "v4_smartdemo",
+      "result": "loss",
+      "opp_elo": 1737,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v7-1": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v7-1_2178_15307744.replay",
+      "name": "baseline_loss_funnel-rush-v7-1_2178_15307744.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2178,
+      "max_turn": 56,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v7-1_2123_15307695.replay",
+      "name": "baseline_win_funnel-rush-v7-1_2123_15307695.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2123,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v7-1_1976_15308382.replay",
+      "name": "baseline_loss_funnel-rush-v7-1_1976_15308382.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1976,
+      "max_turn": 57,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "jack": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_jack_1622_15307408.replay",
+      "name": "baseline_loss_jack_1622_15307408.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1622,
+      "max_turn": 49,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_jack_1575_15307408.replay",
+      "name": "baseline_loss_jack_1575_15307408.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1575,
+      "max_turn": 49,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_baseline/athena_baseline_loss_jack_1575_15309737.replay",
+      "name": "athena_baseline_loss_jack_1575_15309737.replay",
+      "our_algo": "athena_baseline",
+      "result": "loss",
+      "opp_elo": 1575,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75d": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75d_2185_15308254.replay",
+      "name": "baseline_loss_funnel-rush-v75d_2185_15308254.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2185,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75_2140_15308179.replay",
+      "name": "baseline_loss_funnel-rush-v75_2140_15308179.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2140,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "popcorn-v2-online": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_popcorn-v2-online_1821_15309565.replay",
+      "name": "baseline_loss_popcorn-v2-online_1821_15309565.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1821,
+      "max_turn": 46,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v4": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v4_1572_15307285.replay",
+      "name": "baseline_win_python-algo-v4_1572_15307285.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1572,
+      "max_turn": 49,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-v4_1584_15307285.replay",
+      "name": "baseline_win_python-algo-v4_1584_15307285.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1584,
+      "max_turn": 49,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-v4_1614_15305534.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo-v4_1614_15305534.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1614,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v8": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_2063_15308490.replay",
+      "name": "baseline_loss_funnel-rush-v8_2063_15308490.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2063,
+      "max_turn": 55,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v8_1951_15308448.replay",
+      "name": "baseline_win_funnel-rush-v8_1951_15308448.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1951,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_1832_15308408.replay",
+      "name": "baseline_loss_funnel-rush-v8_1832_15308408.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1832,
+      "max_turn": 47,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v8_1813_15308456.replay",
+      "name": "baseline_win_funnel-rush-v8_1813_15308456.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1813,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_2211_15308556.replay",
+      "name": "baseline_loss_funnel-rush-v8_2211_15308556.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2211,
+      "max_turn": 52,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v8_1910_15308541.replay",
+      "name": "baseline_loss_funnel-rush-v8_1910_15308541.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1910,
+      "max_turn": 56,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v8_1989_15308448.replay",
+      "name": "baseline_win_funnel-rush-v8_1989_15308448.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1989,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_funnel-rush-v8_1050_15308439.replay",
+      "name": "v21_temporal_phase_gate_win_funnel-rush-v8_1050_15308439.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1050,
+      "max_turn": 13,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v8_1951_15308445.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v8_1951_15308445.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1951,
+      "max_turn": 62,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v8_1813_15308449.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v8_1813_15308449.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1813,
+      "max_turn": 56,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-tuned": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_python-algo-tuned_1421_15307273.replay",
+      "name": "baseline_win_python-algo-tuned_1421_15307273.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1421,
+      "max_turn": 38,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-tuned_1421_15305595.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo-tuned_1421_15305595.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1421,
+      "max_turn": 86,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-tuned_1421_15305537.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo-tuned_1421_15305537.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1421,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v43b": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v43b_2122_15307737.replay",
+      "name": "baseline_win_funnel-rush-v43b_2122_15307737.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2122,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v9": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_2141_15308691.replay",
+      "name": "baseline_loss_funnel-rush-v9_2141_15308691.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2141,
+      "max_turn": 52,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_1992_15309020.replay",
+      "name": "baseline_loss_funnel-rush-v9_1992_15309020.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1992,
+      "max_turn": 39,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_2046_15308808.replay",
+      "name": "baseline_loss_funnel-rush-v9_2046_15308808.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2046,
+      "max_turn": 42,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_2012_15308978.replay",
+      "name": "baseline_loss_funnel-rush-v9_2012_15308978.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2012,
+      "max_turn": 39,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_1831_15308600.replay",
+      "name": "baseline_loss_funnel-rush-v9_1831_15308600.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1831,
+      "max_turn": 57,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v9_1854_15308901.replay",
+      "name": "baseline_loss_funnel-rush-v9_1854_15308901.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1854,
+      "max_turn": 46,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v9_1831_15308593.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v9_1831_15308593.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1831,
+      "max_turn": 50,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v9_2141_15308685.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v9_2141_15308685.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2141,
+      "max_turn": 40,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75f": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75f_2082_15308347.replay",
+      "name": "baseline_loss_funnel-rush-v75f_2082_15308347.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2082,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v10": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v10_2080_15309390.replay",
+      "name": "baseline_loss_funnel-rush-v10_2080_15309390.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2080,
+      "max_turn": 39,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v10_1983_15309421.replay",
+      "name": "baseline_loss_funnel-rush-v10_1983_15309421.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1983,
+      "max_turn": 38,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v67": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v67_2150_15308034.replay",
+      "name": "baseline_loss_funnel-rush-v67_2150_15308034.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2150,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v55": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v55_1819_15307646.replay",
+      "name": "baseline_win_funnel-rush-v55_1819_15307646.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1819,
+      "max_turn": 45,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v67c": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v67c_2132_15308158.replay",
+      "name": "baseline_loss_funnel-rush-v67c_2132_15308158.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2132,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v65": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v65_2104_15307995.replay",
+      "name": "baseline_win_funnel-rush-v65_2104_15307995.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2104,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v47": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v47_2018_15307489.replay",
+      "name": "baseline_win_funnel-rush-v47_2018_15307489.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2018,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v63": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v63_1954_15307937.replay",
+      "name": "baseline_win_funnel-rush-v63_1954_15307937.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1954,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo-v4": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_algo-v4_1777_15307297.replay",
+      "name": "baseline_win_algo-v4_1777_15307297.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1777,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_algo-v4_1766_15307297.replay",
+      "name": "baseline_win_algo-v4_1766_15307297.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1766,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_win_algo-v4_1788_15307297.replay",
+      "name": "baseline_win_algo-v4_1788_15307297.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1788,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v43c": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v43c_1969_15307897.replay",
+      "name": "baseline_win_funnel-rush-v43c_1969_15307897.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1969,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75b": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75b_2072_15308223.replay",
+      "name": "baseline_loss_funnel-rush-v75b_2072_15308223.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2072,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v67b": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v67b_2181_15308081.replay",
+      "name": "baseline_loss_funnel-rush-v67b_2181_15308081.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2181,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v67b_2181_15308061.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v67b_2181_15308061.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2181,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "repentance": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_repentance_1793_15307294.replay",
+      "name": "baseline_loss_repentance_1793_15307294.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1793,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_repentance_1802_15307294.replay",
+      "name": "baseline_loss_repentance_1802_15307294.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 1802,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_repentance_1762_15305931.replay",
+      "name": "v21_temporal_phase_gate_loss_repentance_1762_15305931.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1762,
+      "max_turn": 72,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75g": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75g_2151_15308366.replay",
+      "name": "baseline_loss_funnel-rush-v75g_2151_15308366.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2151,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v59b": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v59b_2099_15307912.replay",
+      "name": "baseline_win_funnel-rush-v59b_2099_15307912.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2099,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75e": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75e_2115_15308305.replay",
+      "name": "baseline_loss_funnel-rush-v75e_2115_15308305.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2115,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v43": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v43_2158_15307373.replay",
+      "name": "baseline_win_funnel-rush-v43_2158_15307373.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2158,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v43_2158_15307319.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v43_2158_15307319.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2158,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v91": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v91_2100_15308282.replay",
+      "name": "baseline_loss_funnel-rush-v91_2100_15308282.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2100,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v91_2100_15308278.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v91_2100_15308278.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2100,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "alt-algo": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_alt-algo_1595_15307275.replay",
+      "name": "baseline_win_alt-algo_1595_15307275.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 1595,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v75c": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v75c_2117_15308239.replay",
+      "name": "baseline_loss_funnel-rush-v75c_2117_15308239.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2117,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v75c_2117_15308234.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v75c_2117_15308234.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2117,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v94": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v94_2056_15308326.replay",
+      "name": "baseline_loss_funnel-rush-v94_2056_15308326.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2056,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v59c": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v59c_2080_15307959.replay",
+      "name": "baseline_win_funnel-rush-v59c_2080_15307959.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2080,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v78": [
+    {
+      "file": "Ranked Replays/baseline/baseline_loss_funnel-rush-v78_2002_15308214.replay",
+      "name": "baseline_loss_funnel-rush-v78_2002_15308214.replay",
+      "our_algo": "baseline",
+      "result": "loss",
+      "opp_elo": 2002,
+      "max_turn": 48,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v78_2002_15308202.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v78_2002_15308202.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2002,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v59": [
+    {
+      "file": "Ranked Replays/baseline/baseline_win_funnel-rush-v59_2085_15307835.replay",
+      "name": "baseline_win_funnel-rush-v59_2085_15307835.replay",
+      "our_algo": "baseline",
+      "result": "win",
+      "opp_elo": 2085,
+      "max_turn": 37,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo_4": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_4_1627_15308206.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_4_1627_15308206.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1627,
+      "max_turn": 57,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_4_1627_15308195.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_4_1627_15308195.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1627,
+      "max_turn": 57,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_4_1410_15308173.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_4_1410_15308173.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1410,
+      "max_turn": 100,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-v2": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-v2_1449_15305598.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo-v2_1449_15305598.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1449,
+      "max_turn": 29,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo-v2_1449_15305531.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo-v2_1449_15305531.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1449,
+      "max_turn": 29,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v5": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_funnel-rush-v5_2199_15306140.replay",
+      "name": "v21_quadrant_adaptive_support_loss_funnel-rush-v5_2199_15306140.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 2199,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-counter": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo-counter_1435_15305592.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo-counter_1435_15305592.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1435,
+      "max_turn": 29,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo_3": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_3_1447_15308090.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_3_1447_15308090.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1447,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_win_python-algo_3_1545_15307946.replay",
+      "name": "v21_quadrant_adaptive_support_win_python-algo_3_1545_15307946.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "win",
+      "opp_elo": 1545,
+      "max_turn": 96,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_python-algo_3_1447_15308091.replay",
+      "name": "v21_temporal_phase_gate_win_python-algo_3_1447_15308091.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1447,
+      "max_turn": 41,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v20": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_funnel-rush-v20_2187_15306610.replay",
+      "name": "v21_quadrant_adaptive_support_loss_funnel-rush-v20_2187_15306610.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 2187,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo6": [
+    {
+      "file": "Ranked Replays/v21_quadrant_adaptive_support/v21_quadrant_adaptive_support_loss_algo6_1767_15305919.replay",
+      "name": "v21_quadrant_adaptive_support_loss_algo6_1767_15305919.replay",
+      "our_algo": "v21_quadrant_adaptive_support",
+      "result": "loss",
+      "opp_elo": 1767,
+      "max_turn": 50,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "algo7": [
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_win_algo7_1581_15306128.replay",
+      "name": "v21_temporal_phase_gate_win_algo7_1581_15306128.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "win",
+      "opp_elo": 1581,
+      "max_turn": 52,
+      "winner": 2,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo_5": [
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo_5_1456_15308110.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo_5_1456_15308110.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1456,
+      "max_turn": 100,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "chaewon-online": [
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_chaewon-online_1451_15309598.replay",
+      "name": "v21_temporal_phase_gate_loss_chaewon-online_1451_15309598.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1451,
+      "max_turn": 82,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_loss_chaewon-online_1451_15309601.replay",
+      "name": "athena_v3_planner_loss_chaewon-online_1451_15309601.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "loss",
+      "opp_elo": 1451,
+      "max_turn": 43,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "python-algo-jae-5": [
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_python-algo-jae-5_1604_15306059.replay",
+      "name": "v21_temporal_phase_gate_loss_python-algo-jae-5_1604_15306059.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1604,
+      "max_turn": 98,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v44": [
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v44_1932_15307389.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v44_1932_15307389.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 1932,
+      "max_turn": 36,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "funnel-rush-v25": [
+    {
+      "file": "Ranked Replays/v21_temporal_phase_gate/v21_temporal_phase_gate_loss_funnel-rush-v25_2141_15307330.replay",
+      "name": "v21_temporal_phase_gate_loss_funnel-rush-v25_2141_15307330.replay",
+      "our_algo": "v21_temporal_phase_gate",
+      "result": "loss",
+      "opp_elo": 2141,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ],
+  "econ-support-greedy": [
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_econ-support-greedy_1398_15310141.replay",
+      "name": "lostkids_v3_codex_win_econ-support-greedy_1398_15310141.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1398,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_econ-support-greedy_1386_15310141.replay",
+      "name": "lostkids_v3_codex_win_econ-support-greedy_1386_15310141.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1386,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/lostkids_v3_codex/lostkids_v3_codex_win_econ-support-greedy_1394_15310141.replay",
+      "name": "lostkids_v3_codex_win_econ-support-greedy_1394_15310141.replay",
+      "our_algo": "lostkids_v3_codex",
+      "result": "win",
+      "opp_elo": 1394,
+      "max_turn": 33,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    },
+    {
+      "file": "Ranked Replays/athena_v3_planner/athena_v3_planner_win_econ-support-greedy_1423_15309488.replay",
+      "name": "athena_v3_planner_win_econ-support-greedy_1423_15309488.replay",
+      "our_algo": "athena_v3_planner",
+      "result": "win",
+      "opp_elo": 1423,
+      "max_turn": 29,
+      "winner": 1,
+      "p1_hp_final": null,
+      "p2_hp_final": null,
+      "p2_name": "algo2"
+    }
+  ]
+}

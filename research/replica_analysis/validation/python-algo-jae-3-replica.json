@@ -1,0 +1,445 @@
+{
+  "replica": "python-algo-jae-3-replica",
+  "opponent_profile": "python-algo-jae-3",
+  "replay": "replays/python-algo-jae-3-replica_vs_python-algo-replica_20260426_150051.replay",
+  "p1_signature": {
+    "max_turn": 39,
+    "p1_first_attack_turn": 17,
+    "p1_unit_total": 113,
+    "p1_unit_mix": {
+      "scouts": 66,
+      "demos": 8,
+      "interceptors": 39
+    },
+    "p1_unit_pct": {
+      "scout_pct": 58.4070796460177,
+      "demo_pct": 7.079646017699115,
+      "interceptor_pct": 34.51327433628318
+    },
+    "p1_total_attacks": 20,
+    "p1_attacks": [
+      {
+        "turn": 0,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 1,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 2,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 3,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 4,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 5,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 2.0
+      },
+      {
+        "turn": 6,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 2.8
+      },
+      {
+        "turn": 7,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 3.3
+      },
+      {
+        "turn": 8,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 3.7
+      },
+      {
+        "turn": 9,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 4.0
+      },
+      {
+        "turn": 10,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 5.3
+      },
+      {
+        "turn": 11,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 6.2
+      },
+      {
+        "turn": 17,
+        "scouts": 7,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 13.1
+      },
+      {
+        "turn": 22,
+        "scouts": 8,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 14.5
+      },
+      {
+        "turn": 26,
+        "scouts": 8,
+        "demos": 1,
+        "intercs": 4,
+        "mp_before": 15.6
+      },
+      {
+        "turn": 29,
+        "scouts": 8,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 14.2
+      },
+      {
+        "turn": 32,
+        "scouts": 9,
+        "demos": 1,
+        "intercs": 4,
+        "mp_before": 16.3
+      },
+      {
+        "turn": 35,
+        "scouts": 10,
+        "demos": 1,
+        "intercs": 4,
+        "mp_before": 17.3
+      },
+      {
+        "turn": 37,
+        "scouts": 8,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 14.1
+      },
+      {
+        "turn": 39,
+        "scouts": 8,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 14.1
+      }
+    ],
+    "p1_spawn_top": [
+      [
+        [
+          13,
+          0
+        ],
+        63
+      ],
+      [
+        [
+          14,
+          0
+        ],
+        50
+      ]
+    ],
+    "p1_breaches_for_us_count": 41,
+    "p2_breaches_against_us_count": 4,
+    "p1_breaches_top": [
+      [
+        [
+          1,
+          15
+        ],
+        16
+      ],
+      [
+        [
+          24,
+          17
+        ],
+        12
+      ],
+      [
+        [
+          3,
+          17
+        ],
+        5
+      ],
+      [
+        [
+          23,
+          18
+        ],
+        5
+      ],
+      [
+        [
+          25,
+          16
+        ],
+        1
+      ],
+      [
+        [
+          6,
+          20
+        ],
+        1
+      ],
+      [
+        [
+          21,
+          20
+        ],
+        1
+      ]
+    ],
+    "p2_breaches_top": [
+      [
+        [
+          26,
+          12
+        ],
+        2
+      ],
+      [
+        [
+          1,
+          12
+        ],
+        1
+      ],
+      [
+        [
+          19,
+          5
+        ],
+        1
+      ]
+    ],
+    "p1_walls_T15": [
+      [
+        6,
+        12
+      ],
+      [
+        7,
+        12
+      ],
+      [
+        8,
+        12
+      ],
+      [
+        9,
+        12
+      ],
+      [
+        10,
+        12
+      ],
+      [
+        11,
+        12
+      ],
+      [
+        13,
+        12
+      ],
+      [
+        14,
+        12
+      ],
+      [
+        16,
+        12
+      ],
+      [
+        17,
+        12
+      ],
+      [
+        18,
+        12
+      ],
+      [
+        19,
+        12
+      ],
+      [
+        23,
+        12
+      ],
+      [
+        24,
+        12
+      ],
+      [
+        25,
+        13
+      ],
+      [
+        3,
+        12
+      ],
+      [
+        21,
+        12
+      ],
+      [
+        2,
+        13
+      ],
+      [
+        4,
+        12
+      ],
+      [
+        20,
+        12
+      ],
+      [
+        22,
+        12
+      ],
+      [
+        5,
+        12
+      ]
+    ],
+    "p1_turrets_T15": [
+      [
+        13,
+        11
+      ],
+      [
+        14,
+        11
+      ],
+      [
+        11,
+        11
+      ],
+      [
+        16,
+        11
+      ],
+      [
+        8,
+        11
+      ],
+      [
+        19,
+        11
+      ],
+      [
+        5,
+        11
+      ],
+      [
+        22,
+        11
+      ],
+      [
+        1,
+        13
+      ],
+      [
+        26,
+        13
+      ],
+      [
+        7,
+        9
+      ],
+      [
+        20,
+        9
+      ],
+      [
+        0,
+        13
+      ],
+      [
+        27,
+        13
+      ]
+    ],
+    "p1_supports_T15": [],
+    "p1_hp_final": 36.0,
+    "p2_hp_final": 4.0
+  },
+  "profile_summary": {
+    "n_replays": 11,
+    "unit_mix_avg": {
+      "scouts": 110.45454545454545,
+      "demos": 85.81818181818181,
+      "interceptors": 73.36363636363636,
+      "scout_pct": 40.96426163182738,
+      "demo_pct": 31.827376938637897,
+      "interceptor_pct": 27.208361429534726
+    },
+    "first_attack_turn": {
+      "median": 13.0,
+      "min": 8,
+      "max": 13,
+      "values": [
+        13,
+        8,
+        13,
+        8,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ]
+    },
+    "attack_count_avg": 59.45454545454545,
+    "max_turns_avg": 70.0909090909091
+  },
+  "scores": {
+    "unit_mix_similarity": 0.7525226907906122,
+    "first_attack_similarity": 0.6,
+    "first_attack_diff_turns": 4.0,
+    "spawn_overlap_pct": 0.3333333333333333,
+    "wall_jaccard": 0.9166666666666666,
+    "turret_jaccard": 0.8571428571428571,
+    "support_jaccard": 1.0
+  }
+}

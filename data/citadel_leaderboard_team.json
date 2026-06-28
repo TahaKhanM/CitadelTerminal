@@ -1,0 +1,1130 @@
+{
+  "snapshot_at": "2026-04-26T21:27:15.144063+00:00",
+  "comp_id": 1338,
+  "comp_name": "Spring 2026 - Europe Terminal",
+  "comp_deadline": "2026-04-27T21:00:00Z",
+  "method": "rank teams by their best (highest-rated) currently-active config=1072 algo",
+  "caveat": "each team selects ONE entry algo for the round-robin; only the calling user's entry is exposed by the API. wick_selected_entry=v13_second_ring (rating 1530), wick_best_algo=oracle_pure_upload (rating 2167).",
+  "wick_team_id": 5826,
+  "teams": [
+    {
+      "team_id": 5826,
+      "name": "Wick",
+      "isPublic": false,
+      "members": [
+        "TAHA",
+        "Rham"
+      ],
+      "algos": [
+        {
+          "id": 361251,
+          "name": "oracle_pure_upload",
+          "rating": 2167,
+          "isActive": true
+        },
+        {
+          "id": 361264,
+          "name": "oracle_pure_upload",
+          "rating": 2016,
+          "isActive": true
+        },
+        {
+          "id": 361265,
+          "name": "oracle_pure_upload",
+          "rating": 1838,
+          "isActive": true
+        },
+        {
+          "id": 360578,
+          "name": "baseline",
+          "rating": 1732,
+          "isActive": true
+        },
+        {
+          "id": 360950,
+          "name": "arc_demoline",
+          "rating": 1732,
+          "isActive": true
+        },
+        {
+          "id": 360023,
+          "name": "v13_second_ring",
+          "rating": 1530,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 361251,
+        "name": "oracle_pure_upload",
+        "rating": 2167,
+        "isActive": true
+      },
+      "best_rating": 2167,
+      "team_wins": 191,
+      "team_losses": 167,
+      "team_win_pct": 53.4
+    },
+    {
+      "team_id": 5891,
+      "name": "Winnerteam",
+      "isPublic": true,
+      "members": [
+        "foxhenderson",
+        "pipmy",
+        "Ltb"
+      ],
+      "algos": [
+        {
+          "id": 361314,
+          "name": "ascension",
+          "rating": 2012,
+          "isActive": true
+        },
+        {
+          "id": 361254,
+          "name": "rebirthV2",
+          "rating": 1832,
+          "isActive": true
+        },
+        {
+          "id": 361059,
+          "name": "repentance",
+          "rating": 1730,
+          "isActive": true
+        },
+        {
+          "id": 360365,
+          "name": "potential-algo",
+          "rating": 1601,
+          "isActive": true
+        }
+      ],
+      "n_algos": 4,
+      "best_algo": {
+        "id": 361314,
+        "name": "ascension",
+        "rating": 2012,
+        "isActive": true
+      },
+      "best_rating": 2012,
+      "team_wins": 50,
+      "team_losses": 72,
+      "team_win_pct": 41.0
+    },
+    {
+      "team_id": 5902,
+      "name": "test run",
+      "isPublic": true,
+      "members": [
+        "maxrivaldii",
+        "gencersarp",
+        "joshua-bode"
+      ],
+      "algos": [
+        {
+          "id": 361287,
+          "name": "python-algo-babayaga5",
+          "rating": 2004,
+          "isActive": true
+        },
+        {
+          "id": 361161,
+          "name": "python-algo-42",
+          "rating": 1749,
+          "isActive": true
+        },
+        {
+          "id": 361182,
+          "name": "42",
+          "rating": 1679,
+          "isActive": true
+        },
+        {
+          "id": 360478,
+          "name": "python-algo-Riv",
+          "rating": 1627,
+          "isActive": true
+        },
+        {
+          "id": 361286,
+          "name": "python-algo-witch",
+          "rating": 1599,
+          "isActive": true
+        },
+        {
+          "id": 360485,
+          "name": "python-algo-Riv2",
+          "rating": 1539,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 361287,
+        "name": "python-algo-babayaga5",
+        "rating": 2004,
+        "isActive": true
+      },
+      "best_rating": 2004,
+      "team_wins": 80,
+      "team_losses": 91,
+      "team_win_pct": 46.8
+    },
+    {
+      "team_id": 5881,
+      "name": "bobby tables",
+      "isPublic": false,
+      "members": [
+        "aa0",
+        "ameyg"
+      ],
+      "algos": [
+        {
+          "id": 360540,
+          "name": "funnel-rush-v6",
+          "rating": 1981,
+          "isActive": true
+        },
+        {
+          "id": 360561,
+          "name": "funnel-rush-v7",
+          "rating": 1952,
+          "isActive": true
+        },
+        {
+          "id": 360694,
+          "name": "funnel-rush-v8",
+          "rating": 1864,
+          "isActive": true
+        },
+        {
+          "id": 361125,
+          "name": "funnel-a",
+          "rating": 1859,
+          "isActive": true
+        },
+        {
+          "id": 361145,
+          "name": "swap3",
+          "rating": 1859,
+          "isActive": true
+        },
+        {
+          "id": 360580,
+          "name": "python-algo-classic",
+          "rating": 1636,
+          "isActive": true
+        },
+        {
+          "id": 360562,
+          "name": "funnel-rush-v7",
+          "rating": 1500,
+          "isActive": true
+        }
+      ],
+      "n_algos": 7,
+      "best_algo": {
+        "id": 360540,
+        "name": "funnel-rush-v6",
+        "rating": 1981,
+        "isActive": true
+      },
+      "best_rating": 1981,
+      "team_wins": 136,
+      "team_losses": 133,
+      "team_win_pct": 50.6
+    },
+    {
+      "team_id": 5885,
+      "name": "terminal_velocity",
+      "isPublic": false,
+      "members": [
+        "hectorkennerley",
+        "NKessler",
+        "ashmit"
+      ],
+      "algos": [
+        {
+          "id": 361173,
+          "name": "SwitchV1",
+          "rating": 1922,
+          "isActive": true
+        },
+        {
+          "id": 360873,
+          "name": "funnel-crush-before",
+          "rating": 1846,
+          "isActive": true
+        },
+        {
+          "id": 361012,
+          "name": "funnel-crush",
+          "rating": 1845,
+          "isActive": true
+        },
+        {
+          "id": 361172,
+          "name": "Switch5",
+          "rating": 1741,
+          "isActive": true
+        },
+        {
+          "id": 361186,
+          "name": "Arsenal",
+          "rating": 1578,
+          "isActive": true
+        },
+        {
+          "id": 359530,
+          "name": "econ-support-greedy",
+          "rating": 1417,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 361173,
+        "name": "SwitchV1",
+        "rating": 1922,
+        "isActive": true
+      },
+      "best_rating": 1922,
+      "team_wins": 209,
+      "team_losses": 192,
+      "team_win_pct": 52.1
+    },
+    {
+      "team_id": 5853,
+      "name": "The Gooners",
+      "isPublic": true,
+      "members": [
+        "Orangemath",
+        "shrxvxn007",
+        "zarifahmed997"
+      ],
+      "algos": [
+        {
+          "id": 361304,
+          "name": "goonmaxxing",
+          "rating": 1908,
+          "isActive": true
+        },
+        {
+          "id": 360840,
+          "name": "defensive-order-algo",
+          "rating": 1615,
+          "isActive": true
+        },
+        {
+          "id": 361098,
+          "name": "True Gooner",
+          "rating": 1579,
+          "isActive": true
+        },
+        {
+          "id": 360677,
+          "name": "python-algo 4",
+          "rating": 1564,
+          "isActive": true
+        },
+        {
+          "id": 360675,
+          "name": "python-algo 4",
+          "rating": 1556,
+          "isActive": true
+        },
+        {
+          "id": 360028,
+          "name": "python-algo",
+          "rating": 1422,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 361304,
+        "name": "goonmaxxing",
+        "rating": 1908,
+        "isActive": true
+      },
+      "best_rating": 1908,
+      "team_wins": 157,
+      "team_losses": 148,
+      "team_win_pct": 51.5
+    },
+    {
+      "team_id": 5878,
+      "name": "Team1",
+      "isPublic": true,
+      "members": [
+        "diego",
+        "n1hal",
+        "AKunjoor"
+      ],
+      "algos": [
+        {
+          "id": 359899,
+          "name": "python-algo",
+          "rating": 1830,
+          "isActive": true
+        },
+        {
+          "id": 360229,
+          "name": "python-algow",
+          "rating": 1813,
+          "isActive": true
+        },
+        {
+          "id": 361194,
+          "name": "python-algo",
+          "rating": 1789,
+          "isActive": true
+        },
+        {
+          "id": 360832,
+          "name": "python-algo",
+          "rating": 1783,
+          "isActive": true
+        },
+        {
+          "id": 360853,
+          "name": "python-algow3",
+          "rating": 1766,
+          "isActive": true
+        }
+      ],
+      "n_algos": 5,
+      "best_algo": {
+        "id": 359899,
+        "name": "python-algo",
+        "rating": 1830,
+        "isActive": true
+      },
+      "best_rating": 1830,
+      "team_wins": 180,
+      "team_losses": 237,
+      "team_win_pct": 43.2
+    },
+    {
+      "team_id": 5893,
+      "name": "Sk",
+      "isPublic": true,
+      "members": [
+        "Egil",
+        "krishpatel",
+        "Anoimanoi"
+      ],
+      "algos": [
+        {
+          "id": 360831,
+          "name": "python-algo-v5",
+          "rating": 1760,
+          "isActive": true
+        },
+        {
+          "id": 361055,
+          "name": "python-algo",
+          "rating": 1671,
+          "isActive": true
+        }
+      ],
+      "n_algos": 2,
+      "best_algo": {
+        "id": 360831,
+        "name": "python-algo-v5",
+        "rating": 1760,
+        "isActive": true
+      },
+      "best_rating": 1760,
+      "team_wins": 40,
+      "team_losses": 39,
+      "team_win_pct": 50.6
+    },
+    {
+      "team_id": 5888,
+      "name": "citftw",
+      "isPublic": false,
+      "members": [
+        "txnujk09",
+        "not-tnb",
+        "suchir-g"
+      ],
+      "algos": [
+        {
+          "id": 359993,
+          "name": "python-algo",
+          "rating": 1747,
+          "isActive": true
+        },
+        {
+          "id": 361030,
+          "name": "terminator-h",
+          "rating": 1623,
+          "isActive": true
+        },
+        {
+          "id": 360726,
+          "name": "terminator",
+          "rating": 1608,
+          "isActive": true
+        },
+        {
+          "id": 361088,
+          "name": "python-funnel",
+          "rating": 1468,
+          "isActive": true
+        },
+        {
+          "id": 360869,
+          "name": "python-algo-tnb",
+          "rating": 1431,
+          "isActive": true
+        },
+        {
+          "id": 360045,
+          "name": "python-algo-baseline",
+          "rating": 1428,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 359993,
+        "name": "python-algo",
+        "rating": 1747,
+        "isActive": true
+      },
+      "best_rating": 1747,
+      "team_wins": 218,
+      "team_losses": 252,
+      "team_win_pct": 46.4
+    },
+    {
+      "team_id": 5875,
+      "name": "No edge",
+      "isPublic": true,
+      "members": [
+        "Olezha",
+        "sk0812",
+        "Lothaire"
+      ],
+      "algos": [
+        {
+          "id": 359976,
+          "name": "algo-v4",
+          "rating": 1738,
+          "isActive": true
+        },
+        {
+          "id": 360270,
+          "name": "algo-v6",
+          "rating": 1707,
+          "isActive": true
+        },
+        {
+          "id": 360977,
+          "name": "oleh-v2",
+          "rating": 1645,
+          "isActive": true
+        },
+        {
+          "id": 359895,
+          "name": "algo-v3",
+          "rating": 1601,
+          "isActive": true
+        },
+        {
+          "id": 360980,
+          "name": "oleh",
+          "rating": 1575,
+          "isActive": true
+        },
+        {
+          "id": 360812,
+          "name": "algo12",
+          "rating": 1305,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 359976,
+        "name": "algo-v4",
+        "rating": 1738,
+        "isActive": true
+      },
+      "best_rating": 1738,
+      "team_wins": 247,
+      "team_losses": 315,
+      "team_win_pct": 44.0
+    },
+    {
+      "team_id": 5889,
+      "name": "Lehman Brothers Quant",
+      "isPublic": true,
+      "members": [
+        "Purujit_Aggarwal",
+        "Denys",
+        "AP1"
+      ],
+      "algos": [
+        {
+          "id": 361208,
+          "name": "python-algo",
+          "rating": 1722,
+          "isActive": true
+        },
+        {
+          "id": 361179,
+          "name": "python-algo",
+          "rating": 1652,
+          "isActive": true
+        },
+        {
+          "id": 361283,
+          "name": "python-algo",
+          "rating": 1615,
+          "isActive": true
+        }
+      ],
+      "n_algos": 3,
+      "best_algo": {
+        "id": 361208,
+        "name": "python-algo",
+        "rating": 1722,
+        "isActive": true
+      },
+      "best_rating": 1722,
+      "team_wins": 26,
+      "team_losses": 18,
+      "team_win_pct": 59.1
+    },
+    {
+      "team_id": 5879,
+      "name": "3 RINGS",
+      "isPublic": true,
+      "members": [
+        "ayo",
+        "integrace",
+        "jae"
+      ],
+      "algos": [
+        {
+          "id": 361124,
+          "name": "3-Rings-Race-V2",
+          "rating": 1716,
+          "isActive": true
+        },
+        {
+          "id": 360617,
+          "name": "python-algo-jae-3",
+          "rating": 1648,
+          "isActive": true
+        },
+        {
+          "id": 359914,
+          "name": "python-algo-turtle-v4",
+          "rating": 1638,
+          "isActive": true
+        },
+        {
+          "id": 360388,
+          "name": "streeter",
+          "rating": 1585,
+          "isActive": true
+        }
+      ],
+      "n_algos": 4,
+      "best_algo": {
+        "id": 361124,
+        "name": "3-Rings-Race-V2",
+        "rating": 1716,
+        "isActive": true
+      },
+      "best_rating": 1716,
+      "team_wins": 117,
+      "team_losses": 141,
+      "team_win_pct": 45.3
+    },
+    {
+      "team_id": 5827,
+      "name": "sr",
+      "isPublic": true,
+      "members": [
+        "ragd",
+        "Stella",
+        "jaminimathur"
+      ],
+      "algos": [
+        {
+          "id": 361027,
+          "name": "python-algo1",
+          "rating": 1712,
+          "isActive": true
+        },
+        {
+          "id": 360061,
+          "name": "python-algo1",
+          "rating": 1627,
+          "isActive": true
+        },
+        {
+          "id": 361153,
+          "name": "python-algo1",
+          "rating": 1602,
+          "isActive": true
+        },
+        {
+          "id": 361210,
+          "name": "python-algo1",
+          "rating": 1596,
+          "isActive": true
+        }
+      ],
+      "n_algos": 4,
+      "best_algo": {
+        "id": 361027,
+        "name": "python-algo1",
+        "rating": 1712,
+        "isActive": true
+      },
+      "best_rating": 1712,
+      "team_wins": 70,
+      "team_losses": 69,
+      "team_win_pct": 50.4
+    },
+    {
+      "team_id": 5822,
+      "name": "(unnamed)",
+      "isPublic": true,
+      "members": [
+        "Hera Choi",
+        "Arun__ls"
+      ],
+      "algos": [
+        {
+          "id": 361307,
+          "name": "python-algo",
+          "rating": 1697,
+          "isActive": true
+        },
+        {
+          "id": 361313,
+          "name": "python-algo",
+          "rating": 1472,
+          "isActive": true
+        }
+      ],
+      "n_algos": 2,
+      "best_algo": {
+        "id": 361307,
+        "name": "python-algo",
+        "rating": 1697,
+        "isActive": true
+      },
+      "best_rating": 1697,
+      "team_wins": 9,
+      "team_losses": 12,
+      "team_win_pct": 42.9
+    },
+    {
+      "team_id": 5820,
+      "name": "WFreakS",
+      "isPublic": false,
+      "members": [
+        "vik07x",
+        "sheli"
+      ],
+      "algos": [
+        {
+          "id": 360432,
+          "name": "python-algo-v9",
+          "rating": 1688,
+          "isActive": true
+        },
+        {
+          "id": 359580,
+          "name": "python-algo-v2",
+          "rating": 1687,
+          "isActive": true
+        },
+        {
+          "id": 361188,
+          "name": "python-algo-v39",
+          "rating": 1676,
+          "isActive": true
+        },
+        {
+          "id": 360927,
+          "name": "python-algo-v14",
+          "rating": 1655,
+          "isActive": true
+        },
+        {
+          "id": 361079,
+          "name": "python-algo-v25",
+          "rating": 1527,
+          "isActive": true
+        },
+        {
+          "id": 359547,
+          "name": "python-algo",
+          "rating": 1516,
+          "isActive": true
+        }
+      ],
+      "n_algos": 6,
+      "best_algo": {
+        "id": 360432,
+        "name": "python-algo-v9",
+        "rating": 1688,
+        "isActive": true
+      },
+      "best_rating": 1688,
+      "team_wins": 304,
+      "team_losses": 363,
+      "team_win_pct": 45.6
+    },
+    {
+      "team_id": 5901,
+      "name": "The OverFiTTERS",
+      "isPublic": true,
+      "members": [
+        "pxannnna",
+        "Nicole"
+      ],
+      "algos": [
+        {
+          "id": 361149,
+          "name": "V6-A",
+          "rating": 1626,
+          "isActive": true
+        },
+        {
+          "id": 361137,
+          "name": "V4-A",
+          "rating": 1610,
+          "isActive": true
+        },
+        {
+          "id": 361074,
+          "name": "v2",
+          "rating": 1547,
+          "isActive": true
+        },
+        {
+          "id": 360922,
+          "name": "v1_og",
+          "rating": 1539,
+          "isActive": true
+        },
+        {
+          "id": 361164,
+          "name": "V7-A",
+          "rating": 1453,
+          "isActive": true
+        }
+      ],
+      "n_algos": 5,
+      "best_algo": {
+        "id": 361149,
+        "name": "V6-A",
+        "rating": 1626,
+        "isActive": true
+      },
+      "best_rating": 1626,
+      "team_wins": 53,
+      "team_losses": 60,
+      "team_win_pct": 46.9
+    },
+    {
+      "team_id": 5883,
+      "name": "Better jmc ",
+      "isPublic": false,
+      "members": [
+        "sebk",
+        "hussain",
+        "aaron"
+      ],
+      "algos": [
+        {
+          "id": 360004,
+          "name": "python-algo",
+          "rating": 1580,
+          "isActive": true
+        },
+        {
+          "id": 360012,
+          "name": "python-algo-claude",
+          "rating": 1473,
+          "isActive": true
+        }
+      ],
+      "n_algos": 2,
+      "best_algo": {
+        "id": 360004,
+        "name": "python-algo",
+        "rating": 1580,
+        "isActive": true
+      },
+      "best_rating": 1580,
+      "team_wins": 211,
+      "team_losses": 174,
+      "team_win_pct": 54.8
+    },
+    {
+      "team_id": 5880,
+      "name": "turrets syndrome",
+      "isPublic": true,
+      "members": [
+        "louiebwu",
+        "icylapras24",
+        "juliurius"
+      ],
+      "algos": [
+        {
+          "id": 359736,
+          "name": "doublegap",
+          "rating": 1460,
+          "isActive": true
+        }
+      ],
+      "n_algos": 1,
+      "best_algo": {
+        "id": 359736,
+        "name": "doublegap",
+        "rating": 1460,
+        "isActive": true
+      },
+      "best_rating": 1460,
+      "team_wins": 74,
+      "team_losses": 100,
+      "team_win_pct": 42.5
+    },
+    {
+      "team_id": 5876,
+      "name": "nala",
+      "isPublic": true,
+      "members": [
+        "Roshan",
+        "octavian202",
+        "Hussein"
+      ],
+      "algos": [
+        {
+          "id": 359956,
+          "name": "python-algo",
+          "rating": 1449,
+          "isActive": true
+        }
+      ],
+      "n_algos": 1,
+      "best_algo": {
+        "id": 359956,
+        "name": "python-algo",
+        "rating": 1449,
+        "isActive": true
+      },
+      "best_rating": 1449,
+      "team_wins": 83,
+      "team_losses": 64,
+      "team_win_pct": 56.5
+    },
+    {
+      "team_id": 5890,
+      "name": " ",
+      "isPublic": true,
+      "members": [
+        "Vmc",
+        "Ryan_Lam",
+        "mjwtan"
+      ],
+      "algos": [
+        {
+          "id": 359952,
+          "name": "python-algo",
+          "rating": 1445,
+          "isActive": true
+        },
+        {
+          "id": 360737,
+          "name": "python-algo-v3",
+          "rating": 1390,
+          "isActive": true
+        },
+        {
+          "id": 360755,
+          "name": "python-algo-v3-1",
+          "rating": 1235,
+          "isActive": true
+        },
+        {
+          "id": 361281,
+          "name": "python-algo",
+          "rating": 1203,
+          "isActive": true
+        },
+        {
+          "id": 361316,
+          "name": "python-algo",
+          "rating": 1189,
+          "isActive": true
+        }
+      ],
+      "n_algos": 5,
+      "best_algo": {
+        "id": 359952,
+        "name": "python-algo",
+        "rating": 1445,
+        "isActive": true
+      },
+      "best_rating": 1445,
+      "team_wins": 219,
+      "team_losses": 201,
+      "team_win_pct": 52.1
+    },
+    {
+      "team_id": 5877,
+      "name": "Ctrl Alt Defeat",
+      "isPublic": false,
+      "members": [
+        "max guo",
+        "Josh"
+      ],
+      "algos": [
+        {
+          "id": 359813,
+          "name": "it_doesnt_meta",
+          "rating": 1440,
+          "isActive": true
+        },
+        {
+          "id": 361308,
+          "name": "rc1",
+          "rating": 1359,
+          "isActive": true
+        }
+      ],
+      "n_algos": 2,
+      "best_algo": {
+        "id": 359813,
+        "name": "it_doesnt_meta",
+        "rating": 1440,
+        "isActive": true
+      },
+      "best_rating": 1440,
+      "team_wins": 92,
+      "team_losses": 100,
+      "team_win_pct": 47.9
+    },
+    {
+      "team_id": 5858,
+      "name": "sudo rm -rf /*",
+      "isPublic": false,
+      "members": [
+        "Krey",
+        "Zan"
+      ],
+      "algos": [
+        {
+          "id": 359720,
+          "name": "python-algo",
+          "rating": 1423,
+          "isActive": true
+        },
+        {
+          "id": 361293,
+          "name": "python-algo",
+          "rating": 1229,
+          "isActive": true
+        }
+      ],
+      "n_algos": 2,
+      "best_algo": {
+        "id": 359720,
+        "name": "python-algo",
+        "rating": 1423,
+        "isActive": true
+      },
+      "best_rating": 1423,
+      "team_wins": 100,
+      "team_losses": 87,
+      "team_win_pct": 53.5
+    },
+    {
+      "team_id": 5857,
+      "name": "thebigwick",
+      "isPublic": false,
+      "members": [
+        "angshumang"
+      ],
+      "algos": [
+        {
+          "id": 359697,
+          "name": "python-algo",
+          "rating": 1055,
+          "isActive": true
+        }
+      ],
+      "n_algos": 1,
+      "best_algo": {
+        "id": 359697,
+        "name": "python-algo",
+        "rating": 1055,
+        "isActive": true
+      },
+      "best_rating": 1055,
+      "team_wins": 0,
+      "team_losses": 6,
+      "team_win_pct": 0.0
+    },
+    {
+      "team_id": 5895,
+      "name": "Europe Test",
+      "isPublic": false,
+      "members": [
+        "C1Beatrice"
+      ],
+      "algos": [],
+      "n_algos": 0,
+      "best_algo": null,
+      "best_rating": 0,
+      "team_wins": 0,
+      "team_losses": 0,
+      "team_win_pct": null
+    },
+    {
+      "team_id": 5873,
+      "name": "the g squad",
+      "isPublic": false,
+      "members": [
+        "sned",
+        "melindamorkeh"
+      ],
+      "algos": [],
+      "n_algos": 0,
+      "best_algo": null,
+      "best_rating": 0,
+      "team_wins": 0,
+      "team_losses": 0,
+      "team_win_pct": null
+    },
+    {
+      "team_id": 5852,
+      "name": "very kuai",
+      "isPublic": false,
+      "members": [
+        "enxgmatic",
+        "pseudoflash"
+      ],
+      "algos": [],
+      "n_algos": 0,
+      "best_algo": null,
+      "best_rating": 0,
+      "team_wins": 0,
+      "team_losses": 0,
+      "team_win_pct": null
+    }
+  ]
+}

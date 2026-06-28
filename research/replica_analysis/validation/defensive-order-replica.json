@@ -1,0 +1,376 @@
+{
+  "replica": "defensive-order-replica",
+  "opponent_profile": "defensive-order-algo",
+  "replay": "replays/defensive-order-replica_vs_python-algo-replica_20260426_150040.replay",
+  "p1_signature": {
+    "max_turn": 35,
+    "p1_first_attack_turn": 17,
+    "p1_unit_total": 92,
+    "p1_unit_mix": {
+      "scouts": 63,
+      "demos": 3,
+      "interceptors": 26
+    },
+    "p1_unit_pct": {
+      "scout_pct": 68.47826086956522,
+      "demo_pct": 3.260869565217391,
+      "interceptor_pct": 28.26086956521739
+    },
+    "p1_total_attacks": 15,
+    "p1_attacks": [
+      {
+        "turn": 0,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 1,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 2,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 3,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 4,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 1.0
+      },
+      {
+        "turn": 5,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 2.0
+      },
+      {
+        "turn": 6,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 2.8
+      },
+      {
+        "turn": 7,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 3.3
+      },
+      {
+        "turn": 8,
+        "scouts": 0,
+        "demos": 0,
+        "intercs": 1,
+        "mp_before": 3.7
+      },
+      {
+        "turn": 17,
+        "scouts": 11,
+        "demos": 0,
+        "intercs": 2,
+        "mp_before": 13.5
+      },
+      {
+        "turn": 22,
+        "scouts": 11,
+        "demos": 0,
+        "intercs": 3,
+        "mp_before": 14.7
+      },
+      {
+        "turn": 26,
+        "scouts": 9,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 15.6
+      },
+      {
+        "turn": 29,
+        "scouts": 11,
+        "demos": 0,
+        "intercs": 3,
+        "mp_before": 14.2
+      },
+      {
+        "turn": 32,
+        "scouts": 10,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 16.3
+      },
+      {
+        "turn": 35,
+        "scouts": 11,
+        "demos": 1,
+        "intercs": 3,
+        "mp_before": 17.3
+      }
+    ],
+    "p1_spawn_top": [
+      [
+        [
+          14,
+          0
+        ],
+        70
+      ],
+      [
+        [
+          13,
+          0
+        ],
+        22
+      ]
+    ],
+    "p1_breaches_for_us_count": 47,
+    "p2_breaches_against_us_count": 4,
+    "p1_breaches_top": [
+      [
+        [
+          1,
+          15
+        ],
+        35
+      ],
+      [
+        [
+          24,
+          17
+        ],
+        12
+      ]
+    ],
+    "p2_breaches_top": [
+      [
+        [
+          26,
+          12
+        ],
+        2
+      ],
+      [
+        [
+          21,
+          7
+        ],
+        1
+      ],
+      [
+        [
+          7,
+          6
+        ],
+        1
+      ]
+    ],
+    "p1_walls_T15": [
+      [
+        6,
+        12
+      ],
+      [
+        7,
+        12
+      ],
+      [
+        8,
+        12
+      ],
+      [
+        9,
+        12
+      ],
+      [
+        10,
+        12
+      ],
+      [
+        11,
+        12
+      ],
+      [
+        13,
+        12
+      ],
+      [
+        14,
+        12
+      ],
+      [
+        16,
+        12
+      ],
+      [
+        17,
+        12
+      ],
+      [
+        18,
+        12
+      ],
+      [
+        19,
+        12
+      ],
+      [
+        23,
+        12
+      ],
+      [
+        24,
+        12
+      ],
+      [
+        25,
+        13
+      ],
+      [
+        3,
+        12
+      ],
+      [
+        21,
+        12
+      ],
+      [
+        2,
+        13
+      ],
+      [
+        4,
+        12
+      ],
+      [
+        20,
+        12
+      ],
+      [
+        22,
+        12
+      ],
+      [
+        5,
+        12
+      ]
+    ],
+    "p1_turrets_T15": [
+      [
+        13,
+        11
+      ],
+      [
+        14,
+        11
+      ],
+      [
+        11,
+        11
+      ],
+      [
+        16,
+        11
+      ],
+      [
+        8,
+        11
+      ],
+      [
+        19,
+        11
+      ],
+      [
+        5,
+        11
+      ],
+      [
+        22,
+        11
+      ],
+      [
+        1,
+        13
+      ],
+      [
+        26,
+        13
+      ],
+      [
+        7,
+        9
+      ],
+      [
+        20,
+        9
+      ],
+      [
+        0,
+        13
+      ],
+      [
+        27,
+        13
+      ]
+    ],
+    "p1_supports_T15": [],
+    "p1_hp_final": 36.0,
+    "p2_hp_final": 3.0
+  },
+  "profile_summary": {
+    "n_replays": 13,
+    "unit_mix_avg": {
+      "scouts": 110.46153846153847,
+      "demos": 39.38461538461539,
+      "interceptors": 43.15384615384615,
+      "scout_pct": 57.233957752092465,
+      "demo_pct": 20.406536468712634,
+      "interceptor_pct": 22.359505779194897
+    },
+    "first_attack_turn": {
+      "median": 10,
+      "min": 10,
+      "max": 13,
+      "values": [
+        10,
+        10,
+        10,
+        13,
+        10,
+        13,
+        10,
+        13,
+        10,
+        13,
+        10
+      ]
+    },
+    "attack_count_avg": 40.15384615384615,
+    "max_turns_avg": 51.69230769230769
+  },
+  "scores": {
+    "unit_mix_similarity": 0.8285433309650475,
+    "first_attack_similarity": 0.30000000000000004,
+    "first_attack_diff_turns": 7,
+    "spawn_overlap_pct": 0.25,
+    "wall_jaccard": 0.9166666666666666,
+    "turret_jaccard": 0.8571428571428571,
+    "support_jaccard": 1.0
+  }
+}
