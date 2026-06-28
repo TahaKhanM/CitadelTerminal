@@ -1,0 +1,1158 @@
+{
+  "snapshot_at": "2026-04-26T21:27:15.144063+00:00",
+  "comp_id": 1338,
+  "methodology": "three views per team: best_active (current /user/algo_info rating), peak_reliable (>=5 games match graph), peak_any (>=1 game)",
+  "teams": [
+    {
+      "team_id": 5880,
+      "team_name": "turrets syndrome",
+      "members": [
+        "louiebwu",
+        "icylapras24",
+        "juliurius"
+      ],
+      "n_algos_active": 1,
+      "n_algos_seen_in_graph": 32,
+      "best_active": {
+        "id": 359736,
+        "name": "doublegap",
+        "rating": 1460,
+        "games": 174,
+        "wins": 74,
+        "losses": 100,
+        "user": "icylapras24"
+      },
+      "peak_reliable": {
+        "id": 361148,
+        "name": "demo-siege",
+        "rating": 2237,
+        "games": 11,
+        "is_deleted": true,
+        "user": "louiebwu"
+      },
+      "peak_any": {
+        "id": 361148,
+        "name": "demo-siege",
+        "rating": 2237,
+        "games": 11,
+        "is_deleted": true,
+        "user": "louiebwu"
+      }
+    },
+    {
+      "team_id": 5902,
+      "team_name": "test run",
+      "members": [
+        "maxrivaldii",
+        "gencersarp",
+        "joshua-bode"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 105,
+      "best_active": {
+        "id": 361287,
+        "name": "python-algo-babayaga5",
+        "rating": 2004,
+        "games": 14,
+        "wins": 11,
+        "losses": 3,
+        "user": "gencersarp"
+      },
+      "peak_reliable": {
+        "id": 361216,
+        "name": "python-algo-babayaga2",
+        "rating": 2056,
+        "games": 11,
+        "is_deleted": true,
+        "user": "gencersarp"
+      },
+      "peak_any": {
+        "id": 361216,
+        "name": "python-algo-babayaga2",
+        "rating": 2056,
+        "games": 11,
+        "is_deleted": true,
+        "user": "gencersarp"
+      }
+    },
+    {
+      "team_id": 5891,
+      "team_name": "Winnerteam",
+      "members": [
+        "foxhenderson",
+        "pipmy",
+        "Ltb"
+      ],
+      "n_algos_active": 4,
+      "n_algos_seen_in_graph": 128,
+      "best_active": {
+        "id": 361314,
+        "name": "ascension",
+        "rating": 2012,
+        "games": 5,
+        "wins": 5,
+        "losses": 0,
+        "user": "foxhenderson"
+      },
+      "peak_reliable": {
+        "id": 361253,
+        "name": "hello-world",
+        "rating": 2182,
+        "games": 15,
+        "is_deleted": true,
+        "user": "foxhenderson"
+      },
+      "peak_any": {
+        "id": 361253,
+        "name": "hello-world",
+        "rating": 2182,
+        "games": 15,
+        "is_deleted": true,
+        "user": "foxhenderson"
+      }
+    },
+    {
+      "team_id": 5878,
+      "team_name": "Team1",
+      "members": [
+        "diego",
+        "n1hal",
+        "AKunjoor"
+      ],
+      "n_algos_active": 5,
+      "n_algos_seen_in_graph": 111,
+      "best_active": {
+        "id": 359899,
+        "name": "python-algo",
+        "rating": 1830,
+        "games": 154,
+        "wins": 64,
+        "losses": 90,
+        "user": "n1hal"
+      },
+      "peak_reliable": {
+        "id": 360663,
+        "name": "python-algo",
+        "rating": 1976,
+        "games": 6,
+        "is_deleted": true,
+        "user": "n1hal"
+      },
+      "peak_any": {
+        "id": 359909,
+        "name": "python-algo",
+        "rating": 2162,
+        "games": 2,
+        "is_deleted": true,
+        "user": "n1hal"
+      }
+    },
+    {
+      "team_id": 5827,
+      "team_name": "sr",
+      "members": [
+        "ragd",
+        "Stella",
+        "jaminimathur"
+      ],
+      "n_algos_active": 4,
+      "n_algos_seen_in_graph": 177,
+      "best_active": {
+        "id": 361027,
+        "name": "python-algo1",
+        "rating": 1712,
+        "games": 17,
+        "wins": 12,
+        "losses": 5,
+        "user": "jaminimathur"
+      },
+      "peak_reliable": {
+        "id": 361027,
+        "name": "python-algo1",
+        "rating": 1712,
+        "games": 17,
+        "is_deleted": false,
+        "user": "jaminimathur"
+      },
+      "peak_any": {
+        "id": 359594,
+        "name": "python-algo",
+        "rating": 2059,
+        "games": 2,
+        "is_deleted": true,
+        "user": "jaminimathur"
+      }
+    },
+    {
+      "team_id": 5885,
+      "team_name": "terminal_velocity",
+      "members": [
+        "hectorkennerley",
+        "NKessler",
+        "ashmit"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 92,
+      "best_active": {
+        "id": 361173,
+        "name": "SwitchV1",
+        "rating": 1922,
+        "games": 30,
+        "wins": 16,
+        "losses": 14,
+        "user": "hectorkennerley"
+      },
+      "peak_reliable": {
+        "id": 361162,
+        "name": "SwitchV1",
+        "rating": 2146,
+        "games": 11,
+        "is_deleted": true,
+        "user": "hectorkennerley"
+      },
+      "peak_any": {
+        "id": 361162,
+        "name": "SwitchV1",
+        "rating": 2146,
+        "games": 11,
+        "is_deleted": true,
+        "user": "hectorkennerley"
+      }
+    },
+    {
+      "team_id": 5889,
+      "team_name": "Lehman Brothers Quant",
+      "members": [
+        "Purujit_Aggarwal",
+        "Denys",
+        "AP1"
+      ],
+      "n_algos_active": 3,
+      "n_algos_seen_in_graph": 91,
+      "best_active": {
+        "id": 361208,
+        "name": "python-algo",
+        "rating": 1722,
+        "games": 16,
+        "wins": 10,
+        "losses": 6,
+        "user": "Purujit_Aggarwal"
+      },
+      "peak_reliable": {
+        "id": 359706,
+        "name": "python-algo",
+        "rating": 1867,
+        "games": 5,
+        "is_deleted": true,
+        "user": "Purujit_Aggarwal"
+      },
+      "peak_any": {
+        "id": 359688,
+        "name": "python-algo",
+        "rating": 1898,
+        "games": 4,
+        "is_deleted": true,
+        "user": "Purujit_Aggarwal"
+      }
+    },
+    {
+      "team_id": 5820,
+      "team_name": "WFreakS",
+      "members": [
+        "vik07x",
+        "sheli"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 47,
+      "best_active": {
+        "id": 360432,
+        "name": "python-algo-v9",
+        "rating": 1688,
+        "games": 119,
+        "wins": 47,
+        "losses": 72,
+        "user": "vik07x"
+      },
+      "peak_reliable": {
+        "id": 360929,
+        "name": "python-algo-v15",
+        "rating": 1724,
+        "games": 5,
+        "is_deleted": true,
+        "user": "sheli"
+      },
+      "peak_any": {
+        "id": 360219,
+        "name": "python-algo-v7",
+        "rating": 1798,
+        "games": 1,
+        "is_deleted": true,
+        "user": "sheli"
+      }
+    },
+    {
+      "team_id": 5901,
+      "team_name": "The OverFiTTERS",
+      "members": [
+        "pxannnna",
+        "Nicole"
+      ],
+      "n_algos_active": 5,
+      "n_algos_seen_in_graph": 25,
+      "best_active": {
+        "id": 361149,
+        "name": "V6-A",
+        "rating": 1626,
+        "games": 15,
+        "wins": 7,
+        "losses": 8,
+        "user": "pxannnna"
+      },
+      "peak_reliable": {
+        "id": 360932,
+        "name": "v3",
+        "rating": 1697,
+        "games": 6,
+        "is_deleted": true,
+        "user": "Nicole"
+      },
+      "peak_any": {
+        "id": 360932,
+        "name": "v3",
+        "rating": 1697,
+        "games": 6,
+        "is_deleted": true,
+        "user": "Nicole"
+      }
+    },
+    {
+      "team_id": 5875,
+      "team_name": "No edge",
+      "members": [
+        "Olezha",
+        "sk0812",
+        "Lothaire"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 163,
+      "best_active": {
+        "id": 359976,
+        "name": "algo-v4",
+        "rating": 1738,
+        "games": 155,
+        "wins": 64,
+        "losses": 91,
+        "user": "sk0812"
+      },
+      "peak_reliable": {
+        "id": 360454,
+        "name": "oleh-v2",
+        "rating": 2207,
+        "games": 5,
+        "is_deleted": true,
+        "user": "Olezha"
+      },
+      "peak_any": {
+        "id": 360639,
+        "name": "oleh-v2",
+        "rating": 2282,
+        "games": 4,
+        "is_deleted": true,
+        "user": "Olezha"
+      }
+    },
+    {
+      "team_id": 5881,
+      "team_name": "bobby tables",
+      "members": [
+        "aa0",
+        "ameyg"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 144,
+      "best_active": {
+        "id": 360540,
+        "name": "funnel-rush-v6",
+        "rating": 1981,
+        "games": 40,
+        "wins": 22,
+        "losses": 18,
+        "user": "ameyg"
+      },
+      "peak_reliable": {
+        "id": 360524,
+        "name": "funnel-rush-v23",
+        "rating": 2229,
+        "games": 9,
+        "is_deleted": true,
+        "user": "aa0"
+      },
+      "peak_any": {
+        "id": 360524,
+        "name": "funnel-rush-v23",
+        "rating": 2229,
+        "games": 9,
+        "is_deleted": true,
+        "user": "aa0"
+      }
+    },
+    {
+      "team_id": 5853,
+      "team_name": "The Gooners",
+      "members": [
+        "Orangemath",
+        "shrxvxn007",
+        "zarifahmed997"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 67,
+      "best_active": {
+        "id": 361304,
+        "name": "goonmaxxing",
+        "rating": 1908,
+        "games": 14,
+        "wins": 9,
+        "losses": 5,
+        "user": "zarifahmed997"
+      },
+      "peak_reliable": {
+        "id": 361297,
+        "name": "goonmaxxing",
+        "rating": 1933,
+        "games": 11,
+        "is_deleted": true,
+        "user": "zarifahmed997"
+      },
+      "peak_any": {
+        "id": 361297,
+        "name": "goonmaxxing",
+        "rating": 1933,
+        "games": 11,
+        "is_deleted": true,
+        "user": "zarifahmed997"
+      }
+    },
+    {
+      "team_id": 5879,
+      "team_name": "3 RINGS",
+      "members": [
+        "ayo",
+        "integrace",
+        "jae"
+      ],
+      "n_algos_active": 4,
+      "n_algos_seen_in_graph": 163,
+      "best_active": {
+        "id": 361124,
+        "name": "3-Rings-Race-V2",
+        "rating": 1716,
+        "games": 22,
+        "wins": 10,
+        "losses": 12,
+        "user": "integrace"
+      },
+      "peak_reliable": {
+        "id": 360287,
+        "name": "python-algo-jae-3",
+        "rating": 2119,
+        "games": 7,
+        "is_deleted": true,
+        "user": "jae"
+      },
+      "peak_any": {
+        "id": 360287,
+        "name": "python-algo-jae-3",
+        "rating": 2119,
+        "games": 7,
+        "is_deleted": true,
+        "user": "jae"
+      }
+    },
+    {
+      "team_id": 5893,
+      "team_name": "Sk",
+      "members": [
+        "Egil",
+        "krishpatel",
+        "Anoimanoi"
+      ],
+      "n_algos_active": 2,
+      "n_algos_seen_in_graph": 30,
+      "best_active": {
+        "id": 360831,
+        "name": "python-algo-v5",
+        "rating": 1760,
+        "games": 53,
+        "wins": 27,
+        "losses": 26,
+        "user": "Egil"
+      },
+      "peak_reliable": {
+        "id": 360831,
+        "name": "python-algo-v5",
+        "rating": 1760,
+        "games": 53,
+        "is_deleted": false,
+        "user": "Egil"
+      },
+      "peak_any": {
+        "id": 361198,
+        "name": "python-algo",
+        "rating": 1947,
+        "games": 3,
+        "is_deleted": true,
+        "user": "Anoimanoi"
+      }
+    },
+    {
+      "team_id": 5826,
+      "team_name": "Wick",
+      "members": [
+        "TAHA",
+        "Rham"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 49,
+      "best_active": {
+        "id": 361251,
+        "name": "oracle_pure_upload",
+        "rating": 2167,
+        "games": 24,
+        "wins": 21,
+        "losses": 3,
+        "user": "TAHA"
+      },
+      "peak_reliable": {
+        "id": 361251,
+        "name": "oracle_pure_upload",
+        "rating": 2167,
+        "games": 24,
+        "is_deleted": false,
+        "user": "TAHA"
+      },
+      "peak_any": {
+        "id": 361251,
+        "name": "oracle_pure_upload",
+        "rating": 2167,
+        "games": 24,
+        "is_deleted": false,
+        "user": "TAHA"
+      }
+    },
+    {
+      "team_id": 5888,
+      "team_name": "citftw",
+      "members": [
+        "txnujk09",
+        "not-tnb",
+        "suchir-g"
+      ],
+      "n_algos_active": 6,
+      "n_algos_seen_in_graph": 30,
+      "best_active": {
+        "id": 359993,
+        "name": "python-algo",
+        "rating": 1747,
+        "games": 161,
+        "wins": 71,
+        "losses": 90,
+        "user": "suchir-g"
+      },
+      "peak_reliable": {
+        "id": 359993,
+        "name": "python-algo",
+        "rating": 1747,
+        "games": 161,
+        "is_deleted": false,
+        "user": "suchir-g"
+      },
+      "peak_any": {
+        "id": 359993,
+        "name": "python-algo",
+        "rating": 1747,
+        "games": 161,
+        "is_deleted": false,
+        "user": "suchir-g"
+      }
+    },
+    {
+      "team_id": 5890,
+      "team_name": " ",
+      "members": [
+        "Vmc",
+        "Ryan_Lam",
+        "mjwtan"
+      ],
+      "n_algos_active": 5,
+      "n_algos_seen_in_graph": 36,
+      "best_active": {
+        "id": 359952,
+        "name": "python-algo",
+        "rating": 1445,
+        "games": 132,
+        "wins": 73,
+        "losses": 59,
+        "user": "mjwtan"
+      },
+      "peak_reliable": {
+        "id": 359952,
+        "name": "python-algo",
+        "rating": 1445,
+        "games": 132,
+        "is_deleted": false,
+        "user": "mjwtan"
+      },
+      "peak_any": {
+        "id": 359988,
+        "name": "python-algo(R3,R4 defence upg",
+        "rating": 1527,
+        "games": 1,
+        "is_deleted": true,
+        "user": "mjwtan"
+      }
+    },
+    {
+      "team_id": 5883,
+      "team_name": "Better jmc ",
+      "members": [
+        "sebk",
+        "hussain",
+        "aaron"
+      ],
+      "n_algos_active": 2,
+      "n_algos_seen_in_graph": 5,
+      "best_active": {
+        "id": 360004,
+        "name": "python-algo",
+        "rating": 1580,
+        "games": 132,
+        "wins": 78,
+        "losses": 54,
+        "user": "hussain"
+      },
+      "peak_reliable": {
+        "id": 360004,
+        "name": "python-algo",
+        "rating": 1580,
+        "games": 132,
+        "is_deleted": false,
+        "user": "hussain"
+      },
+      "peak_any": {
+        "id": 360004,
+        "name": "python-algo",
+        "rating": 1580,
+        "games": 132,
+        "is_deleted": false,
+        "user": "hussain"
+      }
+    },
+    {
+      "team_id": 5876,
+      "team_name": "nala",
+      "members": [
+        "Roshan",
+        "octavian202",
+        "Hussein"
+      ],
+      "n_algos_active": 1,
+      "n_algos_seen_in_graph": 1,
+      "best_active": {
+        "id": 359956,
+        "name": "python-algo",
+        "rating": 1449,
+        "games": 147,
+        "wins": 83,
+        "losses": 64,
+        "user": "octavian202"
+      },
+      "peak_reliable": {
+        "id": 359956,
+        "name": "python-algo",
+        "rating": 1449,
+        "games": 147,
+        "is_deleted": false,
+        "user": "octavian202"
+      },
+      "peak_any": {
+        "id": 359956,
+        "name": "python-algo",
+        "rating": 1449,
+        "games": 147,
+        "is_deleted": false,
+        "user": "octavian202"
+      }
+    },
+    {
+      "team_id": 5877,
+      "team_name": "Ctrl Alt Defeat",
+      "members": [
+        "max guo",
+        "Josh"
+      ],
+      "n_algos_active": 2,
+      "n_algos_seen_in_graph": 8,
+      "best_active": {
+        "id": 359813,
+        "name": "it_doesnt_meta",
+        "rating": 1440,
+        "games": 183,
+        "wins": 88,
+        "losses": 95,
+        "user": "Josh"
+      },
+      "peak_reliable": {
+        "id": 360920,
+        "name": "jack",
+        "rating": 2030,
+        "games": 6,
+        "is_deleted": true,
+        "user": "Josh"
+      },
+      "peak_any": {
+        "id": 360920,
+        "name": "jack",
+        "rating": 2030,
+        "games": 6,
+        "is_deleted": true,
+        "user": "Josh"
+      }
+    },
+    {
+      "team_id": 5858,
+      "team_name": "sudo rm -rf /*",
+      "members": [
+        "Krey",
+        "Zan"
+      ],
+      "n_algos_active": 2,
+      "n_algos_seen_in_graph": 12,
+      "best_active": {
+        "id": 359720,
+        "name": "python-algo",
+        "rating": 1423,
+        "games": 174,
+        "wins": 95,
+        "losses": 79,
+        "user": "Krey"
+      },
+      "peak_reliable": {
+        "id": 359720,
+        "name": "python-algo",
+        "rating": 1423,
+        "games": 174,
+        "is_deleted": false,
+        "user": "Krey"
+      },
+      "peak_any": {
+        "id": 359720,
+        "name": "python-algo",
+        "rating": 1423,
+        "games": 174,
+        "is_deleted": false,
+        "user": "Krey"
+      }
+    },
+    {
+      "team_id": 5822,
+      "team_name": "(unnamed)",
+      "members": [
+        "Hera Choi",
+        "Arun__ls"
+      ],
+      "n_algos_active": 2,
+      "n_algos_seen_in_graph": 2,
+      "best_active": {
+        "id": 361307,
+        "name": "python-algo",
+        "rating": 1697,
+        "games": 12,
+        "wins": 6,
+        "losses": 6,
+        "user": "Arun__ls"
+      },
+      "peak_reliable": {
+        "id": 361307,
+        "name": "python-algo",
+        "rating": 1697,
+        "games": 12,
+        "is_deleted": false,
+        "user": "Arun__ls"
+      },
+      "peak_any": {
+        "id": 361307,
+        "name": "python-algo",
+        "rating": 1697,
+        "games": 12,
+        "is_deleted": false,
+        "user": "Arun__ls"
+      }
+    },
+    {
+      "team_id": 5857,
+      "team_name": "thebigwick",
+      "members": [
+        "angshumang"
+      ],
+      "n_algos_active": 1,
+      "n_algos_seen_in_graph": 1,
+      "best_active": {
+        "id": 359697,
+        "name": "python-algo",
+        "rating": 1055,
+        "games": 6,
+        "wins": 0,
+        "losses": 6,
+        "user": "angshumang"
+      },
+      "peak_reliable": {
+        "id": 359697,
+        "name": "python-algo",
+        "rating": 1055,
+        "games": 6,
+        "is_deleted": false,
+        "user": "angshumang"
+      },
+      "peak_any": {
+        "id": 359697,
+        "name": "python-algo",
+        "rating": 1055,
+        "games": 6,
+        "is_deleted": false,
+        "user": "angshumang"
+      }
+    }
+  ],
+  "top_30_algos_by_peak": [
+    {
+      "aid": 360639,
+      "peak": 2282,
+      "name": "oleh-v2",
+      "user": "Olezha",
+      "team": "No edge",
+      "games": 4,
+      "wins": 2,
+      "losses": 2,
+      "active": false
+    },
+    {
+      "aid": 361148,
+      "peak": 2237,
+      "name": "demo-siege",
+      "user": "louiebwu",
+      "team": "turrets syndrome",
+      "games": 11,
+      "wins": 11,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360524,
+      "peak": 2229,
+      "name": "funnel-rush-v23",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 9,
+      "wins": 9,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360539,
+      "peak": 2227,
+      "name": "funnel-rush-v25",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 7,
+      "wins": 7,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 361133,
+      "peak": 2216,
+      "name": "demo-siege",
+      "user": "louiebwu",
+      "team": "turrets syndrome",
+      "games": 13,
+      "wins": 12,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360704,
+      "peak": 2211,
+      "name": "funnel-rush-v8",
+      "user": "ameyg",
+      "team": "bobby tables",
+      "games": 6,
+      "wins": 6,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360491,
+      "peak": 2210,
+      "name": "funnel-rush-v7",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 9,
+      "wins": 9,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360541,
+      "peak": 2208,
+      "name": "funnel-rush-v6",
+      "user": "ameyg",
+      "team": "bobby tables",
+      "games": 7,
+      "wins": 7,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360454,
+      "peak": 2207,
+      "name": "oleh-v2",
+      "user": "Olezha",
+      "team": "No edge",
+      "games": 5,
+      "wins": 4,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360425,
+      "peak": 2204,
+      "name": "funnel-rush",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 6,
+      "wins": 6,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360548,
+      "peak": 2200,
+      "name": "oleh-v2",
+      "user": "Olezha",
+      "team": "No edge",
+      "games": 3,
+      "wins": 2,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360469,
+      "peak": 2199,
+      "name": "funnel-rush-v5",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 10,
+      "wins": 9,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360496,
+      "peak": 2196,
+      "name": "funnel-rush-v9",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 8,
+      "wins": 7,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360038,
+      "peak": 2195,
+      "name": "python-algo",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 5,
+      "wins": 4,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360572,
+      "peak": 2189,
+      "name": "funnel-rush-v25b",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 8,
+      "wins": 8,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360513,
+      "peak": 2187,
+      "name": "funnel-rush-v20",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 6,
+      "wins": 5,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 361170,
+      "peak": 2186,
+      "name": "python-algo",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 12,
+      "wins": 12,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360681,
+      "peak": 2185,
+      "name": "funnel-rush-v75d",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 5,
+      "wins": 5,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 361253,
+      "peak": 2182,
+      "name": "hello-world",
+      "user": "foxhenderson",
+      "team": "Winnerteam",
+      "games": 15,
+      "wins": 14,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360665,
+      "peak": 2181,
+      "name": "funnel-rush-v67b",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 6,
+      "wins": 6,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360628,
+      "peak": 2178,
+      "name": "funnel-rush-v7-1",
+      "user": "ameyg",
+      "team": "bobby tables",
+      "games": 9,
+      "wins": 9,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360547,
+      "peak": 2174,
+      "name": "funnel-rush-v32",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 8,
+      "wins": 8,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 361251,
+      "peak": 2167,
+      "name": "oracle_pure_upload",
+      "user": "TAHA",
+      "team": "Wick",
+      "games": 24,
+      "wins": 21,
+      "losses": 3,
+      "active": true
+    },
+    {
+      "aid": 359909,
+      "peak": 2162,
+      "name": "python-algo",
+      "user": "n1hal",
+      "team": "Team1",
+      "games": 2,
+      "wins": 2,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360520,
+      "peak": 2160,
+      "name": "funnel-rush-v22",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 7,
+      "wins": 7,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360583,
+      "peak": 2158,
+      "name": "funnel-rush-v43",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 8,
+      "wins": 7,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360686,
+      "peak": 2151,
+      "name": "funnel-rush-v75g",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 5,
+      "wins": 5,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360662,
+      "peak": 2150,
+      "name": "funnel-rush-v67",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 6,
+      "wins": 6,
+      "losses": 0,
+      "active": false
+    },
+    {
+      "aid": 360509,
+      "peak": 2150,
+      "name": "funnel-rush-v17",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 6,
+      "wins": 5,
+      "losses": 1,
+      "active": false
+    },
+    {
+      "aid": 360492,
+      "peak": 2148,
+      "name": "funnel-rush-v8",
+      "user": "aa0",
+      "team": "bobby tables",
+      "games": 9,
+      "wins": 7,
+      "losses": 2,
+      "active": false
+    }
+  ]
+}
