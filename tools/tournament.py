@@ -24,82 +24,17 @@ from itertools import permutations
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-STARTER_KIT = REPO_ROOT / "C1GamesStarterKit-master"
-ENGINE_JAR = STARTER_KIT / "engine.jar"
-CONFIG_JSON = STARTER_KIT / "game-configs.json"
-
-subprocess.run([str(REPO_ROOT / "tools" / "apply_competition_config.sh")], check=True)
-
-
-def resolve_algo(name: str) -> Path:
-    p = Path(name)
-    if p.is_dir():
-        return p.resolve()
-    candidate = REPO_ROOT / "algos" / name
-    if candidate.is_dir():
-        return candidate.resolve()
-    raise FileNotFoundError(f"Cannot find algo '{name}'")
+from match_runner import REPO_ROOT, resolve_algo, run_one_match as _run_match
 
 
 def run_one_match(task):
-    """Top-level for ProcessPool picklability. Same approach as bestof.py."""
-    p1_dir, p2_dir, out_dir, pair_id, timeout_sec = task
-    p1_dir, p2_dir, out_dir = Path(p1_dir), Path(p2_dir), Path(out_dir)
-    worker_dir = Path(tempfile.mkdtemp(prefix="cit_tournament_"))
-    start = time.time()
-    try:
-        (worker_dir / "game-configs.json").symlink_to(CONFIG_JSON)
-        (worker_dir / "replays").mkdir()
-
-        proc = subprocess.run(
-            ["java", "-jar", str(ENGINE_JAR), "work",
-             str(p1_dir / "run.sh"), str(p2_dir / "run.sh")],
-            cwd=str(worker_dir),
-            capture_output=True, text=True,
-            timeout=timeout_sec,
-        )
-        duration = time.time() - start
-
-        replays = list((worker_dir / "replays").glob("*.replay"))
-        if not replays:
-            return {"pair": pair_id, "error": "no replay"}
-        src = replays[0]
-        dest = out_dir / f"{p1_dir.name}_vs_{p2_dir.name}.replay"
-        shutil.move(str(src), str(dest))
-
-        with open(dest) as f:
-            last = None
-            for line in f:
-                if line.strip():
-                    last = line
-        final = json.loads(last)
-        p1_hp = float(final["p1Stats"][0])
-        p2_hp = float(final["p2Stats"][0])
-        if p1_hp > p2_hp:
-            winner_side = 1
-        elif p2_hp > p1_hp:
-            winner_side = 2
-        else:
-            winner_side = 0
-
-        return {
-            "pair": pair_id,
-            "p1": p1_dir.name,
-            "p2": p2_dir.name,
-            "winner_side": winner_side,
-            "winner_name": p1_dir.name if winner_side == 1 else (p2_dir.name if winner_side == 2 else "tie"),
-            "p1_hp": p1_hp,
-            "p2_hp": p2_hp,
-            "replay": str(dest),
-            "duration": duration,
-        }
-    except subprocess.TimeoutExpired:
-        return {"pair": pair_id, "error": f"timeout after {timeout_sec}s"}
-    except Exception as e:
-        return {"pair": pair_id, "error": str(e)}
-    finally:
-        shutil.rmtree(worker_dir, ignore_errors=True)
+    result = _run_match(task)
+    result['pair'] = result['game_id']
+    if 'error' not in result:
+        side = {'p1': 1, 'p2': 2, 'tie': 0}[result['winner']]
+        result['winner_side'] = side
+        result['winner_name'] = result['p1'] if side == 1 else (result['p2'] if side == 2 else 'tie')
+    return result
 
 
 def parse_args(argv):
@@ -109,6 +44,8 @@ def parse_args(argv):
         print(__doc__)
         sys.exit(1)
     algos = [resolve_algo(a) for a in positional]
+    if len({a.name for a in algos}) != len(algos):
+        raise ValueError("algo directory names must be unique in a tournament")
     workers = None
     for f in flags:
         if f.startswith("--workers="):
@@ -116,6 +53,8 @@ def parse_args(argv):
             workers = None if v == "auto" else int(v)
     if workers is None:
         workers = min(os.cpu_count() or 4, len(algos) * (len(algos) - 1))
+    if workers < 1:
+        raise ValueError("workers must be positive")
     return algos, workers
 
 
@@ -136,6 +75,7 @@ def main(argv):
     games = {a.name: 0 for a in algos}
     matrix = {}  # (p1_name, p2_name) -> result dict
     errors = 0
+    failed_matches = []
 
     with ProcessPoolExecutor(max_workers=workers) as pool:
         future_to_task = {pool.submit(run_one_match, t): t for t in tasks}
@@ -143,6 +83,7 @@ def main(argv):
             r = fut.result()
             if "error" in r:
                 errors += 1
+                failed_matches.append(r)
                 print(f"  pair {r['pair']}: ERROR — {r['error']}")
                 continue
             print(f"  {r['p1']:<25} vs {r['p2']:<25}  "
@@ -201,9 +142,11 @@ def main(argv):
             ],
             "wall_seconds": wall_elapsed,
             "workers": workers,
+            "errors": failed_matches,
+            "complete": not failed_matches,
         }, f, indent=2)
     print(f"\n[tournament] Summary: {summary_path}")
-    return 0
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":

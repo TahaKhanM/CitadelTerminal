@@ -49,3 +49,7 @@ errorFile*.txt
 # Local Claude Code state
 .claude/settings.local.json
 .claude/projects/
+
+# Local verification environments and generated config backup
+.venv/
+C1GamesStarterKit-master/game-configs.json.starterkit-original

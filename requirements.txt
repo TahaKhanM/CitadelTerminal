@@ -1,4 +1,6 @@
+# The portable action-phase simulator requires NumPy (including the shipped bot).
+numpy>=1.24,<3
+# Optional research tools: evolutionary search and replay downloading.
 cma>=3.3
 requests>=2.31
-# selenium is optional — only needed for `scrape_ranked_replays.py login`
-# selenium>=4.15
+# selenium is optional — only needed for scrape_ranked_replays.py login.
