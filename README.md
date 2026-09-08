@@ -103,7 +103,7 @@ performance against a fixed test pool and generalization to unseen opponents.
 | [F2 development report](algos/smart_oracle_F2/VARIANT_SMART_ORACLE_F2_REPORT.md) | Documents four loss diagnoses and a small local development benchmark. Its summary reports 9/9 and includes equal-HP self-play; it does not substantiate the previous README's blanket 12–0 F2 claim. |
 | [Historical simulator reports](algos/athena/sim/PARITY_REPORTS/) | Record a 19-column exact gate over 87,677 Java replay frames with a documented cascade tolerance in four other columns. The ranked corpus is absent from the public default checkout. |
 | Current local verification, 8 September 2026 | 42 Rust tests, 10 evaluation tests, 5 regression tests per search variant and 240 seeded synthetic dual-mode cases passed. |
-| Current F2 vs bundled starter, both sides | 2 wins, 0 errors; surviving F2 HP was 35 on each side. A functional smoke comparison against a weak baseline, not a new strength claim. |
+| Current F2 vs bundled starter, both sides | 2 wins, 0 errors; surviving F2 HP was 33 and 35 with a freshly built native backend. A functional smoke comparison against a weak baseline; [run evidence](docs/verification/2026-09-08.json). |
 
 The earlier README and application PDF state a top-five finish among 1,000+
 entrants. The retained data above support a narrower, dated reconstructed

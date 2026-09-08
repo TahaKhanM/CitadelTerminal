@@ -84,11 +84,14 @@ seeded synthetic positions across the fuzzer's twelve categories.
   watchdog/exception fallback.
 - Two starter-vs-v13 engine games and two F2-vs-starter games completed; all four
   stored terminal records passed the revised outcome parser. F2 won both sides
-  against the starter with 35 HP remaining. This is a functional smoke test.
+  against the starter. A repeat with a freshly built native wheel from
+  `4479ca8` left F2 at 33 and 35 HP; [machine-readable evidence](verification/2026-09-08.json)
+  records the engine/config hashes and terminal statistics. This is a functional smoke test.
 
 Local execution used the existing NumPy environment and Java 25 on macOS. Rust
 source tests rebuilt without relying on a previously installed Python extension;
-full agent games used the available native extension. An isolated Python+NumPy
+initial full agent games used an available native extension; the final recorded
+comparison rebuilt and used a wheel from this checkout. An isolated Python+NumPy
 environment without the native module also passed both variants' regressions,
 the F2 first-turn smoke check and 240 synthetic cases. CI exercises that portable
 path on future changes. The old large
@@ -113,3 +116,5 @@ historical variants separately runnable preserves comparison provenance, but
 future work would benefit from an explicit versioned engine API and frozen
 fixtures. Large-scale refactoring before securing those fixtures would make
 regression attribution harder.
+
+The public Linux workflow also passed both jobs at `4479ca8`: [CI run](https://github.com/TahaKhanM/CitadelTerminal/actions/runs/34173882101).
