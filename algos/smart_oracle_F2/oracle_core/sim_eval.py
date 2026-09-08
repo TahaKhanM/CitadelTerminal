@@ -604,10 +604,8 @@ def _python_fallback_sim(state_dict: Dict[str, Any], config_path: str) -> Dict[s
     but that's still 3000+ sims per 8s offense budget — plenty for
     beam search width 50 × 3 opp actions = 150 sims/turn.
 
-    On any error (vendored package missing, dict schema mismatch,
-    sim crash), falls back to identity so the caller's downstream
-    logic stays alive. A non-identity result is preferred but a
-    crash here would lose the whole turn.
+    Simulation failures propagate to the search/fallback boundary. Returning
+    the input unchanged would fabricate a valid rollout and favor hoarding.
     """
     try:
         # Late-import the vendored sim so unit tests that don't need
@@ -640,15 +638,7 @@ def _python_fallback_sim(state_dict: Dict[str, Any], config_path: str) -> Dict[s
         # so caller treats it identically to sim_rs output).
         return _sim_state_to_dict(state)
     except Exception as e:
-        # Defensive fallback: log to stderr (engine surfaces it via
-        # printBotErrors=True) and return identity so the planner can
-        # still soft-degrade to lower tiers.
-        print(
-            f"[sim_eval] _python_fallback_sim failed ({type(e).__name__}: {e}); "
-            "returning identity. Beam search will down-score by mp_cost only.",
-            file=sys.stderr,
-        )
-        return state_dict
+        raise RuntimeError(f"portable action-phase simulation failed: {e}") from e
 
 
 def _dict_to_sim_state(state_dict: Dict[str, Any], cfg: Any) -> Any:

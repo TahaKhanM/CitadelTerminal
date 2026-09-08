@@ -356,32 +356,14 @@ class OpponentModel:
             self.fallback_count += 1
             viable = [(ActionSignature(), 1.0)]
 
-        sigs, weights = zip(*viable)
-        # Sample k indices weighted by weights
-        k_actual = min(k, len(viable))
-        # Use weighted choice with replacement
+        # Deterministic top-weight modes, with seeded launcher-tile choices.
+        # These are representative scenarios, not iid posterior samples.
         out: List[ActionPlan] = []
-        # Get UNIQUE diverse samples (try first), then fill remainder with weighted
-        if k_actual <= len(viable):
-            # Sort signatures by weight descending and take top-k_actual
-            sorted_sigs = sorted(viable, key=lambda sw: -sw[1])
-            for sig, _ in sorted_sigs[:k_actual]:
-                plan = materialize_signature(
-                    sig, opp_player=opp_player, rng=self.rng,
-                    legal_filter=legal_filter, mp_budget=opp_mp,
-                    config=config,
-                )
-                out.append(plan)
-        else:
-            # Sample with replacement
-            for _ in range(k):
-                sig = self.rng.choices(sigs, weights=weights, k=1)[0]
-                plan = materialize_signature(
-                    sig, opp_player=opp_player, rng=self.rng,
-                    legal_filter=legal_filter, mp_budget=opp_mp,
-                    config=config,
-                )
-                out.append(plan)
+        for sig, _ in sorted(viable, key=lambda sw: -sw[1])[:max(0, k)]:
+            out.append(materialize_signature(
+                sig, opp_player=opp_player, rng=self.rng,
+                legal_filter=legal_filter, mp_budget=opp_mp, config=config,
+            ))
         return out
 
     def _sigs_for_bucket(self, bk: str) -> List[Tuple[ActionSignature, float]]:

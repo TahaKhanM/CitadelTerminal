@@ -101,6 +101,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.config = None
         self.opp_model: Optional[OpponentModel] = None
         self.turn_observer = TurnObserver(self_player_id=1)
+        self._observation_context = None
         self.recent_breaches: List[Tuple[int, int]] = []
         # smart_oracle_F: classify the opponent each turn so we know when
         # to engage the funnel response (only against single_archetype
@@ -156,6 +157,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         try:
             gs = gamelib.GameState(self.config, turn_state)
             gs.suppress_warnings(True)
+            self._begin_turn_observation(gs)
 
             # smart_oracle_F: advance the opponent classifier window for
             # the previous completed turn, then classify. The classifier
@@ -247,8 +249,6 @@ class AlgoStrategy(gamelib.AlgoCore):
             )
             gamelib.debug_write(f"[smart_oracle_F2]  top3: {top_str}")
 
-            # Reset turn observer for next turn's accumulation
-            self.turn_observer.reset()
 
             gs.submit_turn()
             return
@@ -306,6 +306,28 @@ class AlgoStrategy(gamelib.AlgoCore):
         except Exception as e:
             gamelib.debug_write(f"[smart_oracle_F2] safe_fallback failed: {e!r}")
 
+    def _begin_turn_observation(self, game_state):
+        """Finish the previous action phase when the next deploy state arrives.
+
+        AlgoCore forwards phase 1 frames to on_action_frame; phase 2 is the
+        final game message and never reaches that callback. Keep resource
+        buckets from the previous deploy state, before either player spends.
+        The turn guard avoids counting a repeated callback twice.
+        """
+        turn = int(game_state.turn_number)
+        previous = self._observation_context
+        if previous is not None and previous[0] == turn:
+            return
+        if previous is not None and self.opp_model is not None:
+            old_turn, our_mp, opp_mp, breaches = previous
+            self.opp_model.observe(old_turn, our_mp=our_mp, opp_mp=opp_mp,
+                                   recent_breaches=breaches,
+                                   sig=self.turn_observer.snapshot())
+        self.turn_observer.reset()
+        self._observation_context = (turn, float(game_state.get_resource(MP_RES)),
+                                     float(game_state.get_resource(MP_RES, 1)),
+                                     len(self.recent_breaches))
+
     # ------------------------------------------------------------------
     # Action-frame tracking
     # ------------------------------------------------------------------
@@ -349,29 +371,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         except Exception:
             pass
 
-        # If this is the LAST action frame of the turn (phase=2 end), feed
-        # the accumulated turn observation into the opp model.
-        try:
-            ti = frame.get("turnInfo")
-            if ti and len(ti) >= 1 and int(ti[0]) == 2:
-                # End of action phase — observation is complete.
-                sig = self.turn_observer.snapshot()
-                if not sig.is_empty():
-                    # We need the resources at the START of this turn for the
-                    # bucket key. Use the action-frame stats as proxy.
-                    p1s = frame.get("p1Stats") or [0, 0, 0]
-                    p2s = frame.get("p2Stats") or [0, 0, 0]
-                    our_mp = float(p1s[2]) if len(p1s) >= 3 else 0.0
-                    opp_mp = float(p2s[2]) if len(p2s) >= 3 else 0.0
-                    turn = int(ti[1]) if len(ti) >= 2 else 0
-                    self.opp_model.observe(
-                        turn, our_mp=our_mp, opp_mp=opp_mp,
-                        recent_breaches=len(self.recent_breaches),
-                        sig=sig,
-                    )
-                self.turn_observer.reset()
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":
