@@ -35,8 +35,15 @@ def replay_outcome(path: Path) -> dict:
     hp = [float(final[key][0]) for key in ('p1Stats', 'p2Stats')]
     if not all(math.isfinite(value) for value in hp):
         raise ValueError('non-finite terminal HP')
-    winner = 'p1' if hp[0] > hp[1] else ('p2' if hp[1] > hp[0] else 'tie')
-    return {'winner': winner, 'p1_hp': hp[0], 'p2_hp': hp[1]}
+    end = final.get('endStats')
+    if not isinstance(end, dict) or type(end.get('winner')) is not int or end['winner'] not in (0, 1, 2):
+        raise ValueError('terminal frame has no valid engine winner')
+    for player in ('player1', 'player2'):
+        stats = end.get(player, {})
+        if stats.get('crashed') or stats.get('timeout_death'):
+            raise ValueError(f"{player} crashed or timed out; benchmark incomplete")
+    winner = {0: 'tie', 1: 'p1', 2: 'p2'}[end['winner']]
+    return {'winner': winner, 'p1_hp': hp[0], 'p2_hp': hp[1], 'engine_stats': end}
 
 
 def run_one_match(task):
@@ -121,3 +128,23 @@ def summarize_results(results, n):
             'b_wins': wins_b, 'ties': ties, 'errors': errors,
             'a_rate': wins_a/completed if completed else None,
             'ci_low': lo, 'ci_high': hi, 'complete': errors == 0}
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description='Run one isolated Terminal match.')
+    default = str(REPO_ROOT / 'C1GamesStarterKit-master/python-algo')
+    parser.add_argument('algo_a', nargs='?', default=default)
+    parser.add_argument('algo_b', nargs='?', default=default)
+    args = parser.parse_args()
+    first, second = resolve_algo(args.algo_a), resolve_algo(args.algo_b)
+    output = REPO_ROOT / 'replays' / f'match_{time.time_ns()}'
+    result = run_one_match((str(first), str(second), str(output), 1, 480))
+    output.mkdir(parents=True, exist_ok=True)
+    (output / 'summary.json').write_text(json.dumps(result, indent=2)+'\n')
+    print(json.dumps(result, indent=2))
+    return 1 if 'error' in result else 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

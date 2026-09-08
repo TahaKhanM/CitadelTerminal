@@ -32,7 +32,7 @@ class EvaluationTests(unittest.TestCase):
     def test_terminal_frame_required(self):
         with tempfile.TemporaryDirectory() as d:
             path=Path(d)/'result.replay'
-            frame={'turnInfo':[1,4,0], 'p1Stats':[40,1,1], 'p2Stats':[30,1,1]}
+            frame={'turnInfo':[1,4,0], 'p1Stats':[40,1,1], 'p2Stats':[30,1,1], 'endStats':{'winner':1}}
             path.write_text(json.dumps(frame)+'\n')
             with self.assertRaisesRegex(ValueError,'terminal'):
                 runner.replay_outcome(path)
@@ -42,6 +42,20 @@ class EvaluationTests(unittest.TestCase):
             frame['p1Stats'][0]=float('nan')
             path.write_text(json.dumps(frame)+'\n')
             with self.assertRaisesRegex(ValueError,'finite'):
+                runner.replay_outcome(path)
+
+    def test_engine_winner_is_authoritative(self):
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'result.replay'
+            path.write_text(json.dumps({'turnInfo':[2], 'p1Stats':[40], 'p2Stats':[40], 'endStats':{'winner':2}}))
+            self.assertEqual(runner.replay_outcome(path)['winner'],'p2')
+
+    def test_bot_failure_is_reported_even_when_java_exits_successfully(self):
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'result.replay'
+            path.write_text(json.dumps({'turnInfo':[2], 'p1Stats':[40], 'p2Stats':[30],
+                                       'endStats':{'winner':1,'player2':{'crashed':True}}}))
+            with self.assertRaisesRegex(ValueError,'crashed'):
                 runner.replay_outcome(path)
 
     def test_nonzero_engine_exit_never_scores_a_partial_replay(self):

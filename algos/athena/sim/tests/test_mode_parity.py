@@ -129,6 +129,9 @@ def main() -> int:
     config = SimConfig.load()
     corpus = sorted((Path(__file__).resolve().parent.parent.parent.parent.parent
                      / "replays" / "ranked").glob("*.replay"))
+    if not corpus:
+        print("SKIP: ranked replay corpus absent; run sim.fuzz for synthetic dual-mode coverage")
+        return 0
     total_turns = 0
     failures: List[Tuple[str, int, str]] = []
     t0 = time.perf_counter()

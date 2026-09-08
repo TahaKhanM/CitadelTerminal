@@ -87,6 +87,11 @@ def main() -> int:
         300,
     ))
 
+    # Public checkout has no ranked replay corpus; always exercise both
+    # execution modes on seeded synthetic positions instead of passing zero turns.
+    steps.append(("synthetic_dual_mode_120", [PY, "-m", "algos.athena.sim.fuzz",
+                  "--n", "120", "--seed", str(args.seed)], 120))
+
     if args.scope in ("short", "full", "heavy"):
         steps.append((
             "validator",

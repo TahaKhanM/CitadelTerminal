@@ -26,6 +26,7 @@ Exit code: 0 all pass, 1 any widening detected.
 from __future__ import annotations
 
 import sys
+from unittest import SkipTest
 from pathlib import Path
 
 import numpy as np
@@ -167,8 +168,7 @@ def test_ranked_replay_propagation() -> None:
         # (superseded by the 311-replay corpus in `Ranked Replays/`).
         # Skip rather than fail — the other 3 sub-tests still cover
         # round01, apply_damage, and config-spec dtype guards.
-        print(f"  SKIP  ranked replay propagation (replay missing: {path.name})")
-        return
+        raise SkipTest(f"replay missing: {path.name}")
     frames, _ = _parse_replay(path)
     deploys = _index_deploy_frames(frames)
     actions_first = _index_first_action_frames(frames)
@@ -220,15 +220,19 @@ if __name__ == "__main__":
         ("ranked replay propagation", test_ranked_replay_propagation),
     ]
     failures = []
+    skipped = 0
     for name, fn in tests:
         try:
             fn()
             print(f"  PASS  {name}")
+        except SkipTest as e:
+            skipped += 1
+            print(f"  SKIP  {name}: {e}")
         except AssertionError as e:
             print(f"  FAIL  {name}: {e}")
             failures.append(name)
     if failures:
         print(f"\n{len(failures)}/{len(tests)} tests failed")
         sys.exit(1)
-    print(f"\nAll {len(tests)} tests passed")
+    print(f"\n{len(tests)-skipped} tests passed, {skipped} skipped")
     sys.exit(0)
