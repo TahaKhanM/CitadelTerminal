@@ -1,5 +1,5 @@
 {
-  "_source": "extracted from replays/final_v11_vs_1654_elo_win.replay header.config, 2026-04-23, verified against docs/UNITS_REFERENCE.md. Written by tools/apply_competition_config.sh into C1GamesStarterKit-master/game-configs.json.",
+  "_source": "Post-competition correction (2026-09-08): unitInformation and resources match the raw server fields retained in algos/athena/data/citadel_config_snapshot.json. Support upgrades inherit the base cost of 4; no coresForPlayerDamage rule. See docs/ENGINEERING_REVIEW.md.",
   "seasonCompatibilityModeP1": 5,
   "seasonCompatibilityModeP2": 5,
   "debug": {
@@ -54,7 +54,6 @@
         "iconxScale": 0.5,
         "iconyScale": 0.5,
         "icon": "S3_encryptor",
-        "cost1": 2,
         "startHealth": 40,
         "refundPercentage": 0.8,
         "turnsRequiredToRemove": 3,
@@ -191,7 +190,6 @@
     "maxBits": 150,
     "bitsPerRound": 1,
     "coresPerRound": 4,
-    "coresForPlayerDamage": 1,
     "startingBits": 1,
     "bitDecayPerRound": 0.25,
     "startingCores": 8

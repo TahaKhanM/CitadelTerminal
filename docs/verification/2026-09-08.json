@@ -1,0 +1,106 @@
+{
+  "review_date": "2026-09-08",
+  "source_revision": "4479ca856100c88816367206ae9caa1df472d36d",
+  "purpose": "Functional verification on both sides against the bundled starter, not a tournament-strength estimate",
+  "command": "PYTHON_CMD=<review-python> <review-python> tools/bestof.py algos/smart_oracle_F2 C1GamesStarterKit-master/python-algo 1 --workers=2",
+  "backend": "sim_rs wheel built from this source revision with maturin build --release; abi3-py39 macOS arm64",
+  "config_sha256": "d6e6ab82408e6029580768b76b7e5aa58ae88afaba66db25c4c045c787575d1b",
+  "engine_sha256": "0b72f7b37a1d482d57ce84e8841f8e1ba6adc071160b6c5cac79df31ab74b524",
+  "completed": 2,
+  "errors": 0,
+  "a_wins": 2,
+  "b_wins": 0,
+  "ties": 0,
+  "matches": [
+    {
+      "game_id": 1,
+      "p1": "smart_oracle_F2",
+      "p2": "python-algo",
+      "winner": "p1",
+      "p1_hp": 33.0,
+      "p2_hp": -5.0,
+      "duration": 18.007421082998917,
+      "returncode": 0,
+      "engine_stats": {
+        "duration": 14804,
+        "winner": 1,
+        "player1": {
+          "stationary_resource_spent": 163.0,
+          "dynamic_resource_spoiled": 1.0,
+          "crashed": false,
+          "name": "smart_oracle_F2",
+          "dynamic_resource_destroyed": 66.0,
+          "time_damage_taken": 0,
+          "dynamic_resource_spent": 111.0,
+          "stationary_resource_left_on_board": 112.0,
+          "timeout_death": false,
+          "points_scored": 45.0,
+          "total_computation_time": 10881
+        },
+        "frames": 1460,
+        "player2": {
+          "stationary_resource_spent": 90.0,
+          "dynamic_resource_spoiled": 8.5,
+          "crashed": false,
+          "name": "python-algo",
+          "dynamic_resource_destroyed": 91.0,
+          "time_damage_taken": 0,
+          "dynamic_resource_spent": 102.0,
+          "stationary_resource_left_on_board": 63.0,
+          "timeout_death": false,
+          "points_scored": 7.0,
+          "total_computation_time": 205
+        },
+        "turns": 30
+      }
+    },
+    {
+      "game_id": 2,
+      "p1": "python-algo",
+      "p2": "smart_oracle_F2",
+      "winner": "p2",
+      "p1_hp": -2.0,
+      "p2_hp": 35.0,
+      "duration": 15.479647457999818,
+      "returncode": 0,
+      "engine_stats": {
+        "duration": 12278,
+        "winner": 2,
+        "player1": {
+          "stationary_resource_spent": 73.0,
+          "dynamic_resource_spoiled": 6.5,
+          "crashed": false,
+          "name": "python-algo",
+          "dynamic_resource_destroyed": 68.0,
+          "time_damage_taken": 0,
+          "dynamic_resource_spent": 79.0,
+          "stationary_resource_left_on_board": 39.0,
+          "timeout_death": false,
+          "points_scored": 5.0,
+          "total_computation_time": 168
+        },
+        "frames": 1395,
+        "player2": {
+          "stationary_resource_spent": 142.0,
+          "dynamic_resource_spoiled": 0.8,
+          "crashed": false,
+          "name": "smart_oracle_F2",
+          "dynamic_resource_destroyed": 44.0,
+          "time_damage_taken": 0,
+          "dynamic_resource_spent": 86.0,
+          "stationary_resource_left_on_board": 92.0,
+          "timeout_death": false,
+          "points_scored": 42.0,
+          "total_computation_time": 8514
+        },
+        "turns": 26
+      }
+    }
+  ],
+  "limitations": [
+    "Two games against one weak baseline",
+    "Fixed opponent prior seed and a time-budgeted search",
+    "No held-out opponent selection",
+    "Historical full ranked replay corpus is not distributed on main"
+  ]
+}

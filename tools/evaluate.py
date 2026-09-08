@@ -237,11 +237,6 @@ def evaluate_matchup(algo_path: Path, opp_path: Path, n: int, out_dir: Path,
                 r = {"game_id": gid, "error": f"worker exception: {e}"}
 
             algo_was_p1 = (gid <= n)
-            if algo_was_p1:
-                games_side_a += 1
-            else:
-                games_side_b += 1
-
             if "error" in r:
                 crashes += 1
                 game_details.append({
@@ -250,6 +245,11 @@ def evaluate_matchup(algo_path: Path, opp_path: Path, n: int, out_dir: Path,
                     "error": r["error"],
                 })
                 continue
+
+            if algo_was_p1:
+                games_side_a += 1
+            else:
+                games_side_b += 1
 
             # Winner translation: in bestof.py r['winner'] is 'p1'/'p2'/'tie'
             # relative to the match's P1; we translate to algo perspective.
@@ -292,8 +292,9 @@ def evaluate_matchup(algo_path: Path, opp_path: Path, n: int, out_dir: Path,
                 "turns": metrics.get("turns"),
             })
 
-    win_rate = wins / total if total else 0.0
-    ci_lo, ci_hi = wilson_interval(wins, total)
+    completed = wins + losses + ties
+    win_rate = wins / completed if completed else 0.0
+    ci_lo, ci_hi = wilson_interval(wins, completed)
 
     # Mirror-balance: compare win rate when algo was P1 vs. P2.
     wr_a = (wins_side_a / games_side_a) if games_side_a else 0.0
@@ -303,7 +304,8 @@ def evaluate_matchup(algo_path: Path, opp_path: Path, n: int, out_dir: Path,
     return {
         "name": opp_path.name,
         "path": str(opp_path),
-        "games": total,
+        "games": completed,
+        "attempted": total,
         "wins": wins,
         "losses": losses,
         "ties": ties,
@@ -586,11 +588,7 @@ def main(argv=None):
     md = render_markdown(report)
     print(md)
 
-    # Exit status: 0 on success regardless of WR; 1 only if any crashes
-    # occurred AND the caller presumably wants to know. Per requirements the
-    # tool is a benchmarker, not a pass/fail gate — so always exit 0 when it
-    # ran to completion. Crashes surface via JSON/markdown.
-    return 0
+    return 1 if any_crashes or total_games_run == 0 else 0
 
 
 if __name__ == "__main__":

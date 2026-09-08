@@ -62,9 +62,10 @@ def _structure_value_per_side(state_dict: Dict[str, Any], player: int) -> float:
         max_hp = _MAX_HP.get((idx, upg), 60.0)
         cur_hp = max(0.0, float(s.get("hp", 0)))
         frac = min(1.0, cur_hp / max_hp) if max_hp > 0 else 0.0
-        total += coef * frac
+        contribution = coef * frac
         if s.get("turn_start_removal") is not None:
-            total *= 0.5
+            contribution *= 0.5
+        total += contribution
     return total
 
 

@@ -118,9 +118,13 @@ def _project_next_turn(post_state: Dict[str, Any], opp_top_sig: ActionSignature,
     for key in ("p1", "p2"):
         sp = float(sd[key]["sp"])
         mp = float(sd[key]["mp"])
-        mp = round(mp * 0.75, 1)
-        mp_income = 1 + (turn // 5)
-        sp_income = 4
+        resources = config.get("resources", {})
+        mp = round(mp * (1 - resources.get("bitDecayPerRound", .25)), 1)
+        ramp = resources.get("roundStartBitRamp", 5)
+        interval = resources.get("turnIntervalForBitSchedule", 5)
+        growth = max(0, (turn + 1 - ramp) // interval + 1)
+        mp_income = resources.get("bitsPerRound", 1) + growth * resources.get("bitGrowthRate", 1)
+        sp_income = resources.get("coresPerRound", 4)
         sd[key]["sp"] = round(sp + sp_income, 1)
         sd[key]["mp"] = round(mp + mp_income, 1)
 
@@ -290,7 +294,7 @@ def search(game_state, config, opp_model: OpponentModel, *,
             continue
 
     if not phase1_scores:
-        return SearchResult(best_plan=ActionPlan(name="empty"), telemetry=tel)
+        raise RuntimeError("search produced no successfully simulated candidate")
 
     # 4b. Phase-2 with VA's variance-aware ranking
     phase1_scores.sort(key=lambda t: -t[0])
