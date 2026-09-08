@@ -179,6 +179,12 @@ def _get_sim_rs():
     # Attempt 1: standard import (local conda wheel, etc.)
     try:
         import sim_rs  # type: ignore
+        if not callable(getattr(sim_rs, "simulate_action_phase_py", None)):
+            # The Rust source directory can be imported as a PEP 420 namespace
+            # package when no extension is installed. Import success alone
+            # does not mean a usable simulation backend exists.
+            sys.modules.pop("sim_rs", None)
+            raise ImportError("sim_rs has no native simulate_action_phase_py entry point")
         _SIM_RS = sim_rs
         _SIM_RS_LOAD_PATH = "conda"
         return _SIM_RS
@@ -228,6 +234,9 @@ def _get_sim_rs():
         sys.path.insert(0, str(bundled_dir))
     try:
         import sim_rs  # type: ignore  # noqa: F811
+        if not callable(getattr(sim_rs, "simulate_action_phase_py", None)):
+            sys.modules.pop("sim_rs", None)
+            raise ImportError("bundled sim_rs has no native entry point")
         _SIM_RS = sim_rs
         _SIM_RS_LOAD_PATH = "bundled"
         print(

@@ -3,7 +3,7 @@ import json
 import os
 from pathlib import Path
 import sys
-from types import SimpleNamespace
+from types import SimpleNamespace, ModuleType
 import unittest
 from unittest.mock import patch
 
@@ -15,6 +15,7 @@ from oracle_core.opponent_model import OpponentModel, bucket_key, ActionSignatur
 from oracle_core.value import _structure_value_per_side
 import oracle_core.search as search_module
 from oracle_core.sim_eval import _python_fallback_sim
+import oracle_core.sim_eval as sim_eval
 
 
 class StrategyTests(unittest.TestCase):
@@ -51,6 +52,13 @@ class StrategyTests(unittest.TestCase):
                 result=search_module._project_next_turn(state,ActionSignature(),cfg,1,'unused')
             self.assertEqual(result['p1']['mp'],expected)
             self.assertEqual(result['p1']['sp'],4)
+
+    def test_rust_source_namespace_is_not_a_native_backend(self):
+        with patch.dict(sys.modules, {'sim_rs':ModuleType('sim_rs')}), \
+             patch.object(sim_eval, '_SIM_RS_TRIED', False), \
+             patch.object(sim_eval, '_SIM_RS', None), \
+             patch('platform.system', return_value='Darwin'):
+            self.assertIsNone(sim_eval._get_sim_rs())
 
     def test_failed_simulation_does_not_return_identity(self):
         with self.assertRaisesRegex(RuntimeError,'simulation failed'):

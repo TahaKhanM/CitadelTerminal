@@ -279,8 +279,7 @@ def search(game_state, config, opp_model: OpponentModel, *,
             continue
 
     if not phase1_scores:
-        # Couldn't evaluate any candidate — return empty plan as fallback
-        return SearchResult(best_plan=ActionPlan(name="empty"), telemetry=tel)
+        raise RuntimeError("search produced no successfully simulated candidate")
 
     # 4b. Phase-2: rescore top-N at k_opp confidence
     phase1_scores.sort(key=lambda t: -t[0])
